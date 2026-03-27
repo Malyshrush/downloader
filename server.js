@@ -162,28 +162,15 @@ app.post('/upload', upload.single('file'), async (req, res) => {
     }
 
     const mime = file.mimetype;
-    let attachment = null;
+let attachment = null;
 
-    if (mime.startsWith('image/')) {
-      if (target === 'message') {
-        attachment = await uploadPhotoToMessages(user_token, group_id, file.buffer, file.originalname);
-      } else {
-        attachment = await uploadPhotoToWall(user_token, group_id, file.buffer, file.originalname);
-      }
-    } else if (mime.startsWith('video/')) {
-      if (target === 'message') {
-        attachment = await uploadVideoToMessages(user_token, group_id, file.buffer, file.originalname);
-      } else {
-        attachment = await uploadVideoToWall(user_token, group_id, file.buffer, file.originalname);
-      }
-    } else {
-      // Документы
-      if (target === 'message') {
-        attachment = await uploadDocToMessages(user_token, group_id, file.buffer, file.originalname);
-      } else {
-        attachment = await uploadDocToWall(user_token, group_id, file.buffer, file.originalname);
-      }
-    }
+if (mime.startsWith('image/')) {
+  attachment = await uploadPhotoToMessages(user_token, group_id, file.buffer, file.originalname);
+} else if (mime.startsWith('video/')) {
+  attachment = await uploadVideoToMessages(user_token, group_id, file.buffer, file.originalname);
+} else {
+  attachment = await uploadDocToMessages(user_token, group_id, file.buffer, file.originalname);
+}
 
     res.json({ success: true, attachment });
   } catch (err) {
