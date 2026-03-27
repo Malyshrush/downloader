@@ -122,12 +122,12 @@ async function uploadDocToWall(userToken, groupId, buffer, filename) {
 }
 
 async function uploadVideoToMessages(userToken, groupId, buffer, filename) {
-  // 1. video.save
+  // 1. video.save без group_id, с приватностью "только владелец"
   const saveRes = await axios.get('https://api.vk.com/method/video.save', {
     params: {
       access_token: userToken,
       name: filename || 'video.mp4',
-      group_id: Math.abs(groupId),
+      privacy_view: ['only_owners'],   // видео видно только владельцу
       v: '5.199'
     }
   });
