@@ -69,7 +69,22 @@ async function getUserId(userToken) {
   if (cachedUserId) return cachedUserId;
   
   console.log('[AUTH] Getting user_id from token...');
-  const res = await axios.get('https://api.vk.com/method/users.get', {
+  
+  // Пробуем account.getProfileInfo - работает для User Token
+  let res = await axios.get('https://api.vk.com/method/account.getProfileInfo', {
+    params: { access_token: userToken, v: '5.199' }
+  });
+  
+  console.log('[AUTH] account.getProfileInfo response:', JSON.stringify(res.data).substring(0, 200));
+  
+  if (res.data.response?.id) {
+    cachedUserId = res.data.response.id;
+    console.log('[AUTH] User ID from account.getProfileInfo:', cachedUserId);
+    return cachedUserId;
+  }
+  
+  // Если не получилось - пробуем users.get
+  res = await axios.get('https://api.vk.com/method/users.get', {
     params: { access_token: userToken, v: '5.199' }
   });
   
@@ -77,7 +92,7 @@ async function getUserId(userToken) {
   
   if (res.data.error) throw new Error('VK API Error: ' + res.data.error.error_msg);
   if (!res.data.response || !res.data.response[0]) {
-    throw new Error('Не удалось получить user_id. Проверьте User Token.');
+    throw new Error('Не удалось получить user_id. User Token должен быть получен через https://vkhost.github.io/ → VK Admin');
   }
   
   cachedUserId = res.data.response[0].id;
