@@ -76,26 +76,14 @@ async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   const { file } = uploadResult.data;
   if (!file) throw new Error('Ошибка загрузки документа на сервер ВК');
 
-  // ✅ Сначала пробуем БЕЗ peer_id (для сообщений от имени сообщества)
-  try {
-    const saveRes = await axios.post('https://api.vk.com/method/docs.save', null, {
-      params: { file, access_token: userToken, v: '5.199' }
-    });
-    if (saveRes.data.response?.doc) {
-      return `doc${saveRes.data.response.doc.owner_id}_${saveRes.data.response.doc.id}`;
-    }
-  } catch (e) {
-    console.log('docs.save без peer_id не сработал, пробуем с peer_id...');
-  }
-
-  // ✅ Если не получилось - пробуем с peer_id диалога с сообществом
+  // ✅ Всегда используем peer_id = -groupId (диалог с сообществом)
   const peerId = -Math.abs(groupId);
-  const saveRes2 = await axios.post('https://api.vk.com/method/docs.save', null, {
+  const saveRes = await axios.post('https://api.vk.com/method/docs.save', null, {
     params: { file, peer_id: peerId, access_token: userToken, v: '5.199' }
   });
-  if (saveRes2.data.error) throw new Error(saveRes2.data.error.error_msg);
+  if (saveRes.data.error) throw new Error(saveRes.data.error.error_msg);
 
-  const savedDoc = saveRes2.data.response.doc;
+  const savedDoc = saveRes.data.response.doc;
   if (!savedDoc) throw new Error('Документ не сохранён');
 
   return `doc${savedDoc.owner_id}_${savedDoc.id}`;
