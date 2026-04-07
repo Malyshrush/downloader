@@ -66,13 +66,12 @@ async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   console.log('[UPLOAD DOC] Starting upload for:', filename, 'group_id:', groupId);
   
   const absGroupId = Math.abs(groupId);
-  // ✅ Для сообщений от имени сообщества: peer_id = -groupId
-  const peerId = -absGroupId;
   
-  console.log('[UPLOAD DOC] Requesting upload URL with peer_id:', peerId);
+  // ✅ Для сообщества: загружаем документ на стену группы, затем используем в сообщениях
+  console.log('[UPLOAD DOC] Requesting wall upload URL for group:', absGroupId);
   
-  const uploadServerRes = await axios.get('https://api.vk.com/method/docs.getMessagesUploadServer', {
-    params: { peer_id: peerId, access_token: userToken, v: '5.199' }
+  const uploadServerRes = await axios.get('https://api.vk.com/method/docs.getWallUploadServer', {
+    params: { group_id: absGroupId, access_token: userToken, v: '5.199' }
   });
   if (uploadServerRes.data.error) throw new Error(uploadServerRes.data.error.error_msg);
 
@@ -84,12 +83,11 @@ async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   const { file } = uploadResult.data;
   if (!file) throw new Error('Ошибка загрузки документа на сервер ВК');
 
-  console.log('[UPLOAD DOC] File uploaded to VK, file param:', file.substring(0, 100));
+  console.log('[UPLOAD DOC] File uploaded to VK wall, saving with group_id:', absGroupId);
   
-  // ✅ Сохраняем документ с тем же peer_id
-  console.log('[UPLOAD DOC] Saving doc with peer_id:', peerId);
+  // ✅ Сохраняем документ для стены сообщества
   const saveRes = await axios.post('https://api.vk.com/method/docs.save', null, {
-    params: { file, peer_id: peerId, access_token: userToken, v: '5.199' }
+    params: { file, group_id: absGroupId, access_token: userToken, v: '5.199' }
   });
   
   console.log('[UPLOAD DOC] docs.save response:', JSON.stringify(saveRes.data).substring(0, 200));
