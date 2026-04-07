@@ -63,6 +63,8 @@ async function uploadPhotoToWall(userToken, groupId, buffer, filename) {
 }
 
 async function uploadDocToMessages(userToken, groupId, buffer, filename) {
+  console.log('[UPLOAD DOC] Starting upload for:', filename);
+  
   const uploadServerRes = await axios.get('https://api.vk.com/method/docs.getMessagesUploadServer', {
     params: { access_token: userToken, v: '5.199' }
   });
@@ -76,7 +78,9 @@ async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   const { file } = uploadResult.data;
   if (!file) throw new Error('Ошибка загрузки документа на сервер ВК');
 
-  // ✅ Всегда используем peer_id = -groupId (диалог с сообществом)
+  console.log('[UPLOAD DOC] File uploaded, saving with peer_id:', -Math.abs(groupId));
+  
+  // ✅ peer_id для сообщества = отрицательный group_id
   const peerId = -Math.abs(groupId);
   const saveRes = await axios.post('https://api.vk.com/method/docs.save', null, {
     params: { file, peer_id: peerId, access_token: userToken, v: '5.199' }
@@ -86,6 +90,7 @@ async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   const savedDoc = saveRes.data.response.doc;
   if (!savedDoc) throw new Error('Документ не сохранён');
 
+  console.log('[UPLOAD DOC] Success:', `doc${savedDoc.owner_id}_${savedDoc.id}`);
   return `doc${savedDoc.owner_id}_${savedDoc.id}`;
 }
 
