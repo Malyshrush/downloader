@@ -101,17 +101,17 @@ async function getUserId(userToken) {
 }
 
 async function uploadDocToMessages(userToken, groupId, buffer, filename) {
-  console.log('[UPLOAD DOC] Starting upload for:', filename);
+  console.log('[UPLOAD DOC] Starting upload for:', filename, 'group_id:', groupId);
   
-  // ✅ Получаем user_id владельца токена
-  const userId = await getUserId(userToken);
-  console.log('[UPLOAD DOC] Uploading to user messages, user_id:', userId);
+  const absGroupId = Math.abs(groupId);
   
-  // ✅ Загружаем документ в личные сообщения пользователя
-  const uploadServerRes = await axios.get('https://api.vk.com/method/docs.getMessagesUploadServer', {
-    params: { peer_id: userId, access_token: userToken, v: '5.199' }
+  // ✅ Для Group Token: загружаем документ на стену сообщества
+  console.log('[UPLOAD DOC] Requesting wall upload URL for group:', absGroupId);
+  
+  const uploadServerRes = await axios.get('https://api.vk.com/method/docs.getWallUploadServer', {
+    params: { group_id: absGroupId, access_token: userToken, v: '5.199' }
   });
-  if (uploadServerRes.data.error) throw new Error(uploadServerRes.data.error.error_msg);
+  if (uploadServerRes.data.error) throw new Error('VK API Error: ' + uploadServerRes.data.error.error_msg);
 
   const uploadUrl = uploadServerRes.data.response.upload_url;
   const form = new FormData();
@@ -121,14 +121,14 @@ async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   const { file } = uploadResult.data;
   if (!file) throw new Error('Ошибка загрузки документа на сервер ВК');
 
-  console.log('[UPLOAD DOC] File uploaded, saving for user:', userId);
+  console.log('[UPLOAD DOC] File uploaded, saving with group_id:', absGroupId);
   
-  // ✅ Сохраняем документ для пользователя
+  // ✅ Сохраняем документ для сообщества
   const saveRes = await axios.post('https://api.vk.com/method/docs.save', null, {
-    params: { file, peer_id: userId, access_token: userToken, v: '5.199' }
+    params: { file, group_id: absGroupId, access_token: userToken, v: '5.199' }
   });
   
-  if (saveRes.data.error) throw new Error(saveRes.data.error.error_msg);
+  if (saveRes.data.error) throw new Error('VK API Error: ' + saveRes.data.error.error_msg);
 
   const savedDoc = saveRes.data.response.doc;
   if (!savedDoc) throw new Error('Документ не сохранён');
