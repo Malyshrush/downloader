@@ -168,8 +168,18 @@ async function uploadVideoToWall(userToken, groupId, buffer, filename) {
 // ========== ОСНОВНОЙ ОБРАБОТЧИК ==========
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const { user_token, group_id, target } = req.body;
+    const { user_token, group_id, target, secret } = req.body;
     const file = req.file;
+    
+    console.log('[UPLOAD] Received request:', {
+      has_user_token: !!user_token,
+      user_token_start: user_token ? user_token.substring(0, 20) : 'NONE',
+      group_id,
+      target,
+      has_file: !!file,
+      filename: file?.originalname
+    });
+    
     if (!user_token || !group_id || !file || !target) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
@@ -186,7 +196,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
 
     res.json({ success: true, attachment });
   } catch (err) {
-    console.error(err);
+    console.error('[UPLOAD ERROR]', err);
     res.status(500).json({ success: false, error: err.message });
   }
 });
