@@ -65,10 +65,14 @@ async function uploadPhotoToWall(userToken, groupId, buffer, filename) {
 async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   console.log('[UPLOAD DOC] Starting upload for:', filename, 'group_id:', groupId);
   
-  // ✅ Для сообщества используем group_id при получении upload URL
   const absGroupId = Math.abs(groupId);
+  // ✅ Для сообщений от имени сообщества: peer_id = -groupId
+  const peerId = -absGroupId;
+  
+  console.log('[UPLOAD DOC] Requesting upload URL with peer_id:', peerId);
+  
   const uploadServerRes = await axios.get('https://api.vk.com/method/docs.getMessagesUploadServer', {
-    params: { group_id: absGroupId, access_token: userToken, v: '5.199' }
+    params: { peer_id: peerId, access_token: userToken, v: '5.199' }
   });
   if (uploadServerRes.data.error) throw new Error(uploadServerRes.data.error.error_msg);
 
@@ -82,9 +86,10 @@ async function uploadDocToMessages(userToken, groupId, buffer, filename) {
 
   console.log('[UPLOAD DOC] File uploaded to VK, file param:', file.substring(0, 100));
   
-  // ✅ Для документов от имени сообщества НЕ используем peer_id
+  // ✅ Сохраняем документ с тем же peer_id
+  console.log('[UPLOAD DOC] Saving doc with peer_id:', peerId);
   const saveRes = await axios.post('https://api.vk.com/method/docs.save', null, {
-    params: { file, group_id: absGroupId, access_token: userToken, v: '5.199' }
+    params: { file, peer_id: peerId, access_token: userToken, v: '5.199' }
   });
   
   console.log('[UPLOAD DOC] docs.save response:', JSON.stringify(saveRes.data).substring(0, 200));
