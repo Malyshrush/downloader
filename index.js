@@ -192,12 +192,10 @@ async function uploadVideoToWall(userToken, groupId, buffer, filename) {
 // ========== ОСНОВНОЙ ОБРАБОТЧИК ==========
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
-    const { user_token, community_token, vk_token, group_id, target, secret } = req.body;
+    const { user_token, group_id, target } = req.body;
     const file = req.file;
     
     console.log('[UPLOAD] Received request:', {
-      has_community_token: !!community_token,
-      has_vk_token: !!vk_token,
       has_user_token: !!user_token,
       group_id,
       target,
@@ -209,62 +207,32 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       return res.status(400).json({ success: false, error: 'Missing required fields (group_id, file, target)' });
     }
 
-    // Определяем приоритет токенов
-    const primaryToken = user_token || community_token || vk_token;
-    const fallbackToken = (user_token && (community_token || vk_token)) ? (community_token || vk_token) : null;
-    
-    if (!primaryToken) {
-      return res.status(400).json({ success: false, error: 'Missing token (user_token or community_token required)' });
+    if (!user_token) {
+      return res.status(400).json({ success: false, error: 'Missing user_token (required for file upload)' });
     }
 
     const mime = file.mimetype;
     let attachment = null;
-    let lastError = null;
 
-    // Функция загрузки с выбранным токеном
-    const tryUpload = async (token, tokenType) => {
-      console.log(`[UPLOAD] Trying with ${tokenType}:`, token.substring(0, 20) + '...');
-      
-      if (mime.startsWith('image/')) {
-        if (target === 'comment') {
-          return await uploadPhotoToWall(token, group_id, file.buffer, file.originalname);
-        } else {
-          return await uploadPhotoToMessages(token, group_id, file.buffer, file.originalname);
-        }
-      } else if (mime.startsWith('video/')) {
-        return await uploadVideoToMessages(token, group_id, file.buffer, file.originalname);
+    console.log(`[UPLOAD] Using user_token:`, user_token.substring(0, 20) + '...');
+    
+    if (mime.startsWith('image/')) {
+      if (target === 'comments') {
+        attachment = await uploadPhotoToWall(user_token, group_id, file.buffer, file.originalname);
       } else {
-        if (target === 'comment') {
-          return await uploadDocToWall(token, group_id, file.buffer, file.originalname);
-        } else {
-          return await uploadDocToMessages(token, group_id, file.buffer, file.originalname);
-        }
+        attachment = await uploadPhotoToMessages(user_token, group_id, file.buffer, file.originalname);
       }
-    };
-
-    // Попытка 1: основной токен
-    try {
-      attachment = await tryUpload(primaryToken, user_token ? 'user_token' : 'community_token');
-      console.log('[UPLOAD] Success with primary token');
-    } catch (err) {
-      lastError = err;
-      console.log('[UPLOAD] Primary token failed:', err.message);
-      
-      // Попытка 2: fallback токен
-      if (fallbackToken) {
-        try {
-          console.log('[UPLOAD] Trying fallback token...');
-          attachment = await tryUpload(fallbackToken, 'fallback_token');
-          console.log('[UPLOAD] Success with fallback token');
-        } catch (fallbackErr) {
-          console.log('[UPLOAD] Fallback token also failed:', fallbackErr.message);
-          throw new Error(`Both tokens failed. Primary: ${err.message}. Fallback: ${fallbackErr.message}`);
-        }
+    } else if (mime.startsWith('video/')) {
+      attachment = await uploadVideoToMessages(user_token, group_id, file.buffer, file.originalname);
+    } else {
+      if (target === 'comments') {
+        attachment = await uploadDocToWall(user_token, group_id, file.buffer, file.originalname);
       } else {
-        throw err;
+        attachment = await uploadDocToMessages(user_token, group_id, file.buffer, file.originalname);
       }
     }
 
+    console.log('[UPLOAD] Success:', attachment);
     res.json({ success: true, attachment });
   } catch (err) {
     console.error('[UPLOAD ERROR]', err);
