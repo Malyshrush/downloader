@@ -106,12 +106,11 @@ async function getUserId(userToken) {
 async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   console.log('[UPLOAD DOC] Starting upload for:', filename, 'group_id:', groupId);
   
-  // ✅ ИСПРАВЛЕНИЕ: Используем getUserId для получения peer_id пользователя
-  const userId = await getUserId(userToken);
-  console.log('[UPLOAD DOC] Requesting messages upload URL with user peer_id:', userId);
+  // ✅ ИСПРАВЛЕНИЕ: Не используем peer_id вообще для загрузки документов
+  console.log('[UPLOAD DOC] Requesting messages upload URL without peer_id');
   
   const uploadServerRes = await axios.get('https://api.vk.com/method/docs.getMessagesUploadServer', {
-    params: { type: 'doc', peer_id: userId, access_token: userToken, v: '5.199' }
+    params: { type: 'doc', access_token: userToken, v: '5.199' }
   });
   if (uploadServerRes.data.error) throw new Error('VK API Error: ' + uploadServerRes.data.error.error_msg);
 
