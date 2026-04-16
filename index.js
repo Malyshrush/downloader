@@ -106,12 +106,12 @@ async function getUserId(userToken) {
 async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   console.log('[UPLOAD DOC] Starting upload for:', filename, 'group_id:', groupId);
   
-  // ✅ ИСПРАВЛЕНИЕ: Добавляем peer_id для загрузки от имени сообщества
-  const peerId = -Math.abs(parseInt(groupId));
-  console.log('[UPLOAD DOC] Requesting messages upload URL with peer_id:', peerId);
+  // ✅ ИСПРАВЛЕНИЕ: Используем getUserId для получения peer_id пользователя
+  const userId = await getUserId(userToken);
+  console.log('[UPLOAD DOC] Requesting messages upload URL with user peer_id:', userId);
   
   const uploadServerRes = await axios.get('https://api.vk.com/method/docs.getMessagesUploadServer', {
-    params: { type: 'doc', peer_id: peerId, access_token: userToken, v: '5.199' }
+    params: { type: 'doc', peer_id: userId, access_token: userToken, v: '5.199' }
   });
   if (uploadServerRes.data.error) throw new Error('VK API Error: ' + uploadServerRes.data.error.error_msg);
 
@@ -123,10 +123,10 @@ async function uploadDocToMessages(userToken, groupId, buffer, filename) {
   const { file } = uploadResult.data;
   if (!file) throw new Error('Ошибка загрузки документа на сервер ВК');
 
-  console.log('[UPLOAD DOC] File uploaded, saving with peer_id:', peerId);
+  console.log('[UPLOAD DOC] File uploaded, saving...');
   
   const saveRes = await axios.post('https://api.vk.com/method/docs.save', null, {
-    params: { file, peer_id: peerId, access_token: userToken, v: '5.199' }
+    params: { file, access_token: userToken, v: '5.199' }
   });
   
   if (saveRes.data.error) throw new Error('VK API Error: ' + saveRes.data.error.error_msg);
@@ -166,15 +166,14 @@ async function uploadDocToWall(userToken, groupId, buffer, filename) {
 async function uploadVideoToMessages(userToken, groupId, buffer, filename) {
   console.log('[UPLOAD VIDEO] Starting upload for:', filename, 'group_id:', groupId);
   
-  // ✅ ИСПРАВЛЕНИЕ: Добавляем group_id для загрузки от имени сообщества
-  const absGroupId = Math.abs(parseInt(groupId));
-  console.log('[UPLOAD VIDEO] Requesting video.save with group_id:', absGroupId);
+  // ✅ ИСПРАВЛЕНИЕ: Загружаем видео на личную страницу пользователя (без group_id)
+  // Видео будет доступно для прикрепления к сообщениям сообщества
+  console.log('[UPLOAD VIDEO] Requesting video.save for user account');
   
   const saveRes = await axios.get('https://api.vk.com/method/video.save', {
     params: { 
       access_token: userToken, 
       name: filename || 'video.mp4', 
-      group_id: absGroupId,
       privacy_view: 'only_me', 
       v: '5.199' 
     }
