@@ -36,8 +36,16 @@ async function drainIncomingEvents() {
   return getEventQueueBackend().drainIncomingEvents();
 }
 
+async function drainOutboundActions() {
+  return getEventQueueBackend().drainOutboundActions();
+}
+
 async function consumeIncomingEvent(handler) {
   return getEventQueueBackend().consumeIncomingEvent(handler);
+}
+
+async function consumeOutboundAction(handler) {
+  return getEventQueueBackend().consumeOutboundAction(handler);
 }
 
 async function flushIncomingEvents() {
@@ -76,7 +84,9 @@ module.exports = {
   publishIncomingEvent,
   publishOutboundAction,
   drainIncomingEvents,
+  drainOutboundActions,
   consumeIncomingEvent,
+  consumeOutboundAction,
   flushIncomingEvents,
   claimIncomingEvent,
   hasProcessedEvent,

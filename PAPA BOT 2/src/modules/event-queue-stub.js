@@ -1,4 +1,5 @@
 const incomingEvents = [];
+const outboundActions = [];
 const processedEventIds = new Map();
 const activeClaims = new Map();
 let incomingEventConsumer = null;
@@ -49,10 +50,15 @@ async function publishIncomingEvent(eventEnvelope) {
 }
 
 async function publishOutboundAction(actionEnvelope) {
+  if (!actionEnvelope || !actionEnvelope.actionId) {
+    throw new Error('actionEnvelope.actionId is required');
+  }
+
+  outboundActions.push(JSON.parse(JSON.stringify(actionEnvelope)));
   return {
     accepted: true,
     queue: 'stub-outbound',
-    eventId: actionEnvelope?.eventId || ''
+    actionId: actionEnvelope.actionId
   };
 }
 
@@ -60,10 +66,22 @@ async function drainIncomingEvents() {
   return incomingEvents.splice(0, incomingEvents.length);
 }
 
+async function drainOutboundActions() {
+  return outboundActions.splice(0, outboundActions.length);
+}
+
 async function consumeIncomingEvent(handler) {
   const batch = await drainIncomingEvents();
   for (const envelope of batch) {
     await handler(envelope);
+  }
+  return batch.length;
+}
+
+async function consumeOutboundAction(handler) {
+  const batch = await drainOutboundActions();
+  for (const action of batch) {
+    await handler(action);
   }
   return batch.length;
 }
@@ -127,6 +145,7 @@ async function releaseIncomingEventClaim(eventId, meta = {}) {
 
 function resetEventQueueForTests() {
   incomingEvents.length = 0;
+  outboundActions.length = 0;
   processedEventIds.clear();
   activeClaims.clear();
   incomingEventConsumer = null;
@@ -137,7 +156,9 @@ module.exports = {
   publishIncomingEvent,
   publishOutboundAction,
   drainIncomingEvents,
+  drainOutboundActions,
   consumeIncomingEvent,
+  consumeOutboundAction,
   flushIncomingEvents,
   claimIncomingEvent,
   hasProcessedEvent,

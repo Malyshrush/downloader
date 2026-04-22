@@ -2,7 +2,9 @@ const assert = require('node:assert/strict');
 
 const {
   publishIncomingEvent,
+  publishOutboundAction,
   drainIncomingEvents,
+  drainOutboundActions,
   claimIncomingEvent,
   hasProcessedEvent,
   markProcessedEvent,
@@ -53,6 +55,16 @@ async function run(name, fn) {
     await releaseIncomingEventClaim('evt_claim_1', { error: 'retry me' });
     const third = await claimIncomingEvent('evt_claim_1');
     assert.equal(third.acquired, true);
+  });
+
+  await run('publishOutboundAction queues actions in FIFO order', async () => {
+    resetEventQueueForTests();
+
+    await publishOutboundAction({ actionId: 'act_1', actionType: 'send_message_response' });
+    await publishOutboundAction({ actionId: 'act_2', actionType: 'send_comment_response' });
+
+    const drained = await drainOutboundActions();
+    assert.deepEqual(drained.map(item => item.actionId), ['act_1', 'act_2']);
   });
 
   await run('publishIncomingEvent auto-dispatches to registered consumer', async () => {

@@ -29,10 +29,11 @@ logValidationResult();
 logConfigSummary();
 
 // Экспорт основного обработчика
-const { handler, workerHandler } = require('./src/handler');
+const { handler, workerHandler, senderHandler } = require('./src/handler');
 
 module.exports.handler = handler;
 module.exports.workerHandler = workerHandler;
+module.exports.senderHandler = senderHandler;
 
 // Для локального запуска
 if (require.main === module) {

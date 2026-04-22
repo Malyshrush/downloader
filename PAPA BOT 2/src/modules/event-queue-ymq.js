@@ -23,6 +23,8 @@ function buildMessageAttributes(envelope = {}) {
   for (const [key, value] of Object.entries({
     eventId: envelope.eventId,
     eventType: envelope.eventType,
+    actionId: envelope.actionId,
+    actionType: envelope.actionType,
     profileId: envelope.profileId,
     communityId: envelope.communityId,
     traceId: envelope.traceId
@@ -42,6 +44,34 @@ function parseQueueMessageBody(message) {
     throw new Error('Queue message body is empty');
   }
   return JSON.parse(message.Body);
+}
+
+async function consumeQueueMessages(queueClient, queueUrl, visibilityTimeoutSeconds, handler) {
+  const response = await queueClient.send(new ReceiveMessageCommand({
+    QueueUrl: queueUrl,
+    MaxNumberOfMessages: 10,
+    WaitTimeSeconds: 0,
+    VisibilityTimeout: visibilityTimeoutSeconds,
+    AttributeNames: ['All'],
+    MessageAttributeNames: ['All']
+  }));
+
+  const messages = Array.isArray(response.Messages) ? response.Messages : [];
+  let processedCount = 0;
+
+  for (const message of messages) {
+    const payload = parseQueueMessageBody(message);
+    await handler(payload);
+    if (message.ReceiptHandle) {
+      await queueClient.send(new DeleteMessageCommand({
+        QueueUrl: queueUrl,
+        ReceiptHandle: message.ReceiptHandle
+      }));
+    }
+    processedCount += 1;
+  }
+
+  return processedCount;
 }
 
 function createYmqEventQueueBackend(config) {
@@ -69,16 +99,20 @@ function createYmqEventQueueBackend(config) {
   }
 
   async function publishOutboundAction(actionEnvelope) {
+    if (!actionEnvelope || !actionEnvelope.actionId) {
+      throw new Error('actionEnvelope.actionId is required');
+    }
+
     const response = await queueClient.send(new SendMessageCommand({
       QueueUrl: config.outboundQueueUrl,
-      MessageBody: JSON.stringify(actionEnvelope || {}),
-      MessageAttributes: buildMessageAttributes(actionEnvelope || {})
+      MessageBody: JSON.stringify(actionEnvelope),
+      MessageAttributes: buildMessageAttributes(actionEnvelope)
     }));
 
     return {
       accepted: true,
       queue: config.outboundQueueUrl,
-      eventId: actionEnvelope?.eventId || '',
+      actionId: actionEnvelope.actionId,
       messageId: response.MessageId || ''
     };
   }
@@ -87,32 +121,26 @@ function createYmqEventQueueBackend(config) {
     return [];
   }
 
+  async function drainOutboundActions() {
+    return [];
+  }
+
   async function consumeIncomingEvent(handler) {
-    const response = await queueClient.send(new ReceiveMessageCommand({
-      QueueUrl: config.incomingQueueUrl,
-      MaxNumberOfMessages: 10,
-      WaitTimeSeconds: 0,
-      VisibilityTimeout: config.idempotencyLeaseSeconds,
-      AttributeNames: ['All'],
-      MessageAttributeNames: ['All']
-    }));
+    return consumeQueueMessages(
+      queueClient,
+      config.incomingQueueUrl,
+      config.idempotencyLeaseSeconds,
+      handler
+    );
+  }
 
-    const messages = Array.isArray(response.Messages) ? response.Messages : [];
-    let processedCount = 0;
-
-    for (const message of messages) {
-      const envelope = parseQueueMessageBody(message);
-      await handler(envelope);
-      if (message.ReceiptHandle) {
-        await queueClient.send(new DeleteMessageCommand({
-          QueueUrl: config.incomingQueueUrl,
-          ReceiptHandle: message.ReceiptHandle
-        }));
-      }
-      processedCount += 1;
-    }
-
-    return processedCount;
+  async function consumeOutboundAction(handler) {
+    return consumeQueueMessages(
+      queueClient,
+      config.outboundQueueUrl,
+      config.idempotencyLeaseSeconds,
+      handler
+    );
   }
 
   function setIncomingEventConsumer(handler) {
@@ -132,7 +160,9 @@ function createYmqEventQueueBackend(config) {
     publishIncomingEvent,
     publishOutboundAction,
     drainIncomingEvents,
+    drainOutboundActions,
     consumeIncomingEvent,
+    consumeOutboundAction,
     flushIncomingEvents,
     claimIncomingEvent: stateStore.claimIncomingEvent,
     hasProcessedEvent: stateStore.hasProcessedEvent,

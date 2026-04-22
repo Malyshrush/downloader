@@ -132,8 +132,14 @@ const {
     isSessionExpired
 } = require('./modules/admin-sessions');
 const { buildEventEnvelope, isSupportedEventType } = require('./modules/event-envelope');
-const { publishIncomingEvent, consumeIncomingEvent, setIncomingEventConsumer } = require('./modules/event-queue');
+const {
+    publishIncomingEvent,
+    consumeIncomingEvent,
+    consumeOutboundAction,
+    setIncomingEventConsumer
+} = require('./modules/event-queue');
 const { processIncomingEvent } = require('./modules/event-worker');
+const { processOutboundAction } = require('./modules/outbound-actions');
 // Админ-панель (файл в корне dist/, на уровень выше от src/)
 let adminHTML = '<h1>Admin panel loading...</h1>';
 try {
@@ -2673,7 +2679,7 @@ async function handleLogoutAdmin(event) {
     }
 }
 
-function extractWorkerEnvelopes(event) {
+function extractQueuedPayloads(event) {
     const rawBody = typeof event?.body === 'string' ? JSON.parse(event.body || '{}') : (event?.body || event || {});
     if (!rawBody || (typeof rawBody === 'object' && Object.keys(rawBody).length === 0)) {
         return [];
@@ -2691,9 +2697,14 @@ function extractWorkerEnvelopes(event) {
         : [rawBody?.envelope || rawBody];
 }
 
+function extractWorkerEnvelopes(event) {
+    return extractQueuedPayloads(event);
+}
+
 async function workerHandlerWithDependencies(event, overrides = {}) {
     const consumeIncomingEventImpl = overrides.consumeIncomingEvent || consumeIncomingEvent;
     const processIncomingEventImpl = overrides.processIncomingEvent || processIncomingEvent;
+    const processOutboundActionImpl = overrides.processOutboundAction || processOutboundAction;
     const envelopes = extractWorkerEnvelopes(event);
 
     if (envelopes.length === 0) {
@@ -2706,6 +2717,10 @@ async function workerHandlerWithDependencies(event, overrides = {}) {
     }
 
     for (const envelope of envelopes) {
+        if (envelope && envelope.actionId && envelope.actionType && !envelope.eventType) {
+            await processOutboundActionImpl(envelope);
+            continue;
+        }
         await processIncomingEventImpl(envelope);
     }
 
@@ -2720,13 +2735,44 @@ async function workerHandler(event) {
     return workerHandlerWithDependencies(event);
 }
 
+async function senderHandlerWithDependencies(event, overrides = {}) {
+    const consumeOutboundActionImpl = overrides.consumeOutboundAction || consumeOutboundAction;
+    const processOutboundActionImpl = overrides.processOutboundAction || processOutboundAction;
+    const actions = extractQueuedPayloads(event);
+
+    if (actions.length === 0) {
+        const processedCount = await consumeOutboundActionImpl(processOutboundActionImpl);
+        return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+            body: processedCount ? `sender-ok:${processedCount}` : 'sender-ok:0'
+        };
+    }
+
+    for (const action of actions) {
+        await processOutboundActionImpl(action);
+    }
+
+    return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+        body: `sender-ok:${actions.length}`
+    };
+}
+
+async function senderHandler(event) {
+    return senderHandlerWithDependencies(event);
+}
+
 setIncomingEventConsumer(processIncomingEvent);
 
 module.exports = {
     handler,
     workerHandler,
+    senderHandler,
     __testOnly: {
         handleVkWebhookWithDependencies,
-        workerHandlerWithDependencies
+        workerHandlerWithDependencies,
+        senderHandlerWithDependencies
     }
 };

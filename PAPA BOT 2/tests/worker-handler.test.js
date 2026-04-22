@@ -78,6 +78,42 @@ async function run(name, fn) {
     assert.equal(response.statusCode, 200);
     assert.equal(response.body, 'worker-ok:3');
   });
+
+  await run('workerHandler routes outbound action batches to the sender path', async () => {
+    const processed = [];
+    const response = await __testOnly.workerHandlerWithDependencies(
+      {
+        messages: [
+          {
+            details: {
+              message: {
+                body: JSON.stringify({
+                  actionId: 'act_batch_1',
+                  actionType: 'send_message_response',
+                  payload: { userId: 1 }
+                })
+              }
+            }
+          }
+        ]
+      },
+      {
+        processIncomingEvent: async () => {
+          throw new Error('unexpected incoming event handling');
+        },
+        processOutboundAction: async action => {
+          processed.push(action.actionId);
+        },
+        consumeIncomingEvent: async () => {
+          throw new Error('unexpected stub consume');
+        }
+      }
+    );
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(response.body, 'worker-ok:1');
+    assert.deepEqual(processed, ['act_batch_1']);
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {
