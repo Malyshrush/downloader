@@ -173,6 +173,7 @@ async function initializeStorage() {
     log('info', '🔧 Checking Object Storage initialization...');
 
     for (const fileName of COMMON_FILES) {
+        await hotStateStore.ensureJsonObject(fileName, buildDefaultCommonFile(fileName));
         try {
             await s3Send(new GetObjectCommand({ Bucket: BUCKET_NAME, Key: fileName }));
         } catch (error) {
