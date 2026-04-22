@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-04-22T17:24:36.419Z",
+  "createdAt": "2026-04-22T17:45:21.867Z",
   "ymqEndpoint": "https://message-queue.api.cloud.yandex.net",
   "ydbDocApiEndpoint": "https://docapi.serverless.yandexcloud.net/ru-central1/b1gh3sun4tm32rd0jpd4/etnbufcfn4sjsrn3fa1s",
   "incomingQueue": {
@@ -24,6 +24,10 @@
   },
   "userStateTable": {
     "tableName": "user_state_rows",
+    "tableStatus": "ACTIVE"
+  },
+  "communityVariablesTable": {
+    "tableName": "community_variable_entries",
     "tableStatus": "ACTIVE"
   },
   "profileUserSharedTable": {

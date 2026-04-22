@@ -7,10 +7,12 @@ const { getUserVariables: getUserVarsFromSheet } = require('./users');
 const { log } = require('../utils/logger');
 const { addAppLog } = require('./app-logs');
 const { createUserStateStore, buildUserScope } = require('./user-state-store');
+const { createCommunityVariablesStore } = require('./community-variables-store');
 const { createProfileUserSharedStore, buildProfileUserSharedScope } = require('./profile-user-shared-store');
 const { createSharedVariablesStore, buildSharedVariablesScope } = require('./shared-variables-store');
 
 const userStateStore = createUserStateStore();
+const communityVariablesStore = createCommunityVariablesStore();
 const profileUserSharedStore = createProfileUserSharedStore();
 const sharedVariablesStore = createSharedVariablesStore();
 
@@ -38,6 +40,15 @@ function isStructuredUserStateEnabled(overrides = {}) {
 
 function getProfileUserSharedStore(overrides = {}) {
     return overrides.profileUserSharedStore || profileUserSharedStore;
+}
+
+function getCommunityVariablesStore(overrides = {}) {
+    return overrides.communityVariablesStore || communityVariablesStore;
+}
+
+function isCommunityVariablesStoreEnabled(overrides = {}) {
+    const store = getCommunityVariablesStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
 function isProfileUserSharedStoreEnabled(overrides = {}) {
@@ -113,6 +124,37 @@ function buildSharedVariableRows(variables) {
             'Значение ПВС': value || ''
         };
     });
+}
+
+function buildCommunityVariableStateFromRows(rows) {
+    const globalVars = {};
+    const vkVars = {};
+    const userVariableNames = [];
+    const seenUserVariableNames = new Set();
+
+    for (const row of Array.isArray(rows) ? rows : []) {
+        const globalName = String(row && row['Глобальная'] || '').trim().toLowerCase();
+        if (globalName) {
+            globalVars[globalName] = String(row && row['Значение ГП'] || '').trim();
+        }
+
+        const vkName = String(row && (row['ПЕРЕМЕННЫЕ ВК'] || row['Переменные ВК']) || '').trim().toLowerCase();
+        if (vkName) {
+            vkVars[vkName] = String(row && row['Значение/Описание ПВК'] || '').trim();
+        }
+
+        const userName = String(row && row['Пользовательская'] || '').trim().toLowerCase();
+        if (userName && !seenUserVariableNames.has(userName)) {
+            seenUserVariableNames.add(userName);
+            userVariableNames.push(userName);
+        }
+    }
+
+    return {
+        globalVars,
+        vkVars,
+        userVariableNames
+    };
 }
 
 async function getProfileUserSharedVariableRowsWithDependencies(profileId = '1', overrides = {}) {
@@ -1007,8 +1049,50 @@ async function updateProfileUserSharedVariables(userId, variables, profileId = '
     return updateProfileUserSharedVariablesWithDependencies(userId, variables, profileId);
 }
 
+async function getGlobalVariablesWithDependencies(communityId = null, profileId = '1', overrides = {}) {
+    try {
+        if (isCommunityVariablesStoreEnabled(overrides)) {
+            const structuredState = await getCommunityVariablesStore(overrides).listVariableState(communityId, profileId);
+            const hasStructuredGlobals = Object.keys(structuredState.globalVars || {}).length > 0;
+            const hasStructuredVk = Object.keys(structuredState.vkVars || {}).length > 0;
+
+            if (hasStructuredGlobals && hasStructuredVk) {
+                return {
+                    globalVars: structuredState.globalVars || {},
+                    vkVars: structuredState.vkVars || {}
+                };
+            }
+
+            const varsSheet = await getSheetData('РџР•Р Р•РњР•РќРќР«Р•', communityId, profileId);
+            const fallbackState = buildCommunityVariableStateFromRows(varsSheet);
+            return {
+                globalVars: hasStructuredGlobals ? (structuredState.globalVars || {}) : fallbackState.globalVars,
+                vkVars: hasStructuredVk ? (structuredState.vkVars || {}) : fallbackState.vkVars
+            };
+        }
+
+        const varsSheet = await getSheetData('РџР•Р Р•РњР•РќРќР«Р•', communityId, profileId);
+        const fallbackState = buildCommunityVariableStateFromRows(varsSheet);
+        return {
+            globalVars: fallbackState.globalVars,
+            vkVars: fallbackState.vkVars
+        };
+    } catch (error) {
+        log('error', 'вќЊ Error getting global variables:', error);
+        return { globalVars: {}, vkVars: {} };
+    }
+}
+
+async function getGlobalVariables(communityId = null, profileId = '1') {
+    return getGlobalVariablesWithDependencies(communityId, profileId);
+}
+
 async function updateGlobalVariablesWithDependencies(variables, communityId = null, profileId = '1', overrides = {}) {
     try {
+        if (isCommunityVariablesStoreEnabled(overrides)) {
+            await getCommunityVariablesStore(overrides).replaceGlobalVariables(communityId, variables || {}, profileId);
+            return;
+        }
         const cid = communityId;
         const sheetUpdater = overrides.updateSheetData || updateSheetData;
         await sheetUpdater('ПЕРЕМЕННЫЕ', cid, profileId, function(rows) {
@@ -1056,6 +1140,11 @@ async function syncUserVariableCatalogWithDependencies(variableNames, communityI
             : [];
         if (!names.length) return;
 
+        if (isCommunityVariablesStoreEnabled(overrides)) {
+            await getCommunityVariablesStore(overrides).ensureUserVariableCatalog(communityId, names, profileId);
+            return;
+        }
+
         const sheetUpdater = overrides.updateSheetData || updateSheetData;
         await sheetUpdater('ПЕРЕМЕННЫЕ', communityId, profileId, function(rows) {
             const sheet = Array.isArray(rows) ? rows : [];
@@ -1097,6 +1186,7 @@ module.exports = {
     performVariableActions,
     checkVariableConditions,
     __testOnly: {
+        getGlobalVariablesWithDependencies,
         getProfileUserSharedVariableRowsWithDependencies,
         getProfileUserSharedVariablesWithDependencies,
         getSharedVariablesWithDependencies,

@@ -77,6 +77,103 @@ async function run(name, fn) {
     assert.equal(updates[0].nextRows.length, 2);
     assert.equal(updates[0].nextRows[1]['Пользовательская'], 'pp_level');
   });
+  await run('getGlobalVariablesWithDependencies reads structured community variables when enabled', async () => {
+    const result = await variables.__testOnly.getGlobalVariablesWithDependencies(
+      'community-1',
+      '8',
+      {
+        communityVariablesStore: {
+          isEnabled: () => true,
+          listVariableState: async (communityId, profileId) => {
+            assert.equal(communityId, 'community-1');
+            assert.equal(profileId, '8');
+            return {
+              globalVars: {
+                gp_limit: '500'
+              },
+              vkVars: {
+                '%vk_user%': 'Имя пользователя'
+              },
+              userVariableNames: ['pp_score']
+            };
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(result, {
+      globalVars: {
+        gp_limit: '500'
+      },
+      vkVars: {
+        '%vk_user%': 'Имя пользователя'
+      }
+    });
+  });
+
+  await run('updateGlobalVariablesWithDependencies writes structured global entries when enabled', async () => {
+    const calls = [];
+
+    await variables.__testOnly.updateGlobalVariablesWithDependencies(
+      { gp_limit: '500', gp_mode: 'auto' },
+      'community-1',
+      '8',
+      {
+        updateSheetData: async () => {
+          throw new Error('sheet fallback should not be used');
+        },
+        communityVariablesStore: {
+          isEnabled: () => true,
+          replaceGlobalVariables: async (communityId, vars, profileId) => {
+            calls.push({ communityId, vars, profileId });
+            return { stored: 2, deleted: 1, backend: 'ydb-community-variables' };
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(calls, [
+      {
+        communityId: 'community-1',
+        vars: {
+          gp_limit: '500',
+          gp_mode: 'auto'
+        },
+        profileId: '8'
+      }
+    ]);
+  });
+
+  await run('syncUserVariableCatalogWithDependencies stores missing structured user catalog entries when enabled', async () => {
+    const calls = [];
+
+    await variables.__testOnly.syncUserVariableCatalogWithDependencies(
+      ['pp_score', 'pp_level'],
+      'community-1',
+      '8',
+      {
+        updateSheetData: async () => {
+          throw new Error('sheet fallback should not be used');
+        },
+        communityVariablesStore: {
+          isEnabled: () => true,
+          ensureUserVariableCatalog: async (communityId, variableNames, profileId) => {
+            calls.push({ communityId, variableNames, profileId });
+            return { stored: 1, backend: 'ydb-community-variables' };
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(calls, [
+      {
+        communityId: 'community-1',
+        variableNames: ['pp_score', 'pp_level'],
+        profileId: '8'
+      }
+    ]);
+  });
+
   await run('syncProfileUserSharedVariablesToUsersWithDependencies updates structured user rows per community when enabled', async () => {
     const updates = [];
 

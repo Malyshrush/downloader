@@ -145,6 +145,7 @@ async function main() {
   const hotStateTableName = args['hot-state-table'] || runtimeConfig.ydbHotStateTable;
   const appLogsTableName = args['app-logs-table'] || runtimeConfig.ydbAppLogsTable;
   const userStateTableName = args['user-state-table'] || runtimeConfig.ydbUserStateTable;
+  const communityVariablesTableName = args['community-variables-table'] || runtimeConfig.ydbCommunityVariablesTable;
   const profileUserSharedTableName = args['profile-user-shared-table'] || runtimeConfig.ydbProfileUserSharedTable;
   const sharedVariablesTableName = args['shared-variables-table'] || runtimeConfig.ydbSharedVariablesTable;
 
@@ -233,6 +234,30 @@ async function main() {
       }
     ]
   );
+  const communityVariablesTable = await ensureTable(
+    dynamoClient,
+    communityVariablesTableName,
+    [
+      {
+        AttributeName: 'communityScope',
+        KeyType: 'HASH'
+      },
+      {
+        AttributeName: 'variableKey',
+        KeyType: 'RANGE'
+      }
+    ],
+    [
+      {
+        AttributeName: 'communityScope',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'variableKey',
+        AttributeType: 'S'
+      }
+    ]
+  );
   const profileUserSharedTable = await ensureTable(
     dynamoClient,
     profileUserSharedTableName,
@@ -292,6 +317,7 @@ async function main() {
     hotStateTable,
     appLogsTable,
     userStateTable,
+    communityVariablesTable,
     profileUserSharedTable,
     sharedVariablesTable
   };
