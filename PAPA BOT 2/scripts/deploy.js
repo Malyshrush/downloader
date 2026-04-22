@@ -34,6 +34,11 @@ const CONFIG = {
             name: 'vk-bot-2-worker',
             entrypoint: 'index.workerHandler',
             logsFile: 'last_deploy_worker_logs.txt'
+        },
+        {
+            name: 'vk-bot-2-sender',
+            entrypoint: 'index.senderHandler',
+            logsFile: 'last_deploy_sender_logs.txt'
         }
     ],
     runtime: 'nodejs18',
