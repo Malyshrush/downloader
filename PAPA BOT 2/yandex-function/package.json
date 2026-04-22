@@ -1,0 +1,27 @@
+{
+  "name": "vk-bot",
+  "version": "2.0.0",
+  "description": "VK Chat Bot с поддержкой мульти-сообществ, отложенных сообщений и рассылок",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/local-server.js",
+    "dev": "node src/local-server.js",
+    "deploy": "node scripts/deploy.js",
+    "test": "node test_webhook.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1024.0",
+    "@aws-sdk/client-dynamodb": "^3.936.0",
+    "@aws-sdk/client-sqs": "^3.936.0",
+    "@aws-sdk/lib-dynamodb": "^3.936.0",
+    "axios": "^1.14.0",
+    "busboy": "^1.6.0",
+    "dotenv": "^17.4.0",
+    "form-data": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "author": "",
+  "license": "MIT"
+}
