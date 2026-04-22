@@ -218,16 +218,13 @@ async function validateCommunitiesForProfile(fullConfig, profileId) {
 
 async function saveFullConfig(fullConfig, profileId = '1') {
     const pid = normalizeProfileId(profileId);
-    const s3Client = getS3Client();
-    const bucket = getBucketName();
+    return saveFullConfigWithDependencies(fullConfig, pid);
+}
 
-    await s3Client.send(new PutObjectCommand({
-        Bucket: bucket,
-        Key: getBotConfigKey(pid),
-        Body: JSON.stringify(fullConfig, null, 2),
-        ContentType: 'application/json'
-    }));
-
+async function saveFullConfigWithDependencies(fullConfig, profileId = '1', overrides = {}) {
+    const pid = normalizeProfileId(profileId);
+    const targetStore = overrides.hotStateStore || hotStateStore;
+    await targetStore.saveJsonObject(getBotConfigKey(pid), fullConfig);
     BOT_CONFIGS[pid] = fullConfig;
     LAST_USED_PROFILE.id = pid;
     return fullConfig;
@@ -417,5 +414,8 @@ module.exports = {
     resolveCommunityContext,
     getBotConfigKey,
     findVkGroupUsage,
-    ensureVkGroupIdNotDuplicated
+    ensureVkGroupIdNotDuplicated,
+    __testOnly: {
+        saveFullConfigWithDependencies
+    }
 };
