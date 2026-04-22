@@ -37,9 +37,7 @@ async function run(name, fn) {
         releaseIncomingEventClaim: async id => calls.push('release:' + id),
         processStructuredTriggers: async () => calls.push('structured'),
         handleMessage: async () => calls.push('message'),
-        handleComment: async () => calls.push('comment'),
-        processDelayed: async () => calls.push('delayed'),
-        processMailing: async () => calls.push('mailing')
+        handleComment: async () => calls.push('comment')
       }
     );
 
@@ -47,8 +45,6 @@ async function run(name, fn) {
       'claim:evt_msg_1',
       'structured',
       'message',
-      'delayed',
-      'mailing',
       'mark:evt_msg_1'
     ]);
   });
@@ -98,9 +94,7 @@ async function run(name, fn) {
           handleMessage: async () => {
             calls.push('message');
             throw new Error('message failed');
-          },
-          processDelayed: async () => calls.push('delayed'),
-          processMailing: async () => calls.push('mailing')
+          }
         }
       ),
       /message failed/
@@ -138,19 +132,40 @@ async function run(name, fn) {
         releaseIncomingEventClaim: async id => calls.push('release:' + id),
         processStructuredTriggers: async () => calls.push('structured'),
         handleMessage: async () => calls.push('message'),
-        handleComment: async () => calls.push('comment'),
-        processDelayed: async () => calls.push('delayed'),
-        processMailing: async () => calls.push('mailing')
+        handleComment: async () => calls.push('comment')
       }
     );
 
     assert.deepEqual(calls, [
       'claim:evt_sys_1',
       'structured',
-      'delayed',
-      'mailing',
       'mark:evt_sys_1'
     ]);
+  });
+
+  await run('processIncomingEvent does not trigger scheduler scans from worker path', async () => {
+    await processIncomingEvent(
+      {
+        eventId: 'evt_no_sched_1',
+        eventType: 'message_new',
+        profileId: '7',
+        communityId: '123456',
+        payload: { type: 'message_new', group_id: 123456, object: { message: { id: 42, from_id: 777 } } }
+      },
+      {
+        claimIncomingEvent: async id => ({ acquired: true, eventId: id }),
+        markProcessedEvent: async () => {},
+        releaseIncomingEventClaim: async () => {},
+        processStructuredTriggers: async () => {},
+        handleMessage: async () => {},
+        processDelayed: async () => {
+          throw new Error('processDelayed must not be called from event-worker');
+        },
+        processMailing: async () => {
+          throw new Error('processMailing must not be called from event-worker');
+        }
+      }
+    );
   });
 })().then(() => {
   process.exit(0);

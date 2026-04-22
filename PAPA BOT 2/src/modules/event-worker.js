@@ -1,7 +1,6 @@
 const { processStructuredTriggers } = require('./structured-triggers');
 const { handleMessage } = require('./messages');
 const { handleComment } = require('./comments');
-const { processDelayed, processMailing } = require('./scheduler');
 const {
   claimIncomingEvent,
   markProcessedEvent,
@@ -19,8 +18,6 @@ async function processIncomingEvent(envelope, overrides = {}) {
   const processStructuredTriggersImpl = overrides.processStructuredTriggers || processStructuredTriggers;
   const handleMessageImpl = overrides.handleMessage || handleMessage;
   const handleCommentImpl = overrides.handleComment || handleComment;
-  const processDelayedImpl = overrides.processDelayed || processDelayed;
-  const processMailingImpl = overrides.processMailing || processMailing;
 
   const profileId = String(envelope.profileId || '1');
   const communityId = String(envelope.communityId || envelope.payload?.group_id || 'default');
@@ -50,9 +47,6 @@ async function processIncomingEvent(envelope, overrides = {}) {
     if (envelope.eventType === 'wall_reply_new' || envelope.eventType === 'wall_reply_edit') {
       await handleCommentImpl(data, profileId);
     }
-
-    await processDelayedImpl(communityId, profileId);
-    await processMailingImpl(communityId, profileId);
 
     await markProcessedEventImpl(envelope.eventId, {
       eventType: envelope.eventType,
