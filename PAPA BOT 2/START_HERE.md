@@ -1,56 +1,67 @@
 # START HERE
 
-This file is the shortest correct entrypoint for any new session working on `PAPA BOT 2`.
+This is the shortest correct entrypoint for any new session working on `PAPA BOT 2`.
 
-## What This Project Is
+## What This Workspace Is
 
-`PAPA BOT 2` is the rebuild workspace for the current PAPA BOT architecture.
+`PAPA BOT 2` is the active migration workspace for rebuilding the current PAPA BOT runtime without changing the product contract.
 
 - baseline reference: [PAPA BOT 1](</C:/PROJECT/GPT/PAPA BOT 1>)
 - active migration workspace: [PAPA BOT 2](</C:/PROJECT/GPT/PAPA BOT 2>)
 
-The rebuild goal is to preserve the current product behavior while replacing the synchronous blob-heavy runtime with a queue-first architecture on Yandex Cloud.
+The goal is to preserve current bot behavior while replacing synchronous blob-heavy execution with a queue-first architecture on Yandex Cloud.
 
-## What Was Already Done
+## What Is Already In Place
 
-At the moment of this file version, these migration steps are already in place:
+At the current state of the branch:
 
-- ingress is queue-first and no longer runs full processing inline
+- webhook ingress is thin and queue-first
+- normalized inbound event envelope exists
 - inbound worker path exists
 - outbound action queue exists
 - dedicated sender function exists and is deployed
-- delayed and mailing deliveries are queued to sender instead of sending inline from scheduler
+- delayed and mailing deliveries are queued to sender instead of sending inline
 - event worker no longer runs scheduler scans
-- durable idempotency is backed by YDB
-- part of hot-state storage is switched from S3 JSON to YDB with S3 fallback/backup, including profile dashboard state
+- durable idempotency is stored in YDB
+- hot-state storage is YDB-primary with S3 fallback and backup for:
+  - bot config
+  - profile dashboard
+  - admin auth
+  - admin security
+  - admin sessions
+  - users
+  - variables
+  - app logs
+  - bot version metadata
 
-## What Must Still Be Protected
+## What Must Stay Stable
 
 Do not break without an explicit migration decision:
 
-- admin panel
-- auth, sessions, CAPTCHA
+- admin panel behavior
+- auth, sessions, and CAPTCHA flows
 - message and comment behavior
 - structured triggers
 - delayed jobs and mailings
-- users, groups, variables
+- users, groups, and variables
 - multi-community support
-- promo / recovery / profile-limit flows
+- promo, recovery, and profile-limit flows
 
 ## Read These Files Next
 
 1. [REBUILD_TO_1000_COMMUNITIES.md](</C:/PROJECT/GPT/PAPA BOT 2/REBUILD_TO_1000_COMMUNITIES.md>)
 2. [NEXT_STEPS.md](</C:/PROJECT/GPT/PAPA BOT 2/NEXT_STEPS.md>)
-3. then only after that touch code
+3. only then touch code
 
 ## Working Rules
 
-- treat `PAPA BOT 1` only as behavioral reference
-- make architectural changes only in `PAPA BOT 2`
-- prefer incremental migration slices
-- verify each slice before moving on
+- treat `PAPA BOT 1` only as behavior reference
+- make architecture changes only in `PAPA BOT 2`
+- prefer bounded migration slices
 - keep ingress thin, workers explicit, sender isolated
+- verify each slice before moving on
+- do not reintroduce direct VK sends from decision logic or scheduler loops
 
-## Recommended Start Prompt For A New Chat
+## Recommended Start Prompt
 
-`Работаем только в PAPA BOT 2. Уже прочитаны START_HERE.md, REBUILD_TO_1000_COMMUNITIES.md и NEXT_STEPS.md. Продолжаем миграцию queue-first архитектуры с сохранением текущего продуктового поведения.`
+`Work only in PAPA BOT 2. START_HERE.md, REBUILD_TO_1000_COMMUNITIES.md, and NEXT_STEPS.md are already read. Continue the queue-first migration while preserving current product behavior.`

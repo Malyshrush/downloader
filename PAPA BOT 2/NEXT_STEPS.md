@@ -1,99 +1,104 @@
 # NEXT STEPS
 
-This file tracks the practical migration status of `PAPA BOT 2` after the queue/YDB/sender work that is already done.
+This file tracks the practical migration status of `PAPA BOT 2` after the queue, sender, and hot-state cutover work already completed.
 
-It is not a full architecture spec. For that, read [REBUILD_TO_1000_COMMUNITIES.md](</C:/PROJECT/GPT/PAPA BOT 2/REBUILD_TO_1000_COMMUNITIES.md>).
+It is not the full architecture spec. For the long-term target, read [REBUILD_TO_1000_COMMUNITIES.md](</C:/PROJECT/GPT/PAPA BOT 2/REBUILD_TO_1000_COMMUNITIES.md>).
 
 ## Current Status
 
 ### Already Done
 
 - inbound webhook path is thin and queue-first
-- normalized event envelope exists
+- normalized inbound event envelope exists
 - inbound worker exists
 - outbound action queue exists
 - dedicated sender cloud function exists and is wired to outbound YMQ
-- message/comment sends are routed through outbound actions
-- scheduler now queues delayed and mailing deliveries to sender
-- event worker no longer triggers `processDelayed` / `processMailing`
+- message and comment sends are routed through outbound actions
+- scheduler queues delayed and mailing deliveries to sender
+- event worker no longer triggers `processDelayed` or `processMailing`
 - durable idempotency is implemented in YDB
-- config/admin/profile-dashboard hot-state storage is moved to YDB primary with S3 fallback/backup
+- YDB-backed hot-state with S3 fallback and backup is the primary runtime path for:
+  - config
+  - profile dashboard
+  - admin auth
+  - admin security
+  - admin sessions
+  - users
+  - variables
+  - app logs
+  - bot version metadata
 
 ### Still Not Done
 
-- users and other hottest operational entities are still blob-backed in Object Storage
-- synchronous app-log writes still exist in hot paths
-- runtime state is not fully cut over from JSON blobs to structured storage
-- admin/backend adaptation is not finished end-to-end
+- some migrated modules still carry legacy S3-only code paths and imports that should be removed
+- the hot-state layer still stores whole JSON documents for several high-write entities
+- runtime state is not yet fully decomposed into narrower structured YDB entities
+- repo hygiene and operator docs still need to stay aligned with the real deployed shape
 
-## Immediate Next Technical Focus
+## Immediate Technical Focus
 
-The next correct focus is to keep removing the hottest synchronous JSON write paths from runtime processing.
+The next correct focus is no longer "introduce sender" or "cut over users to hot state" because that work is already done.
 
-### First Target
+The current focus is:
 
-Move these write-heavy paths away from blob-first behavior:
-
-- `src/modules/users.js`
-- variable-related runtime mutations
-
-The goal is:
-
-- stop rewriting large per-community JSON objects on every hot event
-- reduce lock contention and request amplification
-- prepare the remaining state for structured YDB storage
+- finish cleanup of legacy blob-first code in modules already migrated to hot-state
+- keep docs aligned with the deployed queue-first architecture
+- then choose the next truly hot entity that still deserves a structured YDB table instead of whole-document mutation
 
 ## Recommended Order From Here
 
 ### Step 1
 
-Map every hot write that still happens during:
+Clean migrated modules so runtime behavior has one obvious primary path:
 
-- inbound event processing
-- sender delivery processing
-- scheduler delivery completion
-
-Files to inspect first:
-
-- [src/modules/users.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/users.js>)
-- [src/modules/variables.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/variables.js>)
-- [src/modules/row-actions.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/row-actions.js>)
-- [src/modules/app-logs.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/app-logs.js>)
+- [src/modules/admin-profiles.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/admin-profiles.js>)
+- [src/modules/admin-security.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/admin-security.js>)
+- [src/modules/admin-sessions.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/admin-sessions.js>)
+- [src/modules/config.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/config.js>)
+- [src/modules/bot-version-store.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/bot-version-store.js>)
 
 ### Step 2
 
-Separate hot operational state into two groups:
+Keep operator docs truthful:
 
-- must become structured hot state now
-- can temporarily stay in S3 as backup/export/cold data
+- [README.md](</C:/PROJECT/GPT/PAPA BOT 2/README.md>)
+- [START_HERE.md](</C:/PROJECT/GPT/PAPA BOT 2/START_HERE.md>)
+- this file
+- subproject READMEs that still describe the pre-split runtime or have broken encoding
 
 ### Step 3
 
-Pick one bounded migration slice and finish it completely.
+After cleanup, inspect the remaining hottest whole-document writes and decide whether they need structured storage now.
 
-Recommended bounded slice:
+Inspect first:
 
-- user step/bot/group mutations
-- profile usage counters tightly related to hot processing
-- then variable synchronization paths that still rewrite large sheets
+- [src/modules/users.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/users.js>)
+- [src/modules/variables.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/variables.js>)
+- [src/modules/app-logs.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/app-logs.js>)
+- [src/modules/row-actions.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/row-actions.js>)
+
+The decision criterion is simple:
+
+- keep whole-document hot-state mutation where traffic is acceptable
+- introduce narrower structured YDB entities only where contention or write amplification is still materially risky
 
 ## What Not To Do Next
 
-- do not start cosmetic UI work
-- do not redesign admin panel screens
-- do not mix three migrations into one huge commit
-- do not re-introduce direct VK sends from timer or decision code
-- do not expand product scope
+- do not redesign admin UI without a separate reason
+- do not reintroduce direct VK sends from decision code or scheduler loops
+- do not mix unrelated migrations into one commit
+- do not expand product scope while the runtime migration is still being stabilized
 
 ## Definition Of Done For The Next Slice
 
 The next slice is successful only if:
 
-- one hot write path is removed or materially reduced
-- product behavior stays compatible
-- tests cover the new contract
-- queue-driven split remains intact
+- one concrete cleanup or storage boundary becomes simpler
+- deployed behavior stays compatible
+- tests cover the touched contract
+- queue-driven separation stays intact
+- docs match reality
 
-## Practical Start For The Next Session
+## Practical Start Prompt
 
-`Работаем в PAPA BOT 2. Queue-first ingress, outbound sender и scheduler queue path уже сделаны. Следующий шаг: разобрать оставшиеся hot JSON writes в users/profile-dashboard/variables и вынести очередной write-heavy path из blob-first модели.`
+`Work in PAPA BOT 2. Queue-first ingress, sender worker, YMQ queues, YDB idempotency, and hot-state cutover are already in place. Continue with legacy cleanup, documentation alignment, and the next structured-storage decision only where hot-write pressure still justifies it.`

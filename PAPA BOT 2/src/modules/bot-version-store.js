@@ -1,8 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { log } = require('../utils/logger');
-const { getS3Client, getBucketName } = require('./storage');
 const { createHotStateStore } = require('./hot-state-store');
 
 const BOT_VERSION_KEY = 'bot_version.json';

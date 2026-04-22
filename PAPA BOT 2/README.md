@@ -1,10 +1,10 @@
 # PAPA BOT 2
 
-`PAPA BOT 2` is the active migration workspace for rebuilding PAPA BOT toward a queue-driven architecture that can scale much further while staying on Yandex Cloud Functions.
+`PAPA BOT 2` is the active migration workspace for rebuilding the PAPA BOT runtime into a queue-first architecture on Yandex Cloud Functions without redesigning the product.
 
-This is not a greenfield project and not a product redesign. It is a controlled rebuild of the runtime model behind the existing VK bot.
+This is a controlled migration, not a greenfield rewrite.
 
-## Product Contract That Must Stay Stable
+## Product Contract
 
 The rebuild must preserve:
 
@@ -15,57 +15,64 @@ The rebuild must preserve:
 - delayed steps and mailings
 - users, groups, and variables
 - multi-community support
-- promo codes, recovery, and profile limits
+- promo codes, recovery flows, and profile limits
 
-If behavior changes, it must be an explicit migration decision, not a side effect of refactoring.
+If behavior changes, it must be a deliberate migration decision, not an accidental side effect.
 
 ## Current Runtime Shape
 
-The branch already contains three separated execution paths:
+The branch already runs through separated execution paths:
 
-- `handler` / ingress path:
-  accepts webhook requests and publishes normalized incoming events
-- `workerHandler`:
-  consumes inbound event batches and runs decision logic
-- `senderHandler`:
-  consumes outbound action batches and performs delivery work
+- `handler` accepts webhook traffic, normalizes events, and publishes inbound work
+- `workerHandler` consumes inbound batches and runs decision logic
+- `senderHandler` consumes outbound action batches and performs delivery work
 
-Timer-based scheduler work is also separated:
+Scheduler responsibilities are also split:
 
-- delayed steps and mailings are scanned by scheduler logic
+- scheduler scans delayed and mailing jobs
 - scheduler publishes outbound delivery actions
 - sender worker performs actual sends and post-send updates
 
-## Infrastructure Already In Place
+## Infrastructure In Place
 
-- `Yandex Message Queue` for inbound and outbound queues
-- `YDB Document API` for durable idempotency
+- Yandex Message Queue for inbound and outbound queues
+- YDB Document API for durable idempotency
 - dedicated sender cloud function `vk-bot-2-sender`
-- YDB-backed hot-state layer for config/admin/profile-dashboard JSON objects with S3 fallback and backup
+- shared YDB-backed hot-state layer with S3 fallback and backup
 
-## What Was Already Migrated
+## Already Migrated
 
 - inbound queue abstraction and cloud backend
 - normalized event envelope
 - inbound worker path
-- outbound message/comment action queue
+- outbound message and comment action queue
 - dedicated sender function deployment
-- delayed and mailing delivery routing through outbound actions
+- scheduler delivery routing through outbound actions
 - removal of scheduler scans from inbound event worker
-- profile dashboard hot-state moved behind the shared YDB-backed hot-state store
+- YDB-backed hot-state primary path for:
+  - bot config
+  - profile dashboard
+  - admin auth
+  - admin security
+  - admin sessions
+  - users
+  - variables
+  - app logs
+  - bot version metadata
 
 ## What Still Remains
 
-The project is not fully migrated yet. Important unfinished areas:
+The project is not "fully done" yet. The current remaining work is narrower:
 
-- full hot-state cutover away from Object Storage JSON for the hottest runtime entities
-- moving `users`, variable-heavy state, and counters to structured storage
-- reducing synchronous `app_logs` writes in hot paths
-- finishing admin/backend adaptation on top of the new state model
+- remove leftover legacy S3-only code from modules already cut over to hot-state
+- keep documentation aligned with the real runtime and deploy topology
+- decide where whole-document hot-state mutation is still acceptable and where structured YDB entities are needed next
 
 ## Key Files
 
 - [src/handler.js](</C:/PROJECT/GPT/PAPA BOT 2/src/handler.js>)
+- [src/worker-handler.js](</C:/PROJECT/GPT/PAPA BOT 2/src/worker-handler.js>)
+- [src/sender-handler.js](</C:/PROJECT/GPT/PAPA BOT 2/src/sender-handler.js>)
 - [src/modules/event-worker.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/event-worker.js>)
 - [src/modules/outbound-actions.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/outbound-actions.js>)
 - [src/modules/scheduler.js](</C:/PROJECT/GPT/PAPA BOT 2/src/modules/scheduler.js>)
@@ -78,7 +85,7 @@ The project is not fully migrated yet. Important unfinished areas:
 2. [REBUILD_TO_1000_COMMUNITIES.md](</C:/PROJECT/GPT/PAPA BOT 2/REBUILD_TO_1000_COMMUNITIES.md>)
 3. [NEXT_STEPS.md](</C:/PROJECT/GPT/PAPA BOT 2/NEXT_STEPS.md>)
 
-## Working Rule For This Copy
+## Working Rule
 
 Use `PAPA BOT 1` only as a behavioral reference.
-All architectural work must happen in `PAPA BOT 2`.
+All architectural changes happen in `PAPA BOT 2`.
