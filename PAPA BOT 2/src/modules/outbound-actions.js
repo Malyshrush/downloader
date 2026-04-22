@@ -11,12 +11,18 @@ const {
   sendCommentAndPerformActions,
   sendFallbackCommentFromRow
 } = require('./comments');
+const {
+  processDelayedDeliveryAction,
+  processMailingDeliveryAction
+} = require('./scheduler');
 
 async function dispatchOutboundAction(action, overrides = {}) {
   const sendMessageAndPerformActionsImpl = overrides.sendMessageAndPerformActions || sendMessageAndPerformActions;
   const sendFallbackResponseFromRowImpl = overrides.sendFallbackResponseFromRow || sendFallbackResponseFromRow;
   const sendCommentAndPerformActionsImpl = overrides.sendCommentAndPerformActions || sendCommentAndPerformActions;
   const sendFallbackCommentFromRowImpl = overrides.sendFallbackCommentFromRow || sendFallbackCommentFromRow;
+  const processDelayedDeliveryActionImpl = overrides.processDelayedDeliveryAction || processDelayedDeliveryAction;
+  const processMailingDeliveryActionImpl = overrides.processMailingDeliveryAction || processMailingDeliveryAction;
   const payload = action.payload || {};
 
   switch (action.actionType) {
@@ -56,6 +62,12 @@ async function dispatchOutboundAction(action, overrides = {}) {
         payload.communityId,
         payload.profileId
       );
+
+    case 'send_delayed_delivery':
+      return processDelayedDeliveryActionImpl(action, overrides);
+
+    case 'send_mailing_delivery':
+      return processMailingDeliveryActionImpl(action, overrides);
 
     default:
       throw new Error(`Unsupported outbound action type: ${action.actionType}`);
