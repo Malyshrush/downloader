@@ -9,6 +9,11 @@ function cloneValue(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function buildJsonText(value) {
+  if (value === undefined) return '';
+  return JSON.stringify(value, null, 2);
+}
+
 function isNotFoundError(error) {
   return Boolean(
     error &&
@@ -115,6 +120,16 @@ function createHotStateStore(config = buildHotStateConfig(process.env), override
     }));
     return { objectKey };
   });
+  const deleteHotStateItem = overrides.deleteHotStateItem || (async objectKey => {
+    const { DeleteCommand } = require('@aws-sdk/lib-dynamodb');
+    const client = getDocumentClient();
+    if (!client) return null;
+    await client.send(new DeleteCommand({
+      TableName: config.ydbHotStateTable,
+      Key: { objectKey }
+    }));
+    return { objectKey };
+  });
   const readS3Object = overrides.readS3Object || (async objectKey => {
     const { GetObjectCommand } = require('@aws-sdk/client-s3');
     const response = await getS3Client().send(new GetObjectCommand({
@@ -135,6 +150,14 @@ function createHotStateStore(config = buildHotStateConfig(process.env), override
       Key: objectKey,
       Body: jsonText,
       ContentType: 'application/json'
+    }));
+    return { objectKey };
+  });
+  const deleteS3Object = overrides.deleteS3Object || (async objectKey => {
+    const { DeleteObjectCommand } = require('@aws-sdk/client-s3');
+    await getS3Client().send(new DeleteObjectCommand({
+      Bucket: config.bucketName,
+      Key: objectKey
     }));
     return { objectKey };
   });
@@ -240,6 +263,75 @@ function createHotStateStore(config = buildHotStateConfig(process.env), override
     };
   }
 
+  async function updateJsonObject(objectKey, updater, options = {}) {
+    if (typeof updater !== 'function') {
+      throw new Error('updater must be a function');
+    }
+
+    const current = await loadJsonObject(objectKey, options);
+    const draftValue = cloneValue(current.value);
+    const nextValue = await updater(draftValue, {
+      source: current.source,
+      objectKey: current.objectKey
+    });
+    const resolvedValue = nextValue === undefined ? draftValue : nextValue;
+    const nextJsonText = buildJsonText(resolvedValue);
+    const currentJsonText = buildJsonText(current.value);
+
+    if (nextJsonText === currentJsonText) {
+      return {
+        value: cloneValue(resolvedValue),
+        previousValue: cloneValue(current.value),
+        source: current.source,
+        changed: false,
+        saveResult: null
+      };
+    }
+
+    const saveResult = await saveJsonObject(objectKey, resolvedValue);
+    return {
+      value: cloneValue(resolvedValue),
+      previousValue: cloneValue(current.value),
+      source: current.source,
+      changed: true,
+      saveResult
+    };
+  }
+
+  async function deleteJsonObject(objectKey) {
+    const normalizedKey = String(objectKey || '').trim();
+    if (!normalizedKey) {
+      throw new Error('objectKey is required');
+    }
+
+    let deletedFromYdb = false;
+    let deletedFromS3 = false;
+
+    if (isHotStateEnabled(config)) {
+      try {
+        await deleteHotStateItem(normalizedKey);
+        deletedFromYdb = true;
+      } catch (error) {
+        logger('warn', `Hot state YDB delete failed for ${normalizedKey}: ${error.message}`);
+      }
+    }
+
+    try {
+      await deleteS3Object(normalizedKey);
+      deletedFromS3 = true;
+    } catch (error) {
+      if (!isNotFoundError(error)) {
+        logger('warn', `Hot state S3 delete failed for ${normalizedKey}: ${error.message}`);
+      }
+    }
+
+    return {
+      objectKey: normalizedKey,
+      deletedFromYdb,
+      deletedFromS3
+    };
+  }
+
   async function ensureJsonObject(objectKey, defaultValue) {
     const current = await loadJsonObject(objectKey, { defaultValue });
     if (current.source === 'default') {
@@ -251,6 +343,8 @@ function createHotStateStore(config = buildHotStateConfig(process.env), override
   return {
     loadJsonObject,
     saveJsonObject,
+    updateJsonObject,
+    deleteJsonObject,
     ensureJsonObject
   };
 }

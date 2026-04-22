@@ -284,10 +284,45 @@ async function saveSheetData(sheetName, data, communityId, profileId = '1') {
     }
 }
 
+async function updateSheetData(sheetName, communityId, profileId = '1', updater) {
+    if (typeof updater !== 'function') {
+        throw new Error('updater must be a function');
+    }
+
+    const pid = normalizeProfileId(profileId);
+    const fileName = getFileName(sheetName, communityId, pid);
+    if (!fileName) throw new Error(`Unknown sheet: ${sheetName}`);
+
+    const result = await hotStateStore.updateJsonObject(
+        fileName,
+        currentValue => {
+            const normalizedCurrent = Array.isArray(currentValue)
+                ? currentValue
+                : JSON.parse(JSON.stringify(DEFAULT_DATA[sheetName] || []));
+            return updater(normalizedCurrent);
+        },
+        {
+            defaultValue: DEFAULT_DATA[sheetName] || [],
+            legacyKeys: pid === '1' ? [getLegacyFileName(sheetName, communityId)] : []
+        }
+    );
+
+    const cacheKey = communityId ? `${pid}_${sheetName}_${communityId}` : `${pid}_${sheetName}`;
+    memoryCache.data[cacheKey] = result.value;
+    memoryCache.lastUpdated[cacheKey] = Date.now();
+    if (sheetName === 'РЎРћРћР‘Р©Р•РќРРЇ' || sheetName === 'РљРћРњРњР•РќРўРђР РР Р’ РџРћРЎРўРђРҐ' || sheetName === 'РџР•Р Р•РњР•РќРќР«Р•') {
+        const uk = communityId ? `${pid}_РџРћР›Р¬Р—РћР’РђРўР•Р›Р_${communityId}` : `${pid}_РџРћР›Р¬Р—РћР’РђРўР•Р›Р`;
+        delete memoryCache.data[uk];
+        delete memoryCache.lastUpdated[uk];
+    }
+
+    return result;
+}
+
 function getFileMap() { return FILE_BASE; }
 
 module.exports = {
     getS3Client, getBucketName, initializeStorage, invalidateCache,
-    getSheetData, saveSheetData, getFileMap, DEFAULT_DATA, getFileName,
+    getSheetData, saveSheetData, updateSheetData, getFileMap, DEFAULT_DATA, getFileName,
     getLegacyFileName, normalizeProfileId
 };

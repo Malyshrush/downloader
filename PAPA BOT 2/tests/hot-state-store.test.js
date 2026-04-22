@@ -127,6 +127,61 @@ function createConfig(overrides = {}) {
     assert.equal(calls[0], `ydb:admin_sessions.json:${JSON.stringify({ sessions: {} }, null, 2)}`);
     assert.equal(calls[1], 's3:admin_sessions.json');
   });
+
+  await run('updateJsonObject loads current value and skips write when unchanged', async () => {
+    const calls = [];
+    const store = createHotStateStore(
+      createConfig(),
+      {
+        readHotStateItem: async objectKey => {
+          calls.push(`read:${objectKey}`);
+          return { objectKey, jsonText: '{"enabled":true}' };
+        },
+        writeHotStateItem: async () => {
+          calls.push('unexpected-ydb-write');
+        },
+        writeS3Object: async () => {
+          calls.push('unexpected-s3-write');
+        },
+        log: () => {}
+      }
+    );
+
+    const result = await store.updateJsonObject('app_logs_settings.json', value => {
+      value.enabled = true;
+    }, {
+      defaultValue: { enabled: false }
+    });
+
+    assert.equal(result.changed, false);
+    assert.deepEqual(result.value, { enabled: true });
+    assert.deepEqual(calls, ['read:app_logs_settings.json']);
+  });
+
+  await run('deleteJsonObject removes hot state from YDB and S3 backup', async () => {
+    const calls = [];
+    const store = createHotStateStore(
+      createConfig(),
+      {
+        deleteHotStateItem: async objectKey => {
+          calls.push(`ydb:${objectKey}`);
+        },
+        deleteS3Object: async objectKey => {
+          calls.push(`s3:${objectKey}`);
+        },
+        log: () => {}
+      }
+    );
+
+    const result = await store.deleteJsonObject('profile_dashboard.json');
+
+    assert.deepEqual(result, {
+      objectKey: 'profile_dashboard.json',
+      deletedFromYdb: true,
+      deletedFromS3: true
+    });
+    assert.deepEqual(calls, ['ydb:profile_dashboard.json', 's3:profile_dashboard.json']);
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {
