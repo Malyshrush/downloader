@@ -71,6 +71,75 @@ async function run(name, fn) {
     assert.deepEqual(calls[0].nextRows[0].meta, { actor: 'admin' });
   });
 
+  await run('addAppLog writes one structured YDB row when app-log store is enabled', async () => {
+    const storeCalls = [];
+
+    await appLogs.__testOnly.addAppLogWithDependencies(
+      {
+        profileId: '7',
+        communityId: 'community-b',
+        tab: 'USERS',
+        title: 'Created',
+        summary: 'New user',
+        details: ['ID: 15']
+      },
+      {
+        getAppLogSettings: async () => ({ enabled: true }),
+        appLogsStore: {
+          isEnabled: () => true,
+          addLog: async (scope, row) => {
+            storeCalls.push({ scope, row });
+          }
+        },
+        updateSheetData: async () => {
+          throw new Error('sheet mutation should not be used when structured store is enabled');
+        }
+      }
+    );
+
+    assert.equal(storeCalls.length, 1);
+    assert.equal(storeCalls[0].scope, '7:community-b');
+    assert.equal(storeCalls[0].row.tab, 'USERS');
+    assert.equal(storeCalls[0].row.title, 'Created');
+  });
+
+  await run('getAppLogs reads structured rows when app-log store is enabled', async () => {
+    const rows = await appLogs.__testOnly.getAppLogsWithDependencies('community-z', '9', 2, {
+      appLogsStore: {
+        isEnabled: () => true,
+        listLogs: async (scope, limit) => {
+          assert.equal(scope, '9:community-z');
+          assert.equal(limit, 2);
+          return [{ id: 'log_2' }, { id: 'log_1' }];
+        }
+      },
+      getSheetData: async () => {
+        throw new Error('sheet fallback should not be used when structured store is enabled');
+      }
+    });
+
+    assert.deepEqual(rows, [{ id: 'log_2' }, { id: 'log_1' }]);
+  });
+
+  await run('clearAppLogs clears structured scope when app-log store is enabled', async () => {
+    const clearCalls = [];
+
+    await appLogs.__testOnly.clearAppLogsWithDependencies('community-c', '5', {
+      appLogsStore: {
+        isEnabled: () => true,
+        clearLogs: async scope => {
+          clearCalls.push(scope);
+          return { deletedCount: 3 };
+        }
+      },
+      updateSheetData: async () => {
+        throw new Error('sheet fallback should not be used when structured store is enabled');
+      }
+    });
+
+    assert.deepEqual(clearCalls, ['5:community-c']);
+  });
+
   await run('deleteAppLogsFile removes log object through hot-state store', async () => {
     const calls = [];
     const result = await appLogs.__testOnly.deleteAppLogsFileWithDependencies('community-c', '5', {

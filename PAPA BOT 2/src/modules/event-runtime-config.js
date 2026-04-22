@@ -37,6 +37,7 @@ function buildEventRuntimeConfig(env = process.env) {
     ydbDocApiEndpoint,
     ydbIdempotencyTable: String(env.YDB_IDEMPOTENCY_TABLE || 'event_idempotency').trim() || 'event_idempotency',
     ydbHotStateTable: String(env.YDB_HOT_STATE_TABLE || 'hot_state_objects').trim() || 'hot_state_objects',
+    ydbAppLogsTable: String(env.YDB_APP_LOGS_TABLE || 'app_logs_entries').trim() || 'app_logs_entries',
     idempotencyLeaseSeconds: normalizePositiveInteger(env.EVENT_IDEMPOTENCY_LEASE_SECONDS, 300),
     idempotencyRetentionDays: normalizePositiveInteger(env.EVENT_IDEMPOTENCY_RETENTION_DAYS, 30),
     awsAccessKeyId: String(env.AWS_ACCESS_KEY_ID || '').trim(),

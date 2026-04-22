@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-04-22T16:31:32.336Z",
+  "ymqEndpoint": "https://message-queue.api.cloud.yandex.net",
+  "ydbDocApiEndpoint": "https://docapi.serverless.yandexcloud.net/ru-central1/b1gh3sun4tm32rd0jpd4/etnbufcfn4sjsrn3fa1s",
+  "incomingQueue": {
+    "queueName": "vk-bot-2-incoming",
+    "queueUrl": "https://message-queue.api.cloud.yandex.net/b1gh3sun4tm32rd0jpd4/dj60000000ktqvr301ff/vk-bot-2-incoming"
+  },
+  "outboundQueue": {
+    "queueName": "vk-bot-2-outbound",
+    "queueUrl": "https://message-queue.api.cloud.yandex.net/b1gh3sun4tm32rd0jpd4/dj60000000ktqvvc01ff/vk-bot-2-outbound"
+  },
+  "idempotencyTable": {
+    "tableName": "event_idempotency",
+    "tableStatus": "ACTIVE"
+  },
+  "hotStateTable": {
+    "tableName": "hot_state_objects",
+    "tableStatus": "ACTIVE"
+  },
+  "appLogsTable": {
+    "tableName": "app_logs_entries",
+    "tableStatus": "ACTIVE"
+  }
+}

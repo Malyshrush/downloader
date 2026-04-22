@@ -75,6 +75,7 @@ const CONFIG = {
         'YDB_DOCAPI_ENDPOINT',
         'YDB_IDEMPOTENCY_TABLE',
         'YDB_HOT_STATE_TABLE',
+        'YDB_APP_LOGS_TABLE',
         'EVENT_IDEMPOTENCY_LEASE_SECONDS',
         'EVENT_IDEMPOTENCY_RETENTION_DAYS'
     ]
@@ -354,6 +355,33 @@ function prepareEnvVars() {
         .join(',');
 }
 
+function provisionEventInfra() {
+    const envFile = path.join(CONFIG.projectRoot, '.env');
+    if (!fs.existsSync(envFile)) {
+        log('ℹ️ .env не найден, пропускаем auto-provision event infra', 'yellow');
+        return;
+    }
+
+    const envContent = fs.readFileSync(envFile, 'utf8');
+    if (!/YDB_DOCAPI_ENDPOINT\s*=/.test(envContent) || !/AWS_ACCESS_KEY_ID\s*=/.test(envContent) || !/AWS_SECRET_ACCESS_KEY\s*=/.test(envContent)) {
+        log('ℹ️ Недостаточно cloud env для auto-provision event infra, пропускаем шаг', 'yellow');
+        return;
+    }
+
+    const provisionScript = path.join(CONFIG.projectRoot, 'yandex-function', 'scripts', 'provision-event-infra.js');
+    if (!fs.existsSync(provisionScript)) {
+        log('ℹ️ provision-event-infra.js не найден, пропускаем шаг', 'yellow');
+        return;
+    }
+
+    log(`\n☁️ Проверка очередей и YDB таблиц...`, 'cyan');
+    execSync('node scripts/provision-event-infra.js', {
+        cwd: path.join(CONFIG.projectRoot, 'yandex-function'),
+        stdio: 'inherit'
+    });
+    log('✅ Event infra синхронизирована', 'green');
+}
+
 /**
  * Выполнить деплой
  */
@@ -490,6 +518,8 @@ async function main() {
     if (!skipBackup) {
         createBackup();
     }
+
+    provisionEventInfra();
     
     // 2. Подготовка dist/
     prepareDist();
