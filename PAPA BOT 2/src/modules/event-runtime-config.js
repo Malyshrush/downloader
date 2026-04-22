@@ -39,6 +39,8 @@ function buildEventRuntimeConfig(env = process.env) {
     ydbHotStateTable: String(env.YDB_HOT_STATE_TABLE || 'hot_state_objects').trim() || 'hot_state_objects',
     ydbAppLogsTable: String(env.YDB_APP_LOGS_TABLE || 'app_logs_entries').trim() || 'app_logs_entries',
     ydbUserStateTable: String(env.YDB_USER_STATE_TABLE || 'user_state_rows').trim() || 'user_state_rows',
+    ydbProfileUserSharedTable: String(env.YDB_PROFILE_USER_SHARED_TABLE || 'profile_user_shared_state').trim() || 'profile_user_shared_state',
+    ydbSharedVariablesTable: String(env.YDB_SHARED_VARIABLES_TABLE || 'shared_variables_catalog').trim() || 'shared_variables_catalog',
     idempotencyLeaseSeconds: normalizePositiveInteger(env.EVENT_IDEMPOTENCY_LEASE_SECONDS, 300),
     idempotencyRetentionDays: normalizePositiveInteger(env.EVENT_IDEMPOTENCY_RETENTION_DAYS, 30),
     awsAccessKeyId: String(env.AWS_ACCESS_KEY_ID || '').trim(),

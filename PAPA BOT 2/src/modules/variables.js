@@ -7,8 +7,12 @@ const { getUserVariables: getUserVarsFromSheet } = require('./users');
 const { log } = require('../utils/logger');
 const { addAppLog } = require('./app-logs');
 const { createUserStateStore, buildUserScope } = require('./user-state-store');
+const { createProfileUserSharedStore, buildProfileUserSharedScope } = require('./profile-user-shared-store');
+const { createSharedVariablesStore, buildSharedVariablesScope } = require('./shared-variables-store');
 
 const userStateStore = createUserStateStore();
+const profileUserSharedStore = createProfileUserSharedStore();
+const sharedVariablesStore = createSharedVariablesStore();
 
 function buildSharedVariableDisplay(variables) {
     const names = [];
@@ -32,6 +36,64 @@ function isStructuredUserStateEnabled(overrides = {}) {
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
+function getProfileUserSharedStore(overrides = {}) {
+    return overrides.profileUserSharedStore || profileUserSharedStore;
+}
+
+function isProfileUserSharedStoreEnabled(overrides = {}) {
+    const store = getProfileUserSharedStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function getSharedVariablesStore(overrides = {}) {
+    return overrides.sharedVariablesStore || sharedVariablesStore;
+}
+
+function isSharedVariablesStoreEnabled(overrides = {}) {
+    const store = getSharedVariablesStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function buildProfileUserSharedRowsFromEntries(entries) {
+    const rows = [];
+    for (const entry of Array.isArray(entries) ? entries : []) {
+        const userId = String(entry && entry.userId || '').trim();
+        if (!userId) continue;
+        for (const [name, value] of Object.entries(entry && entry.variables || {})) {
+            const normalizedName = String(name || '').trim();
+            if (!normalizedName) continue;
+            rows.push({
+                ID: userId,
+                'РџРµСЂРµРјРµРЅРЅР°СЏ РџР’РЎ': normalizedName,
+                'Р—РЅР°С‡РµРЅРёРµ РџР’РЎ': String(value || '').trim()
+            });
+        }
+    }
+    return rows;
+}
+
+function buildSharedVariableCatalogMap(rows) {
+    const byName = new Map();
+    for (const row of Array.isArray(rows) ? rows : []) {
+        const varName = String(row && row['РџРµСЂРµРјРµРЅРЅР°СЏ РџР’РЎ'] || '').trim();
+        const value = String(row && row['Р—РЅР°С‡РµРЅРёРµ РџР’РЎ'] || '').trim();
+        if (!varName) continue;
+        const key = varName.toLowerCase();
+        if (!byName.has(key)) {
+            byName.set(key, { name: varName, values: new Set() });
+        }
+        if (value) {
+            byName.get(key).values.add(value);
+        }
+    }
+
+    const variables = {};
+    for (const item of byName.values()) {
+        variables[item.name] = Array.from(item.values).join('\n');
+    }
+    return variables;
+}
+
 function buildGlobalVariableRows(variables) {
     return Object.entries(variables || {}).map(function([name, value]) {
         return {
@@ -53,8 +115,12 @@ function buildSharedVariableRows(variables) {
     });
 }
 
-async function getProfileUserSharedVariableRows(profileId = '1') {
+async function getProfileUserSharedVariableRowsWithDependencies(profileId = '1', overrides = {}) {
     try {
+        if (isProfileUserSharedStoreEnabled(overrides)) {
+            const entries = await getProfileUserSharedStore(overrides).listUserEntries(buildProfileUserSharedScope(profileId));
+            return buildProfileUserSharedRowsFromEntries(entries);
+        }
         const rows = await getSheetData('ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ', null, profileId);
         return Array.isArray(rows) ? rows : [];
     } catch (error) {
@@ -63,9 +129,21 @@ async function getProfileUserSharedVariableRows(profileId = '1') {
     }
 }
 
-async function getProfileUserSharedVariables(userId, profileId = '1') {
+async function getProfileUserSharedVariableRows(profileId = '1') {
+    return getProfileUserSharedVariableRowsWithDependencies(profileId);
+}
+
+async function getProfileUserSharedVariablesWithDependencies(userId, profileId = '1', overrides = {}) {
     try {
-        const rows = await getProfileUserSharedVariableRows(profileId);
+        if (isProfileUserSharedStoreEnabled(overrides)) {
+            const variables = await getProfileUserSharedStore(overrides).getUserVariables(
+                buildProfileUserSharedScope(profileId),
+                userId
+            );
+            return variables || {};
+        }
+
+        const rows = await getProfileUserSharedVariableRowsWithDependencies(profileId, overrides);
         const normalizedUserId = String(userId || '').trim();
         const sharedVars = {};
         rows.forEach(function(row) {
@@ -79,6 +157,10 @@ async function getProfileUserSharedVariables(userId, profileId = '1') {
         log('error', '❌ Error getting profile user shared variables:', error);
         return {};
     }
+}
+
+async function getProfileUserSharedVariables(userId, profileId = '1') {
+    return getProfileUserSharedVariablesWithDependencies(userId, profileId);
 }
 
 async function syncProfileSharedVariableCatalog(profileId = '1', rows = null) {
@@ -227,8 +309,11 @@ async function getGlobalVariables(communityId = null, profileId = '1') {
     }
 }
 
-async function getSharedVariables(profileId = '1') {
+async function getSharedVariablesWithDependencies(profileId = '1', overrides = {}) {
     try {
+        if (isSharedVariablesStoreEnabled(overrides)) {
+            return getSharedVariablesStore(overrides).listVariables(buildSharedVariablesScope(profileId));
+        }
         const varsSheet = await getSheetData('ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ', null, profileId);
         if (!varsSheet) return {};
 
@@ -244,6 +329,10 @@ async function getSharedVariables(profileId = '1') {
         log('error', '❌ Error getting shared variables:', error);
         return {};
     }
+}
+
+async function getSharedVariables(profileId = '1') {
+    return getSharedVariablesWithDependencies(profileId);
 }
 
 /**
@@ -770,7 +859,15 @@ async function syncProfileSharedVariableCatalogWithDependencies(profileId = '1',
         log('debug', 'syncProfileSharedVariableCatalog: Starting for profile ' + profileId);
         const sourceRows = Array.isArray(rows)
             ? rows
-            : await (overrides.getProfileUserSharedVariableRows || getProfileUserSharedVariableRows)(profileId);
+            : await (overrides.getProfileUserSharedVariableRows || getProfileUserSharedVariableRowsWithDependencies)(profileId, overrides);
+        const catalogVariables = buildSharedVariableCatalogMap(sourceRows);
+        if (isSharedVariablesStoreEnabled(overrides)) {
+            await getSharedVariablesStore(overrides).replaceVariables(
+                buildSharedVariablesScope(profileId),
+                catalogVariables
+            );
+            return;
+        }
         const byName = new Map();
 
         sourceRows.forEach(function(row) {
@@ -857,6 +954,26 @@ async function syncProfileUserSharedVariablesToUsers(userId, variables, profileI
 async function updateProfileUserSharedVariablesWithDependencies(userId, variables, profileId = '1', overrides = {}) {
     try {
         const normalizedUserId = String(userId || '').trim();
+        const normalizedVariables = {};
+        Object.entries(variables || {}).forEach(function([name, value]) {
+            const normalizedName = String(name || '').trim();
+            if (!normalizedName) return;
+            normalizedVariables[normalizedName.toLowerCase()] = String(value || '').trim();
+        });
+
+        if (isProfileUserSharedStoreEnabled(overrides)) {
+            await getProfileUserSharedStore(overrides).putUserVariables(
+                buildProfileUserSharedScope(profileId),
+                normalizedUserId,
+                normalizedVariables
+            );
+            const structuredSyncCatalog = overrides.syncProfileSharedVariableCatalog || syncProfileSharedVariableCatalogWithDependencies;
+            const structuredSyncUsers = overrides.syncProfileUserSharedVariablesToUsers || syncProfileUserSharedVariablesToUsersWithDependencies;
+            await structuredSyncCatalog(profileId, null, overrides);
+            await structuredSyncUsers(normalizedUserId, normalizedVariables, profileId, overrides);
+            return;
+        }
+
         const sheetUpdater = overrides.updateSheetData || updateSheetData;
         const result = await sheetUpdater('ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ', null, profileId, function(rows) {
             const nextRows = (Array.isArray(rows) ? rows : []).filter(function(row) {
@@ -912,6 +1029,13 @@ async function updateGlobalVariables(variables, communityId = null, profileId = 
 
 async function updateSharedVariablesWithDependencies(variables, profileId = '1', overrides = {}) {
     try {
+        if (isSharedVariablesStoreEnabled(overrides)) {
+            await getSharedVariablesStore(overrides).replaceVariables(
+                buildSharedVariablesScope(profileId),
+                variables || {}
+            );
+            return;
+        }
         const sheetUpdater = overrides.updateSheetData || updateSheetData;
         await sheetUpdater('ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ', null, profileId, function() {
             return buildSharedVariableRows(variables);
@@ -973,6 +1097,9 @@ module.exports = {
     performVariableActions,
     checkVariableConditions,
     __testOnly: {
+        getProfileUserSharedVariableRowsWithDependencies,
+        getProfileUserSharedVariablesWithDependencies,
+        getSharedVariablesWithDependencies,
         updateGlobalVariablesWithDependencies,
         updateSharedVariablesWithDependencies,
         syncUserVariableCatalogWithDependencies,

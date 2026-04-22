@@ -145,6 +145,8 @@ async function main() {
   const hotStateTableName = args['hot-state-table'] || runtimeConfig.ydbHotStateTable;
   const appLogsTableName = args['app-logs-table'] || runtimeConfig.ydbAppLogsTable;
   const userStateTableName = args['user-state-table'] || runtimeConfig.ydbUserStateTable;
+  const profileUserSharedTableName = args['profile-user-shared-table'] || runtimeConfig.ydbProfileUserSharedTable;
+  const sharedVariablesTableName = args['shared-variables-table'] || runtimeConfig.ydbSharedVariablesTable;
 
   const sqsClient = createSqsClient(runtimeConfig);
   const dynamoClient = createDynamoClient(runtimeConfig);
@@ -231,6 +233,54 @@ async function main() {
       }
     ]
   );
+  const profileUserSharedTable = await ensureTable(
+    dynamoClient,
+    profileUserSharedTableName,
+    [
+      {
+        AttributeName: 'profileScope',
+        KeyType: 'HASH'
+      },
+      {
+        AttributeName: 'userId',
+        KeyType: 'RANGE'
+      }
+    ],
+    [
+      {
+        AttributeName: 'profileScope',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'userId',
+        AttributeType: 'S'
+      }
+    ]
+  );
+  const sharedVariablesTable = await ensureTable(
+    dynamoClient,
+    sharedVariablesTableName,
+    [
+      {
+        AttributeName: 'profileScope',
+        KeyType: 'HASH'
+      },
+      {
+        AttributeName: 'variableName',
+        KeyType: 'RANGE'
+      }
+    ],
+    [
+      {
+        AttributeName: 'profileScope',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'variableName',
+        AttributeType: 'S'
+      }
+    ]
+  );
 
   const output = {
     createdAt: new Date().toISOString(),
@@ -241,7 +291,9 @@ async function main() {
     idempotencyTable,
     hotStateTable,
     appLogsTable,
-    userStateTable
+    userStateTable,
+    profileUserSharedTable,
+    sharedVariablesTable
   };
 
   const outputPath = path.join(__dirname, '..', 'event-infra.generated.json');

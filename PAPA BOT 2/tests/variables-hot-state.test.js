@@ -129,6 +129,168 @@ async function run(name, fn) {
       }
     ]);
   });
+
+  await run('getProfileUserSharedVariablesWithDependencies reads structured profile user variables when enabled', async () => {
+    const sharedVariables = await variables.__testOnly.getProfileUserSharedVariablesWithDependencies(
+      '42',
+      '8',
+      {
+        profileUserSharedStore: {
+          isEnabled: () => true,
+          getUserVariables: async (profileScope, userId) => {
+            assert.equal(profileScope, '8');
+            assert.equal(userId, '42');
+            return {
+              pvs_score: '100',
+              pvs_level: '7'
+            };
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(sharedVariables, {
+      pvs_score: '100',
+      pvs_level: '7'
+    });
+  });
+
+  await run('syncProfileSharedVariableCatalogWithDependencies rebuilds structured catalog from structured user entries', async () => {
+    const calls = [];
+
+    await variables.__testOnly.syncProfileSharedVariableCatalogWithDependencies(
+      '8',
+      null,
+      {
+        updateSheetData: async () => {
+          throw new Error('sheet fallback should not be used');
+        },
+        profileUserSharedStore: {
+          isEnabled: () => true,
+          listUserEntries: async profileScope => {
+            assert.equal(profileScope, '8');
+            return [
+              {
+                userId: '42',
+                variables: {
+                  pvs_score: '100',
+                  pvs_level: '7'
+                }
+              },
+              {
+                userId: '77',
+                variables: {
+                  pvs_score: '200'
+                }
+              }
+            ];
+          }
+        },
+        sharedVariablesStore: {
+          isEnabled: () => true,
+          replaceVariables: async (profileScope, variables) => {
+            calls.push({ profileScope, variables });
+            return { stored: 2, deleted: 0, backend: 'ydb-shared-variables' };
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(calls, [
+      {
+        profileScope: '8',
+        variables: {
+          pvs_score: '100\n200',
+          pvs_level: '7'
+        }
+      }
+    ]);
+  });
+
+  await run('updateProfileUserSharedVariablesWithDependencies writes structured user vars and syncs dependents when enabled', async () => {
+    const storeCalls = [];
+    const syncCatalogCalls = [];
+    const syncUsersCalls = [];
+
+    await variables.__testOnly.updateProfileUserSharedVariablesWithDependencies(
+      '42',
+      {
+        pvs_score: '100',
+        pvs_level: '7'
+      },
+      '8',
+      {
+        updateSheetData: async () => {
+          throw new Error('sheet fallback should not be used');
+        },
+        profileUserSharedStore: {
+          isEnabled: () => true,
+          putUserVariables: async (profileScope, userId, vars) => {
+            storeCalls.push({ profileScope, userId, vars });
+            return { stored: true, backend: 'ydb-profile-user-shared' };
+          }
+        },
+        syncProfileSharedVariableCatalog: async (profileId, rows, overrides) => {
+          syncCatalogCalls.push({ profileId, rows, hasOverrides: Boolean(overrides) });
+        },
+        syncProfileUserSharedVariablesToUsers: async (userId, vars, profileId, overrides) => {
+          syncUsersCalls.push({ userId, vars, profileId, hasOverrides: Boolean(overrides) });
+        }
+      }
+    );
+
+    assert.deepEqual(storeCalls, [
+      {
+        profileScope: '8',
+        userId: '42',
+        vars: {
+          pvs_score: '100',
+          pvs_level: '7'
+        }
+      }
+    ]);
+    assert.deepEqual(syncCatalogCalls, [
+      {
+        profileId: '8',
+        rows: null,
+        hasOverrides: true
+      }
+    ]);
+    assert.deepEqual(syncUsersCalls, [
+      {
+        userId: '42',
+        vars: {
+          pvs_score: '100',
+          pvs_level: '7'
+        },
+        profileId: '8',
+        hasOverrides: true
+      }
+    ]);
+  });
+
+  await run('getSharedVariablesWithDependencies reads structured shared catalog when enabled', async () => {
+    const sharedVariables = await variables.__testOnly.getSharedVariablesWithDependencies(
+      '8',
+      {
+        sharedVariablesStore: {
+          isEnabled: () => true,
+          listVariables: async profileScope => {
+            assert.equal(profileScope, '8');
+            return {
+              pvs_score: '100\n200',
+              pvs_level: '7'
+            };
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(sharedVariables, {
+      pvs_score: '100\n200',
+      pvs_level: '7'
+    });
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {
