@@ -9,6 +9,7 @@ const { getCommunityConfig, getActiveCommunityId } = require('./config');
 const { createKeyboard, createMailingKeyboard } = require('./keyboard');
 const { getAttachmentsFromRow } = require('./attachments');
 const { replaceVariables } = require('./variables');
+const { listUsers } = require('./users');
 const { addAppLog } = require('./app-logs');
 const { publishOutboundAction } = require('./event-queue');
 const { sendMessageWithTokenRetry } = require('./messages');
@@ -648,7 +649,7 @@ async function collectMailingRecipients(row, communityId, profileId = '1') {
         const requiredGroups = groupsRaw.split(/[\r\n,]+/).map(g => g.trim().toLowerCase()).filter(g => g);
 
         if (requiredGroups.length) {
-            const users = await getSheetData('ПОЛЬЗОВАТЕЛИ', communityId, profileId);
+            const users = await listUsers(communityId, profileId);
 
             for (const user of users) {
                 const userGroups = (user['ГРУППА'] || '').split(/[\r\n,]+/).map(g => g.trim().toLowerCase()).filter(g => g);

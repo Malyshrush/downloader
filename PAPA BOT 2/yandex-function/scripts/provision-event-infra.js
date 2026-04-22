@@ -144,6 +144,7 @@ async function main() {
   const idempotencyTableName = args['idempotency-table'] || runtimeConfig.ydbIdempotencyTable;
   const hotStateTableName = args['hot-state-table'] || runtimeConfig.ydbHotStateTable;
   const appLogsTableName = args['app-logs-table'] || runtimeConfig.ydbAppLogsTable;
+  const userStateTableName = args['user-state-table'] || runtimeConfig.ydbUserStateTable;
 
   const sqsClient = createSqsClient(runtimeConfig);
   const dynamoClient = createDynamoClient(runtimeConfig);
@@ -206,6 +207,30 @@ async function main() {
       }
     ]
   );
+  const userStateTable = await ensureTable(
+    dynamoClient,
+    userStateTableName,
+    [
+      {
+        AttributeName: 'userScope',
+        KeyType: 'HASH'
+      },
+      {
+        AttributeName: 'userId',
+        KeyType: 'RANGE'
+      }
+    ],
+    [
+      {
+        AttributeName: 'userScope',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'userId',
+        AttributeType: 'S'
+      }
+    ]
+  );
 
   const output = {
     createdAt: new Date().toISOString(),
@@ -215,7 +240,8 @@ async function main() {
     outboundQueue,
     idempotencyTable,
     hotStateTable,
-    appLogsTable
+    appLogsTable,
+    userStateTable
   };
 
   const outputPath = path.join(__dirname, '..', 'event-infra.generated.json');

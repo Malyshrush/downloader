@@ -6,6 +6,9 @@ const { getSheetData, saveSheetData, updateSheetData, invalidateCache } = requir
 const { getUserVariables: getUserVarsFromSheet } = require('./users');
 const { log } = require('../utils/logger');
 const { addAppLog } = require('./app-logs');
+const { createUserStateStore, buildUserScope } = require('./user-state-store');
+
+const userStateStore = createUserStateStore();
 
 function buildSharedVariableDisplay(variables) {
     const names = [];
@@ -18,6 +21,15 @@ function buildSharedVariableDisplay(variables) {
         names: names.join('\n'),
         values: values.join('\n')
     };
+}
+
+function getUserStateStore(overrides = {}) {
+    return overrides.userStateStore || userStateStore;
+}
+
+function isStructuredUserStateEnabled(overrides = {}) {
+    const store = getUserStateStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
 function buildGlobalVariableRows(variables) {
@@ -806,6 +818,19 @@ async function syncProfileUserSharedVariablesToUsersWithDependencies(userId, var
         const communityIds = getAllCommunityIds(profileId);
 
         for (const communityId of communityIds) {
+            if (isStructuredUserStateEnabled(overrides)) {
+                await getUserStateStore(overrides).updateUserRow(
+                    buildUserScope(communityId, profileId),
+                    normalizedUserId,
+                    function(userRow) {
+                        userRow['Переменная ПВС'] = display.names;
+                        userRow['Значение ПВС'] = display.values;
+                        return { value: userRow };
+                    }
+                );
+                continue;
+            }
+
             await sheetUpdater('ПОЛЬЗОВАТЕЛИ', communityId, profileId, function(rows) {
                 const users = Array.isArray(rows) ? rows : [];
                 const idx = users.findIndex(function(row) {

@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-04-22T16:31:32.336Z",
+  "createdAt": "2026-04-22T17:01:48.578Z",
   "ymqEndpoint": "https://message-queue.api.cloud.yandex.net",
   "ydbDocApiEndpoint": "https://docapi.serverless.yandexcloud.net/ru-central1/b1gh3sun4tm32rd0jpd4/etnbufcfn4sjsrn3fa1s",
   "incomingQueue": {
@@ -20,6 +20,10 @@
   },
   "appLogsTable": {
     "tableName": "app_logs_entries",
+    "tableStatus": "ACTIVE"
+  },
+  "userStateTable": {
+    "tableName": "user_state_rows",
     "tableStatus": "ACTIVE"
   }
 }

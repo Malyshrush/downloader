@@ -3,6 +3,7 @@ const { getProfileById, isMainAdminProfile } = require('./admin-profiles');
 const { getProfilePromoActivationStatus } = require('./admin-security');
 const { loadBotConfig, getFullConfig } = require('./config');
 const { createHotStateStore } = require('./hot-state-store');
+const { listUsers } = require('./users');
 const { log } = require('../utils/logger');
 
 const DASHBOARD_FILE = 'profile_dashboard.json';
@@ -301,7 +302,7 @@ async function getProfileDashboardOverview(profileId) {
         const vkGroupId = String(config?.vk_group_id || internalCommunityId || '').trim();
         let usersCount = 0;
         try {
-            const users = await getSheetData('ПОЛЬЗОВАТЕЛИ', vkGroupId, profileId);
+            const users = await listUsers(vkGroupId, profileId);
             usersCount = (users || []).filter(function(row) {
                 return String(row['ID'] || '').trim();
             }).length;

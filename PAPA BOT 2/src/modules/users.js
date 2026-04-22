@@ -2,11 +2,12 @@
  * Модуль управления пользователями
  */
 
-const { getSheetData, updateSheetData, invalidateCache } = require('./storage');
+const { getSheetData, updateSheetData } = require('./storage');
 const { getVkToken } = require('./config');
 const { getUserName } = require('./vk-api');
 const { log } = require('../utils/logger');
 const { addAppLog } = require('./app-logs');
+const { createUserStateStore, buildUserScope } = require('./user-state-store');
 
 const USERS_SHEET = 'ПОЛЬЗОВАТЕЛИ';
 const COLUMN_ID = 'ID';
@@ -22,6 +23,7 @@ const COLUMN_SENT_STEPS = 'Отправленные Шаги';
 const COLUMN_GROUP_HISTORY = '_История групп';
 
 const userNamesCache = {};
+const userStateStore = createUserStateStore();
 
 function normalizeUserId(userId) {
     return String(userId || '').trim();
@@ -45,9 +47,45 @@ function findUserIndex(rows, userId) {
     });
 }
 
+function getUserStateStore(overrides = {}) {
+    return overrides.userStateStore || userStateStore;
+}
+
+function isStructuredUserStateEnabled(overrides = {}) {
+    const store = getUserStateStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+async function getUserRowWithDependencies(userId, communityId = null, profileId = '1', overrides = {}) {
+    if (isStructuredUserStateEnabled(overrides)) {
+        return getUserStateStore(overrides).getUserRow(buildUserScope(communityId, profileId), userId);
+    }
+
+    const rows = await getSheetData(USERS_SHEET, communityId, profileId);
+    const index = findUserIndex(rows, userId);
+    return index === -1 ? null : rows[index];
+}
+
+async function listUsersWithDependencies(communityId = null, profileId = '1', overrides = {}) {
+    if (isStructuredUserStateEnabled(overrides)) {
+        return getUserStateStore(overrides).listUserRows(buildUserScope(communityId, profileId));
+    }
+
+    const rows = await getSheetData(USERS_SHEET, communityId, profileId);
+    return Array.isArray(rows) ? rows : [];
+}
+
 async function mutateUserRowWithDependencies(userId, communityId = null, profileId = '1', mutator, overrides = {}) {
     if (typeof mutator !== 'function') {
         throw new Error('mutator must be a function');
+    }
+
+    if (isStructuredUserStateEnabled(overrides)) {
+        return getUserStateStore(overrides).updateUserRow(
+            buildUserScope(communityId, profileId),
+            userId,
+            mutator
+        );
     }
 
     const sheetUpdater = overrides.updateSheetData || updateSheetData;
@@ -90,12 +128,7 @@ async function updateUserData(userId, communityId = null, profileId = '1') {
 
         log('debug', '✅ Got user name: ' + userName);
 
-        const users = await getSheetData(USERS_SHEET, cid, profileId) || [];
-        log('debug', '📊 Total users in database: ' + users.length);
-
-        const existingUser = users.find(function(user) {
-            return normalizeUserId(user && user[COLUMN_ID]) === normalizeUserId(userId);
-        });
+        const existingUser = await getUserRowWithDependencies(userId, cid, profileId);
         if (existingUser) {
             log('debug', '✅ User ' + userId + ' already exists in database');
             return true;
@@ -160,23 +193,29 @@ async function addNewUserToSheetWithDependencies(userId, userName, communityId =
             sharedDisplayValues = values.join('\n');
         } catch (error) {}
 
-        const sheetUpdater = overrides.updateSheetData || updateSheetData;
-        await sheetUpdater(USERS_SHEET, communityId, profileId, rows => {
-            const users = Array.isArray(rows) ? rows : [];
-            users.push({
-                [COLUMN_ID]: String(userId),
-                [COLUMN_NAME]: userName,
-                [COLUMN_GROUPS]: '',
-                [COLUMN_USER_VARIABLE_NAMES]: '',
-                [COLUMN_USER_VARIABLE_VALUES]: '',
-                [COLUMN_SHARED_VARIABLE_NAMES]: sharedDisplayNames,
-                [COLUMN_SHARED_VARIABLE_VALUES]: sharedDisplayValues,
-                [COLUMN_CURRENT_BOT]: '',
-                [COLUMN_CURRENT_STEP]: '',
-                [COLUMN_SENT_STEPS]: ''
+        const nextRow = {
+            [COLUMN_ID]: String(userId),
+            [COLUMN_NAME]: userName,
+            [COLUMN_GROUPS]: '',
+            [COLUMN_USER_VARIABLE_NAMES]: '',
+            [COLUMN_USER_VARIABLE_VALUES]: '',
+            [COLUMN_SHARED_VARIABLE_NAMES]: sharedDisplayNames,
+            [COLUMN_SHARED_VARIABLE_VALUES]: sharedDisplayValues,
+            [COLUMN_CURRENT_BOT]: '',
+            [COLUMN_CURRENT_STEP]: '',
+            [COLUMN_SENT_STEPS]: ''
+        };
+
+        if (isStructuredUserStateEnabled(overrides)) {
+            await getUserStateStore(overrides).putUserRow(buildUserScope(communityId, profileId), nextRow);
+        } else {
+            const sheetUpdater = overrides.updateSheetData || updateSheetData;
+            await sheetUpdater(USERS_SHEET, communityId, profileId, rows => {
+                const users = Array.isArray(rows) ? rows : [];
+                users.push(nextRow);
+                return users;
             });
-            return users;
-        });
+        }
 
         log('debug', `✅ User ${userId} added to sheet`);
         const appLogger = overrides.addAppLog || addAppLog;
@@ -199,17 +238,12 @@ async function addNewUserToSheet(userId, userName, communityId = null, profileId
     return addNewUserToSheetWithDependencies(userId, userName, communityId, profileId);
 }
 
-async function getUserVariables(userId, communityId = null, profileId = '1') {
+async function getUserVariablesWithDependencies(userId, communityId = null, profileId = '1', overrides = {}) {
     try {
         const cid = communityId;
         log('debug', '🔧 Getting user variables for ' + userId + ' (Community: ' + cid + ')');
 
-        const users = await getSheetData(USERS_SHEET, cid, profileId);
-        if (!users) return {};
-
-        const user = users.find(function(row) {
-            return normalizeUserId(row && row[COLUMN_ID]) === normalizeUserId(userId);
-        });
+        const user = await getUserRowWithDependencies(userId, cid, profileId, overrides);
         if (!user) return {};
 
         const varNames = normalizeLowercaseLines(user[COLUMN_USER_VARIABLE_NAMES], /[\r\n,]+/);
@@ -225,6 +259,10 @@ async function getUserVariables(userId, communityId = null, profileId = '1') {
         log('error', '❌ Error getting user variables:', error);
         return {};
     }
+}
+
+async function getUserVariables(userId, communityId = null, profileId = '1') {
+    return getUserVariablesWithDependencies(userId, communityId, profileId);
 }
 
 async function updateUserVariablesWithDependencies(userId, variables, forceOverwrite = true, communityId = null, profileId = '1', overrides = {}) {
@@ -441,11 +479,7 @@ async function checkUserGroups(userId, required, communityId = null, profileId =
         const cid = communityId;
         log('debug', '🔍 Checking groups for user ' + userId + ' (Community: ' + cid + ')');
 
-        invalidateCache(USERS_SHEET, cid, profileId);
-        const users = await getSheetData(USERS_SHEET, cid, profileId);
-        const user = (users || []).find(function(row) {
-            return normalizeUserId(row && row[COLUMN_ID]) === normalizeUserId(userId);
-        });
+        const user = await getUserRowWithDependencies(userId, cid, profileId);
         if (!user) return false;
 
         const userGroups = normalizeLowercaseLines(user[COLUMN_GROUPS]);
@@ -463,11 +497,7 @@ async function checkStepAlreadySent(userId, bot, step, communityId = null, profi
     try {
         log('debug', `🔍 Checking if step "${step}" already sent to user ${userId}`);
 
-        invalidateCache(USERS_SHEET, communityId, profileId);
-        const users = await getSheetData(USERS_SHEET, communityId, profileId);
-        const user = (users || []).find(function(row) {
-            return normalizeUserId(row && row[COLUMN_ID]) === normalizeUserId(userId);
-        });
+        const user = await getUserRowWithDependencies(userId, communityId, profileId);
         if (!user) {
             log('debug', `❌ User ${userId} not found`);
             return false;
@@ -549,15 +579,26 @@ async function clearStepSentHistory(userId, bot = null, communityId = null, prof
 async function deleteUserDataWithDependencies(userId, communityId = null, profileId = '1', overrides = {}) {
     try {
         const normalizedUserId = normalizeUserId(userId);
-        const sheetUpdater = overrides.updateSheetData || updateSheetData;
-        const result = await sheetUpdater(USERS_SHEET, communityId, profileId, rows => {
-            const users = Array.isArray(rows) ? rows : [];
-            return users.filter(function(user) {
-                return normalizeUserId(user && user[COLUMN_ID]) !== normalizedUserId;
-            });
-        });
+        let changed = false;
 
-        if (!result || !result.changed) {
+        if (isStructuredUserStateEnabled(overrides)) {
+            const deleteResult = await getUserStateStore(overrides).deleteUserRow(
+                buildUserScope(communityId, profileId),
+                normalizedUserId
+            );
+            changed = Boolean(deleteResult && deleteResult.deleted);
+        } else {
+            const sheetUpdater = overrides.updateSheetData || updateSheetData;
+            const result = await sheetUpdater(USERS_SHEET, communityId, profileId, rows => {
+                const users = Array.isArray(rows) ? rows : [];
+                return users.filter(function(user) {
+                    return normalizeUserId(user && user[COLUMN_ID]) !== normalizedUserId;
+                });
+            });
+            changed = Boolean(result && result.changed);
+        }
+
+        if (!changed) {
             return false;
         }
 
@@ -584,10 +625,7 @@ async function deleteUserData(userId, communityId = null, profileId = '1') {
 
 async function getUserCurrentSteps(userId, bot = null, communityId = null, profileId = '1') {
     try {
-        const users = await getSheetData(USERS_SHEET, communityId, profileId);
-        const user = (users || []).find(function(row) {
-            return normalizeUserId(row && row[COLUMN_ID]) === normalizeUserId(userId);
-        });
+        const user = await getUserRowWithDependencies(userId, communityId, profileId);
         if (!user) return '';
 
         const allBots = normalizeLines(user[COLUMN_CURRENT_BOT], /[\n,]+/);
@@ -610,11 +648,16 @@ async function getUserCurrentSteps(userId, bot = null, communityId = null, profi
     }
 }
 
+async function listUsers(communityId = null, profileId = '1') {
+    return listUsersWithDependencies(communityId, profileId);
+}
+
 module.exports = {
     updateUserData,
     getUserVKName,
     addNewUserToSheet,
     getUserVariables,
+    listUsers,
     updateUserVariables,
     updateUserBotAndStep,
     removeUserBotAndStep,
@@ -626,6 +669,9 @@ module.exports = {
     getUserCurrentSteps,
     deleteUserData,
     __testOnly: {
+        getUserRowWithDependencies,
+        getUserVariablesWithDependencies,
+        listUsersWithDependencies,
         mutateUserRowWithDependencies,
         addNewUserToSheetWithDependencies,
         updateUserVariablesWithDependencies,
