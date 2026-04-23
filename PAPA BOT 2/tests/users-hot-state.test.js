@@ -103,6 +103,41 @@ async function run(name, fn) {
     });
   });
 
+  await run('getUserRowWithDependencies uses injected sheet getter for legacy fallback', async () => {
+    const row = await users.__testOnly.getUserRowWithDependencies('42', 'community-1', '9', {
+      getSheetData: async (sheetName, communityId, profileId) => {
+        assert.equal(sheetName, 'ПОЛЬЗОВАТЕЛИ');
+        assert.equal(communityId, 'community-1');
+        assert.equal(profileId, '9');
+        return [
+          { ID: '42', Name: 'Alice' },
+          { ID: '77', Name: 'Bob' }
+        ];
+      }
+    });
+
+    assert.deepEqual(row, { ID: '42', Name: 'Alice' });
+  });
+
+  await run('listUsersWithDependencies uses injected sheet getter for legacy fallback', async () => {
+    const rows = await users.__testOnly.listUsersWithDependencies('community-1', '9', {
+      getSheetData: async (sheetName, communityId, profileId) => {
+        assert.equal(sheetName, 'ПОЛЬЗОВАТЕЛИ');
+        assert.equal(communityId, 'community-1');
+        assert.equal(profileId, '9');
+        return [
+          { ID: '42', Name: 'Alice' },
+          { ID: '77', Name: 'Bob' }
+        ];
+      }
+    });
+
+    assert.deepEqual(rows, [
+      { ID: '42', Name: 'Alice' },
+      { ID: '77', Name: 'Bob' }
+    ]);
+  });
+
   await run('updateUserVariablesWithDependencies mutates only the target user through userStateStore when enabled', async () => {
     const updates = [];
     const syncedCatalogs = [];

@@ -440,6 +440,34 @@ async function run(name, fn) {
     ]);
   });
 
+  await run('getProfileUserSharedVariableRowsWithDependencies uses injected sheet getter for legacy fallback', async () => {
+    const rows = await variables.__testOnly.getProfileUserSharedVariableRowsWithDependencies(
+      '8',
+      {
+        getSheetData: async (sheetName, communityId, profileId) => {
+          assert.equal(sheetName, 'ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ');
+          assert.equal(communityId, null);
+          assert.equal(profileId, '8');
+          return [
+            {
+              ID: '42',
+              'РџРµСЂРµРјРµРЅРЅР°СЏ РџР’РЎ': 'pvs_score',
+              'Р—РЅР°С‡РµРЅРёРµ РџР’РЎ': '100'
+            }
+          ];
+        }
+      }
+    );
+
+    assert.deepEqual(rows, [
+      {
+        ID: '42',
+        'РџРµСЂРµРјРµРЅРЅР°СЏ РџР’РЎ': 'pvs_score',
+        'Р—РЅР°С‡РµРЅРёРµ РџР’РЎ': '100'
+      }
+    ]);
+  });
+
   await run('getSharedVariablesWithDependencies reads structured shared catalog when enabled', async () => {
     const sharedVariables = await variables.__testOnly.getSharedVariablesWithDependencies(
       '8',
@@ -460,6 +488,29 @@ async function run(name, fn) {
     assert.deepEqual(sharedVariables, {
       pvs_score: '100\n200',
       pvs_level: '7'
+    });
+  });
+
+  await run('getSharedVariablesWithDependencies uses injected sheet getter for legacy fallback', async () => {
+    const sharedVariables = await variables.__testOnly.getSharedVariablesWithDependencies(
+      '8',
+      {
+        getSheetData: async (sheetName, communityId, profileId) => {
+          assert.equal(sheetName, 'ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ');
+          assert.equal(communityId, null);
+          assert.equal(profileId, '8');
+          return [
+            {
+              'Переменная ПВС': 'pvs_score',
+              'Значение ПВС': '100\n200'
+            }
+          ];
+        }
+      }
+    );
+
+    assert.deepEqual(sharedVariables, {
+      pvs_score: '100\n200'
     });
   });
 

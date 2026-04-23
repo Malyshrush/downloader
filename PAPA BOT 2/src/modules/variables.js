@@ -65,6 +65,10 @@ function isSharedVariablesStoreEnabled(overrides = {}) {
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
+function getSheetDataWithOverrides(overrides = {}) {
+    return overrides.getSheetData || getSheetData;
+}
+
 function buildProfileUserSharedRowsFromEntries(entries) {
     const rows = [];
     for (const entry of Array.isArray(entries) ? entries : []) {
@@ -159,6 +163,7 @@ function buildCommunityVariableStateFromRows(rows) {
 
 async function getProfileUserSharedVariableRowsWithDependencies(profileId = '1', overrides = {}) {
     try {
+        const getSheetData = getSheetDataWithOverrides(overrides);
         if (isProfileUserSharedStoreEnabled(overrides)) {
             const entries = await getProfileUserSharedStore(overrides).listUserEntries(buildProfileUserSharedScope(profileId));
             return buildProfileUserSharedRowsFromEntries(entries);
@@ -208,6 +213,7 @@ async function getProfileUserSharedVariables(userId, profileId = '1') {
 
 async function getSharedVariablesWithDependencies(profileId = '1', overrides = {}) {
     try {
+        const getSheetData = getSheetDataWithOverrides(overrides);
         if (isSharedVariablesStoreEnabled(overrides)) {
             return getSharedVariablesStore(overrides).listVariables(buildSharedVariablesScope(profileId));
         }

@@ -61,7 +61,8 @@ async function getUserRowWithDependencies(userId, communityId = null, profileId 
         return getUserStateStore(overrides).getUserRow(buildUserScope(communityId, profileId), userId);
     }
 
-    const rows = await getSheetData(USERS_SHEET, communityId, profileId);
+    const sheetGetter = overrides.getSheetData || getSheetData;
+    const rows = await sheetGetter(USERS_SHEET, communityId, profileId);
     const index = findUserIndex(rows, userId);
     return index === -1 ? null : rows[index];
 }
@@ -71,7 +72,8 @@ async function listUsersWithDependencies(communityId = null, profileId = '1', ov
         return getUserStateStore(overrides).listUserRows(buildUserScope(communityId, profileId));
     }
 
-    const rows = await getSheetData(USERS_SHEET, communityId, profileId);
+    const sheetGetter = overrides.getSheetData || getSheetData;
+    const rows = await sheetGetter(USERS_SHEET, communityId, profileId);
     return Array.isArray(rows) ? rows : [];
 }
 
