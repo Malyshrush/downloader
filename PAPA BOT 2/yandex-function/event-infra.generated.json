@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-04-23T09:27:06.605Z",
+  "createdAt": "2026-04-23T09:57:23.712Z",
   "ymqEndpoint": "https://message-queue.api.cloud.yandex.net",
   "ydbDocApiEndpoint": "https://docapi.serverless.yandexcloud.net/ru-central1/b1gh3sun4tm32rd0jpd4/etnbufcfn4sjsrn3fa1s",
   "incomingQueue": {
@@ -32,6 +32,10 @@
   },
   "delayedDeliveriesTable": {
     "tableName": "delayed_delivery_entries",
+    "tableStatus": "ACTIVE"
+  },
+  "mailingDeliveriesTable": {
+    "tableName": "mailing_delivery_entries",
     "tableStatus": "ACTIVE"
   },
   "profileUserSharedTable": {

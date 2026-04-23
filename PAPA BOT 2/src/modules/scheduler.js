@@ -15,10 +15,12 @@ const { publishOutboundAction } = require('./event-queue');
 const { sendMessageWithTokenRetry } = require('./messages');
 const { performRowActions } = require('./row-actions');
 const { createDelayedDeliveryStore } = require('./delayed-delivery-store');
+const { createMailingDeliveryStore } = require('./mailing-delivery-store');
 
 const isProcessingDelayed = {};
 const lastProcessTime = {};
 const delayedDeliveryStore = createDelayedDeliveryStore();
+const mailingDeliveryStore = createMailingDeliveryStore();
 
 const processedDelayedMessages = new Map();
 const DELAYED_TTL = 5 * 60 * 1000;
@@ -69,6 +71,20 @@ const DELAYED_SENT_AT_KEYS = ['Фактическое время отправк�
 const DELAYED_SENT_AT_MSK_KEYS = ['Факт. время отправки (по мск.)', 'Р¤Р°РєС‚. РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё (РїРѕ РјСЃРє.)'];
 const MESSAGE_STEP_KEYS = ['Шаг', 'РЁР°Рі'];
 const MESSAGE_ANSWER_KEYS = ['Ответ', 'РћС‚РІРµС‚'];
+const MAILING_NUMBER_KEYS = ['№', 'в„–', 'РІвЂћвЂ“'];
+const MAILING_STATUS_KEYS = ['Статус', 'РЎС‚Р°С‚СѓСЃ'];
+const MAILING_ERROR_KEYS = ['Ошибка', 'РћС€РёР±РєР°'];
+const MAILING_SCHEDULED_AT_KEYS = [
+    'Дата и время отправки (по мск.)',
+    'Р”Р°С‚Р° Рё РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё (РїРѕ РјСЃРє.)',
+    'Дата и время отправки',
+    'Р”Р°С‚Р° Рё РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё',
+    'Фактическое время отправки (по мск.)',
+    'Р¤Р°РєС‚РёС‡РµСЃРєРѕРµ РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё (РїРѕ РјСЃРє.)'
+];
+const MAILING_MESSAGE_TEXT_KEYS = ['Сообщение Рассылки', 'РЎРѕРѕР±С‰РµРЅРёРµ Р Р°СЃСЃС‹Р»РєРё'];
+const MAILING_SENT_AT_KEYS = ['Фактическое время отправки', 'Р¤Р°РєС‚РёС‡РµСЃРєРѕРµ РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё'];
+const MAILING_SENT_AT_MSK_KEYS = ['Факт. время отправки (по мск.)', 'Р¤Р°РєС‚. РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё (РїРѕ РјСЃРє.)'];
 
 function getFirstDefinedValue(row, keys) {
     for (const key of keys) {
@@ -130,6 +146,45 @@ function getMessageStepName(row) {
 
 function getMessageAnswer(row) {
     return String(getFirstDefinedValue(row, MESSAGE_ANSWER_KEYS) || '').trim();
+}
+
+function getMailingRowNumber(row, fallback = '') {
+    return String(getFirstDefinedValue(row, MAILING_NUMBER_KEYS) || fallback || '').trim();
+}
+
+function getMailingStatus(row) {
+    return String(getFirstDefinedValue(row, MAILING_STATUS_KEYS) || '').trim();
+}
+
+function isPendingMailingStatus(status) {
+    const value = String(status || '').trim();
+    return value === 'Ожидает' || value === 'РћР¶РёРґР°РµС‚';
+}
+
+function isSentMailingStatus(status) {
+    const value = String(status || '').trim();
+    return value === 'Отправлено' || value.startsWith('Отправлено') || value === 'РћС‚РїСЂР°РІР»РµРЅРѕ' || value.startsWith('РћС‚РїСЂР°РІР»РµРЅРѕ');
+}
+
+function getMailingScheduledAt(row) {
+    return String(getFirstDefinedValue(row, MAILING_SCHEDULED_AT_KEYS) || '').trim();
+}
+
+function getMailingMessageText(row) {
+    return String(getFirstDefinedValue(row, MAILING_MESSAGE_TEXT_KEYS) || '').trim();
+}
+
+function setMailingStatus(row, value) {
+    setAllValues(row, MAILING_STATUS_KEYS, value);
+}
+
+function setMailingError(row, value) {
+    setAllValues(row, MAILING_ERROR_KEYS, value);
+}
+
+function setMailingSentAt(row, value) {
+    setAllValues(row, MAILING_SENT_AT_KEYS, value);
+    setAllValues(row, MAILING_SENT_AT_MSK_KEYS, value);
 }
 
 function findRowByNumber(rows, rowNumber) {
@@ -233,13 +288,8 @@ function buildMailingDeliveryAction({
     fileCommunityId,
     actualGroupId
 }) {
-    const rowNumber = String(row['№'] || rowIndex + 1).trim();
-    const scheduledTimeStr = String(
-        row['Дата и время отправки (по мск.)'] ||
-        row['Дата и время отправки'] ||
-        row['Фактическое время отправки (по мск.)'] ||
-        ''
-    ).trim();
+    const rowNumber = getMailingRowNumber(row, rowIndex + 1);
+    const scheduledTimeStr = getMailingScheduledAt(row);
     const actionId = buildSchedulerActionId('scheduler_mailing', [
         profileId,
         fileCommunityId,
@@ -270,6 +320,15 @@ function getDelayedDeliveryStore(overrides = {}) {
 
 function isDelayedDeliveryStoreEnabled(overrides = {}) {
     const store = getDelayedDeliveryStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function getMailingDeliveryStore(overrides = {}) {
+    return overrides.mailingDeliveryStore || mailingDeliveryStore;
+}
+
+function isMailingDeliveryStoreEnabled(overrides = {}) {
+    const store = getMailingDeliveryStore(overrides);
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
@@ -487,12 +546,51 @@ async function processDelayedWithDependencies(communityId = null, profileId = '1
     }
 }
 
+function applyMailingRuntimeState(row, state) {
+    if (!state) return row;
+    const merged = Object.assign({}, row);
+    const status = getMailingStatus(state);
+    const error = getFirstDefinedValue(state, MAILING_ERROR_KEYS);
+    const sentAt = getFirstDefinedValue(state, MAILING_SENT_AT_KEYS);
+    const sentAtMsk = getFirstDefinedValue(state, MAILING_SENT_AT_MSK_KEYS);
+
+    if (status) {
+        setMailingStatus(merged, status);
+    }
+    if (error || getFirstDefinedValue(state, MAILING_ERROR_KEYS) === '') {
+        setMailingError(merged, error);
+    }
+    if (sentAt || sentAtMsk) {
+        setMailingSentAt(merged, sentAtMsk || sentAt);
+    }
+    return merged;
+}
+
+async function loadMailingRuntimeState(row, fileCommunityId, profileId, overrides = {}) {
+    if (!isMailingDeliveryStoreEnabled(overrides)) {
+        return null;
+    }
+    const mailingId = getMailingRowNumber(row);
+    if (!mailingId) {
+        return null;
+    }
+    return getMailingDeliveryStore(overrides).getMailingState(fileCommunityId, mailingId, profileId);
+}
+
+async function updateMailingRuntimeState(fileCommunityId, mailingId, profileId, overrides = {}, mutator) {
+    if (isMailingDeliveryStoreEnabled(overrides)) {
+        return getMailingDeliveryStore(overrides).updateMailingState(fileCommunityId, mailingId, mutator, profileId);
+    }
+    return null;
+}
+
 async function processMailingWithDependencies(communityId = null, profileId = '1', overrides = {}) {
     const getActiveCommunityIdImpl = overrides.getActiveCommunityId || getActiveCommunityId;
     const getSheetDataImpl = overrides.getSheetData || getSheetData;
     const saveSheetDataImpl = overrides.saveSheetData || saveSheetData;
     const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
     const publishOutboundActionImpl = overrides.publishOutboundAction || publishOutboundAction;
+    const useStructuredMailingStore = isMailingDeliveryStoreEnabled(overrides);
     const cid = communityId || getActiveCommunityIdImpl(profileId) || 'default';
 
     try {
@@ -519,19 +617,28 @@ async function processMailingWithDependencies(communityId = null, profileId = '1
 
         for (let i = 0; i < mailing.length; i++) {
             const row = mailing[i];
-            if (row['Статус'] !== 'Ожидает') {
+            const rowNumber = getMailingRowNumber(row, i + 1);
+            const runtimeState = await loadMailingRuntimeState(row, fileCommunityId, profileId, overrides);
+            const effectiveRow = applyMailingRuntimeState(row, runtimeState);
+
+            if (!isPendingMailingStatus(getMailingStatus(effectiveRow))) {
                 continue;
             }
 
-            const scheduledValue =
-                row['Дата и время отправки (по мск.)'] ||
-                row['Дата и время отправки'] ||
-                row['Фактическое время отправки (по мск.)'];
+            const scheduledValue = getMailingScheduledAt(effectiveRow);
             const schedule = parseScheduledTime(scheduledValue);
             if (!schedule.ok) {
-                row['Статус'] = 'Ошибка';
-                row['Ошибка'] = schedule.error;
-                hasChanges = true;
+                if (useStructuredMailingStore) {
+                    await updateMailingRuntimeState(fileCommunityId, rowNumber, profileId, overrides, rowDraft => {
+                        setMailingStatus(rowDraft, 'Ошибка');
+                        setMailingError(rowDraft, schedule.error);
+                        return { value: rowDraft };
+                    });
+                } else {
+                    setMailingStatus(row, 'Ошибка');
+                    setMailingError(row, schedule.error);
+                    hasChanges = true;
+                }
                 continue;
             }
 
@@ -539,18 +646,26 @@ async function processMailingWithDependencies(communityId = null, profileId = '1
                 continue;
             }
 
-            const mailingKey = `mail_${row['№'] || i}_${schedule.value}`;
+            const mailingKey = `mail_${rowNumber || i}_${schedule.value}`;
             if (processedMailings.has(mailingKey)) {
                 continue;
             }
 
             processedMailings.set(mailingKey, nowTs);
-            row['Статус'] = 'В обработке';
-            row['Ошибка'] = '';
+            if (useStructuredMailingStore) {
+                await updateMailingRuntimeState(fileCommunityId, rowNumber, profileId, overrides, rowDraft => {
+                    setMailingStatus(rowDraft, 'В обработке');
+                    setMailingError(rowDraft, '');
+                    return { value: rowDraft };
+                });
+            } else {
+                setMailingStatus(row, 'В обработке');
+                setMailingError(row, '');
+            }
 
             try {
                 const action = buildMailingDeliveryAction({
-                    row,
+                    row: effectiveRow,
                     rowIndex: i,
                     communityId: cid,
                     profileId,
@@ -559,11 +674,19 @@ async function processMailingWithDependencies(communityId = null, profileId = '1
                 });
                 await publishOutboundActionImpl(action);
                 queuedCount += 1;
-                hasChanges = true;
+                hasChanges = hasChanges || !useStructuredMailingStore;
             } catch (error) {
-                row['Статус'] = 'Ошибка';
-                row['Ошибка'] = error.message;
-                hasChanges = true;
+                if (useStructuredMailingStore) {
+                    await updateMailingRuntimeState(fileCommunityId, rowNumber, profileId, overrides, rowDraft => {
+                        setMailingStatus(rowDraft, 'Ошибка');
+                        setMailingError(rowDraft, error.message);
+                        return { value: rowDraft };
+                    });
+                } else {
+                    setMailingStatus(row, 'Ошибка');
+                    setMailingError(row, error.message);
+                    hasChanges = true;
+                }
             }
         }
 
@@ -751,6 +874,7 @@ async function processMailingDeliveryActionWithDependencies(action, overrides = 
     const getAttachmentsFromRowImpl = overrides.getAttachmentsFromRow || getAttachmentsFromRow;
     const sendMessageWithTokenRetryImpl = overrides.sendMessageWithTokenRetry || sendMessageWithTokenRetry;
     const addAppLogImpl = overrides.addAppLog || addAppLog;
+    const useStructuredMailingStore = isMailingDeliveryStoreEnabled(overrides);
 
     const mailing = await getSheetDataImpl('РАССЫЛКА', fileCommunityId, profileId);
     const row = findRowByNumber(mailing, rowNumber);
@@ -759,22 +883,33 @@ async function processMailingDeliveryActionWithDependencies(action, overrides = 
         return { skipped: true, reason: 'row_missing', mailingRowNumber: rowNumber };
     }
 
-    if (String(row['Статус'] || '').trim().startsWith('Отправлено')) {
+    const runtimeState = await loadMailingRuntimeState(row, fileCommunityId, profileId, overrides);
+    const effectiveRow = applyMailingRuntimeState(row, runtimeState);
+
+    if (isSentMailingStatus(getMailingStatus(effectiveRow))) {
         return { skipped: true, reason: 'already_sent', mailingRowNumber: rowNumber };
     }
 
-    const userIds = await collectMailingRecipientsImpl(row, fileCommunityId, profileId);
+    const userIds = await collectMailingRecipientsImpl(effectiveRow, fileCommunityId, profileId);
     if (!userIds.length) {
-        row['Статус'] = 'Ошибка';
-        row['Ошибка'] = 'Нет получателей (проверьте ID/Группу в настройках рассылки)';
-        await saveSheetDataImpl('РАССЫЛКА', mailing, fileCommunityId, profileId);
-        invalidateCacheImpl('РАССЫЛКА', fileCommunityId, profileId);
+        if (useStructuredMailingStore) {
+            await updateMailingRuntimeState(fileCommunityId, rowNumber, profileId, overrides, rowDraft => {
+                setMailingStatus(rowDraft, 'Ошибка');
+                setMailingError(rowDraft, 'Нет получателей (проверьте ID/Группу в настройках рассылки)');
+                return { value: rowDraft };
+            });
+        } else {
+            setMailingStatus(row, 'Ошибка');
+            setMailingError(row, 'Нет получателей (проверьте ID/Группу в настройках рассылки)');
+            await saveSheetDataImpl('РАССЫЛКА', mailing, fileCommunityId, profileId);
+            invalidateCacheImpl('РАССЫЛКА', fileCommunityId, profileId);
+        }
         return { ok: false, mailingRowNumber: rowNumber, reason: 'no_recipients' };
     }
 
-    const messageText = row['Сообщение Рассылки'] || '';
-    const attachments = safeGetAttachments(getAttachmentsFromRowImpl, row, 'MAILING');
-    const keyboard = createMailingKeyboardImpl(row);
+    const messageText = getMailingMessageText(effectiveRow);
+    const attachments = safeGetAttachments(getAttachmentsFromRowImpl, effectiveRow, 'MAILING');
+    const keyboard = createMailingKeyboardImpl(effectiveRow);
     let successCount = 0;
     let errorCount = 0;
 
@@ -801,22 +936,33 @@ async function processMailingDeliveryActionWithDependencies(action, overrides = 
     }
 
     if (errorCount === 0) {
-        row['Статус'] = 'Отправлено';
-        row['Ошибка'] = '';
+        setMailingStatus(effectiveRow, 'Отправлено');
+        setMailingError(effectiveRow, '');
     } else if (successCount === 0) {
-        row['Статус'] = 'Ошибка';
-        row['Ошибка'] = `Не удалось отправить ни одному (${errorCount} ошибок)`;
+        setMailingStatus(effectiveRow, 'Ошибка');
+        setMailingError(effectiveRow, `Не удалось отправить ни одному (${errorCount} ошибок)`);
     } else {
-        row['Статус'] = 'Отправлено (с ошибками)';
-        row['Ошибка'] = `Отправлено: ${successCount}, ошибок: ${errorCount}`;
+        setMailingStatus(effectiveRow, 'Отправлено (с ошибками)');
+        setMailingError(effectiveRow, `Отправлено: ${successCount}, ошибок: ${errorCount}`);
     }
 
     const currentMskStr = formatMskDateTime(now);
-    row['Факт. время отправки (по мск.)'] = currentMskStr;
-    row['Фактическое время отправки'] = currentMskStr;
+    setMailingSentAt(effectiveRow, currentMskStr);
 
-    await saveSheetDataImpl('РАССЫЛКА', mailing, fileCommunityId, profileId);
-    invalidateCacheImpl('РАССЫЛКА', fileCommunityId, profileId);
+    if (useStructuredMailingStore) {
+        await updateMailingRuntimeState(fileCommunityId, rowNumber, profileId, overrides, rowDraft => {
+            setMailingStatus(rowDraft, getMailingStatus(effectiveRow));
+            setMailingError(rowDraft, getFirstDefinedValue(effectiveRow, MAILING_ERROR_KEYS));
+            setMailingSentAt(rowDraft, currentMskStr);
+            return { value: rowDraft };
+        });
+    } else {
+        setMailingStatus(row, getMailingStatus(effectiveRow));
+        setMailingError(row, getFirstDefinedValue(effectiveRow, MAILING_ERROR_KEYS));
+        setMailingSentAt(row, currentMskStr);
+        await saveSheetDataImpl('РАССЫЛКА', mailing, fileCommunityId, profileId);
+        invalidateCacheImpl('РАССЫЛКА', fileCommunityId, profileId);
+    }
 
     await addAppLogImpl({
         tab: 'MAILING',
