@@ -146,6 +146,7 @@ async function main() {
   const appLogsTableName = args['app-logs-table'] || runtimeConfig.ydbAppLogsTable;
   const userStateTableName = args['user-state-table'] || runtimeConfig.ydbUserStateTable;
   const communityVariablesTableName = args['community-variables-table'] || runtimeConfig.ydbCommunityVariablesTable;
+  const delayedDeliveriesTableName = args['delayed-deliveries-table'] || runtimeConfig.ydbDelayedDeliveriesTable;
   const profileUserSharedTableName = args['profile-user-shared-table'] || runtimeConfig.ydbProfileUserSharedTable;
   const sharedVariablesTableName = args['shared-variables-table'] || runtimeConfig.ydbSharedVariablesTable;
 
@@ -258,6 +259,30 @@ async function main() {
       }
     ]
   );
+  const delayedDeliveriesTable = await ensureTable(
+    dynamoClient,
+    delayedDeliveriesTableName,
+    [
+      {
+        AttributeName: 'delayedScope',
+        KeyType: 'HASH'
+      },
+      {
+        AttributeName: 'delayedId',
+        KeyType: 'RANGE'
+      }
+    ],
+    [
+      {
+        AttributeName: 'delayedScope',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'delayedId',
+        AttributeType: 'S'
+      }
+    ]
+  );
   const profileUserSharedTable = await ensureTable(
     dynamoClient,
     profileUserSharedTableName,
@@ -318,6 +343,7 @@ async function main() {
     appLogsTable,
     userStateTable,
     communityVariablesTable,
+    delayedDeliveriesTable,
     profileUserSharedTable,
     sharedVariablesTable
   };

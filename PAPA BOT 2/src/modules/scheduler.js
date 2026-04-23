@@ -14,9 +14,11 @@ const { addAppLog } = require('./app-logs');
 const { publishOutboundAction } = require('./event-queue');
 const { sendMessageWithTokenRetry } = require('./messages');
 const { performRowActions } = require('./row-actions');
+const { createDelayedDeliveryStore } = require('./delayed-delivery-store');
 
 const isProcessingDelayed = {};
 const lastProcessTime = {};
+const delayedDeliveryStore = createDelayedDeliveryStore();
 
 const processedDelayedMessages = new Map();
 const DELAYED_TTL = 5 * 60 * 1000;
@@ -56,9 +58,83 @@ function buildSchedulerActionId(prefix, parts) {
     return [prefix, ...normalizedParts].join(':');
 }
 
+const DELAYED_NUMBER_KEYS = ['№', 'в„–', 'РІвЂћвЂ“'];
+const DELAYED_STEP_KEYS = ['Шаг', 'РЁР°Рі'];
+const DELAYED_USER_ID_KEYS = ['ID Пользователя', 'ID РџРѕР»СЊР·РѕРІР°С‚РµР»СЏ'];
+const DELAYED_TYPE_KEYS = ['Тип', 'РўРёРї'];
+const DELAYED_SCHEDULED_AT_KEYS = ['Дата и время отправки', 'Р”Р°С‚Р° Рё РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё'];
+const DELAYED_STATUS_KEYS = ['Статус', 'РЎС‚Р°С‚СѓСЃ', 'Р РЋРЎвЂљР В°РЎвЂљРЎС“РЎРѓ'];
+const DELAYED_ERROR_KEYS = ['Ошибка', 'РћС€РёР±РєР°', 'Р С›РЎв‚¬Р С‘Р В±Р С”Р В°'];
+const DELAYED_SENT_AT_KEYS = ['Фактическое время отправки', 'Р¤Р°РєС‚РёС‡РµСЃРєРѕРµ РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё'];
+const DELAYED_SENT_AT_MSK_KEYS = ['Факт. время отправки (по мск.)', 'Р¤Р°РєС‚. РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё (РїРѕ РјСЃРє.)'];
+const MESSAGE_STEP_KEYS = ['Шаг', 'РЁР°Рі'];
+const MESSAGE_ANSWER_KEYS = ['Ответ', 'РћС‚РІРµС‚'];
+
+function getFirstDefinedValue(row, keys) {
+    for (const key of keys) {
+        if (!row || !Object.prototype.hasOwnProperty.call(row, key)) continue;
+        const value = row[key];
+        if (value !== undefined && value !== null && String(value).trim() !== '') {
+            return value;
+        }
+    }
+    return '';
+}
+
+function setAllValues(row, keys, value) {
+    for (const key of keys) {
+        row[key] = value;
+    }
+}
+
+function getDelayedRowNumber(row) {
+    return String(getFirstDefinedValue(row, DELAYED_NUMBER_KEYS) || '').trim();
+}
+
+function getDelayedStatus(row) {
+    return String(getFirstDefinedValue(row, DELAYED_STATUS_KEYS) || '').trim();
+}
+
+function getDelayedStepName(row) {
+    return String(getFirstDefinedValue(row, DELAYED_STEP_KEYS) || '').trim();
+}
+
+function getDelayedUserId(row) {
+    return String(getFirstDefinedValue(row, DELAYED_USER_ID_KEYS) || '').trim();
+}
+
+function getDelayedType(row) {
+    return String(getFirstDefinedValue(row, DELAYED_TYPE_KEYS) || 'message').trim() || 'message';
+}
+
+function getDelayedScheduledAt(row) {
+    return String(getFirstDefinedValue(row, DELAYED_SCHEDULED_AT_KEYS) || '').trim();
+}
+
+function setDelayedStatus(row, value) {
+    setAllValues(row, DELAYED_STATUS_KEYS, value);
+}
+
+function setDelayedError(row, value) {
+    setAllValues(row, DELAYED_ERROR_KEYS, value);
+}
+
+function setDelayedSentAt(row, value) {
+    setAllValues(row, DELAYED_SENT_AT_KEYS, value);
+    setAllValues(row, DELAYED_SENT_AT_MSK_KEYS, value);
+}
+
+function getMessageStepName(row) {
+    return String(getFirstDefinedValue(row, MESSAGE_STEP_KEYS) || '').trim();
+}
+
+function getMessageAnswer(row) {
+    return String(getFirstDefinedValue(row, MESSAGE_ANSWER_KEYS) || '').trim();
+}
+
 function findRowByNumber(rows, rowNumber) {
     const expected = String(rowNumber || '').trim();
-    return rows.find(row => String(row['№'] || '').trim() === expected);
+    return rows.find(row => getDelayedRowNumber(row) === expected);
 }
 
 function parseScheduledTime(rawValue) {
@@ -188,6 +264,15 @@ function buildMailingDeliveryAction({
     };
 }
 
+function getDelayedDeliveryStore(overrides = {}) {
+    return overrides.delayedDeliveryStore || delayedDeliveryStore;
+}
+
+function isDelayedDeliveryStoreEnabled(overrides = {}) {
+    const store = getDelayedDeliveryStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
 async function processDelayedWithDependencies(communityId = null, profileId = '1', overrides = {}) {
     const getActiveCommunityIdImpl = overrides.getActiveCommunityId || getActiveCommunityId;
     const getSheetDataImpl = overrides.getSheetData || getSheetData;
@@ -207,6 +292,112 @@ async function processDelayedWithDependencies(communityId = null, profileId = '1
 
         isProcessingDelayed[cid] = true;
         lastProcessTime[cid] = nowTs;
+
+        if (isDelayedDeliveryStoreEnabled(overrides)) {
+            const { fileCommunityId, actualGroupId } = await getCommunityFileContext(cid, profileId, overrides);
+            const delayedRows = await getDelayedDeliveryStore(overrides).listDueRows(fileCommunityId, now, profileId);
+            const messages = await getSheetDataImpl('РЎРћРћР‘Р©Р•РќРРЇ', fileCommunityId, profileId);
+            const comments = await getSheetDataImpl('РљРћРњРњР•РќРўРђР РР Р’ РџРћРЎРўРђРҐ', fileCommunityId, profileId);
+            let queuedCount = 0;
+
+            for (const item of delayedRows) {
+                if (item._delayedId) {
+                    const userId = String(item['ID Пользователя'] || '').trim();
+                    const stepName = String(item['Шаг'] || '').trim();
+                    const type = String(item['Тип'] || 'message').trim() || 'message';
+                    const rowSet = type === 'comment' ? comments : messages;
+                    const row = rowSet.find(entry => String(entry['Шаг'] || '').trim() === stepName);
+                    if (!row) continue;
+
+                    const uniqueKey = item._delayedId || `${userId}_${stepName}_${String(item['Дата и время отправки'] || '')}`;
+                    if (processedDelayedMessages.has(uniqueKey)) continue;
+                    processedDelayedMessages.set(uniqueKey, nowTs);
+
+                    await getDelayedDeliveryStore(overrides).updateDelayedRow(fileCommunityId, item._delayedId, function(rowDraft) {
+                        rowDraft['Статус'] = 'В обработке';
+                        rowDraft['Ошибка'] = '';
+                        return { value: rowDraft };
+                    }, profileId);
+
+                    const actionId = buildSchedulerActionId('scheduler_delayed', [
+                        profileId,
+                        fileCommunityId,
+                        item._delayedId,
+                        item['Дата и время отправки'] || '',
+                        userId,
+                        stepName,
+                        type
+                    ]);
+                    await publishOutboundActionImpl({
+                        actionId,
+                        actionType: 'send_delayed_delivery',
+                        profileId: String(profileId || '1'),
+                        communityId: String(cid || ''),
+                        traceId: actionId,
+                        payload: {
+                            delayedRowNumber: item._delayedId,
+                            delayedId: item._delayedId,
+                            scheduledTimeStr: item['Дата и время отправки'] || '',
+                            userId,
+                            stepName,
+                            type,
+                            fileCommunityId,
+                            actualGroupId,
+                            communityId: String(cid || ''),
+                            profileId: String(profileId || '1')
+                        }
+                    });
+                    queuedCount += 1;
+                    continue;
+                }
+                const userId = String(item['ID РџРѕР»СЊР·РѕРІР°С‚РµР»СЏ'] || '').trim();
+                const stepName = String(item['РЁР°Рі'] || '').trim();
+                const type = String(item['РўРёРї'] || 'message').trim() || 'message';
+                const rowSet = type === 'comment' ? comments : messages;
+                const row = rowSet.find(entry => String(entry['РЁР°Рі'] || '').trim() === stepName);
+                const delayedId = String(item._delayedId || item['в„–'] || '').trim();
+
+                const resolvedRow = row || (rowSet.length === 1 ? rowSet[0] : null);
+                if (!resolvedRow) {
+                    if (delayedId) {
+                        await getDelayedDeliveryStore(overrides).updateDelayedRow(fileCommunityId, delayedId, function(rowDraft) {
+                            rowDraft['РЎС‚Р°С‚СѓСЃ'] = 'РћС€РёР±РєР°';
+                            rowDraft['РћС€РёР±РєР°'] = `РќРµ РЅР°Р№РґРµРЅ С€Р°Рі ${stepName || '(РїСѓСЃС‚Рѕ)'}`;
+                            return { value: rowDraft };
+                        }, profileId);
+                    }
+                    continue;
+                }
+
+                const uniqueKey = `${userId}_${stepName}_${String(item['Р”Р°С‚Р° Рё РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё'] || '')}`;
+                if (processedDelayedMessages.has(uniqueKey)) continue;
+                processedDelayedMessages.set(uniqueKey, nowTs);
+
+                if (delayedId) {
+                    await getDelayedDeliveryStore(overrides).updateDelayedRow(fileCommunityId, delayedId, function(rowDraft) {
+                        rowDraft['РЎС‚Р°С‚СѓСЃ'] = 'Р’ РѕР±СЂР°Р±РѕС‚РєРµ';
+                        rowDraft['РћС€РёР±РєР°'] = '';
+                        return { value: rowDraft };
+                    }, profileId);
+                }
+
+                await publishOutboundActionImpl(buildDelayedDeliveryAction({
+                    item,
+                    communityId: cid,
+                    profileId,
+                    fileCommunityId,
+                    actualGroupId
+                }));
+                queuedCount += 1;
+            }
+
+            return {
+                ok: true,
+                queuedCount,
+                fileCommunityId,
+                actualGroupId
+            };
+        }
 
         log('info', '⏰ [TIMER] Starting processDelayed for community: ' + cid);
 
@@ -398,10 +589,20 @@ async function processMailingWithDependencies(communityId = null, profileId = '1
 }
 
 async function markDelayedDeliveryError(item, delayedRows, fileCommunityId, profileId, message, overrides = {}) {
+    const delayedId = getDelayedRowNumber(item);
+    if (isDelayedDeliveryStoreEnabled(overrides) && delayedId) {
+        await getDelayedDeliveryStore(overrides).updateDelayedRow(fileCommunityId, delayedId, rowDraft => {
+            setDelayedStatus(rowDraft, 'Ошибка');
+            setDelayedError(rowDraft, String(message || 'Unknown scheduler delivery error'));
+            return { value: rowDraft };
+        }, profileId);
+        return;
+    }
+
     const saveSheetDataImpl = overrides.saveSheetData || saveSheetData;
     const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
-    item['Статус'] = 'Ошибка';
-    item['Ошибка'] = String(message || 'Unknown scheduler delivery error');
+    setDelayedStatus(item, 'Ошибка');
+    setDelayedError(item, String(message || 'Unknown scheduler delivery error'));
     await saveSheetDataImpl('ОТЛОЖЕННЫЕ', delayedRows, fileCommunityId, profileId);
     invalidateCacheImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
 }
@@ -429,36 +630,41 @@ async function processDelayedDeliveryActionWithDependencies(action, overrides = 
     const performRowActionsImpl = overrides.performRowActions || performRowActions;
     const addAppLogImpl = overrides.addAppLog || addAppLog;
 
-    const delayed = await getSheetDataImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
     const messages = await getSheetDataImpl('СООБЩЕНИЯ', fileCommunityId, profileId);
     const comments = await getSheetDataImpl('КОММЕНТАРИИ В ПОСТАХ', fileCommunityId, profileId);
-    const item = findRowByNumber(delayed, rowNumber);
+    const useStructuredDelayedStore = isDelayedDeliveryStoreEnabled(overrides);
+    const delayed = useStructuredDelayedStore
+        ? null
+        : await getSheetDataImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+    const item = useStructuredDelayedStore
+        ? await getDelayedDeliveryStore(overrides).getDelayedRow(fileCommunityId, rowNumber, profileId)
+        : findRowByNumber(delayed, rowNumber);
 
     if (!item) {
         return { skipped: true, reason: 'row_missing', delayedRowNumber: rowNumber };
     }
 
-    if (String(item['Статус'] || '').trim() === 'Отправлено') {
+    if (getDelayedStatus(item) === 'Отправлено') {
         return { skipped: true, reason: 'already_sent', delayedRowNumber: rowNumber };
     }
 
-    const stepName = String(item['Шаг'] || '').trim();
-    const type = String(item['Тип'] || 'message').trim() || 'message';
-    const userId = String(item['ID Пользователя'] || '').trim();
+    const stepName = getDelayedStepName(item);
+    const type = getDelayedType(item);
+    const userId = getDelayedUserId(item);
     const rowSet = type === 'comment' ? comments : messages;
-    const row = rowSet.find(entry => String(entry['Шаг'] || '').trim() === stepName);
+    const row = rowSet.find(entry => getMessageStepName(entry) === stepName);
 
     if (!row) {
         await markDelayedDeliveryError(item, delayed, fileCommunityId, profileId, `Не найден шаг ${stepName || '(пусто)'}`, overrides);
         return { ok: false, delayedRowNumber: rowNumber, reason: 'missing_step' };
     }
 
-    const answer = String(row['Ответ'] || '').trim();
+    const answer = getMessageAnswer(row);
     const processedAnswer = await replaceVariablesImpl(answer, userId, actualGroupId, communityId, profileId);
     let attachments = safeGetAttachments(getAttachmentsFromRowImpl, row, 'MESSAGES');
 
     if (attachments.length === 0) {
-        const messageRow = messages.find(entry => String(entry['Шаг'] || '').trim() === stepName);
+        const messageRow = messages.find(entry => getMessageStepName(entry) === stepName);
         if (messageRow) {
             attachments = safeGetAttachments(getAttachmentsFromRowImpl, messageRow, 'MESSAGES');
         }
@@ -482,12 +688,20 @@ async function processDelayedDeliveryActionWithDependencies(action, overrides = 
         }
 
         const currentMskStr = formatMskDateTime(now);
-        item['Статус'] = 'Отправлено';
-        item['Ошибка'] = '';
-        item['Факт. время отправки (по мск.)'] = currentMskStr;
-        item['Фактическое время отправки'] = currentMskStr;
-        await saveSheetDataImpl('ОТЛОЖЕННЫЕ', delayed, fileCommunityId, profileId);
-        invalidateCacheImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+        if (useStructuredDelayedStore) {
+            await getDelayedDeliveryStore(overrides).updateDelayedRow(fileCommunityId, rowNumber, rowDraft => {
+                setDelayedStatus(rowDraft, 'Отправлено');
+                setDelayedError(rowDraft, '');
+                setDelayedSentAt(rowDraft, currentMskStr);
+                return { value: rowDraft };
+            }, profileId);
+        } else {
+            setDelayedStatus(item, 'Отправлено');
+            setDelayedError(item, '');
+            setDelayedSentAt(item, currentMskStr);
+            await saveSheetDataImpl('ОТЛОЖЕННЫЕ', delayed, fileCommunityId, profileId);
+            invalidateCacheImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+        }
 
         const actionGroupId = type === 'comment' ? `-${actualGroupId}` : actualGroupId;
         await performRowActionsImpl(row, userId, actionGroupId, type === 'comment', communityId, profileId);

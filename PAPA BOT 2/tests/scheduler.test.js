@@ -69,6 +69,70 @@ async function run(name, fn) {
     assert.equal(saves[0].sheetName, 'ОТЛОЖЕННЫЕ');
   });
 
+  await run('processDelayed uses structured delayed store when enabled', async () => {
+    const actions = [];
+    const updates = [];
+
+    const response = await scheduler.__testOnly.processDelayedWithDependencies('community-structured', '7', {
+      now: new Date('2026-04-22T10:00:00.000Z'),
+      getCommunityFileContext: async () => ({
+        fileCommunityId: 'file-community-1',
+        actualGroupId: '123456'
+      }),
+      getSheetData: async sheetName => {
+        if (sheetName === 'РЎРћРћР‘Р©Р•РќРРЇ') {
+          return [{ 'Шаг': 'welcome', 'Ответ': 'Привет' }];
+        }
+        if (sheetName === 'РљРћРњРњР•РќРўРђР РР Р’ РџРћРЎРўРђРҐ') return [];
+        throw new Error('delayed sheet fallback should not be used');
+      },
+      saveSheetData: async () => {
+        throw new Error('delayed sheet save should not be used');
+      },
+      invalidateCache: () => {},
+      delayedDeliveryStore: {
+        isEnabled: () => true,
+        listDueRows: async (communityId, now, profileId) => {
+          assert.equal(communityId, 'file-community-1');
+          assert.equal(profileId, '7');
+          return [
+            {
+              _delayedId: 'delayed-1',
+              '№': 'delayed-1',
+              'Шаг': 'welcome',
+              'ID Пользователя': '777',
+              'Тип': 'message',
+              'Дата и время отправки': '2026-04-22 12:00:00',
+              'Статус': 'Ожидает',
+              'Ошибка': ''
+            }
+          ];
+        },
+        updateDelayedRow: async (communityId, delayedId, mutator, profileId) => {
+          const row = {
+            _delayedId: delayedId,
+            'в„–': delayedId,
+            'РЎС‚Р°С‚СѓСЃ': 'РћР¶РёРґР°РµС‚',
+            'РћС€РёР±РєР°': ''
+          };
+          await mutator(row);
+          updates.push({ communityId, delayedId, profileId, row });
+          return { found: true, changed: true, value: row };
+        }
+      },
+      publishOutboundAction: async action => {
+        actions.push(action);
+        return { accepted: true, actionId: action.actionId };
+      }
+    });
+
+    assert.equal(response.queuedCount, 1);
+    assert.equal(actions.length, 1);
+    assert.equal(actions[0].payload.delayedRowNumber, 'delayed-1');
+    assert.equal(updates.length, 1);
+    assert.equal(updates[0].row['Статус'], 'В обработке');
+  });
+
   await run('processMailing queues one outbound action per due mailing row', async () => {
     const mailingRows = [
       {
@@ -211,6 +275,86 @@ async function run(name, fn) {
     assert.equal(rowActionCalls.length, 1);
     assert.equal(saves.length, 1);
     assert.equal(saves[0].sheetName, 'ОТЛОЖЕННЫЕ');
+  });
+
+  await run('processDelayedDeliveryAction uses structured delayed store when enabled', async () => {
+    const updates = [];
+    const rowActionCalls = [];
+    const sendCalls = [];
+
+    const storeRow = {
+      _delayedId: 'delayed-1',
+      '№': 'delayed-1',
+      'Шаг': 'welcome',
+      'ID Пользователя': '777',
+      'Тип': 'message',
+      'Дата и время отправки': '2026-04-22 12:00:00',
+      'Статус': 'В обработке',
+      'Ошибка': ''
+    };
+
+    const result = await scheduler.__testOnly.processDelayedDeliveryActionWithDependencies(
+      {
+        payload: {
+          delayedRowNumber: 'delayed-1',
+          fileCommunityId: 'file-community-1',
+          actualGroupId: '123456',
+          communityId: 'community-1',
+          profileId: '7'
+        }
+      },
+      {
+        now: new Date('2026-04-22T10:00:00.000Z'),
+        getSheetData: async sheetName => {
+          if (sheetName === 'СООБЩЕНИЯ') {
+            return [
+              {
+                'Шаг': 'welcome',
+                'Ответ': 'Привет',
+                'Кнопка Ответа': '',
+                'Цвет/Ссылка Ответа': ''
+              }
+            ];
+          }
+          if (sheetName === 'КОММЕНТАРИИ В ПОСТАХ') return [];
+          throw new Error('delayed sheet fallback should not be used');
+        },
+        saveSheetData: async () => {
+          throw new Error('delayed sheet save should not be used');
+        },
+        invalidateCache: () => {},
+        replaceVariables: async text => text,
+        getAttachmentsFromRow: () => [],
+        createKeyboard: () => ({ buttons: [] }),
+        sendMessageWithTokenRetry: async (...args) => {
+          sendCalls.push(args);
+          return true;
+        },
+        performRowActions: async (...args) => rowActionCalls.push(args),
+        addAppLog: async () => {},
+        delayedDeliveryStore: {
+          isEnabled: () => true,
+          getDelayedRow: async (communityId, delayedId, profileId) => {
+            assert.equal(communityId, 'file-community-1');
+            assert.equal(delayedId, 'delayed-1');
+            assert.equal(profileId, '7');
+            return JSON.parse(JSON.stringify(storeRow));
+          },
+          updateDelayedRow: async (communityId, delayedId, mutator, profileId) => {
+            const row = JSON.parse(JSON.stringify(storeRow));
+            await mutator(row);
+            updates.push({ communityId, delayedId, profileId, row });
+            return { found: true, changed: true, value: row };
+          }
+        }
+      }
+    );
+
+    assert.equal(result.ok, true);
+    assert.equal(sendCalls.length, 1);
+    assert.equal(rowActionCalls.length, 1);
+    assert.equal(updates.length, 1);
+    assert.equal(updates[0].row['Статус'], 'Отправлено');
   });
 
   await run('processMailingDeliveryAction sends queued mailing and stores aggregated result', async () => {
