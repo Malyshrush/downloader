@@ -108,7 +108,7 @@ async function performRowActions(row, userId, groupId, isComment = false, commun
 /**
  * Запланировать отложенное сообщение
  */
-async function scheduleStepMessageLegacy(userId, groupId, stepData, isComment = false, communityId = null, profileId = '1') {
+async function scheduleStepMessageLegacy(userId, groupId, stepData, isComment = false, communityId = null, profileId = '1', overrides = {}) {
     try {
         const [step, delayStr] = stepData.split(',').map(s => s.trim());
         const delay = parseDelay(delayStr);
@@ -116,12 +116,17 @@ async function scheduleStepMessageLegacy(userId, groupId, stepData, isComment = 
         log('debug', `⏰ Scheduling step: "${stepData}" → step="${step}", delay=${delay}sec`);
 
         if (delay > 0 && step) {
-            const { getSheetData, saveSheetData, invalidateCache } = require('./storage');
-            const { getCommunityConfig } = require('./config');
+            const { getSheetData, updateSheetData, invalidateCache } = require('./storage');
+            const getSheetDataImpl = overrides.getSheetData || getSheetData;
+            const updateSheetDataImpl = overrides.updateSheetData || updateSheetData;
+            const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
+            const getCommunityConfig = overrides.getCommunityConfig || require('./config').getCommunityConfig;
+            const addAppLogImpl = overrides.addAppLog || addAppLog;
 
             // Московское время = UTC + 3 часа
             const mskOffset = 3 * 60 * 60 * 1000;
-            const scheduledTimeMsk = new Date(Date.now() + delay * 1000 + mskOffset);
+            const inputNow = overrides.now instanceof Date ? overrides.now : new Date();
+            const scheduledTimeMsk = new Date(inputNow.getTime() + delay * 1000 + mskOffset);
             const mskTimeStr = scheduledTimeMsk.toISOString().replace('T', ' ').substring(0, 19);
 
             // Получаем vk_group_id для корректного имени файла
@@ -133,7 +138,7 @@ async function scheduleStepMessageLegacy(userId, groupId, stepData, isComment = 
                 }
             } catch(e) {}
 
-            const delayed = await getSheetData('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+            const delayed = await getSheetDataImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
 
             delayed.push({
                 '№': (delayed.length + 1).toString(),
@@ -149,10 +154,10 @@ async function scheduleStepMessageLegacy(userId, groupId, stepData, isComment = 
                 'Ошибка': ''
             });
 
-            await saveSheetData('ОТЛОЖЕННЫЕ', delayed, fileCommunityId, profileId);
-            invalidateCache('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+            await updateSheetDataImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId, function() { return delayed; });
+            invalidateCacheImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
             log('debug', `✅ Step ${step} saved to delayed for ${userId} at ${mskTimeStr} мск. (file: ${fileCommunityId})`);
-            await addAppLog({
+            await addAppLogImpl({
                 tab: 'DELAYED',
                 title: 'Запланировано отложенное сообщение',
                 summary: 'Шаг ' + step + ' будет отправлен позже',
@@ -173,7 +178,7 @@ async function scheduleStepMessageLegacy(userId, groupId, stepData, isComment = 
  */
 async function scheduleStepMessageWithDependencies(userId, groupId, stepData, isComment = false, communityId = null, profileId = '1', overrides = {}) {
     if (!isDelayedDeliveryStoreEnabled(overrides)) {
-        return scheduleStepMessageLegacy(userId, groupId, stepData, isComment, communityId, profileId);
+        return scheduleStepMessageLegacy(userId, groupId, stepData, isComment, communityId, profileId, overrides);
     }
 
     try {

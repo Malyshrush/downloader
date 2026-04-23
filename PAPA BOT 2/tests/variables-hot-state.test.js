@@ -1,4 +1,6 @@
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const variables = require('../src/modules/variables');
 
@@ -387,6 +389,15 @@ async function run(name, fn) {
       pvs_score: '100\n200',
       pvs_level: '7'
     });
+  });
+
+  await run('variables module no longer keeps legacy saveSheetData hot writes', async () => {
+    const source = fs.readFileSync(
+      path.join(__dirname, '..', 'src', 'modules', 'variables.js'),
+      'utf8'
+    );
+
+    assert.equal(source.includes('saveSheetData('), false);
   });
 })().then(() => {
   process.exit(0);
