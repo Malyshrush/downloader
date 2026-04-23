@@ -74,6 +74,47 @@ async function run(name, fn) {
 
     assert.deepEqual(result, sourceRows);
   });
+
+  await run('applySheetRuntimeOverlay merges delayed runtime state from YDB store', async () => {
+    const sourceRows = [
+      {
+        '№': '9',
+        'Шаг': 'welcome',
+        'Статус': 'Ожидает',
+        'Дата и время отправки': '2026-04-22 12:00:00',
+        'Ошибка': ''
+      }
+    ];
+
+    const result = await storage.__testOnly.applySheetRuntimeOverlay(
+      'ОТЛОЖЕННЫЕ',
+      sourceRows,
+      'file-community-1',
+      '7',
+      {
+        delayedDeliveryStore: {
+          isEnabled: () => true,
+          getDelayedRow: async (communityId, delayedId, profileId) => {
+            assert.equal(communityId, 'file-community-1');
+            assert.equal(delayedId, '9');
+            assert.equal(profileId, '7');
+            return {
+              '№': '9',
+              'Статус': 'Отправлено',
+              'Ошибка': '',
+              'Факт. время отправки (по мск.)': '2026-04-22 12:03:00'
+            };
+          }
+        }
+      }
+    );
+
+    assert.equal(result.length, 1);
+    assert.equal(result[0]['Шаг'], 'welcome');
+    assert.equal(result[0]['Статус'], 'Отправлено');
+    assert.equal(result[0]['Факт. время отправки (по мск.)'], '2026-04-22 12:03:00');
+    assert.equal(sourceRows[0]['Статус'], 'Ожидает');
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {

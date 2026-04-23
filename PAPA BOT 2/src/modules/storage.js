@@ -6,6 +6,7 @@
 const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { log } = require('../utils/logger');
 const { createHotStateStore } = require('./hot-state-store');
+const { createDelayedDeliveryStore } = require('./delayed-delivery-store');
 const { createMailingDeliveryStore } = require('./mailing-delivery-store');
 
 const BUCKET_NAME = process.env.BUCKET_NAME || 'bot-data-storage';
@@ -21,6 +22,7 @@ const s3Client = new S3Client({
 });
 
 const hotStateStore = createHotStateStore();
+const delayedDeliveryStore = createDelayedDeliveryStore();
 const mailingDeliveryStore = createMailingDeliveryStore();
 const rawS3Client = s3Client;
 
@@ -180,6 +182,15 @@ function getMailingDeliveryStore(overrides = {}) {
     return overrides.mailingDeliveryStore || mailingDeliveryStore;
 }
 
+function getDelayedDeliveryStore(overrides = {}) {
+    return overrides.delayedDeliveryStore || delayedDeliveryStore;
+}
+
+function isDelayedDeliveryStoreEnabled(overrides = {}) {
+    const store = getDelayedDeliveryStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
 function isMailingDeliveryStoreEnabled(overrides = {}) {
     const store = getMailingDeliveryStore(overrides);
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
@@ -206,6 +217,10 @@ function getMailingRowNumber(row, fallback = '') {
     return String(getFirstDefinedValue(row, ['№', 'в„–', 'РІвЂћвЂ“']) || fallback || '').trim();
 }
 
+function getDelayedRowNumber(row, fallback = '') {
+    return String(getFirstDefinedValue(row, ['№', 'в„–', 'РІвЂћвЂ“']) || fallback || '').trim();
+}
+
 function applyMailingRuntimeState(row, state) {
     if (!state) return cloneValue(row);
     const merged = cloneValue(row);
@@ -228,24 +243,66 @@ function applyMailingRuntimeState(row, state) {
     return merged;
 }
 
+function applyDelayedRuntimeState(row, state) {
+    if (!state) return cloneValue(row);
+    const merged = cloneValue(row);
+    const status = getFirstDefinedValue(state, ['Статус', 'РЎС‚Р°С‚СѓСЃ']);
+    const error = getFirstDefinedValue(state, ['Ошибка', 'РћС€РёР±РєР°']);
+    const sentAt = getFirstDefinedValue(state, ['Фактическое время отправки', 'Р¤Р°РєС‚РёС‡РµСЃРєРѕРµ РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё']);
+    const sentAtMsk = getFirstDefinedValue(state, ['Факт. время отправки (по мск.)', 'Р¤Р°РєС‚. РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё (РїРѕ РјСЃРє.)']);
+
+    if (status) {
+        setAllValues(merged, ['Статус', 'РЎС‚Р°С‚СѓСЃ'], status);
+    }
+    if (error || getFirstDefinedValue(state, ['Ошибка', 'РћС€РёР±РєР°']) === '') {
+        setAllValues(merged, ['Ошибка', 'РћС€РёР±РєР°'], error);
+    }
+    if (sentAt || sentAtMsk) {
+        setAllValues(merged, ['Фактическое время отправки', 'Р¤Р°РєС‚РёС‡РµСЃРєРѕРµ РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё'], sentAt || sentAtMsk);
+        setAllValues(merged, ['Факт. время отправки (по мск.)', 'Р¤Р°РєС‚. РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё (РїРѕ РјСЃРє.)'], sentAtMsk || sentAt);
+    }
+
+    return merged;
+}
+
 async function applySheetRuntimeOverlay(sheetName, rows, communityId, profileId = '1', overrides = {}) {
-    if (sheetName !== 'РАССЫЛКА' && sheetName !== 'Р РђРЎРЎР«Р›РљРђ') {
+    const isMailingSheet = sheetName === 'РАССЫЛКА' || sheetName === 'Р РђРЎРЎР«Р›РљРђ';
+    const isDelayedSheet = sheetName === 'ОТЛОЖЕННЫЕ' || sheetName === 'РћРўР›РћР–Р•РќРќР«Р•';
+
+    if (!isMailingSheet && !isDelayedSheet) {
         return rows;
     }
-    if (!Array.isArray(rows) || rows.length === 0 || !isMailingDeliveryStoreEnabled(overrides)) {
+    if (!Array.isArray(rows) || rows.length === 0) {
         return rows;
     }
 
-    const store = getMailingDeliveryStore(overrides);
+    if (isMailingSheet && !isMailingDeliveryStoreEnabled(overrides)) {
+        return rows;
+    }
+    if (isDelayedSheet && !isDelayedDeliveryStoreEnabled(overrides)) {
+        return rows;
+    }
+
     const result = [];
     for (const row of rows) {
-        const mailingId = getMailingRowNumber(row);
-        if (!mailingId) {
+        if (isMailingSheet) {
+            const mailingId = getMailingRowNumber(row);
+            if (!mailingId) {
+                result.push(cloneValue(row));
+                continue;
+            }
+            const runtimeState = await getMailingDeliveryStore(overrides).getMailingState(communityId, mailingId, profileId);
+            result.push(applyMailingRuntimeState(row, runtimeState));
+            continue;
+        }
+
+        const delayedId = getDelayedRowNumber(row);
+        if (!delayedId) {
             result.push(cloneValue(row));
             continue;
         }
-        const runtimeState = await store.getMailingState(communityId, mailingId, profileId);
-        result.push(applyMailingRuntimeState(row, runtimeState));
+        const runtimeState = await getDelayedDeliveryStore(overrides).getDelayedRow(communityId, delayedId, profileId);
+        result.push(applyDelayedRuntimeState(row, runtimeState));
     }
     return result;
 }
