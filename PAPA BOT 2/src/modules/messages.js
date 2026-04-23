@@ -14,10 +14,12 @@ const { checkTriggerExists, checkTriggerMatch, checkAllConditions, normalizeTrig
 const { updateUserData } = require('./users');
 const { addAppLog } = require('./app-logs');
 const { publishOutboundAction } = require('./event-queue');
+const { createMessageRuleStore } = require('./message-rule-store');
 
 // Кэш обработанных сообщений (защита от дублей)
 const processedMessages = new Map();
 const MESSAGE_TTL = 5 * 60 * 1000;
+const messageRuleStore = createMessageRuleStore();
 
 // Очистка старых записей
 setInterval(() => {
@@ -74,11 +76,41 @@ function buildMessageOutboundAction(actionType, { userId, row, originalMessage, 
     };
 }
 
+function getMessageRuleStore(overrides = {}) {
+    return overrides.messageRuleStore || messageRuleStore;
+}
+
+function isMessageRuleStoreEnabled(overrides = {}) {
+    const store = getMessageRuleStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+async function loadMessageRows(communityId, profileId = '1', overrides = {}) {
+    const sheetGetter = overrides.getSheetData || getSheetData;
+    if (!isMessageRuleStoreEnabled(overrides)) {
+        return sheetGetter('СООБЩЕНИЯ', communityId, profileId);
+    }
+
+    const result = await getMessageRuleStore(overrides).listRuleRows(communityId, profileId);
+    if (result && result.initialized) {
+        return result.rows;
+    }
+
+    return sheetGetter('СООБЩЕНИЯ', communityId, profileId);
+}
+
 /**
  * Обработать входящее сообщение
  */
-async function handleMessage(data, profileId = '1') {
+async function handleMessage(data, profileId = '1', overrides = {}) {
     try {
+        const addAppLogFn = overrides.addAppLog || addAppLog;
+        const getVkTokenFn = overrides.getVkToken || getVkToken;
+        const updateUserDataFn = overrides.updateUserData || updateUserData;
+        const checkTriggerExistsFn = overrides.checkTriggerExists || checkTriggerExists;
+        const checkAllConditionsFn = overrides.checkAllConditions || checkAllConditions;
+        const checkTriggerMatchFn = overrides.checkTriggerMatch || checkTriggerMatch;
+        const publishOutboundActionFn = overrides.publishOutboundAction || publishOutboundAction;
         const message = data.object.message;
         const text = (message.text || '').trim();
         const userId = message.from_id;
@@ -107,7 +139,7 @@ async function handleMessage(data, profileId = '1') {
 
         log('info', '📨 ========== NEW MESSAGE ==========' );
         log('info', `📨 From: ${userId}, group_id: ${groupId}, peer_id: ${peerId}, Text: "${text}"`);
-        await addAppLog({
+        await addAppLogFn({
             tab: 'MESSAGES',
             title: data.type === 'message_reply' ? 'Исходящее сообщение' : 'Новое сообщение',
             summary: text ? 'Текст: "' + text + '"' : 'Сообщение без текста',
@@ -131,14 +163,14 @@ async function handleMessage(data, profileId = '1') {
         }
         processedMessages.set(messageKey, Date.now());
 
-        if (!await getVkToken(0, communityId, profileId)) {
+        if (!await getVkTokenFn(0, communityId, profileId)) {
             log('error', '❌ getVkToken() is not set!');
             return;
         }
 
         // ШАГ 1: Обновляем данные пользователя
         log('debug', '📝 Step 1: Updating user data...');
-        const userUpdated = await updateUserData(userId, communityId, profileId);
+        const userUpdated = await updateUserDataFn(userId, communityId, profileId);
         log('debug', '📝 Step 1 done: userUpdated=' + userUpdated);
         if (!userUpdated) {
             log('debug', `⚠️ User ${userId} not in database, but continuing...`);
@@ -146,7 +178,7 @@ async function handleMessage(data, profileId = '1') {
 
         // ШАГ 2: Загружаем сообщения
         log('debug', '📝 Step 2: Loading messages for community ' + communityId);
-        const messages = await getSheetData('СООБЩЕНИЯ', communityId, profileId);
+        const messages = await loadMessageRows(communityId, profileId, overrides);
         log('debug', '📝 Step 2 done: messages=' + (messages ? messages.length : 'null'));
         if (!messages) {
             log('error', `❌ No messages data loaded`);
@@ -176,11 +208,11 @@ async function handleMessage(data, profileId = '1') {
             if (!trigger && triggerMode !== 'FILE') continue;
 
             // Проверка триггера
-            const triggerExists = await checkTriggerExists(text, trigger, triggerMode, eventContext);
+            const triggerExists = await checkTriggerExistsFn(text, trigger, triggerMode, eventContext);
             if (!triggerExists) continue;
 
             // Проверка условий
-            const otherConditionsMet = await checkAllConditions(row, {
+            const otherConditionsMet = await checkAllConditionsFn(row, {
                 userId, groupId, text,
                 eventType: 'message',
                 communityId,
@@ -191,7 +223,7 @@ async function handleMessage(data, profileId = '1') {
             // Проверка точности
             const matchType = (row['Точно/Не точно'] || '').trim().toUpperCase() || 'НЕ ТОЧНО';
             const caseSensitiveStr = (row['Регистр'] || '').trim();
-            const exactMatch = await checkTriggerMatch(text, trigger, matchType, caseSensitiveStr, userId, groupId, communityId, profileId, triggerMode, eventContext);
+            const exactMatch = await checkTriggerMatchFn(text, trigger, matchType, caseSensitiveStr, userId, groupId, communityId, profileId, triggerMode, eventContext);
 
             if (exactMatch) {
                 matchedRowWithConditions = row;
@@ -206,7 +238,7 @@ async function handleMessage(data, profileId = '1') {
         // Принятие решения
         if (matchedRowWithConditions) {
             log('debug', '🚀 STEP 4.1: SENDING MAIN RESPONSE');
-            await publishOutboundAction(buildMessageOutboundAction('send_message_response', {
+            await publishOutboundActionFn(buildMessageOutboundAction('send_message_response', {
                 userId,
                 row: matchedRowWithConditions,
                 originalMessage: message,
@@ -215,7 +247,7 @@ async function handleMessage(data, profileId = '1') {
             }));
         } else if (matchedRowWithoutConditions) {
             log('debug', '🚀 STEP 4.2: SENDING FALLBACK FROM TRIGGER ROW');
-            await publishOutboundAction(buildMessageOutboundAction('send_message_fallback', {
+            await publishOutboundActionFn(buildMessageOutboundAction('send_message_fallback', {
                 userId,
                 row: matchedRowWithoutConditions,
                 originalMessage: message,
@@ -224,7 +256,7 @@ async function handleMessage(data, profileId = '1') {
             }));
         } else if (fallbackRow) {
             log('debug', '🚀 STEP 4.3: SENDING GENERAL FALLBACK');
-            await publishOutboundAction(buildMessageOutboundAction('send_message_fallback', {
+            await publishOutboundActionFn(buildMessageOutboundAction('send_message_fallback', {
                 userId,
                 row: fallbackRow,
                 originalMessage: message,
@@ -234,7 +266,7 @@ async function handleMessage(data, profileId = '1') {
         } else {
             // ✅ Автоответчик отключён - бот молчит если триггер не найден
             log('debug', '🚫 STEP 4.4: NO TRIGGER MATCHED - Bot stays silent');
-            await addAppLog({
+            await addAppLogFn({
                 tab: 'MESSAGES',
                 title: 'Сообщение без ответа',
                 summary: text ? 'Не найден подходящий шаг для текста "' + text + '"' : 'Не найден подходящий шаг',
@@ -413,6 +445,8 @@ module.exports = {
     sendFallbackResponseFromRow,
     sendMessageWithTokenRetry,
     __testOnly: {
-        buildMessageOutboundAction
+        buildMessageOutboundAction,
+        loadMessageRows,
+        handleMessageWithDependencies: handleMessage
     }
 };

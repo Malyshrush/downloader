@@ -43,6 +43,8 @@ function buildEventRuntimeConfig(env = process.env) {
     ydbDelayedDeliveriesTable: String(env.YDB_DELAYED_DELIVERIES_TABLE || 'delayed_delivery_entries').trim() || 'delayed_delivery_entries',
     ydbMailingDeliveriesTable: String(env.YDB_MAILING_DELIVERIES_TABLE || 'mailing_delivery_entries').trim() || 'mailing_delivery_entries',
     ydbStructuredTriggersTable: String(env.YDB_STRUCTURED_TRIGGERS_TABLE || 'structured_trigger_entries').trim() || 'structured_trigger_entries',
+    ydbMessageRulesTable: String(env.YDB_MESSAGE_RULES_TABLE || 'message_rule_entries').trim() || 'message_rule_entries',
+    ydbCommentRulesTable: String(env.YDB_COMMENT_RULES_TABLE || 'comment_rule_entries').trim() || 'comment_rule_entries',
     ydbProfileUserSharedTable: String(env.YDB_PROFILE_USER_SHARED_TABLE || 'profile_user_shared_state').trim() || 'profile_user_shared_state',
     ydbSharedVariablesTable: String(env.YDB_SHARED_VARIABLES_TABLE || 'shared_variables_catalog').trim() || 'shared_variables_catalog',
     idempotencyLeaseSeconds: normalizePositiveInteger(env.EVENT_IDEMPOTENCY_LEASE_SECONDS, 300),

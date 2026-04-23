@@ -9,6 +9,8 @@ const { createHotStateStore } = require('./hot-state-store');
 const { createDelayedDeliveryStore } = require('./delayed-delivery-store');
 const { createMailingDeliveryStore } = require('./mailing-delivery-store');
 const { createStructuredTriggerStore } = require('./structured-trigger-store');
+const { createMessageRuleStore } = require('./message-rule-store');
+const { createCommentRuleStore } = require('./comment-rule-store');
 
 const BUCKET_NAME = process.env.BUCKET_NAME || 'bot-data-storage';
 const S3_TIMEOUT_MS = 10000; // 10 секунд таймаут
@@ -26,6 +28,8 @@ const hotStateStore = createHotStateStore();
 const delayedDeliveryStore = createDelayedDeliveryStore();
 const mailingDeliveryStore = createMailingDeliveryStore();
 const structuredTriggerStore = createStructuredTriggerStore();
+const messageRuleStore = createMessageRuleStore();
+const commentRuleStore = createCommentRuleStore();
 const rawS3Client = s3Client;
 
 const FILE_BASE = {
@@ -192,6 +196,14 @@ function getStructuredTriggerStore(overrides = {}) {
     return overrides.structuredTriggerStore || structuredTriggerStore;
 }
 
+function getMessageRuleStore(overrides = {}) {
+    return overrides.messageRuleStore || messageRuleStore;
+}
+
+function getCommentRuleStore(overrides = {}) {
+    return overrides.commentRuleStore || commentRuleStore;
+}
+
 function isDelayedDeliveryStoreEnabled(overrides = {}) {
     const store = getDelayedDeliveryStore(overrides);
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
@@ -199,6 +211,16 @@ function isDelayedDeliveryStoreEnabled(overrides = {}) {
 
 function isStructuredTriggerStoreEnabled(overrides = {}) {
     const store = getStructuredTriggerStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function isMessageRuleStoreEnabled(overrides = {}) {
+    const store = getMessageRuleStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function isCommentRuleStoreEnabled(overrides = {}) {
+    const store = getCommentRuleStore(overrides);
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
@@ -336,6 +358,62 @@ async function syncStructuredTriggerSheet(sheetName, rows, communityId, profileI
     };
 }
 
+async function syncMessageRuleSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const isMessageSheet = sheetName === 'СООБЩЕНИЯ' || sheetName === 'РЎРћРћР‘Р©Р•РќРРЇ';
+    if (!isMessageSheet) {
+        return { synced: false, backend: 'skipped' };
+    }
+    if (!isMessageRuleStoreEnabled(overrides)) {
+        return { synced: false, backend: 'disabled' };
+    }
+
+    const normalizedRows = Array.isArray(rows) ? cloneValue(rows) : [];
+    const result = await getMessageRuleStore(overrides).replaceRuleRows(communityId, normalizedRows, profileId);
+    return {
+        synced: true,
+        backend: result.backend || 'ydb-message-rules',
+        stored: result.stored || 0
+    };
+}
+
+async function syncCommentRuleSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const isCommentSheet = sheetName === 'КОММЕНТАРИИ В ПОСТАХ' || sheetName === 'РљРћРњРњР•РќРўРђР РР Р’ РџРћРЎРўРђРҐ';
+    if (!isCommentSheet) {
+        return { synced: false, backend: 'skipped' };
+    }
+    if (!isCommentRuleStoreEnabled(overrides)) {
+        return { synced: false, backend: 'disabled' };
+    }
+
+    const normalizedRows = Array.isArray(rows) ? cloneValue(rows) : [];
+    const result = await getCommentRuleStore(overrides).replaceRuleRows(communityId, normalizedRows, profileId);
+    return {
+        synced: true,
+        backend: result.backend || 'ydb-comment-rules',
+        stored: result.stored || 0
+    };
+}
+
+async function syncStructuredReadModelSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const handlers = [
+        syncStructuredTriggerSheet,
+        syncMessageRuleSheet,
+        syncCommentRuleSheet
+    ];
+
+    for (const handler of handlers) {
+        const result = await handler(sheetName, rows, communityId, profileId, overrides);
+        if (result && result.synced) {
+            return result;
+        }
+    }
+
+    return {
+        synced: false,
+        backend: 'skipped'
+    };
+}
+
 async function initializeStorage() {
     log('info', '🔧 Checking Object Storage initialization...');
 
@@ -437,7 +515,7 @@ async function saveSheetData(sheetName, data, communityId, profileId = '1') {
     try {
         log('info', `💾 Saving ${fileName}...`);
         await hotStateStore.saveJsonObject(fileName, data);
-        await syncStructuredTriggerSheet(sheetName, data, communityId, pid);
+        await syncStructuredReadModelSheet(sheetName, data, communityId, pid);
         const cacheKey = communityId ? `${pid}_${sheetName}_${communityId}` : `${pid}_${sheetName}`;
         delete memoryCache.data[cacheKey]; delete memoryCache.lastUpdated[cacheKey];
         if (sheetName === 'СООБЩЕНИЯ' || sheetName === 'КОММЕНТАРИИ В ПОСТАХ' || sheetName === 'ПЕРЕМЕННЫЕ') {
@@ -478,7 +556,7 @@ async function updateSheetData(sheetName, communityId, profileId = '1', updater)
     const cacheKey = communityId ? `${pid}_${sheetName}_${communityId}` : `${pid}_${sheetName}`;
     memoryCache.data[cacheKey] = result.value;
     memoryCache.lastUpdated[cacheKey] = Date.now();
-    await syncStructuredTriggerSheet(sheetName, result.value, communityId, pid);
+    await syncStructuredReadModelSheet(sheetName, result.value, communityId, pid);
     if (sheetName === 'РЎРћРћР‘Р©Р•РќРРЇ' || sheetName === 'РљРћРњРњР•РќРўРђР РР Р’ РџРћРЎРўРђРҐ' || sheetName === 'РџР•Р Р•РњР•РќРќР«Р•') {
         const uk = communityId ? `${pid}_РџРћР›Р¬Р—РћР’РђРўР•Р›Р_${communityId}` : `${pid}_РџРћР›Р¬Р—РћР’РђРўР•Р›Р`;
         delete memoryCache.data[uk];
@@ -496,6 +574,9 @@ module.exports = {
     getLegacyFileName, normalizeProfileId,
     __testOnly: {
         applySheetRuntimeOverlay,
-        syncStructuredTriggerSheet
+        syncStructuredTriggerSheet,
+        syncMessageRuleSheet,
+        syncCommentRuleSheet,
+        syncStructuredReadModelSheet
     }
 };

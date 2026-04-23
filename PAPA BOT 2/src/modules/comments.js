@@ -13,10 +13,12 @@ const { checkTriggerExists, checkTriggerMatch, checkAllConditions, normalizeTrig
 const { updateUserData } = require('./users');
 const { addAppLog } = require('./app-logs');
 const { publishOutboundAction } = require('./event-queue');
+const { createCommentRuleStore } = require('./comment-rule-store');
 
 // Кэш обработанных комментариев
 const processedComments = new Map();
 const COMMENT_TTL = 5 * 60 * 1000;
+const commentRuleStore = createCommentRuleStore();
 
 setInterval(() => {
     const now = Date.now();
@@ -68,11 +70,40 @@ function buildCommentOutboundAction(actionType, { comment, groupId, row, communi
     };
 }
 
+function getCommentRuleStore(overrides = {}) {
+    return overrides.commentRuleStore || commentRuleStore;
+}
+
+function isCommentRuleStoreEnabled(overrides = {}) {
+    const store = getCommentRuleStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+async function loadCommentRows(communityId, profileId = '1', overrides = {}) {
+    const sheetGetter = overrides.getSheetData || getSheetData;
+    if (!isCommentRuleStoreEnabled(overrides)) {
+        return sheetGetter('КОММЕНТАРИИ В ПОСТАХ', communityId, profileId);
+    }
+
+    const result = await getCommentRuleStore(overrides).listRuleRows(communityId, profileId);
+    if (result && result.initialized) {
+        return result.rows;
+    }
+
+    return sheetGetter('КОММЕНТАРИИ В ПОСТАХ', communityId, profileId);
+}
+
 /**
  * Обработать комментарий
  */
-async function handleComment(data, profileId = '1') {
+async function handleComment(data, profileId = '1', overrides = {}) {
     try {
+        const addAppLogFn = overrides.addAppLog || addAppLog;
+        const updateUserDataFn = overrides.updateUserData || updateUserData;
+        const checkTriggerExistsFn = overrides.checkTriggerExists || checkTriggerExists;
+        const checkAllConditionsFn = overrides.checkAllConditions || checkAllConditions;
+        const checkTriggerMatchFn = overrides.checkTriggerMatch || checkTriggerMatch;
+        const publishOutboundActionFn = overrides.publishOutboundAction || publishOutboundAction;
         const comment = data.object;
         
         // Очищаем текст от упоминаний сообщества
@@ -117,7 +148,7 @@ async function handleComment(data, profileId = '1') {
         const postIdentifier = `-${groupId}_${comment.post_id}`;
 
         log('info', `💬 New comment from ${userId}: ${text}`);
-        await addAppLog({
+        await addAppLogFn({
             tab: 'COMMENTS',
             title: 'Новый комментарий',
             summary: text ? 'Комментарий: "' + text + '"' : 'Комментарий без текста',
@@ -134,9 +165,9 @@ async function handleComment(data, profileId = '1') {
         }
         processedComments.set(commentKey, Date.now());
 
-        await updateUserData(userId, communityId, profileId);
+        await updateUserDataFn(userId, communityId, profileId);
 
-        const comments = await getSheetData('КОММЕНТАРИИ В ПОСТАХ', communityId, profileId);
+        const comments = await loadCommentRows(communityId, profileId, overrides);
         if (!comments) {
             log('error', `❌ Failed to load comments data`);
             return;
@@ -159,11 +190,11 @@ async function handleComment(data, profileId = '1') {
             if (!trigger && triggerMode !== 'FILE') continue;
 
             // Проверка триггера
-            const triggerExists = await checkTriggerExists(text, trigger, triggerMode, eventContext);
+            const triggerExists = await checkTriggerExistsFn(text, trigger, triggerMode, eventContext);
             if (!triggerExists) continue;
 
             // Проверка условий
-            const otherConditionsMet = await checkAllConditions(row, {
+            const otherConditionsMet = await checkAllConditionsFn(row, {
                 userId, groupId, text,
                 postId: postIdentifier,
                 commentText: text,
@@ -176,7 +207,7 @@ async function handleComment(data, profileId = '1') {
             // Проверка точности
             const matchType = (row['Точно/Не точно'] || '').trim().toUpperCase() || 'НЕ ТОЧНО';
             const caseSensitiveStr = (row['Регистр'] || '').trim();
-            const exactMatch = await checkTriggerMatch(text, trigger, matchType, caseSensitiveStr, userId, groupId, communityId, profileId, triggerMode, eventContext);
+            const exactMatch = await checkTriggerMatchFn(text, trigger, matchType, caseSensitiveStr, userId, groupId, communityId, profileId, triggerMode, eventContext);
 
             if (exactMatch) {
                 matchedRowWithConditions = row;
@@ -190,7 +221,7 @@ async function handleComment(data, profileId = '1') {
 
         // Отправка ответа
         if (matchedRowWithConditions) {
-            await publishOutboundAction(buildCommentOutboundAction('send_comment_response', {
+            await publishOutboundActionFn(buildCommentOutboundAction('send_comment_response', {
                 comment,
                 groupId,
                 row: matchedRowWithConditions,
@@ -198,7 +229,7 @@ async function handleComment(data, profileId = '1') {
                 profileId
             }));
         } else if (matchedRowWithoutConditions) {
-            await publishOutboundAction(buildCommentOutboundAction('send_comment_fallback', {
+            await publishOutboundActionFn(buildCommentOutboundAction('send_comment_fallback', {
                 comment,
                 groupId,
                 row: matchedRowWithoutConditions,
@@ -206,7 +237,7 @@ async function handleComment(data, profileId = '1') {
                 profileId
             }));
         } else if (fallbackRow) {
-            await publishOutboundAction(buildCommentOutboundAction('send_comment_fallback', {
+            await publishOutboundActionFn(buildCommentOutboundAction('send_comment_fallback', {
                 comment,
                 groupId,
                 row: fallbackRow,
@@ -292,6 +323,8 @@ module.exports = {
     sendCommentAndPerformActions,
     sendFallbackCommentFromRow,
     __testOnly: {
-        buildCommentOutboundAction
+        buildCommentOutboundAction,
+        loadCommentRows,
+        handleCommentWithDependencies: handleComment
     }
 };

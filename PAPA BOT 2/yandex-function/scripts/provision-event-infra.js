@@ -149,6 +149,8 @@ async function main() {
   const delayedDeliveriesTableName = args['delayed-deliveries-table'] || runtimeConfig.ydbDelayedDeliveriesTable;
   const mailingDeliveriesTableName = args['mailing-deliveries-table'] || runtimeConfig.ydbMailingDeliveriesTable;
   const structuredTriggersTableName = args['structured-triggers-table'] || runtimeConfig.ydbStructuredTriggersTable;
+  const messageRulesTableName = args['message-rules-table'] || runtimeConfig.ydbMessageRulesTable;
+  const commentRulesTableName = args['comment-rules-table'] || runtimeConfig.ydbCommentRulesTable;
   const profileUserSharedTableName = args['profile-user-shared-table'] || runtimeConfig.ydbProfileUserSharedTable;
   const sharedVariablesTableName = args['shared-variables-table'] || runtimeConfig.ydbSharedVariablesTable;
 
@@ -333,6 +335,54 @@ async function main() {
       }
     ]
   );
+  const messageRulesTable = await ensureTable(
+    dynamoClient,
+    messageRulesTableName,
+    [
+      {
+        AttributeName: 'ruleScope',
+        KeyType: 'HASH'
+      },
+      {
+        AttributeName: 'ruleId',
+        KeyType: 'RANGE'
+      }
+    ],
+    [
+      {
+        AttributeName: 'ruleScope',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'ruleId',
+        AttributeType: 'S'
+      }
+    ]
+  );
+  const commentRulesTable = await ensureTable(
+    dynamoClient,
+    commentRulesTableName,
+    [
+      {
+        AttributeName: 'ruleScope',
+        KeyType: 'HASH'
+      },
+      {
+        AttributeName: 'ruleId',
+        KeyType: 'RANGE'
+      }
+    ],
+    [
+      {
+        AttributeName: 'ruleScope',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'ruleId',
+        AttributeType: 'S'
+      }
+    ]
+  );
   const profileUserSharedTable = await ensureTable(
     dynamoClient,
     profileUserSharedTableName,
@@ -396,6 +446,8 @@ async function main() {
     delayedDeliveriesTable,
     mailingDeliveriesTable,
     structuredTriggersTable,
+    messageRulesTable,
+    commentRulesTable,
     profileUserSharedTable,
     sharedVariablesTable
   };
