@@ -19,6 +19,10 @@ function normalizeVariableName(variableName) {
   return String(variableName || '').trim().toLowerCase();
 }
 
+function buildMetaVariableKey(entryType) {
+  return `__meta__:${String(entryType || '').trim().toLowerCase()}`;
+}
+
 function buildCommunityVariablesScope(communityId = null, profileId = '1') {
   return `${normalizeProfileId(profileId)}:${normalizeCommunityId(communityId)}`;
 }
@@ -150,8 +154,11 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
   async function listVariableState(communityId = null, profileId = '1') {
     if (!enabled) {
       return {
+        globalInitialized: false,
         globalVars: {},
+        vkInitialized: false,
         vkVars: {},
+        userCatalogInitialized: false,
         userVariableNames: []
       };
     }
@@ -161,29 +168,44 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
     const vkVars = {};
     const userVariableNames = [];
     const seenUserVariableNames = new Set();
+    let globalInitialized = false;
+    let vkInitialized = false;
+    let userCatalogInitialized = false;
 
     for (const item of entries) {
       const entryType = String(item && item.entryType || '').trim().toLowerCase();
       const variableName = normalizeVariableName(item && item.variableName);
+      if (entryType === 'meta') {
+        if (variableName === 'global') globalInitialized = true;
+        if (variableName === 'vk') vkInitialized = true;
+        if (variableName === 'user') userCatalogInitialized = true;
+        continue;
+      }
       if (!variableName) continue;
 
       if (entryType === 'global') {
+        globalInitialized = true;
         globalVars[variableName] = String(item && item.value || '').trim();
         continue;
       }
       if (entryType === 'vk') {
+        vkInitialized = true;
         vkVars[variableName] = String(item && item.value || '').trim();
         continue;
       }
       if (entryType === 'user' && !seenUserVariableNames.has(variableName)) {
+        userCatalogInitialized = true;
         seenUserVariableNames.add(variableName);
         userVariableNames.push(variableName);
       }
     }
 
     return {
+      globalInitialized,
       globalVars,
+      vkInitialized,
       vkVars,
+      userCatalogInitialized,
       userVariableNames
     };
   }
@@ -209,7 +231,12 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
     const normalizedEntryType = String(entryType || '').trim().toLowerCase();
     const existing = await listAllEntries(communityId, profileId);
     const deleteKeys = existing
-      .filter(item => String(item && item.entryType || '').trim().toLowerCase() === normalizedEntryType)
+      .filter(item => {
+        const currentEntryType = String(item && item.entryType || '').trim().toLowerCase();
+        const currentVariableName = normalizeVariableName(item && item.variableName);
+        return currentEntryType === normalizedEntryType
+          || (currentEntryType === 'meta' && currentVariableName === normalizedEntryType);
+      })
       .map(item => ({
         communityScope,
         variableKey: String(item && item.variableKey || '').trim()
@@ -227,6 +254,13 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
         value: String(value || '').trim()
       };
     }).filter(Boolean);
+    putEntries.push({
+      communityScope,
+      variableKey: buildMetaVariableKey(normalizedEntryType),
+      entryType: 'meta',
+      variableName: normalizedEntryType,
+      value: 'initialized'
+    });
 
     await batchWriteItems({
       deleteKeys,
@@ -234,7 +268,7 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
     });
 
     return {
-      stored: putEntries.length,
+      stored: Object.keys(variables || {}).filter(name => normalizeVariableName(name)).length,
       deleted: deleteKeys.length,
       backend: 'ydb-community-variables'
     };
@@ -247,6 +281,11 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
 
     const communityScope = buildCommunityVariablesScope(communityId, profileId);
     const existing = await listAllEntries(communityId, profileId);
+    const hasUserMeta = existing.some(item => {
+      const currentEntryType = String(item && item.entryType || '').trim().toLowerCase();
+      const currentVariableName = normalizeVariableName(item && item.variableName);
+      return currentEntryType === 'meta' && currentVariableName === 'user';
+    });
     const existingNames = new Set(
       existing
         .filter(item => String(item && item.entryType || '').trim().toLowerCase() === 'user')
@@ -271,12 +310,22 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
       });
     }
 
+    if (!hasUserMeta) {
+      missingEntries.push({
+        communityScope,
+        variableKey: buildMetaVariableKey('user'),
+        entryType: 'meta',
+        variableName: 'user',
+        value: 'initialized'
+      });
+    }
+
     if (missingEntries.length) {
       await putItems(missingEntries);
     }
 
     return {
-      stored: missingEntries.length,
+      stored: seenNames.size,
       backend: 'ydb-community-variables'
     };
   }

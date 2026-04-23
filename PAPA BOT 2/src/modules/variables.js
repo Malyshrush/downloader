@@ -838,17 +838,30 @@ async function updateProfileUserSharedVariables(userId, variables, profileId = '
 
 async function getGlobalVariablesWithDependencies(communityId = null, profileId = '1', overrides = {}) {
     try {
+        const sheetGetter = overrides.getSheetData || getSheetData;
         if (isCommunityVariablesStoreEnabled(overrides)) {
             const structuredState = await getCommunityVariablesStore(overrides).listVariableState(communityId, profileId);
-            const hasStructuredGlobals = Object.keys(structuredState.globalVars || {}).length > 0;
-            const hasStructuredVk = Object.keys(structuredState.vkVars || {}).length > 0;
+            const structuredGlobals = structuredState.globalVars || {};
+            const structuredVk = structuredState.vkVars || {};
+            const hasStructuredGlobals = typeof structuredState.globalInitialized === 'boolean'
+                ? structuredState.globalInitialized
+                : Object.keys(structuredGlobals).length > 0;
+            const hasStructuredVk = typeof structuredState.vkInitialized === 'boolean'
+                ? structuredState.vkInitialized
+                : Object.keys(structuredVk).length > 0;
 
             if (hasStructuredGlobals && hasStructuredVk) {
                 return {
-                    globalVars: structuredState.globalVars || {},
-                    vkVars: structuredState.vkVars || {}
+                    globalVars: structuredGlobals,
+                    vkVars: structuredVk
                 };
             }
+            const varsSheetFromOverride = await sheetGetter('ПЕРЕМЕННЫЕ', communityId, profileId);
+            const fallbackStateFromOverride = buildCommunityVariableStateFromRows(varsSheetFromOverride);
+            return {
+                globalVars: hasStructuredGlobals ? structuredGlobals : fallbackStateFromOverride.globalVars,
+                vkVars: hasStructuredVk ? structuredVk : fallbackStateFromOverride.vkVars
+            };
 
             const varsSheet = await getSheetData('РџР•Р Р•РњР•РќРќР«Р•', communityId, profileId);
             const fallbackState = buildCommunityVariableStateFromRows(varsSheet);

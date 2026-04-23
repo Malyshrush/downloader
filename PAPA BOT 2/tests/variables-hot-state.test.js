@@ -113,6 +113,78 @@ async function run(name, fn) {
     });
   });
 
+  await run('getGlobalVariablesWithDependencies keeps structured empty sets without sheet fallback', async () => {
+    const result = await variables.__testOnly.getGlobalVariablesWithDependencies(
+      'community-1',
+      '8',
+      {
+        getSheetData: async () => {
+          throw new Error('sheet fallback should not be used');
+        },
+        communityVariablesStore: {
+          isEnabled: () => true,
+          listVariableState: async () => ({
+            globalInitialized: true,
+            globalVars: {},
+            vkInitialized: true,
+            vkVars: {},
+            userCatalogInitialized: true,
+            userVariableNames: []
+          })
+        }
+      }
+    );
+
+    assert.deepEqual(result, {
+      globalVars: {},
+      vkVars: {}
+    });
+  });
+
+  await run('getGlobalVariablesWithDependencies falls back only for uninitialized structured types', async () => {
+    const result = await variables.__testOnly.getGlobalVariablesWithDependencies(
+      'community-1',
+      '8',
+      {
+        getSheetData: async (sheetName, communityId, profileId) => {
+          assert.equal(sheetName, 'ПЕРЕМЕННЫЕ');
+          assert.equal(communityId, 'community-1');
+          assert.equal(profileId, '8');
+          return [
+            {
+              'Глобальная': '',
+              'Значение ГП': '',
+              'ПЕРЕМЕННЫЕ ВК': '%vk_user%',
+              'Значение/Описание ПВК': 'Имя пользователя'
+            }
+          ];
+        },
+        communityVariablesStore: {
+          isEnabled: () => true,
+          listVariableState: async () => ({
+            globalInitialized: true,
+            globalVars: {
+              gp_limit: '500'
+            },
+            vkInitialized: false,
+            vkVars: {},
+            userCatalogInitialized: false,
+            userVariableNames: []
+          })
+        }
+      }
+    );
+
+    assert.deepEqual(result, {
+      globalVars: {
+        gp_limit: '500'
+      },
+      vkVars: {
+        '%vk_user%': 'Имя пользователя'
+      }
+    });
+  });
+
   await run('updateGlobalVariablesWithDependencies writes structured global entries when enabled', async () => {
     const calls = [];
 

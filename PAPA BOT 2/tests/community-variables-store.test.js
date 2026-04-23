@@ -71,13 +71,56 @@ function createConfig(overrides = {}) {
     const snapshot = await store.listVariableState('community-7', '8');
 
     assert.deepEqual(snapshot, {
+      globalInitialized: true,
       globalVars: {
         gp_limit: '500'
       },
+      vkInitialized: true,
       vkVars: {
         '%vk_user%': 'Имя пользователя'
       },
+      userCatalogInitialized: true,
       userVariableNames: ['pp_score']
+    });
+  });
+
+  await run('community variables store keeps typed initialization markers for empty sets', async () => {
+    const store = createCommunityVariablesStore(
+      createConfig(),
+      {
+        queryItems: async request => {
+          assert.equal(request.communityScope, '8:community-7');
+          return {
+            Items: [
+              {
+                communityScope: '8:community-7',
+                variableKey: '__meta__:global',
+                entryType: 'meta',
+                variableName: 'global',
+                value: 'initialized'
+              },
+              {
+                communityScope: '8:community-7',
+                variableKey: '__meta__:vk',
+                entryType: 'meta',
+                variableName: 'vk',
+                value: 'initialized'
+              }
+            ]
+          };
+        }
+      }
+    );
+
+    const snapshot = await store.listVariableState('community-7', '8');
+
+    assert.deepEqual(snapshot, {
+      globalInitialized: true,
+      globalVars: {},
+      vkInitialized: true,
+      vkVars: {},
+      userCatalogInitialized: false,
+      userVariableNames: []
     });
   });
 
@@ -153,6 +196,13 @@ function createConfig(overrides = {}) {
           entryType: 'global',
           variableName: 'gp_mode',
           value: 'auto'
+        },
+        {
+          communityScope: '8:community-7',
+          variableKey: '__meta__:global',
+          entryType: 'meta',
+          variableName: 'global',
+          value: 'initialized'
         }
       ]
     });
@@ -229,6 +279,13 @@ function createConfig(overrides = {}) {
           entryType: 'vk',
           variableName: '%vk_group%',
           value: 'Название сообщества'
+        },
+        {
+          communityScope: '8:community-7',
+          variableKey: '__meta__:vk',
+          entryType: 'meta',
+          variableName: 'vk',
+          value: 'initialized'
         }
       ]
     });
@@ -281,6 +338,13 @@ function createConfig(overrides = {}) {
           entryType: 'user',
           variableName: 'pp_level',
           value: ''
+        },
+        {
+          communityScope: '8:community-7',
+          variableKey: '__meta__:user',
+          entryType: 'meta',
+          variableName: 'user',
+          value: 'initialized'
         }
       ]
     ]);
