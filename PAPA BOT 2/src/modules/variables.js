@@ -862,23 +862,16 @@ async function getGlobalVariablesWithDependencies(communityId = null, profileId 
                 globalVars: hasStructuredGlobals ? structuredGlobals : fallbackStateFromOverride.globalVars,
                 vkVars: hasStructuredVk ? structuredVk : fallbackStateFromOverride.vkVars
             };
-
-            const varsSheet = await getSheetData('РџР•Р Р•РњР•РќРќР«Р•', communityId, profileId);
-            const fallbackState = buildCommunityVariableStateFromRows(varsSheet);
-            return {
-                globalVars: hasStructuredGlobals ? (structuredState.globalVars || {}) : fallbackState.globalVars,
-                vkVars: hasStructuredVk ? (structuredState.vkVars || {}) : fallbackState.vkVars
-            };
         }
 
-        const varsSheet = await getSheetData('РџР•Р Р•РњР•РќРќР«Р•', communityId, profileId);
+        const varsSheet = await sheetGetter('ПЕРЕМЕННЫЕ', communityId, profileId);
         const fallbackState = buildCommunityVariableStateFromRows(varsSheet);
         return {
             globalVars: fallbackState.globalVars,
             vkVars: fallbackState.vkVars
         };
     } catch (error) {
-        log('error', 'вќЊ Error getting global variables:', error);
+        log('error', 'Error getting global variables:', error);
         return { globalVars: {}, vkVars: {} };
     }
 }
