@@ -158,6 +158,82 @@ function createConfig(overrides = {}) {
     });
   });
 
+  await run('community variables store replaces only vk entries', async () => {
+    const batchCalls = [];
+    const store = createCommunityVariablesStore(
+      createConfig(),
+      {
+        queryItems: async request => {
+          assert.equal(request.communityScope, '8:community-7');
+          return {
+            Items: [
+              {
+                communityScope: '8:community-7',
+                variableKey: 'vk:%vk_old%',
+                entryType: 'vk',
+                variableName: '%vk_old%',
+                value: 'legacy'
+              },
+              {
+                communityScope: '8:community-7',
+                variableKey: 'global:gp_limit',
+                entryType: 'global',
+                variableName: 'gp_limit',
+                value: '500'
+              },
+              {
+                communityScope: '8:community-7',
+                variableKey: 'user:pp_score',
+                entryType: 'user',
+                variableName: 'pp_score',
+                value: ''
+              }
+            ]
+          };
+        },
+        batchWriteItems: async operations => {
+          batchCalls.push(operations);
+          return { ok: true };
+        }
+      }
+    );
+
+    const result = await store.replaceVkVariables('community-7', {
+      '%vk_user%': 'Имя пользователя',
+      '%vk_group%': 'Название сообщества'
+    }, '8');
+
+    assert.deepEqual(result, {
+      stored: 2,
+      deleted: 1,
+      backend: 'ydb-community-variables'
+    });
+    assert.deepEqual(batchCalls[0], {
+      deleteKeys: [
+        {
+          communityScope: '8:community-7',
+          variableKey: 'vk:%vk_old%'
+        }
+      ],
+      putItems: [
+        {
+          communityScope: '8:community-7',
+          variableKey: 'vk:%vk_user%',
+          entryType: 'vk',
+          variableName: '%vk_user%',
+          value: 'Имя пользователя'
+        },
+        {
+          communityScope: '8:community-7',
+          variableKey: 'vk:%vk_group%',
+          entryType: 'vk',
+          variableName: '%vk_group%',
+          value: 'Название сообщества'
+        }
+      ]
+    });
+  });
+
   await run('community variables store appends only missing user catalog entries', async () => {
     const putCalls = [];
     const store = createCommunityVariablesStore(

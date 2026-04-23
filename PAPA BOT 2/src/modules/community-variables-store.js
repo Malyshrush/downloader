@@ -193,10 +193,23 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
       return { stored: 0, deleted: 0, backend: 'disabled' };
     }
 
+    return replaceTypedVariables(communityId, 'global', variables, profileId);
+  }
+
+  async function replaceVkVariables(communityId = null, variables = {}, profileId = '1') {
+    if (!enabled) {
+      return { stored: 0, deleted: 0, backend: 'disabled' };
+    }
+
+    return replaceTypedVariables(communityId, 'vk', variables, profileId);
+  }
+
+  async function replaceTypedVariables(communityId = null, entryType = '', variables = {}, profileId = '1') {
     const communityScope = buildCommunityVariablesScope(communityId, profileId);
+    const normalizedEntryType = String(entryType || '').trim().toLowerCase();
     const existing = await listAllEntries(communityId, profileId);
     const deleteKeys = existing
-      .filter(item => String(item && item.entryType || '').trim().toLowerCase() === 'global')
+      .filter(item => String(item && item.entryType || '').trim().toLowerCase() === normalizedEntryType)
       .map(item => ({
         communityScope,
         variableKey: String(item && item.variableKey || '').trim()
@@ -208,8 +221,8 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
       if (!variableName) return null;
       return {
         communityScope,
-        variableKey: buildVariableKey('global', variableName),
-        entryType: 'global',
+        variableKey: buildVariableKey(normalizedEntryType, variableName),
+        entryType: normalizedEntryType,
         variableName,
         value: String(value || '').trim()
       };
@@ -272,6 +285,7 @@ function createCommunityVariablesStore(config = buildEventRuntimeConfig(process.
     isEnabled: () => enabled,
     listVariableState,
     replaceGlobalVariables,
+    replaceVkVariables,
     ensureUserVariableCatalog
   };
 }
