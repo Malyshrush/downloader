@@ -6,6 +6,7 @@
 const { S3Client, GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { log } = require('../utils/logger');
 const { createHotStateStore } = require('./hot-state-store');
+const { createMailingDeliveryStore } = require('./mailing-delivery-store');
 
 const BUCKET_NAME = process.env.BUCKET_NAME || 'bot-data-storage';
 const S3_TIMEOUT_MS = 10000; // 10 секунд таймаут
@@ -20,6 +21,7 @@ const s3Client = new S3Client({
 });
 
 const hotStateStore = createHotStateStore();
+const mailingDeliveryStore = createMailingDeliveryStore();
 const rawS3Client = s3Client;
 
 const FILE_BASE = {
@@ -169,6 +171,85 @@ async function s3Send(command) {
 function getS3Client() { return proxyS3Client; }
 function getBucketName() { return BUCKET_NAME; }
 
+function cloneValue(value) {
+    if (value === undefined) return undefined;
+    return JSON.parse(JSON.stringify(value));
+}
+
+function getMailingDeliveryStore(overrides = {}) {
+    return overrides.mailingDeliveryStore || mailingDeliveryStore;
+}
+
+function isMailingDeliveryStoreEnabled(overrides = {}) {
+    const store = getMailingDeliveryStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function getFirstDefinedValue(row, keys) {
+    for (const key of keys) {
+        if (!row || !Object.prototype.hasOwnProperty.call(row, key)) continue;
+        const value = row[key];
+        if (value !== undefined && value !== null && String(value).trim() !== '') {
+            return value;
+        }
+    }
+    return '';
+}
+
+function setAllValues(row, keys, value) {
+    for (const key of keys) {
+        row[key] = value;
+    }
+}
+
+function getMailingRowNumber(row, fallback = '') {
+    return String(getFirstDefinedValue(row, ['№', 'в„–', 'РІвЂћвЂ“']) || fallback || '').trim();
+}
+
+function applyMailingRuntimeState(row, state) {
+    if (!state) return cloneValue(row);
+    const merged = cloneValue(row);
+    const status = getFirstDefinedValue(state, ['Статус', 'РЎС‚Р°С‚СѓСЃ']);
+    const error = getFirstDefinedValue(state, ['Ошибка', 'РћС€РёР±РєР°']);
+    const sentAt = getFirstDefinedValue(state, ['Фактическое время отправки', 'Р¤Р°РєС‚РёС‡РµСЃРєРѕРµ РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё']);
+    const sentAtMsk = getFirstDefinedValue(state, ['Факт. время отправки (по мск.)', 'Р¤Р°РєС‚. РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё (РїРѕ РјСЃРє.)']);
+
+    if (status) {
+        setAllValues(merged, ['Статус', 'РЎС‚Р°С‚СѓСЃ'], status);
+    }
+    if (error || getFirstDefinedValue(state, ['Ошибка', 'РћС€РёР±РєР°']) === '') {
+        setAllValues(merged, ['Ошибка', 'РћС€РёР±РєР°'], error);
+    }
+    if (sentAt || sentAtMsk) {
+        setAllValues(merged, ['Фактическое время отправки', 'Р¤Р°РєС‚РёС‡РµСЃРєРѕРµ РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё'], sentAt || sentAtMsk);
+        setAllValues(merged, ['Факт. время отправки (по мск.)', 'Р¤Р°РєС‚. РІСЂРµРјСЏ РѕС‚РїСЂР°РІРєРё (РїРѕ РјСЃРє.)'], sentAtMsk || sentAt);
+    }
+
+    return merged;
+}
+
+async function applySheetRuntimeOverlay(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    if (sheetName !== 'РАССЫЛКА' && sheetName !== 'Р РђРЎРЎР«Р›РљРђ') {
+        return rows;
+    }
+    if (!Array.isArray(rows) || rows.length === 0 || !isMailingDeliveryStoreEnabled(overrides)) {
+        return rows;
+    }
+
+    const store = getMailingDeliveryStore(overrides);
+    const result = [];
+    for (const row of rows) {
+        const mailingId = getMailingRowNumber(row);
+        if (!mailingId) {
+            result.push(cloneValue(row));
+            continue;
+        }
+        const runtimeState = await store.getMailingState(communityId, mailingId, profileId);
+        result.push(applyMailingRuntimeState(row, runtimeState));
+    }
+    return result;
+}
+
 async function initializeStorage() {
     log('info', '🔧 Checking Object Storage initialization...');
 
@@ -235,7 +316,7 @@ async function getSheetData(sheetName, communityId, profileId = '1') {
             defaultValue: DEFAULT_DATA[sheetName] || [],
             legacyKeys: pid === '1' ? [getLegacyFileName(sheetName, communityId)] : []
         });
-        const json = result.value;
+        const json = await applySheetRuntimeOverlay(sheetName, result.value, communityId, pid);
         memoryCache.data[cacheKey] = json;
         memoryCache.lastUpdated[cacheKey] = now;
         log('debug', `📥 Loaded ${fileName}: ${json?.length || 0} rows`);
@@ -246,7 +327,7 @@ async function getSheetData(sheetName, communityId, profileId = '1') {
             try {
                 const legacyResponse = await s3Send(new GetObjectCommand({ Bucket: BUCKET_NAME, Key: legacyFileName }));
                 const legacyData = await legacyResponse.Body.transformToString();
-                const legacyJson = JSON.parse(legacyData);
+                const legacyJson = await applySheetRuntimeOverlay(sheetName, JSON.parse(legacyData), communityId, pid);
                 memoryCache.data[cacheKey] = legacyJson;
                 memoryCache.lastUpdated[cacheKey] = now;
                 log('debug', `📥 Loaded legacy file ${legacyFileName}: ${legacyJson?.length || 0} rows`);
@@ -324,5 +405,8 @@ function getFileMap() { return FILE_BASE; }
 module.exports = {
     getS3Client, getBucketName, initializeStorage, invalidateCache,
     getSheetData, saveSheetData, updateSheetData, getFileMap, DEFAULT_DATA, getFileName,
-    getLegacyFileName, normalizeProfileId
+    getLegacyFileName, normalizeProfileId,
+    __testOnly: {
+        applySheetRuntimeOverlay
+    }
 };
