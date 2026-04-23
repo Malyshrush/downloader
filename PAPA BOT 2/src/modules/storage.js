@@ -8,6 +8,7 @@ const { log } = require('../utils/logger');
 const { createHotStateStore } = require('./hot-state-store');
 const { createDelayedDeliveryStore } = require('./delayed-delivery-store');
 const { createMailingDeliveryStore } = require('./mailing-delivery-store');
+const { createStructuredTriggerStore } = require('./structured-trigger-store');
 
 const BUCKET_NAME = process.env.BUCKET_NAME || 'bot-data-storage';
 const S3_TIMEOUT_MS = 10000; // 10 секунд таймаут
@@ -24,6 +25,7 @@ const s3Client = new S3Client({
 const hotStateStore = createHotStateStore();
 const delayedDeliveryStore = createDelayedDeliveryStore();
 const mailingDeliveryStore = createMailingDeliveryStore();
+const structuredTriggerStore = createStructuredTriggerStore();
 const rawS3Client = s3Client;
 
 const FILE_BASE = {
@@ -186,8 +188,17 @@ function getDelayedDeliveryStore(overrides = {}) {
     return overrides.delayedDeliveryStore || delayedDeliveryStore;
 }
 
+function getStructuredTriggerStore(overrides = {}) {
+    return overrides.structuredTriggerStore || structuredTriggerStore;
+}
+
 function isDelayedDeliveryStoreEnabled(overrides = {}) {
     const store = getDelayedDeliveryStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function isStructuredTriggerStoreEnabled(overrides = {}) {
+    const store = getStructuredTriggerStore(overrides);
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
@@ -307,6 +318,24 @@ async function applySheetRuntimeOverlay(sheetName, rows, communityId, profileId 
     return result;
 }
 
+async function syncStructuredTriggerSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const isStructuredTriggerSheet = sheetName === 'ТРИГГЕРЫ' || sheetName === 'РўР РР“Р“Р•Р Р«';
+    if (!isStructuredTriggerSheet) {
+        return { synced: false, backend: 'skipped' };
+    }
+    if (!isStructuredTriggerStoreEnabled(overrides)) {
+        return { synced: false, backend: 'disabled' };
+    }
+
+    const normalizedRows = Array.isArray(rows) ? cloneValue(rows) : [];
+    const result = await getStructuredTriggerStore(overrides).replaceTriggerRows(communityId, normalizedRows, profileId);
+    return {
+        synced: true,
+        backend: result.backend || 'ydb-structured-triggers',
+        stored: result.stored || 0
+    };
+}
+
 async function initializeStorage() {
     log('info', '🔧 Checking Object Storage initialization...');
 
@@ -408,6 +437,7 @@ async function saveSheetData(sheetName, data, communityId, profileId = '1') {
     try {
         log('info', `💾 Saving ${fileName}...`);
         await hotStateStore.saveJsonObject(fileName, data);
+        await syncStructuredTriggerSheet(sheetName, data, communityId, pid);
         const cacheKey = communityId ? `${pid}_${sheetName}_${communityId}` : `${pid}_${sheetName}`;
         delete memoryCache.data[cacheKey]; delete memoryCache.lastUpdated[cacheKey];
         if (sheetName === 'СООБЩЕНИЯ' || sheetName === 'КОММЕНТАРИИ В ПОСТАХ' || sheetName === 'ПЕРЕМЕННЫЕ') {
@@ -448,6 +478,7 @@ async function updateSheetData(sheetName, communityId, profileId = '1', updater)
     const cacheKey = communityId ? `${pid}_${sheetName}_${communityId}` : `${pid}_${sheetName}`;
     memoryCache.data[cacheKey] = result.value;
     memoryCache.lastUpdated[cacheKey] = Date.now();
+    await syncStructuredTriggerSheet(sheetName, result.value, communityId, pid);
     if (sheetName === 'РЎРћРћР‘Р©Р•РќРРЇ' || sheetName === 'РљРћРњРњР•РќРўРђР РР Р’ РџРћРЎРўРђРҐ' || sheetName === 'РџР•Р Р•РњР•РќРќР«Р•') {
         const uk = communityId ? `${pid}_РџРћР›Р¬Р—РћР’РђРўР•Р›Р_${communityId}` : `${pid}_РџРћР›Р¬Р—РћР’РђРўР•Р›Р`;
         delete memoryCache.data[uk];
@@ -464,6 +495,7 @@ module.exports = {
     getSheetData, saveSheetData, updateSheetData, getFileMap, DEFAULT_DATA, getFileName,
     getLegacyFileName, normalizeProfileId,
     __testOnly: {
-        applySheetRuntimeOverlay
+        applySheetRuntimeOverlay,
+        syncStructuredTriggerSheet
     }
 };

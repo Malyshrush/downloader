@@ -148,6 +148,7 @@ async function main() {
   const communityVariablesTableName = args['community-variables-table'] || runtimeConfig.ydbCommunityVariablesTable;
   const delayedDeliveriesTableName = args['delayed-deliveries-table'] || runtimeConfig.ydbDelayedDeliveriesTable;
   const mailingDeliveriesTableName = args['mailing-deliveries-table'] || runtimeConfig.ydbMailingDeliveriesTable;
+  const structuredTriggersTableName = args['structured-triggers-table'] || runtimeConfig.ydbStructuredTriggersTable;
   const profileUserSharedTableName = args['profile-user-shared-table'] || runtimeConfig.ydbProfileUserSharedTable;
   const sharedVariablesTableName = args['shared-variables-table'] || runtimeConfig.ydbSharedVariablesTable;
 
@@ -308,6 +309,30 @@ async function main() {
       }
     ]
   );
+  const structuredTriggersTable = await ensureTable(
+    dynamoClient,
+    structuredTriggersTableName,
+    [
+      {
+        AttributeName: 'triggerScope',
+        KeyType: 'HASH'
+      },
+      {
+        AttributeName: 'triggerId',
+        KeyType: 'RANGE'
+      }
+    ],
+    [
+      {
+        AttributeName: 'triggerScope',
+        AttributeType: 'S'
+      },
+      {
+        AttributeName: 'triggerId',
+        AttributeType: 'S'
+      }
+    ]
+  );
   const profileUserSharedTable = await ensureTable(
     dynamoClient,
     profileUserSharedTableName,
@@ -370,6 +395,7 @@ async function main() {
     communityVariablesTable,
     delayedDeliveriesTable,
     mailingDeliveriesTable,
+    structuredTriggersTable,
     profileUserSharedTable,
     sharedVariablesTable
   };
