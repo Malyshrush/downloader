@@ -10,11 +10,13 @@ const { createUserStateStore, buildUserScope } = require('./user-state-store');
 const { createCommunityVariablesStore } = require('./community-variables-store');
 const { createProfileUserSharedStore, buildProfileUserSharedScope } = require('./profile-user-shared-store');
 const { createSharedVariablesStore, buildSharedVariablesScope } = require('./shared-variables-store');
+const { createLegacyVariablesSheetAdapter } = require('./legacy-variables-sheet-adapter');
 
 const userStateStore = createUserStateStore();
 const communityVariablesStore = createCommunityVariablesStore();
 const profileUserSharedStore = createProfileUserSharedStore();
 const sharedVariablesStore = createSharedVariablesStore();
+const legacyVariablesAdapter = createLegacyVariablesSheetAdapter();
 
 function buildSharedVariableDisplay(variables) {
     const names = [];
@@ -65,8 +67,14 @@ function isSharedVariablesStoreEnabled(overrides = {}) {
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
-function getSheetDataWithOverrides(overrides = {}) {
-    return overrides.getSheetData || getSheetData;
+function getLegacyVariablesAdapter(overrides = {}) {
+    if (overrides.legacyVariablesAdapter) {
+        return overrides.legacyVariablesAdapter;
+    }
+    if (overrides.getSheetData) {
+        return createLegacyVariablesSheetAdapter({ getSheetData: overrides.getSheetData });
+    }
+    return legacyVariablesAdapter;
 }
 
 function buildProfileUserSharedRowsFromEntries(entries) {
@@ -163,15 +171,14 @@ function buildCommunityVariableStateFromRows(rows) {
 
 async function getProfileUserSharedVariableRowsWithDependencies(profileId = '1', overrides = {}) {
     try {
-        const getSheetData = getSheetDataWithOverrides(overrides);
+        const legacyAdapter = getLegacyVariablesAdapter(overrides);
         if (isProfileUserSharedStoreEnabled(overrides)) {
             const entries = await getProfileUserSharedStore(overrides).listUserEntries(buildProfileUserSharedScope(profileId));
             return buildProfileUserSharedRowsFromEntries(entries);
         }
-        const rows = await getSheetData('ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ', null, profileId);
-        return Array.isArray(rows) ? rows : [];
+        return legacyAdapter.getProfileUserSharedVariableRows(profileId);
     } catch (error) {
-        log('error', '❌ Error getting profile user shared variable rows:', error);
+        log('error', 'Error getting profile user shared variable rows:', error);
         return [];
     }
 }
@@ -213,23 +220,13 @@ async function getProfileUserSharedVariables(userId, profileId = '1') {
 
 async function getSharedVariablesWithDependencies(profileId = '1', overrides = {}) {
     try {
-        const getSheetData = getSheetDataWithOverrides(overrides);
+        const legacyAdapter = getLegacyVariablesAdapter(overrides);
         if (isSharedVariablesStoreEnabled(overrides)) {
             return getSharedVariablesStore(overrides).listVariables(buildSharedVariablesScope(profileId));
         }
-        const varsSheet = await getSheetData('ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ', null, profileId);
-        if (!varsSheet) return {};
-
-        const sharedVars = {};
-        for (const row of varsSheet) {
-            if (row['Переменная ПВС']) {
-                sharedVars[String(row['Переменная ПВС']).trim().toLowerCase()] = String(row['Значение ПВС'] || '').trim();
-            }
-        }
-
-        return sharedVars;
+        return legacyAdapter.getSharedVariables(profileId);
     } catch (error) {
-        log('error', '❌ Error getting shared variables:', error);
+        log('error', 'Error getting shared variables:', error);
         return {};
     }
 }

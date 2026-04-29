@@ -440,7 +440,7 @@ async function run(name, fn) {
     ]);
   });
 
-  await run('getProfileUserSharedVariableRowsWithDependencies uses injected sheet getter for legacy fallback', async () => {
+  await run('getProfileUserSharedVariableRowsWithDependencies uses legacy variables adapter for fallback', async () => {
     const rows = await variables.__testOnly.getProfileUserSharedVariableRowsWithDependencies(
       '8',
       {
@@ -491,7 +491,7 @@ async function run(name, fn) {
     });
   });
 
-  await run('getSharedVariablesWithDependencies uses injected sheet getter for legacy fallback', async () => {
+  await run('getSharedVariablesWithDependencies uses legacy variables adapter for fallback', async () => {
     const sharedVariables = await variables.__testOnly.getSharedVariablesWithDependencies(
       '8',
       {
@@ -514,6 +514,60 @@ async function run(name, fn) {
     });
   });
 
+  await run('getProfileUserSharedVariableRowsWithDependencies prefers legacy adapter override over direct sheet getter', async () => {
+    const rows = await variables.__testOnly.getProfileUserSharedVariableRowsWithDependencies(
+      '8',
+      {
+        getSheetData: async () => {
+          throw new Error('sheet getter should not be used directly');
+        },
+        legacyVariablesAdapter: {
+          getProfileUserSharedVariableRows: async profileId => {
+            assert.equal(profileId, '8');
+            return [
+              {
+                ID: '42',
+                'Р СџР ВµРЎР‚Р ВµР СР ВµР Р…Р Р…Р В°РЎРЏ Р СџР вЂ™Р РЋ': 'pvs_score',
+                'Р вЂ”Р Р…Р В°РЎвЂЎР ВµР Р…Р С‘Р Вµ Р СџР вЂ™Р РЋ': '100'
+              }
+            ];
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(rows, [
+      {
+        ID: '42',
+        'Р СџР ВµРЎР‚Р ВµР СР ВµР Р…Р Р…Р В°РЎРЏ Р СџР вЂ™Р РЋ': 'pvs_score',
+        'Р вЂ”Р Р…Р В°РЎвЂЎР ВµР Р…Р С‘Р Вµ Р СџР вЂ™Р РЋ': '100'
+      }
+    ]);
+  });
+
+  await run('getSharedVariablesWithDependencies prefers legacy adapter override over direct sheet getter', async () => {
+    const sharedVariables = await variables.__testOnly.getSharedVariablesWithDependencies(
+      '8',
+      {
+        getSheetData: async () => {
+          throw new Error('sheet getter should not be used directly');
+        },
+        legacyVariablesAdapter: {
+          getSharedVariables: async profileId => {
+            assert.equal(profileId, '8');
+            return {
+              pvs_score: '100\n200'
+            };
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(sharedVariables, {
+      pvs_score: '100\n200'
+    });
+  });
+
   await run('variables module no longer keeps legacy saveSheetData hot writes', async () => {
     const source = fs.readFileSync(
       path.join(__dirname, '..', 'src', 'modules', 'variables.js'),
@@ -521,6 +575,15 @@ async function run(name, fn) {
     );
 
     assert.equal(source.includes('saveSheetData('), false);
+  });
+
+  await run('variables module no longer keeps direct getSheetData fallback reads', async () => {
+    const source = fs.readFileSync(
+      path.join(__dirname, '..', 'src', 'modules', 'variables.js'),
+      'utf8'
+    );
+
+    assert.equal(source.includes('getSheetData('), false);
   });
 })().then(() => {
   process.exit(0);
