@@ -573,6 +573,42 @@ async function syncSharedVariablesSheet(sheetName, rows, communityId, profileId 
     };
 }
 
+async function syncMailingSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const isMailingSheet = sheetName === 'РАССЫЛКА' || sheetName === 'Р РђРЎРЎР«Р›РљРђ';
+    if (!isMailingSheet) {
+        return { synced: false, backend: 'skipped' };
+    }
+    if (!isMailingDeliveryStoreEnabled(overrides)) {
+        return { synced: false, backend: 'disabled' };
+    }
+
+    const normalizedRows = Array.isArray(rows) ? cloneValue(rows) : [];
+    const result = await getMailingDeliveryStore(overrides).replaceMailingRows(communityId, normalizedRows, profileId);
+    return {
+        synced: true,
+        backend: result.backend || 'ydb-mailing-delivery',
+        stored: result.rows || normalizedRows.length
+    };
+}
+
+async function syncDelayedSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const isDelayedSheet = sheetName === 'ОТЛОЖЕННЫЕ' || sheetName === 'РћРўР›РћР–Р•РќРќР«Р•';
+    if (!isDelayedSheet) {
+        return { synced: false, backend: 'skipped' };
+    }
+    if (!isDelayedDeliveryStoreEnabled(overrides)) {
+        return { synced: false, backend: 'disabled' };
+    }
+
+    const normalizedRows = Array.isArray(rows) ? cloneValue(rows) : [];
+    const result = await getDelayedDeliveryStore(overrides).replaceDelayedRows(communityId, normalizedRows, profileId);
+    return {
+        synced: true,
+        backend: result.backend || 'ydb-delayed-delivery',
+        stored: result.rows || normalizedRows.length
+    };
+}
+
 async function syncStructuredReadModelSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
     const handlers = [
         syncStructuredTriggerSheet,
@@ -580,7 +616,9 @@ async function syncStructuredReadModelSheet(sheetName, rows, communityId, profil
         syncCommentRuleSheet,
         syncCommunityVariablesSheet,
         syncProfileUserSharedSheet,
-        syncSharedVariablesSheet
+        syncSharedVariablesSheet,
+        syncMailingSheet,
+        syncDelayedSheet
     ];
 
     for (const handler of handlers) {

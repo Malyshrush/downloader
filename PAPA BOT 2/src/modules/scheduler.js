@@ -356,6 +356,20 @@ async function loadSchedulerRuleRows(fileCommunityId, profileId, overrides = {})
     };
 }
 
+async function loadMailingRows(fileCommunityId, profileId, legacyAdapter, overrides = {}) {
+    if (isMailingDeliveryStoreEnabled(overrides)) {
+        const store = getMailingDeliveryStore(overrides);
+        if (store && typeof store.listRows === 'function') {
+            const result = await store.listRows(fileCommunityId, profileId);
+            if (result && result.initialized) {
+                return Array.isArray(result.rows) ? result.rows : [];
+            }
+        }
+    }
+
+    return legacyAdapter.listMailingRows(fileCommunityId, profileId);
+}
+
 async function processDelayedWithDependencies(communityId = null, profileId = '1', overrides = {}) {
     const getActiveCommunityIdImpl = overrides.getActiveCommunityId || getActiveCommunityId;
     const legacyAdapter = getLegacySchedulerAdapter(overrides);
@@ -623,7 +637,7 @@ async function processMailingWithDependencies(communityId = null, profileId = '1
         lastProcessTime[mailingThrottleKey] = nowTs;
 
         const { fileCommunityId, actualGroupId } = await getCommunityFileContext(cid, profileId, overrides);
-        const mailing = await legacyAdapter.listMailingRows(fileCommunityId, profileId);
+        const mailing = await loadMailingRows(fileCommunityId, profileId, legacyAdapter, overrides);
         if (!mailing || mailing.length === 0) {
             return { ok: true, queuedCount: 0, fileCommunityId, actualGroupId };
         }
@@ -883,7 +897,7 @@ async function processMailingDeliveryActionWithDependencies(action, overrides = 
     const addAppLogImpl = overrides.addAppLog || addAppLog;
     const useStructuredMailingStore = isMailingDeliveryStoreEnabled(overrides);
 
-    const mailing = await legacyAdapter.listMailingRows(fileCommunityId, profileId);
+    const mailing = await loadMailingRows(fileCommunityId, profileId, legacyAdapter, overrides);
     const row = findRowByNumber(mailing, rowNumber);
 
     if (!row) {

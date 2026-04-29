@@ -56,7 +56,7 @@ function createConfig(overrides = {}) {
 
     assert.equal(result.row['№'], 'delayed-1');
     assert.equal(result.row._delayedId, 'delayed-1');
-    assert.equal(putCalls.length, 1);
+    assert.equal(putCalls.length, 2);
     assert.equal(putCalls[0].delayedScope, '8:community-7');
     assert.equal(putCalls[0].delayedId, 'delayed-1');
     assert.equal(putCalls[0].status, 'Ожидает');
@@ -134,6 +134,43 @@ function createConfig(overrides = {}) {
     assert.equal(result.found, true);
     assert.equal(result.value['Статус'], 'В обработке');
     assert.equal(putCalls[0].status, 'В обработке');
+  });
+  await run('delayed delivery store replaces and lists rows with initialized marker', async () => {
+    const items = new Map();
+    const store = createDelayedDeliveryStore(
+      createConfig(),
+      {
+        putItem: async item => {
+          items.set(item.delayedScope + '|' + item.delayedId, JSON.parse(JSON.stringify(item)));
+        },
+        getItem: async key => {
+          const item = items.get(key.delayedScope + '|' + key.delayedId);
+          return item ? JSON.parse(JSON.stringify(item)) : null;
+        },
+        deleteItem: async key => {
+          items.delete(key.delayedScope + '|' + key.delayedId);
+        },
+        queryItems: async request => ({
+          Items: Array.from(items.values())
+            .filter(item => item.delayedScope === request.delayedScope)
+            .map(item => JSON.parse(JSON.stringify(item)))
+        })
+      }
+    );
+
+    await store.replaceDelayedRows('community-7', [
+      {
+        '№': '10',
+        'Шаг': 'welcome',
+        'Статус': 'Ожидает',
+        'Дата и время отправки': '2026-04-23 13:00:00'
+      }
+    ], '8');
+
+    const listed = await store.listRows('community-7', '8');
+    assert.equal(listed.initialized, true);
+    assert.equal(listed.rows.length, 1);
+    assert.equal(listed.rows[0]['Шаг'], 'welcome');
   });
 })().then(() => {
   process.exit(0);

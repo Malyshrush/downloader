@@ -65,6 +65,50 @@ async function run(name, fn) {
     assert.equal(updatedState['Статус'], 'Отправлено');
     assert.equal(updatedState['Факт. время отправки (по мск.)'], '2026-04-23 12:00:00');
   });
+  await run('mailing delivery store replaces and lists full mailing rows with initialized marker', async () => {
+    const items = new Map();
+    const store = createMailingDeliveryStore(
+      {
+        mode: 'cloud',
+        ydbDocApiEndpoint: 'https://example.test/docapi',
+        ydbMailingDeliveriesTable: 'mailing_delivery_entries',
+        awsAccessKeyId: 'key',
+        awsSecretAccessKey: 'secret',
+        ymqRegion: 'ru-central1'
+      },
+      {
+        putItem: async item => {
+          items.set(item.mailingScope + '|' + item.mailingId, JSON.parse(JSON.stringify(item)));
+        },
+        getItem: async key => {
+          const item = items.get(key.mailingScope + '|' + key.mailingId);
+          return item ? JSON.parse(JSON.stringify(item)) : null;
+        },
+        deleteItem: async key => {
+          items.delete(key.mailingScope + '|' + key.mailingId);
+        },
+        queryItems: async request => ({
+          Items: Array.from(items.values())
+            .filter(item => item.mailingScope === request.mailingScope)
+            .map(item => JSON.parse(JSON.stringify(item)))
+        })
+      }
+    );
+
+    await store.replaceMailingRows('community-1', [
+      { '№': '5', 'Сообщение Рассылки': 'Новость дня', 'Статус': 'Ожидает' },
+      { '№': '8', 'Сообщение Рассылки': 'Вторая новость', 'Статус': 'Ожидает' }
+    ], '7');
+
+    const listed = await store.listRows('community-1', '7');
+    assert.equal(listed.initialized, true);
+    assert.equal(listed.rows.length, 2);
+    assert.equal(listed.rows[0]['Сообщение Рассылки'], 'Новость дня');
+    assert.equal(listed.rows[1]['Сообщение Рассылки'], 'Вторая новость');
+
+    const row = await store.getMailingRow('community-1', '8', '7');
+    assert.equal(row['Сообщение Рассылки'], 'Вторая новость');
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {
