@@ -27,7 +27,7 @@ async function run(name, fn) {
     assert.equal(isLegacySheetAccessAllowed('scheduler', policy), true);
   });
 
-  await run('legacy variables and app logs sheet access is blocked by default in cloud runtime while scheduler stays enabled', async () => {
+  await run('legacy variables, app logs, and scheduler sheet access are blocked by default in cloud runtime', async () => {
     const policy = buildLegacySheetAccessPolicy({
       EVENT_QUEUE_MODE: 'cloud',
       YMQ_INCOMING_QUEUE_URL: 'incoming',
@@ -39,7 +39,7 @@ async function run(name, fn) {
 
     assert.equal(isLegacySheetAccessAllowed('variables', policy), false);
     assert.equal(isLegacySheetAccessAllowed('app_logs', policy), false);
-    assert.equal(isLegacySheetAccessAllowed('scheduler', policy), true);
+    assert.equal(isLegacySheetAccessAllowed('scheduler', policy), false);
   });
 
   await run('legacy sheet access can be re-enabled explicitly per channel in cloud runtime', async () => {
@@ -70,6 +70,7 @@ async function run(name, fn) {
     });
 
     assert.throws(() => assertLegacySheetAccessAllowed('variables', policy), /disabled/);
+    assert.throws(() => assertLegacySheetAccessAllowed('scheduler', policy), /disabled/);
   });
 })().then(() => {
   process.exit(0);

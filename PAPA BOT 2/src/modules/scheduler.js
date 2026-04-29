@@ -364,6 +364,7 @@ async function loadMailingRows(fileCommunityId, profileId, legacyAdapter, overri
             if (result && result.initialized) {
                 return Array.isArray(result.rows) ? result.rows : [];
             }
+            return [];
         }
     }
 

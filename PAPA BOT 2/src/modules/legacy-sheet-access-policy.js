@@ -42,7 +42,7 @@ function isLegacySheetAccessAllowed(channel, policy = buildLegacySheetAccessPoli
 
     switch (String(channel || '').trim()) {
         case 'scheduler':
-            return policy.allowLegacySchedulerSheetAccess || policy.allowLegacySchedulerSheetAccess !== false;
+            return policy.allowLegacySchedulerSheetAccess === true;
         case 'variables':
             return policy.allowLegacyVariablesSheetAccess === true;
         case 'app_logs':
