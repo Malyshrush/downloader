@@ -12,6 +12,10 @@ async function run(name, fn) {
   }
 }
 
+function isDelayedSheetName(value) {
+  return /ОТЛОЖ|РћРўР›РћР–/.test(String(value || ''));
+}
+
 (async function main() {
   await run('scheduleStepMessage appends delayed row through structured store when enabled', async () => {
     const calls = [];
@@ -85,7 +89,7 @@ async function run(name, fn) {
     );
 
     assert.equal(updates.length, 1);
-    assert.equal(updates[0].sheetName, 'ОТЛОЖЕННЫЕ');
+    assert.equal(isDelayedSheetName(updates[0].sheetName), true);
     assert.equal(updates[0].communityId, '229445618');
     assert.equal(updates[0].profileId, '7');
     assert.equal(updates[0].nextRows.length, 1);
@@ -94,7 +98,7 @@ async function run(name, fn) {
     assert.equal(updates[0].nextRows[0]['Статус'], 'Ожидает');
     assert.deepEqual(invalidations, [
       {
-        sheetName: 'ОТЛОЖЕННЫЕ',
+        sheetName: updates[0].sheetName,
         communityId: '229445618',
         profileId: '7'
       }

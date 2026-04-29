@@ -11,7 +11,8 @@ const { replaceVariables } = require('./variables');
 const { listUsers } = require('./users');
 const { addAppLog } = require('./app-logs');
 const { publishOutboundAction } = require('./event-queue');
-const { sendMessageWithTokenRetry } = require('./messages');
+const { sendMessageWithTokenRetry, loadMessageRows } = require('./messages');
+const { loadCommentRows } = require('./comments');
 const { performRowActions } = require('./row-actions');
 const { createDelayedDeliveryStore } = require('./delayed-delivery-store');
 const { createMailingDeliveryStore } = require('./mailing-delivery-store');
@@ -348,6 +349,13 @@ function getLegacySchedulerAdapter(overrides = {}) {
     return legacySchedulerAdapter;
 }
 
+async function loadSchedulerRuleRows(fileCommunityId, profileId, overrides = {}) {
+    return {
+        messages: await loadMessageRows(fileCommunityId, profileId, overrides),
+        comments: await loadCommentRows(fileCommunityId, profileId, overrides)
+    };
+}
+
 async function processDelayedWithDependencies(communityId = null, profileId = '1', overrides = {}) {
     const getActiveCommunityIdImpl = overrides.getActiveCommunityId || getActiveCommunityId;
     const legacyAdapter = getLegacySchedulerAdapter(overrides);
@@ -369,8 +377,7 @@ async function processDelayedWithDependencies(communityId = null, profileId = '1
         if (isDelayedDeliveryStoreEnabled(overrides)) {
             const { fileCommunityId, actualGroupId } = await getCommunityFileContext(cid, profileId, overrides);
             const delayedRows = await getDelayedDeliveryStore(overrides).listDueRows(fileCommunityId, now, profileId);
-            const messages = await legacyAdapter.listMessageRows(fileCommunityId, profileId);
-            const comments = await legacyAdapter.listCommentRows(fileCommunityId, profileId);
+            const { messages, comments } = await loadSchedulerRuleRows(fileCommunityId, profileId, overrides);
             let queuedCount = 0;
 
             for (const item of delayedRows) {
@@ -476,8 +483,7 @@ async function processDelayedWithDependencies(communityId = null, profileId = '1
 
         const { fileCommunityId, actualGroupId } = await getCommunityFileContext(cid, profileId, overrides);
         const delayed = await legacyAdapter.listDelayedRows(fileCommunityId, profileId);
-        const messages = await legacyAdapter.listMessageRows(fileCommunityId, profileId);
-        const comments = await legacyAdapter.listCommentRows(fileCommunityId, profileId);
+        const { messages, comments } = await loadSchedulerRuleRows(fileCommunityId, profileId, overrides);
 
         let hasChanges = false;
         let queuedCount = 0;
@@ -758,8 +764,7 @@ async function processDelayedDeliveryActionWithDependencies(action, overrides = 
     const performRowActionsImpl = overrides.performRowActions || performRowActions;
     const addAppLogImpl = overrides.addAppLog || addAppLog;
 
-    const messages = await legacyAdapter.listMessageRows(fileCommunityId, profileId);
-    const comments = await legacyAdapter.listCommentRows(fileCommunityId, profileId);
+    const { messages, comments } = await loadSchedulerRuleRows(fileCommunityId, profileId, overrides);
     const useStructuredDelayedStore = isDelayedDeliveryStoreEnabled(overrides);
     const delayed = useStructuredDelayedStore
         ? null

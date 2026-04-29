@@ -444,6 +444,7 @@ module.exports = {
     sendMessageAndPerformActions,
     sendFallbackResponseFromRow,
     sendMessageWithTokenRetry,
+    loadMessageRows,
     __testOnly: {
         buildMessageOutboundAction,
         loadMessageRows,

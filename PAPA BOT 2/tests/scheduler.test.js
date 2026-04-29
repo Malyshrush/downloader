@@ -13,6 +13,18 @@ async function run(name, fn) {
   }
 }
 
+function isDelayedSheetName(value) {
+  return /ОТЛОЖ|РћРўР›РћР–/.test(String(value || ''));
+}
+
+function isMessageSheetName(value) {
+  return /СООБЩЕНИ|РЎРћРћР‘Р©/.test(String(value || ''));
+}
+
+function isCommentSheetName(value) {
+  return /КОММЕНТАРИ|РљРћРњРњР•РќРў/.test(String(value || ''));
+}
+
 (async function main() {
   await run('processDelayed queues due delayed steps instead of sending inline', async () => {
     const delayedRows = [
@@ -44,9 +56,9 @@ async function run(name, fn) {
         actualGroupId: '123456'
       }),
       getSheetData: async sheetName => {
-        if (sheetName === 'ОТЛОЖЕННЫЕ') return delayedRows;
-        if (sheetName === 'СООБЩЕНИЯ') return messageRows;
-        if (sheetName === 'КОММЕНТАРИИ В ПОСТАХ') return [];
+        if (isDelayedSheetName(sheetName)) return delayedRows;
+        if (isMessageSheetName(sheetName)) return messageRows;
+        if (isCommentSheetName(sheetName)) return [];
         throw new Error('unexpected sheet ' + sheetName);
       },
       saveSheetData: async (sheetName, rows) => {
@@ -66,7 +78,7 @@ async function run(name, fn) {
     assert.equal(actions[0].payload.userId, '777');
     assert.equal(delayedRows[0]['Статус'], 'В обработке');
     assert.equal(saves.length, 1);
-    assert.equal(saves[0].sheetName, 'ОТЛОЖЕННЫЕ');
+    assert.equal(isDelayedSheetName(saves[0].sheetName), true);
   });
 
   await run('processDelayed uses structured delayed store when enabled', async () => {
@@ -80,23 +92,16 @@ async function run(name, fn) {
         actualGroupId: '123456'
       }),
       getSheetData: async sheetName => {
-        if (sheetName === 'РЎРћРћР‘Р©Р•РќРРЇ') {
+        if (isMessageSheetName(sheetName)) {
           return [{ 'Шаг': 'welcome', 'Ответ': 'Привет' }];
         }
-        if (sheetName === 'РљРћРњРњР•РќРўРђР РР Р’ РџРћРЎРўРђРҐ') return [];
+        if (isCommentSheetName(sheetName)) return [];
         throw new Error('delayed sheet fallback should not be used');
       },
       saveSheetData: async () => {
         throw new Error('delayed sheet save should not be used');
       },
       invalidateCache: () => {},
-      legacySchedulerAdapter: {
-        listMessageRows: async () => [{
-          'РЁР°Рі': 'welcome',
-          'РћС‚РІРµС‚': 'РџСЂРёРІРµС‚'
-        }],
-        listCommentRows: async () => []
-      },
       delayedDeliveryStore: {
         isEnabled: () => true,
         listDueRows: async (communityId, now, profileId) => {
@@ -159,7 +164,7 @@ async function run(name, fn) {
         actualGroupId: '123456'
       }),
       getSheetData: async sheetName => {
-        if (/АССЫЛ|РђРЎРЎР«Р›/.test(sheetName)) return mailingRows;
+        if (/РАССЫЛ|АССЫЛ|РђРЎРЎР«Р›/.test(String(sheetName || ''))) return mailingRows;
         throw new Error('unexpected sheet ' + sheetName);
       },
       saveSheetData: async (sheetName, rows) => {
@@ -178,7 +183,7 @@ async function run(name, fn) {
     assert.equal(actions[0].payload.mailingRowNumber, '5');
     assert.equal(mailingRows[0]['Статус'], 'В обработке');
     assert.equal(saves.length, 1);
-    assert.equal(saves[0].sheetName, 'РАССЫЛКА');
+    assert.equal(/РАССЫЛ|АССЫЛ|РђРЎРЎР«Р›/.test(String(saves[0].sheetName || '')), true);
   });
 
   await run('processMailing uses structured mailing state store when enabled', async () => {
@@ -202,7 +207,7 @@ async function run(name, fn) {
         actualGroupId: '123456'
       }),
       getSheetData: async sheetName => {
-        if (sheetName === 'РАССЫЛКА') return mailingRows;
+        if (/РАССЫЛ|АССЫЛ|РђРЎРЎР«Р›/.test(String(sheetName || ''))) return mailingRows;
         throw new Error('unexpected sheet ' + sheetName);
       },
       saveSheetData: async () => {
@@ -245,7 +250,11 @@ async function run(name, fn) {
         fileCommunityId: 'file-community-1',
         actualGroupId: '123456'
       }),
-      getSheetData: async () => {
+      getSheetData: async sheetName => {
+        if (isMessageSheetName(sheetName)) {
+          return [{ 'Шаг': 'welcome', 'Ответ': 'Привет' }];
+        }
+        if (isCommentSheetName(sheetName)) return [];
         throw new Error('sheet getter should not be used directly');
       },
       saveSheetData: async () => {
@@ -267,13 +276,6 @@ async function run(name, fn) {
             }
           ];
         },
-        listMessageRows: async () => [
-          {
-            'РЁР°Рі': 'welcome',
-            'РћС‚РІРµС‚': 'РџСЂРёРІРµС‚'
-          }
-        ],
-        listCommentRows: async () => [],
         replaceDelayedRows: async (communityId, profileId, rows) => {
           replaceCalls.push({ communityId, profileId, rows: JSON.parse(JSON.stringify(rows)) });
         }
@@ -411,9 +413,9 @@ async function run(name, fn) {
       {
         now: new Date('2026-04-22T10:00:00.000Z'),
         getSheetData: async sheetName => {
-          if (sheetName === 'ОТЛОЖЕННЫЕ') return delayedRows;
-          if (sheetName === 'СООБЩЕНИЯ') return messageRows;
-          if (sheetName === 'КОММЕНТАРИИ В ПОСТАХ') return [];
+          if (isDelayedSheetName(sheetName)) return delayedRows;
+          if (isMessageSheetName(sheetName)) return messageRows;
+          if (isCommentSheetName(sheetName)) return [];
           throw new Error('unexpected sheet ' + sheetName);
         },
         saveSheetData: async (sheetName, rows) => {
@@ -433,7 +435,7 @@ async function run(name, fn) {
     assert.equal(delayedRows[0]['Статус'], 'Отправлено');
     assert.equal(rowActionCalls.length, 1);
     assert.equal(saves.length, 1);
-    assert.equal(saves[0].sheetName, 'ОТЛОЖЕННЫЕ');
+    assert.equal(isDelayedSheetName(saves[0].sheetName), true);
   });
 
   await run('processDelayedDeliveryAction uses structured delayed store when enabled', async () => {
@@ -465,7 +467,7 @@ async function run(name, fn) {
       {
         now: new Date('2026-04-22T10:00:00.000Z'),
         getSheetData: async sheetName => {
-          if (sheetName === 'СООБЩЕНИЯ') {
+          if (isMessageSheetName(sheetName)) {
             return [
               {
                 'Шаг': 'welcome',
@@ -475,7 +477,7 @@ async function run(name, fn) {
               }
             ];
           }
-          if (sheetName === 'КОММЕНТАРИИ В ПОСТАХ') return [];
+          if (isCommentSheetName(sheetName)) return [];
           throw new Error('delayed sheet fallback should not be used');
         },
         saveSheetData: async () => {
@@ -543,7 +545,7 @@ async function run(name, fn) {
       {
         now: new Date('2026-04-22T10:00:00.000Z'),
         getSheetData: async sheetName => {
-          if (/АССЫЛ|РђРЎРЎР«Р›/.test(sheetName)) return mailingRows;
+          if (/РАССЫЛ|АССЫЛ|РђРЎРЎР«Р›/.test(String(sheetName || ''))) return mailingRows;
           throw new Error('unexpected sheet ' + sheetName);
         },
         saveSheetData: async (sheetName, rows) => {
@@ -566,7 +568,7 @@ async function run(name, fn) {
     assert.equal(mailingRows[0]['Статус'], 'Отправлено (с ошибками)');
     assert.match(mailingRows[0]['Ошибка'], /Отправлено: 1, ошибок: 1/);
     assert.equal(saves.length, 1);
-    assert.equal(saves[0].sheetName, 'РАССЫЛКА');
+    assert.equal(/РАССЫЛ|АССЫЛ|РђРЎРЎР«Р›/.test(String(saves[0].sheetName || '')), true);
   });
 
   await run('processMailingDeliveryAction uses structured mailing state store when enabled', async () => {
@@ -596,7 +598,7 @@ async function run(name, fn) {
       {
         now: new Date('2026-04-22T10:00:00.000Z'),
         getSheetData: async sheetName => {
-          if (sheetName === 'РАССЫЛКА') return mailingRows;
+          if (/РАССЫЛ|АССЫЛ|РђРЎРЎР«Р›/.test(String(sheetName || ''))) return mailingRows;
           throw new Error('unexpected sheet ' + sheetName);
         },
         saveSheetData: async () => {

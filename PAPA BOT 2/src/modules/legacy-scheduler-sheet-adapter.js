@@ -3,8 +3,6 @@ const { assertLegacySheetAccessAllowed, buildLegacySheetAccessPolicy } = require
 
 const DELAYED_SHEET = 'ОТЛОЖЕННЫЕ';
 const MAILING_SHEET = 'РАССЫЛКА';
-const MESSAGE_SHEET = 'СООБЩЕНИЯ';
-const COMMENT_SHEET = 'КОММЕНТАРИИ В ПОСТАХ';
 
 function createLegacySchedulerSheetAdapter(dependencies = {}) {
     const sheetGetter = dependencies.getSheetData || getSheetData;
@@ -14,18 +12,6 @@ function createLegacySchedulerSheetAdapter(dependencies = {}) {
     const accessPolicy = dependencies.legacySheetAccessPolicy || buildLegacySheetAccessPolicy();
 
     return {
-        async listMessageRows(communityId, profileId = '1') {
-            assertLegacySheetAccessAllowed('scheduler', accessPolicy);
-            const rows = await sheetGetter(MESSAGE_SHEET, communityId, profileId);
-            return Array.isArray(rows) ? rows : [];
-        },
-
-        async listCommentRows(communityId, profileId = '1') {
-            assertLegacySheetAccessAllowed('scheduler', accessPolicy);
-            const rows = await sheetGetter(COMMENT_SHEET, communityId, profileId);
-            return Array.isArray(rows) ? rows : [];
-        },
-
         async listDelayedRows(communityId, profileId = '1') {
             assertLegacySheetAccessAllowed('scheduler', accessPolicy);
             const rows = await sheetGetter(DELAYED_SHEET, communityId, profileId);
@@ -67,7 +53,5 @@ function createLegacySchedulerSheetAdapter(dependencies = {}) {
 module.exports = {
     createLegacySchedulerSheetAdapter,
     DELAYED_SHEET,
-    MAILING_SHEET,
-    MESSAGE_SHEET,
-    COMMENT_SHEET
+    MAILING_SHEET
 };

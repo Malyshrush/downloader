@@ -322,6 +322,7 @@ module.exports = {
     handleComment,
     sendCommentAndPerformActions,
     sendFallbackCommentFromRow,
+    loadCommentRows,
     __testOnly: {
         buildCommentOutboundAction,
         loadCommentRows,
