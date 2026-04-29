@@ -1,4 +1,4 @@
-const { getSheetData } = require('./storage');
+const { getSheetData, invalidateCache } = require('./storage');
 
 const PROFILE_USER_SHARED_SHEET = 'ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ';
 const SHARED_VARIABLES_SHEET = 'ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ';
@@ -24,6 +24,7 @@ function getFirstDefined(row, columns) {
 
 function createLegacyVariablesSheetAdapter(dependencies = {}) {
     const sheetGetter = dependencies.getSheetData || getSheetData;
+    const cacheInvalidator = dependencies.invalidateCache || invalidateCache;
 
     return {
         async getProfileUserSharedVariableRows(profileId = '1') {
@@ -47,6 +48,11 @@ function createLegacyVariablesSheetAdapter(dependencies = {}) {
             }
 
             return sharedVars;
+        },
+
+        invalidateRuntimeCaches(communityId, profileId = '1') {
+            cacheInvalidator('ПОЛЬЗОВАТЕЛИ', communityId, profileId);
+            cacheInvalidator('ПЕРЕМЕННЫЕ', communityId, profileId);
         }
     };
 }

@@ -440,7 +440,7 @@ async function run(name, fn) {
     ]);
   });
 
-  await run('getProfileUserSharedVariableRowsWithDependencies uses legacy variables adapter for fallback', async () => {
+  await run('getProfileUserSharedVariableRowsWithDependencies uses legacy variables adapter when structured store is disabled', async () => {
     const rows = await variables.__testOnly.getProfileUserSharedVariableRowsWithDependencies(
       '8',
       {
@@ -491,7 +491,7 @@ async function run(name, fn) {
     });
   });
 
-  await run('getSharedVariablesWithDependencies uses legacy variables adapter for fallback', async () => {
+  await run('getSharedVariablesWithDependencies uses legacy variables adapter when structured store is disabled', async () => {
     const sharedVariables = await variables.__testOnly.getSharedVariablesWithDependencies(
       '8',
       {
@@ -566,6 +566,152 @@ async function run(name, fn) {
     assert.deepEqual(sharedVariables, {
       pvs_score: '100\n200'
     });
+  });
+
+  await run('getProfileUserSharedVariablesWithDependencies does not fall back to legacy sheet when structured store is enabled', async () => {
+    const sharedVariables = await variables.__testOnly.getProfileUserSharedVariablesWithDependencies(
+      '42',
+      '8',
+      {
+        getSheetData: async () => {
+          throw new Error('legacy sheet fallback should not be used');
+        },
+        profileUserSharedStore: {
+          isEnabled: () => true,
+          getUserVariables: async () => ({})
+        }
+      }
+    );
+
+    assert.deepEqual(sharedVariables, {});
+  });
+
+  await run('getSharedVariablesWithDependencies does not fall back to legacy sheet when structured store is enabled', async () => {
+    const sharedVariables = await variables.__testOnly.getSharedVariablesWithDependencies(
+      '8',
+      {
+        getSheetData: async () => {
+          throw new Error('legacy sheet fallback should not be used');
+        },
+        sharedVariablesStore: {
+          isEnabled: () => true,
+          listVariables: async () => ({})
+        }
+      }
+    );
+
+    assert.deepEqual(sharedVariables, {});
+  });
+
+  await run('replaceProfileUserSharedRowsWithDependencies rewrites structured shared stores from sheet rows', async () => {
+    const profileCalls = [];
+    const sharedCalls = [];
+
+    const result = await variables.__testOnly.replaceProfileUserSharedRowsWithDependencies(
+      '8',
+      [
+        { ID: '42', 'Переменная ПВС': 'pvs_score', 'Значение ПВС': '100' },
+        { ID: '42', 'Переменная ПВС': 'pvs_level', 'Значение ПВС': '7' },
+        { ID: '77', 'Переменная ПВС': 'pvs_score', 'Значение ПВС': '200' }
+      ],
+      {
+        profileUserSharedStore: {
+          isEnabled: () => true,
+          replaceUserEntries: async (profileScope, entries) => {
+            profileCalls.push({ profileScope, entries });
+          }
+        },
+        sharedVariablesStore: {
+          isEnabled: () => true,
+          replaceVariables: async (profileScope, vars) => {
+            sharedCalls.push({ profileScope, vars });
+          }
+        }
+      }
+    );
+
+    assert.equal(result.entriesStored, 2);
+    assert.equal(result.catalogVariablesStored, 2);
+    assert.deepEqual(profileCalls, [
+      {
+        profileScope: '8',
+        entries: [
+          { userId: '42', variables: { pvs_score: '100', pvs_level: '7' } },
+          { userId: '77', variables: { pvs_score: '200' } }
+        ]
+      }
+    ]);
+    assert.deepEqual(sharedCalls, [
+      {
+        profileScope: '8',
+        vars: {
+          pvs_score: '100\n200',
+          pvs_level: '7'
+        }
+      }
+    ]);
+  });
+
+  await run('replaceSharedVariableCatalogRowsWithDependencies rewrites structured shared catalog from sheet rows', async () => {
+    const calls = [];
+
+    const result = await variables.__testOnly.replaceSharedVariableCatalogRowsWithDependencies(
+      '8',
+      [
+        { 'Переменная ПВС': 'pvs_score', 'Значение ПВС': '100\n200' },
+        { 'Переменная ПВС': 'pvs_level', 'Значение ПВС': '7' }
+      ],
+      {
+        sharedVariablesStore: {
+          isEnabled: () => true,
+          replaceVariables: async (profileScope, vars) => {
+            calls.push({ profileScope, vars });
+          }
+        }
+      }
+    );
+
+    assert.equal(result.catalogVariablesStored, 2);
+    assert.deepEqual(calls, [
+      {
+        profileScope: '8',
+        vars: {
+          pvs_score: '100\n200',
+          pvs_level: '7'
+        }
+      }
+    ]);
+  });
+
+  await run('syncCommunityVariableSheetWithDependencies rewrites structured community variable state from sheet rows', async () => {
+    const calls = [];
+
+    const result = await variables.__testOnly.syncCommunityVariableSheetWithDependencies(
+      'community-1',
+      '8',
+      [
+        { 'Глобальная': 'gp_limit', 'Значение ГП': '500' },
+        { 'ПЕРЕМЕННЫЕ ВК': 'vk_user', 'Значение/Описание ПВК': 'Имя' },
+        { 'Пользовательская': 'pp_score' }
+      ],
+      {
+        communityVariablesStore: {
+          isEnabled: () => true,
+          replaceGlobalVariables: async (communityId, vars, profileId) => calls.push({ method: 'gp', communityId, vars, profileId }),
+          replaceVkVariables: async (communityId, vars, profileId) => calls.push({ method: 'vk', communityId, vars, profileId }),
+          ensureUserVariableCatalog: async (communityId, names, profileId) => calls.push({ method: 'pp', communityId, names, profileId })
+        }
+      }
+    );
+
+    assert.equal(result.globalVariablesStored, 1);
+    assert.equal(result.vkVariablesStored, 1);
+    assert.equal(result.userVariableNamesStored, 1);
+    assert.deepEqual(calls, [
+      { method: 'gp', communityId: 'community-1', vars: { gp_limit: '500' }, profileId: '8' },
+      { method: 'vk', communityId: 'community-1', vars: { vk_user: 'Имя' }, profileId: '8' },
+      { method: 'pp', communityId: 'community-1', names: ['pp_score'], profileId: '8' }
+    ]);
   });
 
   await run('variables module no longer keeps legacy saveSheetData hot writes', async () => {

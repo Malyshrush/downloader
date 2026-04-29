@@ -11,6 +11,9 @@ const { createMailingDeliveryStore } = require('./mailing-delivery-store');
 const { createStructuredTriggerStore } = require('./structured-trigger-store');
 const { createMessageRuleStore } = require('./message-rule-store');
 const { createCommentRuleStore } = require('./comment-rule-store');
+const { createCommunityVariablesStore } = require('./community-variables-store');
+const { createProfileUserSharedStore } = require('./profile-user-shared-store');
+const { createSharedVariablesStore } = require('./shared-variables-store');
 
 const BUCKET_NAME = process.env.BUCKET_NAME || 'bot-data-storage';
 const S3_TIMEOUT_MS = 10000; // 10 секунд таймаут
@@ -30,6 +33,9 @@ const mailingDeliveryStore = createMailingDeliveryStore();
 const structuredTriggerStore = createStructuredTriggerStore();
 const messageRuleStore = createMessageRuleStore();
 const commentRuleStore = createCommentRuleStore();
+const communityVariablesStore = createCommunityVariablesStore();
+const profileUserSharedStore = createProfileUserSharedStore();
+const sharedVariablesStore = createSharedVariablesStore();
 const rawS3Client = s3Client;
 
 const FILE_BASE = {
@@ -204,6 +210,18 @@ function getCommentRuleStore(overrides = {}) {
     return overrides.commentRuleStore || commentRuleStore;
 }
 
+function getCommunityVariablesStore(overrides = {}) {
+    return overrides.communityVariablesStore || communityVariablesStore;
+}
+
+function getProfileUserSharedStore(overrides = {}) {
+    return overrides.profileUserSharedStore || profileUserSharedStore;
+}
+
+function getSharedVariablesStore(overrides = {}) {
+    return overrides.sharedVariablesStore || sharedVariablesStore;
+}
+
 function isDelayedDeliveryStoreEnabled(overrides = {}) {
     const store = getDelayedDeliveryStore(overrides);
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
@@ -226,6 +244,21 @@ function isCommentRuleStoreEnabled(overrides = {}) {
 
 function isMailingDeliveryStoreEnabled(overrides = {}) {
     const store = getMailingDeliveryStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function isCommunityVariablesStoreEnabled(overrides = {}) {
+    const store = getCommunityVariablesStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function isProfileUserSharedStoreEnabled(overrides = {}) {
+    const store = getProfileUserSharedStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function isSharedVariablesStoreEnabled(overrides = {}) {
+    const store = getSharedVariablesStore(overrides);
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
@@ -252,6 +285,85 @@ function getMailingRowNumber(row, fallback = '') {
 
 function getDelayedRowNumber(row, fallback = '') {
     return String(getFirstDefinedValue(row, ['№', 'в„–', 'РІвЂћвЂ“']) || fallback || '').trim();
+}
+
+function normalizeVariableName(value) {
+    return String(value || '').trim().toLowerCase();
+}
+
+function buildCommunityVariableStateFromRows(rows) {
+    const globalVars = {};
+    const vkVars = {};
+    const userVariableNames = [];
+    const seenUserVariableNames = new Set();
+
+    for (const row of Array.isArray(rows) ? rows : []) {
+        const globalName = normalizeVariableName(row && row['Глобальная']);
+        if (globalName) {
+            globalVars[globalName] = String(row && row['Значение ГП'] || '').trim();
+        }
+
+        const vkName = normalizeVariableName(row && (row['ПЕРЕМЕННЫЕ ВК'] || row['Переменные ВК']));
+        if (vkName) {
+            vkVars[vkName] = String(row && row['Значение/Описание ПВК'] || '').trim();
+        }
+
+        const userName = normalizeVariableName(row && row['Пользовательская']);
+        if (userName && !seenUserVariableNames.has(userName)) {
+            seenUserVariableNames.add(userName);
+            userVariableNames.push(userName);
+        }
+    }
+
+    return {
+        globalVars,
+        vkVars,
+        userVariableNames
+    };
+}
+
+function buildProfileUserSharedEntriesFromRows(rows) {
+    const byUserId = new Map();
+
+    for (const row of Array.isArray(rows) ? rows : []) {
+        const userId = String(row && row.ID || '').trim();
+        const variableName = normalizeVariableName(row && row['Переменная ПВС']);
+        if (!userId || !variableName) continue;
+        if (!byUserId.has(userId)) {
+            byUserId.set(userId, {});
+        }
+        byUserId.get(userId)[variableName] = String(row && row['Значение ПВС'] || '').trim();
+    }
+
+    return Array.from(byUserId.entries()).map(function([userId, variables]) {
+        return {
+            userId,
+            variables
+        };
+    });
+}
+
+function buildSharedVariableCatalogMap(rows) {
+    const byName = new Map();
+
+    for (const row of Array.isArray(rows) ? rows : []) {
+        const variableName = String(row && row['Переменная ПВС'] || '').trim();
+        const value = String(row && row['Значение ПВС'] || '').trim();
+        if (!variableName) continue;
+        const key = variableName.toLowerCase();
+        if (!byName.has(key)) {
+            byName.set(key, { name: variableName, values: new Set() });
+        }
+        if (value) {
+            byName.get(key).values.add(value);
+        }
+    }
+
+    const variables = {};
+    for (const item of byName.values()) {
+        variables[item.name.toLowerCase()] = Array.from(item.values).join('\n');
+    }
+    return variables;
 }
 
 function applyMailingRuntimeState(row, state) {
@@ -394,11 +506,81 @@ async function syncCommentRuleSheet(sheetName, rows, communityId, profileId = '1
     };
 }
 
+async function syncCommunityVariablesSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const isVariablesSheet = sheetName === 'ПЕРЕМЕННЫЕ' || sheetName === 'РџР•Р Р•РњР•РќРќР«Р•';
+    if (!isVariablesSheet) {
+        return { synced: false, backend: 'skipped' };
+    }
+    if (!isCommunityVariablesStoreEnabled(overrides)) {
+        return { synced: false, backend: 'disabled' };
+    }
+
+    const normalizedRows = Array.isArray(rows) ? cloneValue(rows) : [];
+    const state = buildCommunityVariableStateFromRows(normalizedRows);
+    await getCommunityVariablesStore(overrides).replaceGlobalVariables(communityId, state.globalVars, profileId);
+    await getCommunityVariablesStore(overrides).replaceVkVariables(communityId, state.vkVars, profileId);
+    await getCommunityVariablesStore(overrides).ensureUserVariableCatalog(communityId, state.userVariableNames, profileId);
+    return {
+        synced: true,
+        backend: 'ydb-community-variables',
+        stored: Object.keys(state.globalVars).length + Object.keys(state.vkVars).length + state.userVariableNames.length
+    };
+}
+
+async function syncProfileUserSharedSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const isProfileSharedSheet = sheetName === 'ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ' || sheetName === 'РџР’РЎ РџРћР›Р¬Р—РћР’РђРўР•Р›Р•Р™ РџР РћР¤РР›РЇ';
+    if (!isProfileSharedSheet) {
+        return { synced: false, backend: 'skipped' };
+    }
+    if (!isProfileUserSharedStoreEnabled(overrides) && !isSharedVariablesStoreEnabled(overrides)) {
+        return { synced: false, backend: 'disabled' };
+    }
+
+    const normalizedRows = Array.isArray(rows) ? cloneValue(rows) : [];
+    const entries = buildProfileUserSharedEntriesFromRows(normalizedRows);
+    const sharedCatalog = buildSharedVariableCatalogMap(normalizedRows);
+
+    if (isProfileUserSharedStoreEnabled(overrides)) {
+        await getProfileUserSharedStore(overrides).replaceUserEntries(profileId, entries);
+    }
+    if (isSharedVariablesStoreEnabled(overrides)) {
+        await getSharedVariablesStore(overrides).replaceVariables(profileId, sharedCatalog);
+    }
+
+    return {
+        synced: true,
+        backend: 'ydb-profile-user-shared',
+        stored: entries.length
+    };
+}
+
+async function syncSharedVariablesSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const isSharedSheet = sheetName === 'ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ' || sheetName === 'РџР•Р Р•РњР•РќРќР«Р• Р’РЎР•РҐ РЎРћРћР‘Р©Р•РЎРўР’';
+    if (!isSharedSheet) {
+        return { synced: false, backend: 'skipped' };
+    }
+    if (!isSharedVariablesStoreEnabled(overrides)) {
+        return { synced: false, backend: 'disabled' };
+    }
+
+    const normalizedRows = Array.isArray(rows) ? cloneValue(rows) : [];
+    const sharedCatalog = buildSharedVariableCatalogMap(normalizedRows);
+    const result = await getSharedVariablesStore(overrides).replaceVariables(profileId, sharedCatalog);
+    return {
+        synced: true,
+        backend: result.backend || 'ydb-shared-variables',
+        stored: result.stored || Object.keys(sharedCatalog).length
+    };
+}
+
 async function syncStructuredReadModelSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
     const handlers = [
         syncStructuredTriggerSheet,
         syncMessageRuleSheet,
-        syncCommentRuleSheet
+        syncCommentRuleSheet,
+        syncCommunityVariablesSheet,
+        syncProfileUserSharedSheet,
+        syncSharedVariablesSheet
     ];
 
     for (const handler of handlers) {
@@ -577,6 +759,9 @@ module.exports = {
         syncStructuredTriggerSheet,
         syncMessageRuleSheet,
         syncCommentRuleSheet,
+        syncCommunityVariablesSheet,
+        syncProfileUserSharedSheet,
+        syncSharedVariablesSheet,
         syncStructuredReadModelSheet
     }
 };

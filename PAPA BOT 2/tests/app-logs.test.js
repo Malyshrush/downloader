@@ -121,6 +121,23 @@ async function run(name, fn) {
     assert.deepEqual(rows, [{ id: 'log_2' }, { id: 'log_1' }]);
   });
 
+  await run('getAppLogs prefers legacy adapter override over direct sheet getter', async () => {
+    const rows = await appLogs.__testOnly.getAppLogsWithDependencies('community-z', '9', 2, {
+      getSheetData: async () => {
+        throw new Error('sheet getter should not be used directly');
+      },
+      legacyAppLogsAdapter: {
+        listRows: async (communityId, profileId) => {
+          assert.equal(communityId, 'community-z');
+          assert.equal(profileId, '9');
+          return [{ id: 'log_2' }, { id: 'log_1' }, { id: 'log_0' }];
+        }
+      }
+    });
+
+    assert.deepEqual(rows, [{ id: 'log_2' }, { id: 'log_1' }]);
+  });
+
   await run('clearAppLogs clears structured scope when app-log store is enabled', async () => {
     const clearCalls = [];
 
@@ -155,6 +172,28 @@ async function run(name, fn) {
       fileName: 'app_logs_profile_5_community-c.json'
     });
     assert.deepEqual(calls, ['app_logs_profile_5_community-c.json']);
+  });
+
+  await run('clearAppLogs invalidates cache through legacy adapter when structured store is enabled', async () => {
+    const clearCalls = [];
+    const invalidateCalls = [];
+
+    await appLogs.__testOnly.clearAppLogsWithDependencies('community-c', '5', {
+      appLogsStore: {
+        isEnabled: () => true,
+        clearLogs: async scope => {
+          clearCalls.push(scope);
+        }
+      },
+      legacyAppLogsAdapter: {
+        invalidateRowsCache: (communityId, profileId) => {
+          invalidateCalls.push({ communityId, profileId });
+        }
+      }
+    });
+
+    assert.deepEqual(clearCalls, ['5:community-c']);
+    assert.deepEqual(invalidateCalls, [{ communityId: 'community-c', profileId: '5' }]);
   });
 })().then(() => {
   process.exit(0);

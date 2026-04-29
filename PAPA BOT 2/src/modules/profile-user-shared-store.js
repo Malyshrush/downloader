@@ -5,6 +5,14 @@ function cloneValue(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function chunkItems(items, size) {
+  const chunks = [];
+  for (let index = 0; index < items.length; index += size) {
+    chunks.push(items.slice(index, index + size));
+  }
+  return chunks;
+}
+
 function normalizeProfileScope(profileId) {
   const normalized = String(profileId || '1').trim();
   return normalized || '1';
@@ -90,6 +98,36 @@ function createProfileUserSharedStore(config = buildEventRuntimeConfig(process.e
     }));
   });
 
+  const batchWriteItems = overrides.batchWriteItems || (async operations => {
+    const { BatchWriteCommand } = require('@aws-sdk/lib-dynamodb');
+    const deleteRequests = (Array.isArray(operations && operations.deleteKeys) ? operations.deleteKeys : [])
+      .map(key => ({
+        DeleteRequest: {
+          Key: {
+            profileScope: key.profileScope,
+            userId: key.userId
+          }
+        }
+      }));
+    const putRequests = (Array.isArray(operations && operations.putItems) ? operations.putItems : [])
+      .map(item => ({
+        PutRequest: {
+          Item: item
+        }
+      }));
+    const requests = deleteRequests.concat(putRequests);
+
+    for (const chunk of chunkItems(requests, 25)) {
+      await getDocumentClient().send(new BatchWriteCommand({
+        RequestItems: {
+          [tableName]: chunk
+        }
+      }));
+    }
+
+    return { ok: true };
+  });
+
   async function getUserVariables(profileScope, userId) {
     if (!enabled) {
       return null;
@@ -158,11 +196,50 @@ function createProfileUserSharedStore(config = buildEventRuntimeConfig(process.e
     return entries;
   }
 
+  async function replaceUserEntries(profileScope, entries) {
+    if (!enabled) {
+      return { stored: 0, deleted: 0, backend: 'disabled' };
+    }
+
+    const normalizedScope = normalizeProfileScope(profileScope);
+    const existing = await listUserEntries(normalizedScope);
+    const deleteKeys = existing
+      .map(entry => ({
+        profileScope: normalizedScope,
+        userId: normalizeUserId(entry && entry.userId)
+      }))
+      .filter(item => item.userId);
+
+    const putItems = [];
+    for (const entry of Array.isArray(entries) ? entries : []) {
+      const normalizedUserId = normalizeUserId(entry && entry.userId);
+      if (!normalizedUserId) continue;
+      putItems.push({
+        profileScope: normalizedScope,
+        userId: normalizedUserId,
+        updatedAt: new Date().toISOString(),
+        variables: cloneValue(entry && entry.variables && typeof entry.variables === 'object' ? entry.variables : {})
+      });
+    }
+
+    await batchWriteItems({
+      deleteKeys,
+      putItems
+    });
+
+    return {
+      stored: putItems.length,
+      deleted: deleteKeys.length,
+      backend: 'ydb-profile-user-shared'
+    };
+  }
+
   return {
     isEnabled: () => enabled,
     getUserVariables,
     putUserVariables,
-    listUserEntries
+    listUserEntries,
+    replaceUserEntries
   };
 }
 

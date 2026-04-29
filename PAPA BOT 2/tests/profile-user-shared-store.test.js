@@ -123,6 +123,57 @@ function createConfig(overrides = {}) {
       }
     ]);
   });
+
+  await run('profile user shared store replaces the whole profile scope', async () => {
+    const batchCalls = [];
+    const store = createProfileUserSharedStore(
+      createConfig(),
+      {
+        queryItems: async request => {
+          assert.equal(request.profileScope, '7');
+          return {
+            Items: [
+              {
+                profileScope: '7',
+                userId: '42',
+                variables: { legacy: '1' }
+              }
+            ]
+          };
+        },
+        batchWriteItems: async operations => {
+          batchCalls.push(operations);
+          return { ok: true };
+        }
+      }
+    );
+
+    const result = await store.replaceUserEntries('7', [
+      {
+        userId: '42',
+        variables: { pvs_score: '100' }
+      },
+      {
+        userId: '77',
+        variables: { pvs_level: '7' }
+      }
+    ]);
+
+    assert.deepEqual(result.backend, 'ydb-profile-user-shared');
+    assert.equal(result.stored, 2);
+    assert.equal(result.deleted, 1);
+    assert.equal(batchCalls.length, 1);
+    assert.deepEqual(batchCalls[0].deleteKeys, [
+      {
+        profileScope: '7',
+        userId: '42'
+      }
+    ]);
+    assert.equal(batchCalls[0].putItems.length, 2);
+    assert.equal(batchCalls[0].putItems[0].profileScope, '7');
+    assert.equal(batchCalls[0].putItems[0].userId, '42');
+    assert.deepEqual(batchCalls[0].putItems[0].variables, { pvs_score: '100' });
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {
