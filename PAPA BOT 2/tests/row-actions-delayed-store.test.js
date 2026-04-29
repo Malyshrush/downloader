@@ -100,6 +100,46 @@ async function run(name, fn) {
       }
     ]);
   });
+
+  await run('scheduleStepMessage legacy fallback prefers scheduler adapter override', async () => {
+    const calls = [];
+
+    await rowActions.__testOnly.scheduleStepMessageWithDependencies(
+      '42',
+      '229445618',
+      'welcome,60',
+      false,
+      'community-1',
+      '7',
+      {
+        now: new Date('2026-04-22T10:00:00.000Z'),
+        getCommunityConfig: async () => ({ vk_group_id: 229445618 }),
+        getSheetData: async () => {
+          throw new Error('sheet getter should not be used directly');
+        },
+        updateSheetData: async () => {
+          throw new Error('sheet updater should not be used directly');
+        },
+        legacySchedulerAdapter: {
+          listDelayedRows: async () => [],
+          appendDelayedRow: async (communityId, profileId, row) => {
+            calls.push({ communityId, profileId, row });
+            return { changed: true, value: row };
+          }
+        },
+        delayedDeliveryStore: {
+          isEnabled: () => false
+        },
+        addAppLog: async () => {}
+      }
+    );
+
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].communityId, '229445618');
+    assert.equal(calls[0].profileId, '7');
+    assert.equal(typeof calls[0].row, 'object');
+    assert.equal(Object.keys(calls[0].row).length > 0, true);
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {

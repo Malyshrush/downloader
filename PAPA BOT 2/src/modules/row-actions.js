@@ -7,8 +7,10 @@ const { updateUserBotAndStep, updateUserGroups } = require('./users');
 const { performVariableActions } = require('./variables');
 const { addAppLog } = require('./app-logs');
 const { createDelayedDeliveryStore } = require('./delayed-delivery-store');
+const { createLegacySchedulerSheetAdapter } = require('./legacy-scheduler-sheet-adapter');
 
 const delayedDeliveryStore = createDelayedDeliveryStore();
+const legacySchedulerAdapter = createLegacySchedulerSheetAdapter();
 
 function getDelayedDeliveryStore(overrides = {}) {
     return overrides.delayedDeliveryStore || delayedDeliveryStore;
@@ -17,6 +19,21 @@ function getDelayedDeliveryStore(overrides = {}) {
 function isDelayedDeliveryStoreEnabled(overrides = {}) {
     const store = getDelayedDeliveryStore(overrides);
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
+function getLegacySchedulerAdapter(overrides = {}) {
+    if (overrides.legacySchedulerAdapter) {
+        return overrides.legacySchedulerAdapter;
+    }
+    if (overrides.getSheetData || overrides.saveSheetData || overrides.updateSheetData || overrides.invalidateCache) {
+        return createLegacySchedulerSheetAdapter({
+            getSheetData: overrides.getSheetData,
+            saveSheetData: overrides.saveSheetData,
+            updateSheetData: overrides.updateSheetData,
+            invalidateCache: overrides.invalidateCache
+        });
+    }
+    return legacySchedulerAdapter;
 }
 
 /**
@@ -116,10 +133,7 @@ async function scheduleStepMessageLegacy(userId, groupId, stepData, isComment = 
         log('debug', `⏰ Scheduling step: "${stepData}" → step="${step}", delay=${delay}sec`);
 
         if (delay > 0 && step) {
-            const { getSheetData, updateSheetData, invalidateCache } = require('./storage');
-            const getSheetDataImpl = overrides.getSheetData || getSheetData;
-            const updateSheetDataImpl = overrides.updateSheetData || updateSheetData;
-            const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
+            const legacyAdapter = getLegacySchedulerAdapter(overrides);
             const getCommunityConfig = overrides.getCommunityConfig || require('./config').getCommunityConfig;
             const addAppLogImpl = overrides.addAppLog || addAppLog;
 
@@ -138,7 +152,7 @@ async function scheduleStepMessageLegacy(userId, groupId, stepData, isComment = 
                 }
             } catch(e) {}
 
-            const delayed = await getSheetDataImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+            const delayed = await legacyAdapter.listDelayedRows(fileCommunityId, profileId);
 
             delayed.push({
                 '№': (delayed.length + 1).toString(),
@@ -154,8 +168,7 @@ async function scheduleStepMessageLegacy(userId, groupId, stepData, isComment = 
                 'Ошибка': ''
             });
 
-            await updateSheetDataImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId, function() { return delayed; });
-            invalidateCacheImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+            await legacyAdapter.appendDelayedRow(fileCommunityId, profileId, delayed[delayed.length - 1]);
             log('debug', `✅ Step ${step} saved to delayed for ${userId} at ${mskTimeStr} мск. (file: ${fileCommunityId})`);
             await addAppLogImpl({
                 tab: 'DELAYED',

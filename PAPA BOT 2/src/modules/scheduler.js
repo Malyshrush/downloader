@@ -4,7 +4,6 @@
  */
 
 const { log } = require('../utils/logger');
-const { getSheetData, saveSheetData, invalidateCache } = require('./storage');
 const { getCommunityConfig, getActiveCommunityId } = require('./config');
 const { createKeyboard, createMailingKeyboard } = require('./keyboard');
 const { getAttachmentsFromRow } = require('./attachments');
@@ -16,11 +15,13 @@ const { sendMessageWithTokenRetry } = require('./messages');
 const { performRowActions } = require('./row-actions');
 const { createDelayedDeliveryStore } = require('./delayed-delivery-store');
 const { createMailingDeliveryStore } = require('./mailing-delivery-store');
+const { createLegacySchedulerSheetAdapter } = require('./legacy-scheduler-sheet-adapter');
 
 const isProcessingDelayed = {};
 const lastProcessTime = {};
 const delayedDeliveryStore = createDelayedDeliveryStore();
 const mailingDeliveryStore = createMailingDeliveryStore();
+const legacySchedulerAdapter = createLegacySchedulerSheetAdapter();
 
 const processedDelayedMessages = new Map();
 const DELAYED_TTL = 5 * 60 * 1000;
@@ -332,11 +333,24 @@ function isMailingDeliveryStoreEnabled(overrides = {}) {
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
+function getLegacySchedulerAdapter(overrides = {}) {
+    if (overrides.legacySchedulerAdapter) {
+        return overrides.legacySchedulerAdapter;
+    }
+    if (overrides.getSheetData || overrides.saveSheetData || overrides.updateSheetData || overrides.invalidateCache) {
+        return createLegacySchedulerSheetAdapter({
+            getSheetData: overrides.getSheetData,
+            saveSheetData: overrides.saveSheetData,
+            updateSheetData: overrides.updateSheetData,
+            invalidateCache: overrides.invalidateCache
+        });
+    }
+    return legacySchedulerAdapter;
+}
+
 async function processDelayedWithDependencies(communityId = null, profileId = '1', overrides = {}) {
     const getActiveCommunityIdImpl = overrides.getActiveCommunityId || getActiveCommunityId;
-    const getSheetDataImpl = overrides.getSheetData || getSheetData;
-    const saveSheetDataImpl = overrides.saveSheetData || saveSheetData;
-    const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
+    const legacyAdapter = getLegacySchedulerAdapter(overrides);
     const publishOutboundActionImpl = overrides.publishOutboundAction || publishOutboundAction;
     const cid = communityId || getActiveCommunityIdImpl(profileId) || 'default';
 
@@ -355,8 +369,8 @@ async function processDelayedWithDependencies(communityId = null, profileId = '1
         if (isDelayedDeliveryStoreEnabled(overrides)) {
             const { fileCommunityId, actualGroupId } = await getCommunityFileContext(cid, profileId, overrides);
             const delayedRows = await getDelayedDeliveryStore(overrides).listDueRows(fileCommunityId, now, profileId);
-            const messages = await getSheetDataImpl('РЎРћРћР‘Р©Р•РќРРЇ', fileCommunityId, profileId);
-            const comments = await getSheetDataImpl('РљРћРњРњР•РќРўРђР РР Р’ РџРћРЎРўРђРҐ', fileCommunityId, profileId);
+            const messages = await legacyAdapter.listMessageRows(fileCommunityId, profileId);
+            const comments = await legacyAdapter.listCommentRows(fileCommunityId, profileId);
             let queuedCount = 0;
 
             for (const item of delayedRows) {
@@ -461,9 +475,9 @@ async function processDelayedWithDependencies(communityId = null, profileId = '1
         log('info', '⏰ [TIMER] Starting processDelayed for community: ' + cid);
 
         const { fileCommunityId, actualGroupId } = await getCommunityFileContext(cid, profileId, overrides);
-        const delayed = await getSheetDataImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
-        const messages = await getSheetDataImpl('СООБЩЕНИЯ', fileCommunityId, profileId);
-        const comments = await getSheetDataImpl('КОММЕНТАРИИ В ПОСТАХ', fileCommunityId, profileId);
+        const delayed = await legacyAdapter.listDelayedRows(fileCommunityId, profileId);
+        const messages = await legacyAdapter.listMessageRows(fileCommunityId, profileId);
+        const comments = await legacyAdapter.listCommentRows(fileCommunityId, profileId);
 
         let hasChanges = false;
         let queuedCount = 0;
@@ -524,8 +538,7 @@ async function processDelayedWithDependencies(communityId = null, profileId = '1
         }
 
         if (hasChanges) {
-            await saveSheetDataImpl('ОТЛОЖЕННЫЕ', delayed, fileCommunityId, profileId);
-            invalidateCacheImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+            await legacyAdapter.replaceDelayedRows(fileCommunityId, profileId, delayed);
         }
 
         return {
@@ -586,9 +599,7 @@ async function updateMailingRuntimeState(fileCommunityId, mailingId, profileId, 
 
 async function processMailingWithDependencies(communityId = null, profileId = '1', overrides = {}) {
     const getActiveCommunityIdImpl = overrides.getActiveCommunityId || getActiveCommunityId;
-    const getSheetDataImpl = overrides.getSheetData || getSheetData;
-    const saveSheetDataImpl = overrides.saveSheetData || saveSheetData;
-    const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
+    const legacyAdapter = getLegacySchedulerAdapter(overrides);
     const publishOutboundActionImpl = overrides.publishOutboundAction || publishOutboundAction;
     const useStructuredMailingStore = isMailingDeliveryStoreEnabled(overrides);
     const cid = communityId || getActiveCommunityIdImpl(profileId) || 'default';
@@ -606,8 +617,7 @@ async function processMailingWithDependencies(communityId = null, profileId = '1
         lastProcessTime[mailingThrottleKey] = nowTs;
 
         const { fileCommunityId, actualGroupId } = await getCommunityFileContext(cid, profileId, overrides);
-        invalidateCacheImpl('РАССЫЛКА', fileCommunityId, profileId);
-        const mailing = await getSheetDataImpl('РАССЫЛКА', fileCommunityId, profileId);
+        const mailing = await legacyAdapter.listMailingRows(fileCommunityId, profileId);
         if (!mailing || mailing.length === 0) {
             return { ok: true, queuedCount: 0, fileCommunityId, actualGroupId };
         }
@@ -691,8 +701,7 @@ async function processMailingWithDependencies(communityId = null, profileId = '1
         }
 
         if (hasChanges) {
-            await saveSheetDataImpl('РАССЫЛКА', mailing, fileCommunityId, profileId);
-            invalidateCacheImpl('РАССЫЛКА', fileCommunityId, profileId);
+            await legacyAdapter.replaceMailingRows(fileCommunityId, profileId, mailing);
         }
 
         return {
@@ -722,12 +731,10 @@ async function markDelayedDeliveryError(item, delayedRows, fileCommunityId, prof
         return;
     }
 
-    const saveSheetDataImpl = overrides.saveSheetData || saveSheetData;
-    const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
+    const legacyAdapter = getLegacySchedulerAdapter(overrides);
     setDelayedStatus(item, 'Ошибка');
     setDelayedError(item, String(message || 'Unknown scheduler delivery error'));
-    await saveSheetDataImpl('ОТЛОЖЕННЫЕ', delayedRows, fileCommunityId, profileId);
-    invalidateCacheImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+    await legacyAdapter.replaceDelayedRows(fileCommunityId, profileId, delayedRows);
 }
 
 async function processDelayedDeliveryActionWithDependencies(action, overrides = {}) {
@@ -743,9 +750,7 @@ async function processDelayedDeliveryActionWithDependencies(action, overrides = 
     }
 
     const now = overrides.now instanceof Date ? overrides.now : new Date();
-    const getSheetDataImpl = overrides.getSheetData || getSheetData;
-    const saveSheetDataImpl = overrides.saveSheetData || saveSheetData;
-    const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
+    const legacyAdapter = getLegacySchedulerAdapter(overrides);
     const replaceVariablesImpl = overrides.replaceVariables || replaceVariables;
     const getAttachmentsFromRowImpl = overrides.getAttachmentsFromRow || getAttachmentsFromRow;
     const createKeyboardImpl = overrides.createKeyboard || createKeyboard;
@@ -753,12 +758,12 @@ async function processDelayedDeliveryActionWithDependencies(action, overrides = 
     const performRowActionsImpl = overrides.performRowActions || performRowActions;
     const addAppLogImpl = overrides.addAppLog || addAppLog;
 
-    const messages = await getSheetDataImpl('СООБЩЕНИЯ', fileCommunityId, profileId);
-    const comments = await getSheetDataImpl('КОММЕНТАРИИ В ПОСТАХ', fileCommunityId, profileId);
+    const messages = await legacyAdapter.listMessageRows(fileCommunityId, profileId);
+    const comments = await legacyAdapter.listCommentRows(fileCommunityId, profileId);
     const useStructuredDelayedStore = isDelayedDeliveryStoreEnabled(overrides);
     const delayed = useStructuredDelayedStore
         ? null
-        : await getSheetDataImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+        : await legacyAdapter.listDelayedRows(fileCommunityId, profileId);
     const item = useStructuredDelayedStore
         ? await getDelayedDeliveryStore(overrides).getDelayedRow(fileCommunityId, rowNumber, profileId)
         : findRowByNumber(delayed, rowNumber);
@@ -822,8 +827,7 @@ async function processDelayedDeliveryActionWithDependencies(action, overrides = 
             setDelayedStatus(item, 'Отправлено');
             setDelayedError(item, '');
             setDelayedSentAt(item, currentMskStr);
-            await saveSheetDataImpl('ОТЛОЖЕННЫЕ', delayed, fileCommunityId, profileId);
-            invalidateCacheImpl('ОТЛОЖЕННЫЕ', fileCommunityId, profileId);
+            await legacyAdapter.replaceDelayedRows(fileCommunityId, profileId, delayed);
         }
 
         const actionGroupId = type === 'comment' ? `-${actualGroupId}` : actualGroupId;
@@ -866,9 +870,7 @@ async function processMailingDeliveryActionWithDependencies(action, overrides = 
     }
 
     const now = overrides.now instanceof Date ? overrides.now : new Date();
-    const getSheetDataImpl = overrides.getSheetData || getSheetData;
-    const saveSheetDataImpl = overrides.saveSheetData || saveSheetData;
-    const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
+    const legacyAdapter = getLegacySchedulerAdapter(overrides);
     const collectMailingRecipientsImpl = overrides.collectMailingRecipients || collectMailingRecipients;
     const createMailingKeyboardImpl = overrides.createMailingKeyboard || createMailingKeyboard;
     const getAttachmentsFromRowImpl = overrides.getAttachmentsFromRow || getAttachmentsFromRow;
@@ -876,7 +878,7 @@ async function processMailingDeliveryActionWithDependencies(action, overrides = 
     const addAppLogImpl = overrides.addAppLog || addAppLog;
     const useStructuredMailingStore = isMailingDeliveryStoreEnabled(overrides);
 
-    const mailing = await getSheetDataImpl('РАССЫЛКА', fileCommunityId, profileId);
+    const mailing = await legacyAdapter.listMailingRows(fileCommunityId, profileId);
     const row = findRowByNumber(mailing, rowNumber);
 
     if (!row) {
@@ -901,8 +903,7 @@ async function processMailingDeliveryActionWithDependencies(action, overrides = 
         } else {
             setMailingStatus(row, 'Ошибка');
             setMailingError(row, 'Нет получателей (проверьте ID/Группу в настройках рассылки)');
-            await saveSheetDataImpl('РАССЫЛКА', mailing, fileCommunityId, profileId);
-            invalidateCacheImpl('РАССЫЛКА', fileCommunityId, profileId);
+            await legacyAdapter.replaceMailingRows(fileCommunityId, profileId, mailing);
         }
         return { ok: false, mailingRowNumber: rowNumber, reason: 'no_recipients' };
     }
@@ -960,8 +961,7 @@ async function processMailingDeliveryActionWithDependencies(action, overrides = 
         setMailingStatus(row, getMailingStatus(effectiveRow));
         setMailingError(row, getFirstDefinedValue(effectiveRow, MAILING_ERROR_KEYS));
         setMailingSentAt(row, currentMskStr);
-        await saveSheetDataImpl('РАССЫЛКА', mailing, fileCommunityId, profileId);
-        invalidateCacheImpl('РАССЫЛКА', fileCommunityId, profileId);
+        await legacyAdapter.replaceMailingRows(fileCommunityId, profileId, mailing);
     }
 
     await addAppLogImpl({
