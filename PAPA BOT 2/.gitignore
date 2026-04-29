@@ -2,6 +2,7 @@
 .vs/
 dist/
 backups/
+мусор/
 *.pid
 *.tmp.json
 *.bak
