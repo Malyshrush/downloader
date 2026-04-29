@@ -3,6 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const variables = require('../src/modules/variables');
+const { createLegacyVariablesSheetAdapter } = require('../src/modules/legacy-variables-sheet-adapter');
 
 async function run(name, fn) {
   try {
@@ -730,6 +731,22 @@ async function run(name, fn) {
     );
 
     assert.equal(source.includes('getSheetData('), false);
+  });
+
+  await run('legacy variables adapter blocks sheet reads in cloud runtime by default', async () => {
+    const adapter = createLegacyVariablesSheetAdapter({
+      legacySheetAccessPolicy: {
+        cloudRuntimeEnabled: true,
+        allowAllLegacySheetFallback: false,
+        allowLegacyVariablesSheetAccess: false
+      },
+      getSheetData: async () => []
+    });
+
+    await assert.rejects(
+      () => adapter.getSharedVariables('8'),
+      /disabled/
+    );
   });
 })().then(() => {
   process.exit(0);

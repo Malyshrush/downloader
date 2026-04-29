@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 
 const appLogs = require('../src/modules/app-logs');
+const { createLegacyAppLogsSheetAdapter } = require('../src/modules/legacy-app-logs-sheet-adapter');
 
 async function run(name, fn) {
   try {
@@ -194,6 +195,22 @@ async function run(name, fn) {
 
     assert.deepEqual(clearCalls, ['5:community-c']);
     assert.deepEqual(invalidateCalls, [{ communityId: 'community-c', profileId: '5' }]);
+  });
+
+  await run('legacy app logs adapter blocks sheet access in cloud runtime by default', async () => {
+    const adapter = createLegacyAppLogsSheetAdapter({
+      legacySheetAccessPolicy: {
+        cloudRuntimeEnabled: true,
+        allowAllLegacySheetFallback: false,
+        allowLegacyAppLogsSheetAccess: false
+      },
+      getSheetData: async () => []
+    });
+
+    await assert.rejects(
+      () => adapter.listRows('community-c', '5'),
+      /disabled/
+    );
   });
 })().then(() => {
   process.exit(0);

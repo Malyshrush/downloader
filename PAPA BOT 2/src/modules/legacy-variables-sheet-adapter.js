@@ -1,4 +1,5 @@
 const { getSheetData, invalidateCache } = require('./storage');
+const { assertLegacySheetAccessAllowed, buildLegacySheetAccessPolicy } = require('./legacy-sheet-access-policy');
 
 const PROFILE_USER_SHARED_SHEET = 'ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ';
 const SHARED_VARIABLES_SHEET = 'ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ';
@@ -25,14 +26,17 @@ function getFirstDefined(row, columns) {
 function createLegacyVariablesSheetAdapter(dependencies = {}) {
     const sheetGetter = dependencies.getSheetData || getSheetData;
     const cacheInvalidator = dependencies.invalidateCache || invalidateCache;
+    const accessPolicy = dependencies.legacySheetAccessPolicy || buildLegacySheetAccessPolicy();
 
     return {
         async getProfileUserSharedVariableRows(profileId = '1') {
+            assertLegacySheetAccessAllowed('variables', accessPolicy);
             const rows = await sheetGetter(PROFILE_USER_SHARED_SHEET, null, profileId);
             return Array.isArray(rows) ? rows : [];
         },
 
         async getSharedVariables(profileId = '1') {
+            assertLegacySheetAccessAllowed('variables', accessPolicy);
             const rows = await sheetGetter(SHARED_VARIABLES_SHEET, null, profileId);
             if (!Array.isArray(rows) || rows.length === 0) {
                 return {};

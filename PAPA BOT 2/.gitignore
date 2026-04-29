@@ -1,0 +1,14 @@
+.claude/
+.vs/
+dist/
+backups/
+*.pid
+*.tmp.json
+*.bak
+last_deploy*.txt
+logs_temp*.txt
+tmp-write-test*.txt
+autosetup_temp.txt
+test-debug.html
+test-modules.js
+yandex-function/last_deploy_logs.txt
