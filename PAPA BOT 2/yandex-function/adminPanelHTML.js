@@ -3363,6 +3363,37 @@ window.sessionCaptchaRefreshInFlight = null;
 return window.sessionCaptchaRefreshInFlight;
 }
 
+function getActiveAdminTabName() {
+var activeTab = document.querySelector('.tablinks.active');
+if (!activeTab) return 'Messages';
+var onclickAttr = activeTab.getAttribute('onclick') || '';
+var match = onclickAttr.match(/'(\w+)'/);
+return (match && match[1]) ? match[1] : 'Messages';
+}
+
+function restoreCurrentCommunityIdFromStorage() {
+if (window.currentCommunityId) return window.currentCommunityId;
+try {
+var communityId = localStorage.getItem('vkBotLastCommunity') || '';
+if (communityId) window.currentCommunityId = communityId;
+return communityId;
+} catch(e) {
+return window.currentCommunityId || '';
+}
+}
+
+function reloadActiveTabAfterSessionCaptcha() {
+var tabName = getActiveAdminTabName();
+restoreCurrentCommunityIdFromStorage();
+setTimeout(function() {
+if (typeof window.refreshTabContent === 'function') {
+window.refreshTabContent(tabName);
+} else if (typeof loadData === 'function') {
+loadData(tabName);
+}
+}, 0);
+}
+
 async function submitSessionCaptcha() {
 var baseUrl = window.location.href.split('?')[0];
 var answerEl = document.getElementById('sessionCaptchaAnswer');
@@ -3380,6 +3411,7 @@ body: JSON.stringify({ mode: 'session', answer: answer })
 if (data && data.success) {
 window.authUiState.sessionCaptchaRequired = false;
 setSessionCaptchaLock(false);
+reloadActiveTabAfterSessionCaptcha();
 }
 } catch (e) {
 if (e && e.message === 'CAPTCHA_REQUIRED' || e && e.message === 'SESSION_INVALID') return;
@@ -6042,16 +6074,19 @@ saveBtn.onclick = function() {
   // Проверяем размер файла
   var fileSizeMB = file.size / (1024 * 1024);
   var useRenderService = fileSizeMB > 3; // Файлы больше 3MB загружаем через Render
+  var communityId = window.currentCommunityId || '';
+  if (!communityId) {
+    communityId = restoreCurrentCommunityIdFromStorage();
+  }
+  var groupId = '';
+  var target = (tab === 'Messages') ? 'message' : 'comment';
+  var baseUrl = window.location.href.split('?')[0];
 
   getBotSettings().then(async function(settings) {
     // ✅ Берём VK Token (Community Token), User Token и vk_group_id из конфига активного сообщества
     var communityToken = '';
     var userToken = '';
-    var groupId = '';
-    var target = (tab === 'Messages') ? 'message' : 'comment';
-    var baseUrl = window.location.href.split('?')[0];
 
-    const communityId = window.currentCommunityId;
     const communityConfig = settings.communities?.[communityId] || {};
     
     // Community Token — первый из массива vk_tokens
@@ -6059,6 +6094,7 @@ saveBtn.onclick = function() {
     userToken = communityConfig.user_token || '';
     groupId = communityConfig.vk_group_id || '';
 
+    if (!communityId) throw new Error('Сообщество не выбрано. Обновите страницу и выберите сообщество.');
     if (!communityToken) throw new Error('VK Token (Community Token) не настроен. Проверьте НАСТРОЙКА сообщества.');
     if (!userToken) throw new Error('User Token не настроен. Проверьте НАСТРОЙКА сообщества.');
     if (!groupId) throw new Error('VK Group ID не настроен');

@@ -33,3 +33,16 @@ test('admin panel throttles automatic session captcha refreshes', () => {
     assert.match(adminPanelHTML, /refreshSessionCaptcha\(true\)/);
     assert.match(adminPanelHTML, /Date\.now\(\) - Number\(window\.sessionCaptchaLastRefreshAt \|\| 0\) < 10000/);
 });
+
+test('admin panel keeps upload community context available after render response', () => {
+    assert.match(adminPanelHTML, /var communityId = window\.currentCommunityId \|\| '';/);
+    assert.match(adminPanelHTML, /communityId: communityId,\s*groupId: groupId/s);
+    assert.doesNotMatch(adminPanelHTML, /const communityId = window\.currentCommunityId;/);
+});
+
+test('admin panel reloads the active tab after successful session captcha', () => {
+    assert.match(adminPanelHTML, /function reloadActiveTabAfterSessionCaptcha\(\)/);
+    assert.match(adminPanelHTML, /reloadActiveTabAfterSessionCaptcha\(\);/);
+    assert.match(adminPanelHTML, /window\.refreshTabContent\(tabName\)/);
+    assert.match(adminPanelHTML, /localStorage\.getItem\('vkBotLastCommunity'\)/);
+});
