@@ -50,9 +50,64 @@ function createUploadForm(file, fieldName, overrides = {}) {
     return form;
 }
 
+function normalizeGroupId(groupId) {
+    return Math.abs(Number(groupId));
+}
+
+function buildVkError(prefix, error) {
+    if (!error) return new Error(prefix);
+    if (error.data?.error?.error_msg) return new Error(`${prefix}: ${error.data.error.error_msg}`);
+    if (error.response?.data?.error?.error_msg) return new Error(`${prefix}: ${error.response.data.error.error_msg}`);
+    return new Error(`${prefix}: ${error.message || String(error)}`);
+}
+
+function isPeerRequiredError(error) {
+    const message = String(
+        error?.message ||
+        error?.data?.error?.error_msg ||
+        error?.response?.data?.error?.error_msg ||
+        ''
+    ).toLowerCase();
+    return message.includes('peer_id') || message.includes('peer id');
+}
+
+async function tryUploadStrategies(strategies) {
+    const errors = [];
+    for (const strategy of strategies) {
+        if (!strategy.enabled) continue;
+        try {
+            return await strategy.run();
+        } catch (error) {
+            errors.push(`${strategy.name}: ${error.message}`);
+            if (strategy.onlyOnPeerRequired && !isPeerRequiredError(error)) {
+                break;
+            }
+        }
+    }
+    throw new Error(errors.join('; ') || 'VK upload failed');
+}
+
 async function uploadPhotoToMessages(userToken, groupId, file, overrides = {}) {
+    const communityToken = overrides.communityToken || '';
+    const absGroupId = normalizeGroupId(groupId);
+    return tryUploadStrategies([
+        {
+            name: 'photo messages user token',
+            enabled: !!userToken,
+            run: () => uploadPhotoToMessagesWithToken(userToken, absGroupId, file, overrides)
+        },
+        {
+            name: 'photo messages community token',
+            enabled: !!communityToken,
+            run: () => uploadPhotoToMessagesWithToken(communityToken, absGroupId, file, overrides)
+        }
+    ]);
+}
+
+async function uploadPhotoToMessagesWithToken(token, absGroupId, file, overrides = {}) {
     const uploadRes = await vkGet('https://api.vk.com/method/photos.getMessagesUploadServer', {
-        access_token: userToken,
+        group_id: absGroupId,
+        access_token: token,
         v: '5.199'
     }, overrides);
     if (uploadRes.data.error) throw new Error('VK API Error: ' + uploadRes.data.error.error_msg);
@@ -66,7 +121,7 @@ async function uploadPhotoToMessages(userToken, groupId, file, overrides = {}) {
     if (!server || !photo || !hash) throw new Error('Ошибка загрузки фото на сервер VK');
 
     const saveRes = await vkPost('https://api.vk.com/method/photos.saveMessagesPhoto', null, {
-        params: { server, photo, hash, access_token: userToken, v: '5.199' }
+        params: { server, photo, hash, group_id: absGroupId, access_token: token, v: '5.199' }
     }, overrides);
     if (saveRes.data.error) throw new Error('VK API Error: ' + saveRes.data.error.error_msg);
 
@@ -75,9 +130,26 @@ async function uploadPhotoToMessages(userToken, groupId, file, overrides = {}) {
 }
 
 async function uploadPhotoToWall(userToken, groupId, file, overrides = {}) {
+    const communityToken = overrides.communityToken || '';
+    const absGroupId = normalizeGroupId(groupId);
+    return tryUploadStrategies([
+        {
+            name: 'photo wall user token',
+            enabled: !!userToken,
+            run: () => uploadPhotoToWallWithToken(userToken, absGroupId, file, overrides)
+        },
+        {
+            name: 'photo wall community token',
+            enabled: !!communityToken,
+            run: () => uploadPhotoToWallWithToken(communityToken, absGroupId, file, overrides)
+        }
+    ]);
+}
+
+async function uploadPhotoToWallWithToken(token, absGroupId, file, overrides = {}) {
     const uploadRes = await vkGet('https://api.vk.com/method/photos.getWallUploadServer', {
-        group_id: Math.abs(Number(groupId)),
-        access_token: userToken,
+        group_id: absGroupId,
+        access_token: token,
         v: '5.199'
     }, overrides);
     if (uploadRes.data.error) throw new Error(uploadRes.data.error.error_msg);
@@ -91,7 +163,7 @@ async function uploadPhotoToWall(userToken, groupId, file, overrides = {}) {
     if (!server || !photo || !hash) throw new Error('Ошибка загрузки фото на сервер VK');
 
     const saveRes = await vkPost('https://api.vk.com/method/photos.saveWallPhoto', null, {
-        params: { group_id: Math.abs(Number(groupId)), server, photo, hash, access_token: userToken, v: '5.199' }
+        params: { group_id: absGroupId, server, photo, hash, access_token: token, v: '5.199' }
     }, overrides);
     if (saveRes.data.error) throw new Error(saveRes.data.error.error_msg);
 
@@ -100,6 +172,29 @@ async function uploadPhotoToWall(userToken, groupId, file, overrides = {}) {
 }
 
 async function uploadDocToMessages(userToken, groupId, file, overrides = {}) {
+    const communityToken = overrides.communityToken || '';
+    const absGroupId = normalizeGroupId(groupId);
+    return tryUploadStrategies([
+        {
+            name: 'doc messages user token',
+            enabled: !!userToken,
+            run: () => uploadDocToMessagesWithUserToken(userToken, file, overrides)
+        },
+        {
+            name: 'doc wall user token',
+            enabled: !!userToken,
+            onlyOnPeerRequired: false,
+            run: () => uploadDocToWallWithToken(userToken, absGroupId, file, overrides)
+        },
+        {
+            name: 'doc messages community token',
+            enabled: !!communityToken,
+            run: () => uploadDocToMessagesWithCommunityToken(communityToken, absGroupId, file, overrides)
+        }
+    ]);
+}
+
+async function uploadDocToMessagesWithUserToken(userToken, file, overrides = {}) {
     const uploadServerRes = await vkGet('https://api.vk.com/method/docs.getMessagesUploadServer', {
         type: 'doc',
         access_token: userToken,
@@ -120,15 +215,59 @@ async function uploadDocToMessages(userToken, groupId, file, overrides = {}) {
     }, overrides);
     if (saveRes.data.error) throw new Error('VK API Error: ' + saveRes.data.error.error_msg);
 
-    const savedDoc = saveRes.data.response.doc;
+    const savedDoc = saveRes.data.response.doc || saveRes.data.response;
+    if (!savedDoc) throw new Error('Документ не сохранён');
+    return `doc${savedDoc.owner_id}_${savedDoc.id}`;
+}
+
+async function uploadDocToMessagesWithCommunityToken(communityToken, absGroupId, file, overrides = {}) {
+    const peerId = -absGroupId;
+    const uploadServerRes = await vkGet('https://api.vk.com/method/docs.getMessagesUploadServer', {
+        peer_id: peerId,
+        access_token: communityToken,
+        v: '5.199'
+    }, overrides);
+    if (uploadServerRes.data.error) throw new Error('VK API Error: ' + uploadServerRes.data.error.error_msg);
+
+    const form = createUploadForm(file, 'file', overrides);
+    const uploadResult = await vkPost(uploadServerRes.data.response.upload_url, form, {
+        headers: form.getHeaders()
+    }, overrides);
+
+    const uploadedFile = uploadResult.data.file;
+    if (!uploadedFile) throw new Error('Ошибка загрузки документа на сервер VK');
+
+    const saveRes = await vkPost('https://api.vk.com/method/docs.save', null, {
+        params: { file: uploadedFile, peer_id: peerId, access_token: communityToken, v: '5.199' }
+    }, overrides);
+    if (saveRes.data.error) throw new Error('VK API Error: ' + saveRes.data.error.error_msg);
+
+    const savedDoc = saveRes.data.response.doc || saveRes.data.response;
     if (!savedDoc) throw new Error('Документ не сохранён');
     return `doc${savedDoc.owner_id}_${savedDoc.id}`;
 }
 
 async function uploadDocToWall(userToken, groupId, file, overrides = {}) {
+    const communityToken = overrides.communityToken || '';
+    const absGroupId = normalizeGroupId(groupId);
+    return tryUploadStrategies([
+        {
+            name: 'doc wall user token',
+            enabled: !!userToken,
+            run: () => uploadDocToWallWithToken(userToken, absGroupId, file, overrides)
+        },
+        {
+            name: 'doc wall community token',
+            enabled: !!communityToken,
+            run: () => uploadDocToWallWithToken(communityToken, absGroupId, file, overrides)
+        }
+    ]);
+}
+
+async function uploadDocToWallWithToken(token, absGroupId, file, overrides = {}) {
     const uploadServerRes = await vkGet('https://api.vk.com/method/docs.getWallUploadServer', {
-        group_id: Math.abs(Number(groupId)),
-        access_token: userToken,
+        group_id: absGroupId,
+        access_token: token,
         v: '5.199'
     }, overrides);
     if (uploadServerRes.data.error) throw new Error(uploadServerRes.data.error.error_msg);
@@ -142,7 +281,7 @@ async function uploadDocToWall(userToken, groupId, file, overrides = {}) {
     if (!uploadedFile) throw new Error('Ошибка загрузки документа на сервер VK');
 
     const saveRes = await vkPost('https://api.vk.com/method/docs.save', null, {
-        params: { file: uploadedFile, group_id: Math.abs(Number(groupId)), access_token: userToken, v: '5.199' }
+        params: { file: uploadedFile, group_id: absGroupId, access_token: token, v: '5.199' }
     }, overrides);
     if (saveRes.data.error) throw new Error(saveRes.data.error.error_msg);
 
@@ -184,6 +323,7 @@ async function handleUploadRequestWithDependencies(req, overrides = {}) {
     const body = req?.body || {};
     const file = req?.file || null;
     const userToken = body.user_token;
+    const communityToken = body.community_token;
     const groupId = body.group_id;
     const target = body.target;
 
@@ -200,14 +340,14 @@ async function handleUploadRequestWithDependencies(req, overrides = {}) {
 
         if (mime.startsWith('image/')) {
             attachment = target === 'comments'
-                ? await uploadPhotoToWallImpl(userToken, groupId, file, overrides)
-                : await uploadPhotoToMessagesImpl(userToken, groupId, file, overrides);
+                ? await uploadPhotoToWallImpl(userToken, groupId, file, { ...overrides, communityToken })
+                : await uploadPhotoToMessagesImpl(userToken, groupId, file, { ...overrides, communityToken });
         } else if (mime.startsWith('video/')) {
-            attachment = await uploadVideoToMessagesImpl(userToken, groupId, file, overrides);
+            attachment = await uploadVideoToMessagesImpl(userToken, groupId, file, { ...overrides, communityToken });
         } else {
             attachment = target === 'comments'
-                ? await uploadDocToWallImpl(userToken, groupId, file, overrides)
-                : await uploadDocToMessagesImpl(userToken, groupId, file, overrides);
+                ? await uploadDocToWallImpl(userToken, groupId, file, { ...overrides, communityToken })
+                : await uploadDocToMessagesImpl(userToken, groupId, file, { ...overrides, communityToken });
         }
 
         return {

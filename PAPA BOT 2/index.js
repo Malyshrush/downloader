@@ -43,7 +43,22 @@ app.get('/healthz', (_req, res) => {
 
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
+    console.log('[UPLOAD] Received request:', {
+      has_user_token: !!req.body?.user_token,
+      has_community_token: !!req.body?.community_token,
+      group_id: req.body?.group_id,
+      target: req.body?.target,
+      has_file: !!req.file,
+      filename: req.file?.originalname,
+      size: req.file?.size,
+      mimetype: req.file?.mimetype
+    });
     const result = await handleUploadRequestWithDependencies(req);
+    console.log('[UPLOAD] Success:', {
+      attachment: result.attachment,
+      fileName: result.fileName,
+      fileSize: result.fileSize
+    });
     res.json(result);
   } catch (error) {
     console.error('[UPLOAD ERROR]', error);
