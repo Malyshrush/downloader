@@ -655,6 +655,9 @@ async function handlePostRequest(event) {
             if (body.action === 'record_uploaded_file') {
                 return handleRecordUploadedFile(event);
             }
+            if (body.action === 'recover_render_upload') {
+                return handleRecoverRenderUpload(event);
+            }
         } catch (e) {
             // Не JSON body, продолжаем обычную обработку
         }
@@ -2110,6 +2113,49 @@ async function handleRecordUploadedFile(event) {
 /**
  * Проверка прав токена
  */
+async function handleRecoverRenderUpload(event, overrides = {}) {
+    const httpGet = overrides.httpGet || require('axios').get;
+    const body = typeof event?.body === 'string' ? JSON.parse(event.body || '{}') : (event?.body || {});
+    const uploadId = String(body.uploadId || body.upload_id || '').trim();
+
+    if (!/^[a-zA-Z0-9_.:-]{8,128}$/.test(uploadId)) {
+        return {
+            statusCode: 400,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify({ success: false, error: 'upload_id is required' })
+        };
+    }
+
+    const renderUrl = String(process.env.RENDER_UPLOAD_URL || 'https://vk-uploader.onrender.com').replace(/\/+$/, '');
+    try {
+        const response = await httpGet(`${renderUrl}/upload-result`, {
+            timeout: Number(overrides.timeoutMs || 10000),
+            params: {
+                upload_id: uploadId,
+                t: Date.now()
+            }
+        });
+
+        return {
+            statusCode: response.status || 200,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify(response.data || {})
+        };
+    } catch (error) {
+        const status = error?.response?.status || 502;
+        const payload = error?.response?.data || {
+            success: false,
+            error: error.message || 'Render recovery failed'
+        };
+
+        return {
+            statusCode: status,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify(payload)
+        };
+    }
+}
+
 async function handleCheckTokenPermissions(event) {
     try {
         const result = await getTokenPermissions();
@@ -2934,6 +2980,7 @@ module.exports = {
     __testOnly: {
         handleVkWebhookWithDependencies,
         handleSaveSheetWithDependencies,
+        handleRecoverRenderUpload,
         workerHandlerWithDependencies,
         senderHandlerWithDependencies
     }

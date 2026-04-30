@@ -22,7 +22,14 @@ test('admin panel surfaces a distinct final upload failure after retries', () =>
 
 test('admin panel sends render upload_id and can recover completed uploads', () => {
     assert.match(adminPanelHTML, /formData\.append\('upload_id', uploadId\)/);
-    assert.match(adminPanelHTML, /\/upload-result\?upload_id=/);
+    assert.match(adminPanelHTML, /action: 'recover_render_upload'/);
+    assert.doesNotMatch(adminPanelHTML, /\/upload-result\?upload_id=/);
     assert.doesNotMatch(adminPanelHTML, /cache: 'no-store'/);
     assert.match(adminPanelHTML, /recoverRenderResult\(60000\)/);
+});
+
+test('admin panel throttles automatic session captcha refreshes', () => {
+    assert.match(adminPanelHTML, /window\.sessionCaptchaLastRefreshAt = 0;/);
+    assert.match(adminPanelHTML, /refreshSessionCaptcha\(true\)/);
+    assert.match(adminPanelHTML, /Date\.now\(\) - Number\(window\.sessionCaptchaLastRefreshAt \|\| 0\) < 10000/);
 });

@@ -3199,7 +3199,7 @@ return '<div id="sessionCaptchaOverlay" class="session-captcha-overlay" style="d
 '<input id="sessionCaptchaAnswer" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Например: AB12CD" style="width:100%;padding:12px;margin-bottom:12px;border:1px solid var(--border-color);border-radius:12px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
 '<div class="profile-card-actions" style="display:flex;gap:10px;flex-wrap:wrap;">' +
 '<button class="btn btn-save" type="button" onclick="submitSessionCaptcha()">Подтвердить</button>' +
-'<button id="sessionCaptchaRefreshButton" class="btn btn-neutral" type="button" onclick="refreshSessionCaptcha()">Обновить каптчу</button>' +
+'<button id="sessionCaptchaRefreshButton" class="btn btn-neutral" type="button" onclick="refreshSessionCaptcha(true)">Обновить каптчу</button>' +
 '</div>' +
 '<div id="sessionCaptchaStatus" style="margin-top:14px;font-size:13px;"></div>' +
 '</div>' +
@@ -3268,6 +3268,7 @@ typeof data.captchaSvg === 'string'
 }
 
 window.sessionCaptchaRefreshInFlight = null;
+window.sessionCaptchaLastRefreshAt = 0;
 
 function setSessionCaptchaRefreshButtonState(pending) {
 var button = document.getElementById('sessionCaptchaRefreshButton');
@@ -3315,7 +3316,7 @@ if (box) box.innerHTML = data.captchaSvg || '';
 toggleLoginCaptcha(true);
 }
 
-async function refreshSessionCaptcha() {
+async function refreshSessionCaptcha(force) {
 if (window.sessionCaptchaRefreshInFlight) {
 return window.sessionCaptchaRefreshInFlight;
 }
@@ -3325,6 +3326,9 @@ var statusEl = document.getElementById('sessionCaptchaStatus');
 var answerEl = document.getElementById('sessionCaptchaAnswer');
 var previousMarkup = box ? box.innerHTML : '';
 var hasPreviousMarkup = !!(previousMarkup && previousMarkup.indexOf('Загружаем каптчу') === -1);
+if (!force && hasPreviousMarkup && Date.now() - Number(window.sessionCaptchaLastRefreshAt || 0) < 10000) {
+return { success: true, reused: true };
+}
 if (statusEl) statusEl.innerHTML = makeInlineText('info', 'Обновляем каптчу...');
 if (box && !hasPreviousMarkup) {
 box.innerHTML = '<div style="color:var(--text-secondary);font-size:14px;">Загружаем каптчу...</div>';
@@ -3341,6 +3345,7 @@ return data;
 if (box) {
 box.innerHTML = data.captchaSvg || previousMarkup || '<div style="color:var(--text-secondary);font-size:14px;">Не удалось загрузить картинку капчи. Нажмите "Обновить каптчу".</div>';
 }
+window.sessionCaptchaLastRefreshAt = Date.now();
 if (statusEl) statusEl.innerHTML = '';
 if (answerEl) {
 answerEl.value = '';
@@ -6119,12 +6124,17 @@ saveBtn.onclick = function() {
 
           var recoverRenderResult = function(timeoutMs) {
             var startedAt = Date.now();
-            var resultUrl = RENDER_SERVICE_URL + '/upload-result?upload_id=' + encodeURIComponent(uploadId);
+            var backendRecoveryUrl = baseUrl;
 
             return new Promise(function(resolve, reject) {
               var poll = function() {
-                fetch(resultUrl + '&t=' + Date.now(), {
-                  method: 'GET',
+                fetch(backendRecoveryUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    action: 'recover_render_upload',
+                    upload_id: uploadId
+                  }),
                   signal: AbortSignal.timeout(5000)
                 }).then(function(response) {
                   if (response.status === 202 || response.status === 404) {
