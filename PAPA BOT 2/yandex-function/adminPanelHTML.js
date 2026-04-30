@@ -6117,6 +6117,7 @@ saveBtn.onclick = function() {
               message.includes('503') ||
               message.includes('504') ||
               message.includes('timeout') ||
+              message.includes('timed out') ||
               message.includes('network')
             );
           };

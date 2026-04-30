@@ -70,6 +70,53 @@ function buildTimeoutError(message = 'timeout exceeded') {
       ['upload', 2]
     ]);
   });
+
+  await run('uploadViaRenderService treats signal timed out as wake candidate', async () => {
+    const calls = [];
+    let uploadAttempt = 0;
+
+    const attachment = await attachments.__testOnly.uploadViaRenderServiceWithDependencies(
+      Buffer.from('big-file'),
+      'video.mp4',
+      'video/mp4',
+      'messages',
+      '229445618',
+      {
+        getUserToken: async () => 'user-token',
+        createFormData: () => ({
+          headers: { 'content-type': 'multipart/form-data' },
+          append() {},
+          getHeaders() {
+            return this.headers;
+          }
+        }),
+        uploadRequest: async () => {
+          uploadAttempt += 1;
+          calls.push(['upload', uploadAttempt]);
+          if (uploadAttempt === 1) {
+            const error = new Error('signal timed out');
+            error.name = 'TimeoutError';
+            throw error;
+          }
+          return { success: true, attachment: 'video1_3' };
+        },
+        pingRender: async attempt => {
+          calls.push(['ping', attempt]);
+          return attempt >= 1;
+        },
+        sleep: async ms => {
+          calls.push(['sleep', ms]);
+        }
+      }
+    );
+
+    assert.equal(attachment, 'video1_3');
+    assert.deepEqual(calls, [
+      ['upload', 1],
+      ['ping', 1],
+      ['upload', 2]
+    ]);
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {
