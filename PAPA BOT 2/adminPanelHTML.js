@@ -6134,8 +6134,6 @@ saveBtn.onclick = function() {
               return;
             }
 
-            statusEl.innerText = '😴 Пытаемся разбудить сервис Render...';
-
             var wakeStartedAt = Date.now();
             var wakeUpAttempts = 0;
 
@@ -6175,7 +6173,18 @@ saveBtn.onclick = function() {
               });
             };
 
-            tryWakeUp();
+            statusEl.innerText = '⏳ Render долго отвечает, повторяем загрузку с увеличенным ожиданием...';
+            uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS).then(function(response) {
+              resolve(response);
+            }).catch(function(retryError) {
+              if (!isRenderWakeCandidate(retryError)) {
+                reject(new Error('Render недоступен: ' + retryError.message));
+                return;
+              }
+
+              statusEl.innerText = '😴 Пытаемся разбудить сервис Render...';
+              tryWakeUp();
+            });
           });
         } else {
           // Загружаем через PAPA BOT backend для маленьких файлов

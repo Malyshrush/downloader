@@ -730,7 +730,16 @@ async function uploadViaRenderServiceWithDependencies(buffer, filename, mimeType
             throw error;
         }
 
-        log('warn', `[RENDER UPLOAD] Initial upload failed, waking Render service: ${error.message}`);
+        log('warn', `[RENDER UPLOAD] Initial upload failed, retrying with extended timeout: ${error.message}`);
+        try {
+            return await executeUpload(RENDER_RETRY_UPLOAD_TIMEOUT_MS);
+        } catch (retryError) {
+            if (!isRenderWakeCandidate(retryError)) {
+                throw retryError;
+            }
+        }
+
+        log('warn', `[RENDER UPLOAD] Extended retry failed, waking Render service: ${error.message}`);
         const awake = await waitForRenderServiceWake(renderUrl, overrides);
         if (!awake) {
             throw new Error('Render service did not wake within 60 seconds');

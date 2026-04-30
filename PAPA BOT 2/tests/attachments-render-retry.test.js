@@ -19,7 +19,7 @@ function buildTimeoutError(message = 'timeout exceeded') {
 }
 
 (async function main() {
-  await run('uploadViaRenderService retries after waking sleeping Render service', async () => {
+  await run('uploadViaRenderService retries with extended timeout before wake checks', async () => {
     const calls = [];
     let uploadAttempt = 0;
 
@@ -51,7 +51,7 @@ function buildTimeoutError(message = 'timeout exceeded') {
         },
         pingRender: async attempt => {
           calls.push(['ping', attempt]);
-          return attempt >= 3;
+          return attempt >= 1;
         },
         sleep: async ms => {
           calls.push(['sleep', ms]);
@@ -62,16 +62,11 @@ function buildTimeoutError(message = 'timeout exceeded') {
     assert.equal(attachment, 'video1_2');
     assert.deepEqual(calls, [
       ['upload', 1],
-      ['ping', 1],
-      ['sleep', 5000],
-      ['ping', 2],
-      ['sleep', 5000],
-      ['ping', 3],
       ['upload', 2]
     ]);
   });
 
-  await run('uploadViaRenderService treats signal timed out as wake candidate', async () => {
+  await run('uploadViaRenderService treats signal timed out as wake candidate and retries before wake', async () => {
     const calls = [];
     let uploadAttempt = 0;
 
@@ -113,12 +108,59 @@ function buildTimeoutError(message = 'timeout exceeded') {
     assert.equal(attachment, 'video1_3');
     assert.deepEqual(calls, [
       ['upload', 1],
-      ['ping', 1],
       ['upload', 2]
     ]);
   });
 
-  await run('uploadViaRenderService exposes distinct error after successful wake but failed retry', async () => {
+  await run('uploadViaRenderService wakes Render only after extended retry also fails', async () => {
+    const calls = [];
+    let uploadAttempt = 0;
+
+    const attachment = await attachments.__testOnly.uploadViaRenderServiceWithDependencies(
+      Buffer.from('big-file'),
+      'video.mp4',
+      'video/mp4',
+      'messages',
+      '229445618',
+      {
+        getUserToken: async () => 'user-token',
+        createFormData: () => ({
+          headers: { 'content-type': 'multipart/form-data' },
+          append() {},
+          getHeaders() {
+            return this.headers;
+          }
+        }),
+        uploadRequest: async () => {
+          uploadAttempt += 1;
+          calls.push(['upload', uploadAttempt]);
+          if (uploadAttempt < 3) {
+            throw buildTimeoutError('upload timed out');
+          }
+          return { success: true, attachment: 'video1_4' };
+        },
+        pingRender: async attempt => {
+          calls.push(['ping', attempt]);
+          return attempt >= 2;
+        },
+        sleep: async ms => {
+          calls.push(['sleep', ms]);
+        }
+      }
+    );
+
+    assert.equal(attachment, 'video1_4');
+    assert.deepEqual(calls, [
+      ['upload', 1],
+      ['upload', 2],
+      ['ping', 1],
+      ['sleep', 5000],
+      ['ping', 2],
+      ['upload', 3]
+    ]);
+  });
+
+  await run('uploadViaRenderService exposes distinct error after successful wake but failed final retry', async () => {
     let uploadAttempt = 0;
 
     await assert.rejects(
@@ -139,7 +181,7 @@ function buildTimeoutError(message = 'timeout exceeded') {
           }),
           uploadRequest: async () => {
             uploadAttempt += 1;
-            if (uploadAttempt === 1) {
+            if (uploadAttempt < 3) {
               throw buildTimeoutError('first upload timed out');
             }
             throw new Error('vk upload timed out');
