@@ -117,6 +117,40 @@ function buildTimeoutError(message = 'timeout exceeded') {
       ['upload', 2]
     ]);
   });
+
+  await run('uploadViaRenderService exposes distinct error after successful wake but failed retry', async () => {
+    let uploadAttempt = 0;
+
+    await assert.rejects(
+      attachments.__testOnly.uploadViaRenderServiceWithDependencies(
+        Buffer.from('big-file'),
+        'video.mp4',
+        'video/mp4',
+        'messages',
+        '229445618',
+        {
+          getUserToken: async () => 'user-token',
+          createFormData: () => ({
+            headers: { 'content-type': 'multipart/form-data' },
+            append() {},
+            getHeaders() {
+              return this.headers;
+            }
+          }),
+          uploadRequest: async () => {
+            uploadAttempt += 1;
+            if (uploadAttempt === 1) {
+              throw buildTimeoutError('first upload timed out');
+            }
+            throw new Error('vk upload timed out');
+          },
+          pingRender: async () => true,
+          sleep: async () => {}
+        }
+      ),
+      /Render woke up, but upload failed: vk upload timed out/
+    );
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {

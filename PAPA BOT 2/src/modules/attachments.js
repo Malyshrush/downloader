@@ -663,7 +663,7 @@ function isRenderWakeCandidate(error) {
 async function waitForRenderServiceWake(renderUrl, overrides = {}) {
     const pingRender = overrides.pingRender || (async () => {
         try {
-            await axios.get(`${renderUrl}/upload`, { timeout: 5000 });
+            await axios.get(renderUrl, { timeout: 5000, validateStatus: () => true });
             return true;
         } catch (error) {
             return false;
@@ -737,7 +737,11 @@ async function uploadViaRenderServiceWithDependencies(buffer, filename, mimeType
         }
 
         log('info', '[RENDER UPLOAD] Render service woke up, retrying upload');
-        return executeUpload(RENDER_RETRY_UPLOAD_TIMEOUT_MS);
+        try {
+            return await executeUpload(RENDER_RETRY_UPLOAD_TIMEOUT_MS);
+        } catch (retryError) {
+            throw new Error(`Render woke up, but upload failed: ${retryError.message}`);
+        }
     }
 }
 

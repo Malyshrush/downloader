@@ -15,6 +15,10 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get('/healthz', (req, res) => {
+  res.status(200).json({ ok: true, service: 'vk-uploader' });
+});
+
 // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
 async function uploadPhotoToMessages(userToken, groupId, buffer, filename) {
   console.log('[UPLOAD PHOTO] Starting upload for messages:', filename);

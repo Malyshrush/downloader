@@ -6074,6 +6074,7 @@ saveBtn.onclick = function() {
 
         if (useRenderService) {
           // Загружаем через Render для больших файлов
+          var RENDER_SERVICE_URL = 'https://vk-uploader.onrender.com';
           var RENDER_UPLOADER_URL = 'https://vk-uploader.onrender.com/upload';
           
           var formData = new FormData();
@@ -6150,16 +6151,18 @@ saveBtn.onclick = function() {
               wakeUpAttempts++;
               statusEl.innerText = '😴 Пытаемся разбудить сервис Render (попытка ' + wakeUpAttempts + ', осталось ' + Math.ceil(remainingWakeMs / 1000) + ' сек)...';
 
-              fetch(RENDER_UPLOADER_URL, {
-                method: 'POST',
-                body: new FormData(),
+              fetch(RENDER_SERVICE_URL, {
+                method: 'GET',
                 signal: AbortSignal.timeout(Math.min(30000, remainingWakeMs))
               }).then(function() {
                 statusEl.innerText = '🌕 Render проснулся, повторяем загрузку...';
-                return uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS);
-              }).then(function(response) {
-                resolve(response);
+                return uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS).then(function(response) {
+                  resolve(response);
+                }).catch(function(retryError) {
+                  reject(new Error('Render проснулся, но загрузка не завершилась: ' + retryError.message));
+                });
               }).catch(function() {
+
                 var currentElapsedWakeMs = Date.now() - wakeStartedAt;
                 var currentRemainingWakeMs = RENDER_WAKE_TIMEOUT_MS - currentElapsedWakeMs;
 
