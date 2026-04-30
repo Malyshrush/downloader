@@ -375,6 +375,7 @@ function normalizeActionCode(value) {
     if (normalized === 'add_group' || normalized === 'добавить в группу') return 'add_group';
     if (normalized === 'remove_group' || normalized === 'исключить из группы') return 'remove_group';
     if (normalized === 'add_to_bot' || normalized === 'добавить в бота') return 'add_to_bot';
+    if (normalized === 'send_bot_answer' || normalized === 'отправить ответ с бота') return 'send_bot_answer';
     if (normalized === 'remove_from_bot' || normalized === 'исключить из бота') return 'remove_from_bot';
     if (normalized === 'approve_group_request' || normalized === 'одобрить заявку в сообщество') return 'approve_group_request';
     if (normalized === 'remove_from_community' || normalized === 'удалить пользователя из сообщества') return 'remove_from_community';
@@ -391,6 +392,26 @@ function normalizeActionCode(value) {
     if (normalized === 'shared_var_update') return 'shared_var_update';
     if (normalized === 'shared_var_delete') return 'shared_var_delete';
     return normalized;
+}
+
+function buildAnswerOnlyStepRow(row) {
+    const answerOnlyRow = Object.assign({}, row || {});
+    [
+        'Бот',
+        'Шаг',
+        'ДОБАВИТЬ ГРУППУ',
+        'ГРУППА',
+        'УДАЛИТЬ ГРУППУ',
+        'Действия с ПП',
+        'Действия с ГП',
+        'Действия с ПВС',
+        'Действия с ПП/ГП/ПВК',
+        'Отправить на Шаг',
+        'Задержка отправки на Шаг'
+    ].forEach(key => {
+        answerOnlyRow[key] = '';
+    });
+    return answerOnlyRow;
 }
 
 function inferLegacyActionCode(row) {
@@ -623,6 +644,37 @@ async function executeStructuredAction(row, normalizedRow, details, communityId,
                     details.object,
                     details.groupId,
                     resolvedStep.row,
+                    communityId,
+                    profileId
+                );
+                continue;
+            }
+            continue;
+        }
+
+        if (actionCode === 'send_bot_answer' && actionBot && actionStep) {
+            const resolvedStep = await resolveTriggeredStepExecution(actionBot, actionStep, communityId, profileId, overrides);
+            const answerOnlyRow = buildAnswerOnlyStepRow(resolvedStep.row);
+            if (resolvedStep.source === 'messages') {
+                await (overrides.sendMessageAndPerformActions || sendMessageAndPerformActions)(
+                    details.userId,
+                    answerOnlyRow,
+                    { group_id: details.groupId },
+                    false,
+                    communityId,
+                    profileId
+                );
+                continue;
+            }
+
+            if (resolvedStep.source === 'comments') {
+                if (normalizedRow.eventCode !== 'wall_comment_add') {
+                    throw new Error(`Шаг "${actionStep}" бота "${actionBot}" находится во вкладке комментариев и не может быть выполнен для события ${details.eventType}`);
+                }
+                await (overrides.sendCommentAndPerformActions || sendCommentAndPerformActions)(
+                    details.object,
+                    details.groupId,
+                    answerOnlyRow,
                     communityId,
                     profileId
                 );

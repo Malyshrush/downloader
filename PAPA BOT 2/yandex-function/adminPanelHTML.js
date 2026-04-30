@@ -4788,6 +4788,7 @@ const STRUCTURED_TRIGGER_ACTIONS = [
     { value: 'add_group', label: 'Добавить в группу' },
     { value: 'remove_group', label: 'Исключить из группы' },
     { value: 'add_to_bot', label: 'Добавить в бота' },
+    { value: 'send_bot_answer', label: 'Отправить ответ с бота' },
     { value: 'remove_from_bot', label: 'Исключить из бота' },
     { value: 'approve_group_request', label: 'Одобрить заявку в Сообщество' },
     { value: 'remove_from_community', label: 'Удалить пользователя из сообщества' },
@@ -4859,11 +4860,11 @@ function shouldStructuredTriggerActionShowGroup(actionCode) {
 }
 
 function shouldStructuredTriggerActionShowBot(actionCode) {
-    return actionCode === 'add_to_bot' || actionCode === 'remove_from_bot';
+    return actionCode === 'add_to_bot' || actionCode === 'send_bot_answer' || actionCode === 'remove_from_bot';
 }
 
 function shouldStructuredTriggerActionShowStep(actionCode) {
-    return actionCode === 'add_to_bot';
+    return actionCode === 'add_to_bot' || actionCode === 'send_bot_answer';
 }
 
 function shouldStructuredTriggerActionShowCommunity(actionCode) {
@@ -5435,7 +5436,7 @@ window.handleStructuredTriggerFormChange = function() {
         var previousAction = previousState.actions[idx] || getDefaultStructuredTriggerAction();
         var nextAction = Object.assign({}, actionItem);
 
-        if (nextAction.action !== 'add_to_bot') {
+        if (!shouldStructuredTriggerActionShowStep(nextAction.action)) {
             nextAction.actionStep = '';
         }
         if (!shouldStructuredTriggerActionShowCommunity(nextAction.action)) {
