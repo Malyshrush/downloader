@@ -1,7 +1,8 @@
-const { GetObjectCommand, PutObjectCommand } = require('@aws-sdk/client-s3');
-const { getS3Client, getBucketName, getSheetData } = require('./storage');
 const { getProfileById, isMainAdminProfile } = require('./admin-profiles');
+const { getProfilePromoActivationStatus } = require('./admin-security');
 const { loadBotConfig, getFullConfig } = require('./config');
+const { createHotStateStore } = require('./hot-state-store');
+const { listUsers } = require('./users');
 const { log } = require('../utils/logger');
 
 const DASHBOARD_FILE = 'profile_dashboard.json';
@@ -15,60 +16,58 @@ function createDefaultData() {
 }
 
 function getTodayKey() {
-    return new Date().toISOString().slice(0, 10);
+    return new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Moscow',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(new Date());
 }
 
 async function loadDashboardData() {
-    const s3Client = getS3Client();
-    const bucket = getBucketName();
+    return loadDashboardDataWithDependencies();
+}
+
+async function loadDashboardDataWithDependencies(overrides = {}) {
+    const hotStateStore = overrides.hotStateStore || createHotStateStore();
     try {
-        const response = await s3Client.send(new GetObjectCommand({
-            Bucket: bucket,
-            Key: DASHBOARD_FILE
-        }));
-        const text = await response.Body.transformToString();
-        const parsed = JSON.parse(text || '{}');
-        
-        // 🔥 ИСПРАВЛЕНИЕ: Возвращаем ВСЕ данные БЕЗ фильтрации
-        // Фильтрация должна происходить в функциях, которые используют эти данные
+        const response = await hotStateStore.loadJsonObject(DASHBOARD_FILE, {
+            defaultValue: createDefaultData()
+        });
+        const parsed = response && response.value ? response.value : createDefaultData();
         return {
             profiles: parsed.profiles || {},
             limitRequests: Array.isArray(parsed.limitRequests) ? parsed.limitRequests : []
         };
     } catch (error) {
-        log('warn', `⚠️ profile-dashboard load failed: ${error.message}`);
+        log('warn', `profile-dashboard load failed: ${error.message}`);
         return createDefaultData();
     }
 }
 
 async function saveDashboardData(data) {
-    const s3Client = getS3Client();
-    const bucket = getBucketName();
+    return saveDashboardDataWithDependencies(data);
+}
+
+async function saveDashboardDataWithDependencies(data, overrides = {}) {
+    const hotStateStore = overrides.hotStateStore || createHotStateStore();
     const normalized = {
         profiles: data?.profiles || {},
         limitRequests: Array.isArray(data?.limitRequests) ? data.limitRequests : []
     };
-    await s3Client.send(new PutObjectCommand({
-        Bucket: bucket,
-        Key: DASHBOARD_FILE,
-        Body: JSON.stringify(normalized, null, 2),
-        ContentType: 'application/json'
-    }));
+    await hotStateStore.saveJsonObject(DASHBOARD_FILE, normalized);
     return normalized;
 }
 
-async function ensureProfileStatsContainer(data, profileId) {
-    const profile = await getProfileById(profileId);
-    console.log('[DEBUG ensureProfileStatsContainer] profileId:', profileId);
-    console.log('[DEBUG ensureProfileStatsContainer] profile:', JSON.stringify(profile));
+async function ensureProfileStatsContainer(data, profileId, overrides = {}) {
+    const getProfileByIdImpl = overrides.getProfileById || getProfileById;
+    const profile = await getProfileByIdImpl(profileId);
     const isMainAdmin = !!(profile && isMainAdminProfile(profile));
+    const profileRequestsLimit = profile?.requestsLimit && Number(profile.requestsLimit) > 0
+        ? Number(profile.requestsLimit)
+        : DEFAULT_LIMIT;
+
     if (!data.profiles[profileId]) {
-        // Используем requestsLimit из профиля, если есть
-        const profileRequestsLimit = profile?.requestsLimit && Number(profile.requestsLimit) > 0 
-            ? Number(profile.requestsLimit) 
-            : DEFAULT_LIMIT;
-        console.log('[DEBUG ensureProfileStatsContainer] profileRequestsLimit:', profileRequestsLimit);
-        
         data.profiles[profileId] = {
             profileId,
             profileName: profile?.name || `Профиль ${profileId}`,
@@ -80,6 +79,7 @@ async function ensureProfileStatsContainer(data, profileId) {
             totalComments: 0,
             totalTriggers: 0,
             communities: {},
+            communityFiles: {},
             limitHistory: []
         };
     }
@@ -92,15 +92,14 @@ async function ensureProfileStatsContainer(data, profileId) {
     }
     if (isMainAdmin) {
         container.dailyLimit = null;
-    } else if (container.dailyLimit === undefined || container.dailyLimit === null) {
-        // Если лимит не установлен, используем из профиля
-        const profileRequestsLimit = profile?.requestsLimit && Number(profile.requestsLimit) > 0 
-            ? Number(profile.requestsLimit) 
-            : DEFAULT_LIMIT;
+    } else {
         container.dailyLimit = profileRequestsLimit;
     }
     if (!container.communities || typeof container.communities !== 'object') {
         container.communities = {};
+    }
+    if (!container.communityFiles || typeof container.communityFiles !== 'object') {
+        container.communityFiles = {};
     }
     if (!Array.isArray(container.limitHistory)) {
         container.limitHistory = [];
@@ -121,6 +120,27 @@ function ensureCommunityStats(container, communityId) {
         };
     }
     return container.communities[key];
+}
+
+function ensureCommunityFilesContainer(container, communityKey) {
+    const key = String(communityKey || 'global').trim() || 'global';
+    if (!Array.isArray(container.communityFiles[key])) {
+        container.communityFiles[key] = [];
+    }
+    return container.communityFiles[key];
+}
+
+function normalizeFileEntry(entry = {}) {
+    return {
+        attachment: String(entry.attachment || '').trim(),
+        fileName: String(entry.fileName || '').trim(),
+        fileType: String(entry.fileType || '').trim(),
+        fileSize: Number(entry.fileSize || 0),
+        uploadedAt: String(entry.uploadedAt || '').trim(),
+        communityId: String(entry.communityId || '').trim(),
+        vkGroupId: String(entry.vkGroupId || '').trim(),
+        groupName: String(entry.groupName || '').trim()
+    };
 }
 
 function detectCounterType(eventType) {
@@ -188,6 +208,49 @@ async function recordStructuredTriggerExecution(profileId, communityId) {
     await saveDashboardData(data);
 }
 
+async function recordUploadedCommunityFile(payload) {
+    return recordUploadedCommunityFileWithDependencies(payload);
+}
+
+async function recordUploadedCommunityFileWithDependencies(payload, overrides = {}) {
+    const data = await loadDashboardDataWithDependencies(overrides);
+    const normalizedProfileId = String(payload?.profileId || '').trim();
+    if (!normalizedProfileId) {
+        throw new Error('profileId is required');
+    }
+
+    const container = await ensureProfileStatsContainer(data, normalizedProfileId, overrides);
+    const entry = normalizeFileEntry({
+        ...payload,
+        uploadedAt: payload?.uploadedAt || new Date().toISOString()
+    });
+    if (!entry.attachment) {
+        throw new Error('attachment is required');
+    }
+
+    const communityKeys = [entry.vkGroupId, entry.communityId].filter(Boolean);
+    if (communityKeys.length === 0) {
+        communityKeys.push('global');
+    }
+
+    for (const communityKey of communityKeys) {
+        const files = ensureCommunityFilesContainer(container, communityKey);
+        const existingIndex = files.findIndex(item => String(item.attachment || '').trim() === entry.attachment);
+        if (existingIndex >= 0) {
+            files[existingIndex] = {
+                ...files[existingIndex],
+                ...entry
+            };
+        } else {
+            files.unshift(entry);
+        }
+        files.sort((a, b) => String(b.uploadedAt || '').localeCompare(String(a.uploadedAt || '')));
+    }
+
+    await saveDashboardDataWithDependencies(data, overrides);
+    return entry;
+}
+
 async function createProfileLimitRequest(profileId, requestedLimit) {
     const limitValue = parseInt(requestedLimit, 10);
     if (!Number.isFinite(limitValue) || limitValue <= 0) {
@@ -243,8 +306,7 @@ async function resolveProfileLimitRequest(requestId, status, actorProfileId, not
             requestId: request.id,
             note: request.note || ''
         });
-        
-        // 🔥 ИСПРАВЛЕНИЕ: Обновляем requestsLimit в профиле админа
+
         const { upsertAdminProfile } = require('./admin-profiles');
         const profile = await getProfileById(request.profileId);
         if (profile) {
@@ -268,66 +330,58 @@ async function resolveProfileLimitRequest(requestId, status, actorProfileId, not
 }
 
 async function getAdminLimitRequests() {
-    const s3Client = getS3Client();
-    const bucket = getBucketName();
     try {
-        const response = await s3Client.send(new GetObjectCommand({
-            Bucket: bucket,
-            Key: DASHBOARD_FILE
-        }));
-        const text = await response.Body.transformToString();
-        const parsed = JSON.parse(text || '{}');
-        
-        // 🔥 ИСПРАВЛЕНИЕ: Для админа возвращаем ВСЕ pending запросы БЕЗ фильтрации по времени
+        const parsed = await loadDashboardData();
         let limitRequests = Array.isArray(parsed.limitRequests) ? parsed.limitRequests : [];
-        
-        // Фильтруем только по статусу pending
         limitRequests = limitRequests.filter(function(request) {
             return request.status === 'pending';
         });
-        
-        // Сортируем по дате (новые первыми)
         limitRequests = limitRequests.sort(function(a, b) {
             return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
         });
-        
-        log('info', `[getAdminLimitRequests] Returning ${limitRequests.length} pending limit requests`);
-        limitRequests.forEach(function(req) {
-            log('debug', `  - profileId: ${req.profileId}, requestedLimit: ${req.requestedLimit}, createdAt: ${req.createdAt}`);
-        });
-        
         return limitRequests;
     } catch (error) {
-        log('error', `❌ getAdminLimitRequests failed: ${error.message}`);
+        log('error', `getAdminLimitRequests failed: ${error.message}`);
         return [];
     }
 }
 
 async function getProfileDashboardOverview(profileId) {
-    const data = await loadDashboardData();
-    const container = await ensureProfileStatsContainer(data, profileId);
-    await saveDashboardData(data);
+    return getProfileDashboardOverviewWithDependencies(profileId);
+}
 
-    // 🔥 ИСПРАВЛЕНИЕ: Берем requestsLimit из профиля, а не из dashboard
-    const profile = await getProfileById(profileId);
-    const profileRequestsLimit = profile?.requestsLimit && Number(profile.requestsLimit) > 0 
-        ? Number(profile.requestsLimit) 
+async function getProfileDashboardOverviewWithDependencies(profileId, overrides = {}) {
+    const getProfileByIdImpl = overrides.getProfileById || getProfileById;
+    const getProfilePromoActivationStatusImpl = overrides.getProfilePromoActivationStatus || getProfilePromoActivationStatus;
+    const loadBotConfigImpl = overrides.loadBotConfig || loadBotConfig;
+    const getFullConfigImpl = overrides.getFullConfig || getFullConfig;
+    const listUsersImpl = overrides.listUsers || listUsers;
+
+    const data = await loadDashboardDataWithDependencies(overrides);
+    const container = await ensureProfileStatsContainer(data, profileId, overrides);
+    await saveDashboardDataWithDependencies(data, overrides);
+
+    const profile = await getProfileByIdImpl(profileId);
+    const promoActivationStatus = await getProfilePromoActivationStatusImpl(profileId);
+    const profileRequestsLimit = profile?.requestsLimit && Number(profile.requestsLimit) > 0
+        ? Number(profile.requestsLimit)
         : (container.dailyLimit || DEFAULT_LIMIT);
 
-    await loadBotConfig(profileId);
-    const fullConfig = getFullConfig(profileId);
+    await loadBotConfigImpl(profileId);
+    const fullConfig = getFullConfigImpl(profileId);
     const communities = Object.entries(fullConfig?.communities || {});
     const communitySummaries = [];
+    const communityFiles = {};
 
     for (const [internalCommunityId, config] of communities) {
         const vkGroupId = String(config?.vk_group_id || internalCommunityId || '').trim();
         let usersCount = 0;
         try {
-            const users = await getSheetData('ПОЛЬЗОВАТЕЛИ', vkGroupId, profileId);
+            const users = await listUsersImpl(vkGroupId, profileId);
             usersCount = (users || []).filter(function(row) {
                 return String(row['ID'] || '').trim();
             }).length;
-        } catch (error) {
+        } catch (_error) {
             usersCount = 0;
         }
 
@@ -350,18 +404,23 @@ async function getProfileDashboardOverview(profileId) {
             triggers: stats.triggers || 0,
             lastEventAt: stats.lastEventAt || ''
         });
+
+        const files = container.communityFiles[vkGroupId] || container.communityFiles[internalCommunityId] || [];
+        communityFiles[vkGroupId] = files
+            .map(normalizeFileEntry)
+            .filter(item => item.attachment)
+            .sort((a, b) => String(b.uploadedAt || '').localeCompare(String(a.uploadedAt || '')));
     }
 
     const limitRequests = data.limitRequests.filter(function(request) {
-        const matches = String(request.profileId) === String(profileId);
-        log('debug', `[limitRequests filter] request.profileId=${request.profileId}, profileId=${profileId}, matches=${matches}`);
-        return matches;
+        return String(request.profileId) === String(profileId);
     });
     const hasLimit = Number.isFinite(profileRequestsLimit) && profileRequestsLimit > 0;
 
     return {
         profileId: String(profileId),
         profileName: container.profileName,
+        isMainAdmin: !!(profile && isMainAdminProfile(profile)),
         dailyLimit: hasLimit ? profileRequestsLimit : null,
         dailyUsed: Number(container.dailyUsed || 0),
         dailyRemaining: hasLimit ? Math.max(profileRequestsLimit - Number(container.dailyUsed || 0), 0) : null,
@@ -371,34 +430,31 @@ async function getProfileDashboardOverview(profileId) {
         totalTriggers: Number(container.totalTriggers || 0),
         dailyUsageDay: container.dailyUsageDay || getTodayKey(),
         communities: communitySummaries,
+        communityFiles,
         limitHistory: container.limitHistory || [],
         limitRequests,
+        promoActivationStatus,
         supportPackages: [1000, 2000, 5000, 10000, 30000, 50000]
     };
 }
 
-// 🔥 НОВОЕ: Удаление запроса на лимит
 async function deleteProfileLimitRequest(requestId, profileId, isAdmin = false) {
     const data = await loadDashboardData();
     const request = data.limitRequests.find(function(item) {
         return String(item.id) === String(requestId);
     });
-    
+
     if (!request) throw new Error('Запрос на лимит не найден');
-    
-    // Проверяем права: только автор запроса или админ может удалить
     if (!isAdmin && String(request.profileId) !== String(profileId)) {
         throw new Error('Вы не можете удалить чужой запрос');
     }
-    
-    // Удаляем запрос из массива
+
     data.limitRequests = data.limitRequests.filter(function(item) {
         return String(item.id) !== String(requestId);
     });
-    
+
     await saveDashboardData(data);
-    log('info', `✅ Limit request deleted: ${requestId}`);
-    
+    log('info', `Limit request deleted: ${requestId}`);
     return { success: true, deletedRequestId: requestId };
 }
 
@@ -407,9 +463,16 @@ module.exports = {
     canProcessProfileEvents,
     recordProfileEventUsage,
     recordStructuredTriggerExecution,
+    recordUploadedCommunityFile,
     createProfileLimitRequest,
     resolveProfileLimitRequest,
     getAdminLimitRequests,
     getProfileDashboardOverview,
-    deleteProfileLimitRequest
+    deleteProfileLimitRequest,
+    __testOnly: {
+        loadDashboardDataWithDependencies,
+        saveDashboardDataWithDependencies,
+        recordUploadedCommunityFileWithDependencies,
+        getProfileDashboardOverviewWithDependencies
+    }
 };

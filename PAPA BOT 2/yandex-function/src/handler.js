@@ -1,3 +1,45 @@
+async function validateAdminSessionFromRequest(event = {}, query = {}, body = {}) {
+    const sessionId = getAdminSessionIdFromEvent(event);
+    const result = await validateAdminSessionRequest({
+        sessionId,
+        ip: getClientIpFromEvent(event),
+        userAgent: getUserAgentFromEvent(event),
+        now: new Date()
+    });
+
+    if (!result.ok) {
+        return result;
+    }
+
+    const sessionState = {
+        ok: true,
+        principalProfile: result.profile,
+        profile: result.profile,
+        session: result.session,
+        principalProfileId: result.profile.id,
+        requestedProfileId: getRequestProfileId(query, body)
+    };
+    event.__adminSession = sessionState;
+    return sessionState;
+}
+
+function buildAdminSessionErrorResponse(result) {
+    const cookieHeaders = result.clearCookie ? buildCookieResponseMeta(buildClearSessionCookie()) : buildCookieResponseMeta();
+    return {
+        statusCode: result.statusCode || 403,
+        ...cookieHeaders,
+        body: JSON.stringify({
+            success: false,
+            sessionInvalid: result.sessionInvalid !== false,
+            expired: !!result.expired,
+            captchaRequired: !!result.captchaRequired,
+            loginCaptchaRequired: !!result.loginCaptchaRequired,
+            errorCode: result.errorCode || '',
+            error: result.error || 'Session invalid'
+        })
+    };
+}
+
 /**
  * Основной обработчик HTTP запросов (роутер)
  */
@@ -22,6 +64,7 @@ const {
     findProfileByRecoveryEmail,
     registerProfileFromPromo,
     reactivateExpiredProfile,
+    activateProfileWithPromoCode,
     isMainAdminProfile,
     buildExpiresAt,
     isProfileExpired
@@ -30,8 +73,20 @@ const {
     registerLoginAttempt,
     getLoginStatus,
     clearLoginLock,
+    appendSecurityEvent,
+    checkCaptchaRateLimit,
+    registerCaptchaRateLimitHit,
+    loadSecurityData,
+    saveSecurityData,
+    requireLoginCaptcha,
+    getLoginCaptchaStatus,
+    clearLoginCaptcha,
+    issueLoginCaptcha,
+    verifyLoginCaptcha,
     registerPromoAttempt,
     getPromoStatus,
+    getProfilePromoActivationStatus,
+    registerProfilePromoActivationAttempt,
     listPromoCodes,
     savePromoCode,
     deletePromoCodeById,
@@ -61,12 +116,31 @@ const { getBotVersionData, saveBotVersionData } = require('./modules/bot-version
 const {
     canProcessProfileEvents,
     recordProfileEventUsage,
+    recordUploadedCommunityFile,
     createProfileLimitRequest,
     resolveProfileLimitRequest,
     deleteProfileLimitRequest,
     getAdminLimitRequests,
     getProfileDashboardOverview
 } = require('./modules/profile-dashboard');
+const {
+    createAdminSession,
+    validateAdminSessionRequest,
+    killAdminSession,
+    issueSessionCaptcha,
+    verifySessionCaptcha,
+    getAdminSession,
+    isSessionExpired
+} = require('./modules/admin-sessions');
+const { buildEventEnvelope, isSupportedEventType } = require('./modules/event-envelope');
+const {
+    publishIncomingEvent,
+    consumeIncomingEvent,
+    consumeOutboundAction,
+    setIncomingEventConsumer
+} = require('./modules/event-queue');
+const { processIncomingEvent } = require('./modules/event-worker');
+const { processOutboundAction } = require('./modules/outbound-actions');
 // Админ-панель (файл в корне dist/, на уровень выше от src/)
 let adminHTML = '<h1>Admin panel loading...</h1>';
 try {
@@ -90,9 +164,132 @@ function getRequestPrincipalProfileId(query = {}, body = {}) {
     return normalizeProfileId(query.principalProfileId || body.principalProfileId || query.profileId || body.profileId || '1');
 }
 
-async function requireMainAdmin(query = {}, body = {}) {
-    const principalProfileId = getRequestPrincipalProfileId(query, body);
-    const principalProfile = await getProfileById(principalProfileId);
+function parseCookies(event = {}) {
+    const rawCookie = String(event.headers?.cookie || event.headers?.Cookie || '').trim();
+    if (!rawCookie) return {};
+    return rawCookie.split(';').reduce((acc, pair) => {
+        const [rawKey, ...rest] = pair.split('=');
+        const key = String(rawKey || '').trim();
+        if (!key) return acc;
+        acc[key] = rest.join('=').trim();
+        return acc;
+    }, {});
+}
+
+function getAdminSessionIdFromEvent(event = {}) {
+    if (typeof event.__adminSessionId === 'string') {
+        return event.__adminSessionId;
+    }
+    const headerSessionId = String(
+        event.headers?.['x-admin-session'] ||
+        event.headers?.['X-Admin-Session'] ||
+        ''
+    ).trim();
+    if (headerSessionId) {
+        event.__adminSessionId = headerSessionId;
+        return headerSessionId;
+    }
+    const cookies = parseCookies(event);
+    const cookieSessionId = String(cookies.adminSessionId || '').trim();
+    event.__adminSessionId = cookieSessionId;
+    return cookieSessionId;
+}
+
+function getClientIpFromEvent(event = {}) {
+    const forwarded = String(event.headers?.['x-forwarded-for'] || event.headers?.['X-Forwarded-For'] || '').trim();
+    if (forwarded) {
+        return forwarded.split(',')[0].trim();
+    }
+    return String(event.headers?.['x-real-ip'] || event.headers?.['X-Real-IP'] || '').trim();
+}
+
+function getUserAgentFromEvent(event = {}) {
+    return String(event.headers?.['user-agent'] || event.headers?.['User-Agent'] || '').trim();
+}
+
+function buildJsonHeaders(extra = {}) {
+    return {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+        ...extra
+    };
+}
+
+function buildCookieResponseMeta(cookies = [], extraHeaders = {}) {
+    const normalizedCookies = Array.isArray(cookies) ? cookies.filter(Boolean) : (cookies ? [cookies] : []);
+    const headers = buildJsonHeaders({
+        ...extraHeaders,
+        ...(normalizedCookies.length ? { 'Set-Cookie': normalizedCookies[0] } : {})
+    });
+    return normalizedCookies.length
+        ? { headers, multiValueHeaders: { 'Set-Cookie': normalizedCookies } }
+        : { headers };
+}
+
+function buildSessionCookie(sessionId) {
+    return `adminSessionId=${sessionId}; Path=/; HttpOnly; SameSite=Lax`;
+}
+
+function buildClearSessionCookie() {
+    return 'adminSessionId=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0';
+}
+
+function getCaptchaMode(query = {}, body = {}) {
+    return String(query.mode || body.mode || 'session').trim().toLowerCase() === 'login'
+        ? 'login'
+        : 'session';
+}
+
+function buildCaptchaRateLimitResponse(limit) {
+    return {
+        statusCode: 429,
+        headers: buildJsonHeaders(),
+        body: JSON.stringify({
+            success: false,
+            rateLimited: true,
+            cooldownMs: limit.cooldownMs || 0,
+            errorCode: 'captcha_rate_limited',
+            error: 'РЎР»РёС€РєРѕРј РјРЅРѕРіРѕ Р·Р°РїСЂРѕСЃРѕРІ РєР°РїС‚С‡Рё. РџРѕРІС‚РѕСЂРёС‚Рµ РїРѕР·Р¶Рµ.'
+        })
+    };
+}
+
+async function reserveCaptchaRateLimit({ sessionId = '', ip = '', action = 'submit' } = {}) {
+    const data = await loadSecurityData();
+    const now = Date.now();
+    const limit = checkCaptchaRateLimit({
+        data,
+        sessionId,
+        ip,
+        action,
+        now
+    });
+
+    if (limit.blocked) {
+        return { ok: false, response: buildCaptchaRateLimitResponse(limit) };
+    }
+
+    registerCaptchaRateLimitHit({
+        data,
+        key: limit.key,
+        bucket: limit.bucket,
+        now
+    });
+    await saveSecurityData(data);
+    return { ok: true };
+}
+
+async function requireMainAdmin(subject = {}, body = {}) {
+    const sessionPrincipal = subject && subject.__adminSession && subject.__adminSession.principalProfile
+        ? subject.__adminSession.principalProfile
+        : null;
+    const query = subject && subject.httpMethod
+        ? (subject.queryStringParameters || subject.query || subject.params || {})
+        : subject;
+    const principalProfileId = sessionPrincipal
+        ? normalizeProfileId(sessionPrincipal.id)
+        : getRequestPrincipalProfileId(query, body);
+    const principalProfile = sessionPrincipal || await getProfileById(principalProfileId);
     if (!principalProfile || !isMainAdminProfile(principalProfile)) {
         throw new Error('Недостаточно прав: доступ только у главного администратора');
     }
@@ -140,13 +337,17 @@ function buildSessionErrorResponse(result) {
 /**
  * Главный обработчик событий
  */
-module.exports.handler = async function(event) {
+async function handler(event) {
     log('info', '🔔 RAW REQUEST:', {
         method: event.httpMethod,
         path: event.path,
         query: event.queryStringParameters,
         bodyPreview: event.body?.substring(0, 200)
     });
+
+    if (Array.isArray(event?.messages)) {
+        return workerHandler(event);
+    }
 
     // CORS preflight
     if (event.httpMethod === 'OPTIONS') {
@@ -179,7 +380,7 @@ module.exports.handler = async function(event) {
     }
 
     return { statusCode: 404, body: 'Not Found' };
-};
+}
 
 /**
  * Обработка таймера (отложенные + рассылки)
@@ -212,7 +413,7 @@ async function handleTimerTrigger(event) {
         // Пинг Render сервиса чтобы он не засыпал
         try {
             const axios = require('axios');
-            await axios.get('https://vk-uploader.onrender.com/upload', { timeout: 5000 }).catch(() => {});
+            await axios.get('https://vk-uploader.onrender.com/healthz', { timeout: 5000 }).catch(() => {});
             log('debug', '🔔 Render service pinged');
         } catch (pingError) {
             log('debug', '⚠️ Render ping failed (non-critical):', pingError.message);
@@ -242,8 +443,8 @@ async function handleGetRequest(event) {
 
     // Загрузка настроек для админ-панели
     if (q.getSettings) {
-        const session = await validateAdminSession(q);
-        if (!session.ok) return buildSessionErrorResponse(session);
+        const session = await validateAdminSessionFromRequest(event, q);
+        if (!session.ok) return buildAdminSessionErrorResponse(session);
         log('debug', '🔑 getSettings requested');
         await loadBotConfig(profileId);
         return {
@@ -273,8 +474,8 @@ async function handleGetRequest(event) {
     // Загрузка данных листа
     if (q.sheet) {
         try {
-            const session = await validateAdminSession(q);
-            if (!session.ok) return buildSessionErrorResponse(session);
+            const session = await validateAdminSessionFromRequest(event, q);
+            if (!session.ok) return buildAdminSessionErrorResponse(session);
             await loadBotConfig(profileId);
             let communityId = isProfileScopedSheet(q.sheet) ? null : (q.communityId || getActiveCommunityId(profileId));
             if (!communityId && !isProfileScopedSheet(q.sheet)) {
@@ -303,8 +504,8 @@ async function handleGetRequest(event) {
 
     // Настройки бота
     if (q.getBotSettings !== undefined) {
-        const session = await validateAdminSession(q);
-        if (!session.ok) return buildSessionErrorResponse(session);
+        const session = await validateAdminSessionFromRequest(event, q);
+        if (!session.ok) return buildAdminSessionErrorResponse(session);
         await loadBotConfig(profileId);
         return {
             statusCode: 200,
@@ -317,8 +518,8 @@ async function handleGetRequest(event) {
     }
 
     if (q.getBotVersion !== undefined) {
-        const session = await validateAdminSession(q);
-        if (!session.ok) return buildSessionErrorResponse(session);
+        const session = await validateAdminSessionFromRequest(event, q);
+        if (!session.ok) return buildAdminSessionErrorResponse(session);
         return {
             statusCode: 200,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -331,9 +532,9 @@ async function handleGetRequest(event) {
     }
 
     if (q.getAdminProfiles !== undefined) {
-        const session = await validateAdminSession(q);
-        if (!session.ok) return buildSessionErrorResponse(session);
-        await requireMainAdmin(q);
+        const session = await validateAdminSessionFromRequest(event, q);
+        if (!session.ok) return buildAdminSessionErrorResponse(session);
+        await requireMainAdmin(event);
         const data = await getPublicProfiles(profileId);
         return {
             statusCode: 200,
@@ -343,9 +544,9 @@ async function handleGetRequest(event) {
     }
 
     if (q.getAdminDashboard !== undefined) {
-        const session = await validateAdminSession(q);
-        if (!session.ok) return buildSessionErrorResponse(session);
-        await requireMainAdmin(q);
+        const session = await validateAdminSessionFromRequest(event, q);
+        if (!session.ok) return buildAdminSessionErrorResponse(session);
+        await requireMainAdmin(event);
         log('info', `[getAdminDashboard] Loading admin dashboard data...`);
         const [profiles, dashboard, limitRequests] = await Promise.all([
             getPublicProfiles(profileId),
@@ -367,8 +568,8 @@ async function handleGetRequest(event) {
     }
 
     if (q.getProfileDashboard !== undefined) {
-        const session = await validateAdminSession(q);
-        if (!session.ok) return buildSessionErrorResponse(session);
+        const session = await validateAdminSessionFromRequest(event, q);
+        if (!session.ok) return buildAdminSessionErrorResponse(session);
         const dashboard = await getProfileDashboardOverview(profileId);
         return {
             statusCode: 200,
@@ -378,8 +579,8 @@ async function handleGetRequest(event) {
     }
 
     if (q.getAppLogs !== undefined) {
-        const session = await validateAdminSession(q);
-        if (!session.ok) return buildSessionErrorResponse(session);
+        const session = await validateAdminSessionFromRequest(event, q);
+        if (!session.ok) return buildAdminSessionErrorResponse(session);
         const communityId = q.communityId || getActiveCommunityId(profileId) || 'global';
         const limit = Math.max(1, Math.min(200, Number(q.limit || 120) || 120));
         const [rows, settings] = await Promise.all([
@@ -409,8 +610,8 @@ async function handleGetRequest(event) {
     }
 
     if (q.validateSession !== undefined) {
-        const session = await validateAdminSession(q);
-        if (!session.ok) return buildSessionErrorResponse(session);
+        const session = await validateAdminSessionFromRequest(event, q);
+        if (!session.ok) return buildAdminSessionErrorResponse(session);
         return {
             statusCode: 200,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -421,6 +622,10 @@ async function handleGetRequest(event) {
                 isMainAdmin: isMainAdminProfile(session.principalProfile)
             })
         };
+    }
+
+    if (q.getCaptcha !== undefined) {
+        return handleGetCaptcha(event);
     }
 
     // Админ-панель
@@ -447,6 +652,9 @@ async function handlePostRequest(event) {
             if (body.action === 'upload_attachment') {
                 return handleUploadAttachment(event);
             }
+            if (body.action === 'record_uploaded_file') {
+                return handleRecordUploadedFile(event);
+            }
         } catch (e) {
             // Не JSON body, продолжаем обычную обработку
         }
@@ -458,8 +666,16 @@ async function handlePostRequest(event) {
     }
 
     // Проверка авторизации
-    if (q.verifyAuth !== undefined) {
+    if (q.verifyAuth !== undefined || q.loginAdmin !== undefined) {
         return handleVerifyAuth(event);
+    }
+
+    if (q.verifyCaptcha !== undefined) {
+        return handleVerifyCaptcha(event);
+    }
+
+    if (q.logoutAdmin !== undefined) {
+        return handleLogoutAdmin(event);
     }
 
     // Запрос восстановления
@@ -502,11 +718,14 @@ async function handlePostRequest(event) {
         q.clearAppLogs !== undefined ||
         q.deleteAppLogsFile !== undefined ||
         q.requestProfileLimit !== undefined ||
-        q.resolveProfileLimitRequest !== undefined;
+        q.activateProfilePromoCode !== undefined ||
+        q.resolveProfileLimitRequest !== undefined ||
+        q.deleteProfileLimitRequest !== undefined;
 
+    let adminSession = null;
     if (needsAdminSession) {
-        const session = await validateAdminSession(q);
-        if (!session.ok) return buildSessionErrorResponse(session);
+        adminSession = await validateAdminSessionFromRequest(event, q);
+        if (!adminSession.ok) return buildAdminSessionErrorResponse(adminSession);
     }
 
     // Сохранение данных листа
@@ -543,6 +762,10 @@ async function handlePostRequest(event) {
 
     if (q.requestProfileLimit !== undefined) {
         return handleRequestProfileLimit(event);
+    }
+
+    if (q.activateProfilePromoCode !== undefined) {
+        return handleActivateProfilePromoCode(event);
     }
 
     if (q.resolveProfileLimitRequest !== undefined) {
@@ -877,7 +1100,8 @@ async function handleRegisterAccount(event) {
             username,
             password,
             recoveryEmail,
-            durationMinutes: promo.durationMinutes
+            durationMinutes: promo.durationMinutes,
+            requestsLimit: promo.dailyRequestsLimit
         }, promo.code);
 
         await consumePromoCode(promo.code, profile.id);
@@ -903,6 +1127,8 @@ async function handleReactivateExpiredProfile(event) {
         const password = String(body.password || '').trim();
         const code = String(body.code || '').trim();
         const attemptKey = `reactivate::${username.toLowerCase()}`;
+        const ip = getClientIpFromEvent(event);
+        const userAgent = getUserAgentFromEvent(event);
 
         const promoStatus = await getPromoStatus(null, attemptKey);
         if (promoStatus.lockUntil && promoStatus.lockUntil > Date.now()) {
@@ -954,17 +1180,23 @@ async function handleReactivateExpiredProfile(event) {
             };
         }
 
-        const reactivatedProfile = await reactivateExpiredProfile(expiredProfile.id, promo.code, promo.durationMinutes);
+        const reactivatedProfile = await reactivateExpiredProfile(expiredProfile.id, promo.code, promo.durationMinutes, promo.dailyRequestsLimit);
         await consumePromoCode(promo.code, expiredProfile.id);
         await clearLoginLock(username);
         await registerPromoAttempt({ attemptKey, success: true, code: promo.code, note: 'reactivate_success' });
+        const session = await createAdminSession({
+            profileId: expiredProfile.id,
+            ip,
+            userAgent,
+            now: new Date().toISOString()
+        });
 
         return {
             statusCode: 200,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            ...buildCookieResponseMeta(buildSessionCookie(session.sessionId)),
             body: JSON.stringify({
                 success: true,
-                token: 'authenticated_' + Date.now(),
+                sessionToken: session.sessionId,
                 profileId: expiredProfile.id,
                 principalProfileId: expiredProfile.id,
                 profileName: reactivatedProfile.name,
@@ -1371,7 +1603,7 @@ async function handleSaveBotVersion(event) {
     try {
         const q = event.queryStringParameters || event.query || event.params || {};
         const body = JSON.parse(event.body || '{}');
-        await requireMainAdmin(q, body);
+        await requireMainAdmin(event, body);
         const saved = await saveBotVersionData(body || {});
         return {
             statusCode: 200,
@@ -1390,7 +1622,7 @@ async function handleSaveBotVersion(event) {
 async function handleSaveAdminProfile(event) {
     try {
         const body = JSON.parse(event.body || '{}');
-        const actor = await requireMainAdmin({}, body);
+        const actor = await requireMainAdmin(event, body);
         const savedProfile = await upsertAdminProfile(body || {}, actor.id);
 
         return {
@@ -1410,7 +1642,7 @@ async function handleSaveAdminProfile(event) {
 async function handleDeleteAdminProfile(event) {
     try {
         const body = JSON.parse(event.body || '{}');
-        await requireMainAdmin({}, body);
+        await requireMainAdmin(event, body);
         const result = await deleteAdminProfile(body.profileId);
         return {
             statusCode: 200,
@@ -1429,7 +1661,7 @@ async function handleDeleteAdminProfile(event) {
 async function handleSavePromoCode(event) {
     try {
         const body = JSON.parse(event.body || '{}');
-        const actor = await requireMainAdmin({}, body);
+        const actor = await requireMainAdmin(event, body);
         const promo = await savePromoCode(body, actor.id);
         return {
             statusCode: 200,
@@ -1448,7 +1680,7 @@ async function handleSavePromoCode(event) {
 async function handleDeletePromoCode(event) {
     try {
         const body = JSON.parse(event.body || '{}');
-        const actor = await requireMainAdmin({}, body);
+        const actor = await requireMainAdmin(event, body);
         const result = await deletePromoCodeById(body.id, actor.id);
         return {
             statusCode: 200,
@@ -1464,10 +1696,138 @@ async function handleDeletePromoCode(event) {
     }
 }
 
+async function handleActivateProfilePromoCode(event) {
+    try {
+        const body = JSON.parse(event.body || '{}');
+        const targetProfileId = getRequestProfileId({}, body);
+        const principalProfile = event.__adminSession?.principalProfile || null;
+        const principalProfileId = principalProfile ? normalizeProfileId(principalProfile.id) : '';
+        const targetProfile = await getProfileById(targetProfileId);
+        const code = String(body.code || '').trim().toUpperCase();
+
+        if (!principalProfile) {
+            return {
+                statusCode: 401,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ success: false, error: 'Сессия не найдена' })
+            };
+        }
+        if (principalProfile.active === false) {
+            return {
+                statusCode: 403,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ success: false, error: 'Профиль отключён' })
+            };
+        }
+        if (!isMainAdminProfile(principalProfile) && isProfileExpired(principalProfile)) {
+            return {
+                statusCode: 403,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ success: false, error: 'Срок действия профиля истёк', expired: true })
+            };
+        }
+        if (!targetProfile) {
+            return {
+                statusCode: 404,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ success: false, error: 'Профиль не найден' })
+            };
+        }
+        if (!isMainAdminProfile(principalProfile) && String(targetProfileId) !== String(principalProfileId)) {
+            return {
+                statusCode: 403,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ success: false, error: 'Недостаточно прав для активации промокода этого профиля' })
+            };
+        }
+        if (isMainAdminProfile(targetProfile)) {
+            return {
+                statusCode: 400,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ success: false, error: 'Главному админу промокоды не требуются' })
+            };
+        }
+        if (!code) {
+            return {
+                statusCode: 400,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ success: false, error: 'Введите промокод' })
+            };
+        }
+
+        const promoStatus = await getProfilePromoActivationStatus(targetProfileId);
+        if (promoStatus.blocked) {
+            return {
+                statusCode: 423,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({
+                    success: false,
+                    locked: true,
+                    error: 'Лимит попыток ввода промокода исчерпан до 00:00 МСК',
+                    promoActivationStatus: promoStatus
+                })
+            };
+        }
+
+        const promo = await getPromoByCode(code);
+        if (!promo || promo.active === false || promo.usedCount >= promo.maxUses) {
+            const attemptStatus = await registerProfilePromoActivationAttempt(targetProfileId, {
+                success: false,
+                code,
+                note: 'profile_invalid_promo'
+            });
+            const dashboard = await getProfileDashboardOverview(targetProfileId);
+            return {
+                statusCode: 404,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Промокод не найден или уже недоступен',
+                    promoActivationStatus: attemptStatus,
+                    dashboard
+                })
+            };
+        }
+
+        const updatedProfile = await activateProfileWithPromoCode(targetProfileId, promo);
+        await consumePromoCode(promo.code, targetProfileId);
+        const attemptStatus = await registerProfilePromoActivationAttempt(targetProfileId, {
+            success: true,
+            code: promo.code,
+            note: 'profile_promo_activated'
+        });
+        const dashboard = await getProfileDashboardOverview(targetProfileId);
+
+        return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({
+                success: true,
+                message: 'Промокод активирован',
+                profile: updatedProfile,
+                promo: {
+                    code: promo.code,
+                    label: promo.label,
+                    durationMinutes: promo.durationMinutes,
+                    dailyRequestsLimit: promo.dailyRequestsLimit
+                },
+                promoActivationStatus: attemptStatus,
+                dashboard
+            })
+        };
+    } catch (e) {
+        return {
+            statusCode: 500,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ success: false, error: e.message })
+        };
+    }
+}
+
 async function handleResolveRecovery(event) {
     try {
         const body = JSON.parse(event.body || '{}');
-        const actor = await requireMainAdmin({}, body);
+        const actor = await requireMainAdmin(event, body);
         const targetProfile = await getProfileById(body.profileId);
         if (!targetProfile) {
             throw new Error('Профиль не найден');
@@ -1542,7 +1902,7 @@ async function handleRequestProfileLimit(event) {
 async function handleResolveProfileLimitRequest(event) {
     try {
         const body = JSON.parse(event.body || '{}');
-        const actor = await requireMainAdmin({}, body);
+        const actor = await requireMainAdmin(event, body);
         const request = await resolveProfileLimitRequest(body.requestId, body.status, actor.id, body.note || '');
         await addAppLog({
             tab: 'ADMIN',
@@ -1585,7 +1945,7 @@ async function handleDeleteProfileLimitRequest(event) {
         // Проверяем, что это запрос текущего профиля или админ удаляет
         let isAdmin = false;
         try {
-            await requireMainAdmin({}, body);
+            await requireMainAdmin(event, body);
             isAdmin = true;
         } catch (e) {
             isAdmin = false;
@@ -1668,17 +2028,81 @@ async function handleUploadAttachment(event) {
 
         const buffer = Buffer.from(fileBase64, 'base64');
         const attachment = await uploadToVK(buffer, fileName, fileType, target, groupId || communityId || null);
+        await persistUploadedCommunityFileRecord({
+            ...body,
+            attachment,
+            fileSize: Number(body.fileSize || buffer.length || 0)
+        });
 
         return {
             statusCode: 200,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ success: true, attachment })
+            body: JSON.stringify({
+                success: true,
+                attachment,
+                fileName,
+                fileType,
+                fileSize: Number(body.fileSize || buffer.length || 0)
+            })
         };
     } catch (err) {
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
             body: JSON.stringify({ success: false, error: err.message })
+        };
+    }
+}
+
+async function persistUploadedCommunityFileRecord(payload, overrides = {}) {
+    const resolveCommunityContextImpl = overrides.resolveCommunityContext || resolveCommunityContext;
+    const recordUploadedCommunityFileImpl = overrides.recordUploadedCommunityFile || recordUploadedCommunityFile;
+    const profileId = payload.profileId ? normalizeProfileId(payload.profileId) : null;
+    const requestedCommunityId = String(payload.communityId || payload.groupId || '').trim();
+    const fallbackGroupId = String(payload.groupId || '').trim();
+    const context =
+        await resolveCommunityContextImpl(requestedCommunityId || null, profileId || null) ||
+        await resolveCommunityContextImpl(fallbackGroupId || null, profileId || null);
+
+    if (!context) {
+        throw new Error('Не удалось определить сообщество для каталога файлов');
+    }
+
+    const vkGroupId = String(context.config?.vk_group_id || fallbackGroupId || context.communityId || '').trim();
+    await recordUploadedCommunityFileImpl({
+        profileId: context.profileId,
+        communityId: context.communityId,
+        vkGroupId,
+        groupName: context.config?.group_name || '',
+        fileName: payload.fileName,
+        fileType: payload.fileType,
+        fileSize: Number(payload.fileSize || 0),
+        attachment: payload.attachment
+    });
+
+    return {
+        success: true,
+        profileId: context.profileId,
+        communityId: context.communityId,
+        vkGroupId
+    };
+}
+
+async function handleRecordUploadedFile(event) {
+    try {
+        await loadBotConfig();
+        const body = JSON.parse(event.body || '{}');
+        const result = await persistUploadedCommunityFileRecord(body);
+        return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ success: true, ...result })
+        };
+    } catch (error) {
+        return {
+            statusCode: 500,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ success: false, error: error.message })
         };
     }
 }
@@ -1706,110 +2130,73 @@ async function handleCheckTokenPermissions(event) {
 /**
  * Обработка вебхука VK
  */
-async function handleVkWebhook(event) {
+async function handleVkWebhookWithDependencies(event, overrides = {}) {
+    const logImpl = overrides.log || log;
+    const resolveCommunityContextImpl = overrides.resolveCommunityContext || resolveCommunityContext;
+    const setActiveCommunityImpl = overrides.setActiveCommunity || setActiveCommunity;
+    const recordProfileEventUsageImpl = overrides.recordProfileEventUsage || recordProfileEventUsage;
+    const buildEventEnvelopeImpl = overrides.buildEventEnvelope || buildEventEnvelope;
+    const publishIncomingEventImpl = overrides.publishIncomingEvent || publishIncomingEvent;
     try {
-        const data = JSON.parse(event.body);
+        const data = JSON.parse(event.body || '{}');
 
-        // Подтверждение вебхука
         if (data.type === 'confirmation') {
             const groupId = data.group_id?.toString() || null;
-            log('info', `🔑 Confirmation request from community: ${groupId}`);
-            const resolved = await resolveCommunityContext(groupId);
+            logImpl('info', `🔑 Confirmation request from community: ${groupId}`);
+            const resolved = await resolveCommunityContextImpl(groupId);
             let confirmationCode = resolved?.config?.confirmation_token || null;
-            // Fallback: ENV
             if (!confirmationCode) {
                 confirmationCode = process.env.CONFIRMATION_TOKEN;
             }
-            
-            log('info', `✅ Returning confirmation code: ${confirmationCode?.substring(0, 4)}...`);
+
+            logImpl('info', `✅ Returning confirmation code: ${confirmationCode?.substring(0, 4)}...`);
             return {
                 statusCode: 200,
                 body: confirmationCode || 'error_no_token'
             };
         }
 
-        // Обработка событий
-        if (data.type === 'message_new' || data.type === 'message_reply' || data.type === 'message_event') {
-            const groupId = data.group_id?.toString() || 'default';
-            const resolved = await resolveCommunityContext(groupId);
-            if (resolved?.communityId) {
-                setActiveCommunity(resolved.communityId, resolved.profileId);
-            }
-            const usage = await recordProfileEventUsage(resolved?.profileId || '1', groupId, data.type);
-            if (!usage.allowed) {
-                log('warn', `⛔ Daily PAPA BOT limit reached for profile ${resolved?.profileId || '1'}`);
-                return {
-                    statusCode: 200,
-                    headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
-                    body: 'ok'
-                };
-            }
-            const structuredResult = await processStructuredTriggers(data, resolved?.profileId || '1');
-
-            // handleMessage (классические триггеры из вкладки СООБЩЕНИЯ) вызывается ВСЕГДА,
-            // даже если структурные триггеры уже сработали. Они независимы.
-            if (data.type !== 'message_event') {
-                await handleMessage(data, resolved?.profileId || '1');
-            }
-            // Обрабатываем отложенные и рассылки для ЭТОГО сообщества
-            await processDelayed(groupId, resolved?.profileId || '1');
-            await processMailing(groupId, resolved?.profileId || '1');
-        } else if (data.type === 'wall_reply_new' || data.type === 'wall_reply_edit' || data.type === 'wall_reply_delete') {
-            const groupId = data.group_id?.toString() || 'default';
-            const resolved = await resolveCommunityContext(groupId);
-            if (resolved?.communityId) {
-                setActiveCommunity(resolved.communityId, resolved.profileId);
-            }
-            const usage = await recordProfileEventUsage(resolved?.profileId || '1', groupId, data.type);
-            if (!usage.allowed) {
-                log('warn', `⛔ Daily PAPA BOT limit reached for profile ${resolved?.profileId || '1'}`);
-                return {
-                    statusCode: 200,
-                    headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
-                    body: 'ok'
-                };
-            }
-            await processStructuredTriggers(data, resolved?.profileId || '1');
-
-            // handleComment (классические триггеры из вкладки КОММЕНТАРИИ В ПОСТАХ) вызывается ВСЕГДА,
-            // даже если структурные триггеры уже сработали. Они независимы.
-            if (data.type !== 'wall_reply_delete') {
-                await handleComment(data, resolved?.profileId || '1');
-            }
-            // Обрабатываем отложенные и рассылки для ЭТОГО сообщества
-            await processDelayed(groupId, resolved?.profileId || '1');
-            await processMailing(groupId, resolved?.profileId || '1');
-        } else if (['photo_new', 'video_new', 'group_join', 'group_leave', 'wall_repost', 'like_add'].includes(data.type)) {
-            const groupId = data.group_id?.toString() || 'default';
-            const resolved = await resolveCommunityContext(groupId);
-            if (resolved?.communityId) {
-                setActiveCommunity(resolved.communityId, resolved.profileId);
-            }
-            const usage = await recordProfileEventUsage(resolved?.profileId || '1', groupId, data.type);
-            if (!usage.allowed) {
-                log('warn', `⛔ Daily PAPA BOT limit reached for profile ${resolved?.profileId || '1'}`);
-                return {
-                    statusCode: 200,
-                    headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
-                    body: 'ok'
-                };
-            }
-            await processStructuredTriggers(data, resolved?.profileId || '1');
-            await processDelayed(groupId, resolved?.profileId || '1');
-            await processMailing(groupId, resolved?.profileId || '1');
-        } else {
-            const profileIds = await getAllProfileIds();
-            for (const profileId of profileIds) {
-                if (!(await canProcessProfileEvents(profileId))) {
-                    continue;
-                }
-                await loadBotConfig(profileId);
-                for (const communityId of getAllCommunityIds(profileId)) {
-                    await processDelayed(communityId, profileId);
-                    await processMailing(communityId, profileId);
-                }
-            }
+        if (!isSupportedEventType(data.type)) {
+            return {
+                statusCode: 200,
+                headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+                body: 'ok'
+            };
         }
+
+        const groupId = data.group_id?.toString() || 'default';
+        const resolved = await resolveCommunityContextImpl(groupId);
+        if (resolved?.communityId) {
+            setActiveCommunityImpl(resolved.communityId, resolved.profileId);
+        }
+
+        const profileId = resolved?.profileId || '1';
+        const usage = await recordProfileEventUsageImpl(profileId, groupId, data.type);
+        if (!usage.allowed) {
+            logImpl('warn', `⛔ Daily PAPA BOT limit reached for profile ${profileId}`);
+            return {
+                statusCode: 200,
+                headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+                body: 'ok'
+            };
+        }
+
+        const envelope = buildEventEnvelopeImpl(data, {
+            profileId,
+            communityId: groupId,
+            receivedAt: new Date().toISOString()
+        });
+
+        if (!envelope) {
+            logImpl('warn', 'VK event skipped: envelope builder returned null');
+            return {
+                statusCode: 200,
+                headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+                body: 'ok'
+            };
+        }
+
+        await publishIncomingEventImpl(envelope);
 
         return {
             statusCode: 200,
@@ -1817,13 +2204,17 @@ async function handleVkWebhook(event) {
             body: 'ok'
         };
     } catch (e) {
-        log('error', 'Handler error:', e.message);
+        logImpl('error', 'Handler error:', e.message);
         return {
             statusCode: 500,
             headers: { 'Access-Control-Allow-Origin': '*' },
             body: 'Internal error'
         };
     }
+}
+
+async function handleVkWebhook(event) {
+    return handleVkWebhookWithDependencies(event);
 }
 
 /**
@@ -2086,3 +2477,464 @@ function escapeHtml(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
 }
+
+async function handleVerifyAuth(event) {
+    try {
+        const body = JSON.parse(event.body || '{}');
+        const { username, password } = body;
+        const ip = getClientIpFromEvent(event);
+        const userAgent = getUserAgentFromEvent(event);
+        const captchaAnswer = String(body.captchaAnswer || body.answer || '').trim();
+        const loginCaptchaStatus = await getLoginCaptchaStatus(ip);
+
+        const loginStatus = await getLoginStatus(username);
+        if (loginStatus.lockUntil && loginStatus.lockUntil > Date.now()) {
+            await requireLoginCaptcha(ip, 'login_locked');
+            return {
+                statusCode: 423,
+                headers: buildJsonHeaders(),
+                body: JSON.stringify({
+                    success: false,
+                    locked: true,
+                    lockUntil: loginStatus.lockUntil,
+                    loginCaptchaRequired: true,
+                    errorCode: 'login_locked',
+                    error: 'РџСЂРѕС„РёР»СЊ РІСЂРµРјРµРЅРЅРѕ Р·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅ РїРѕСЃР»Рµ 3 РЅРµСѓРґР°С‡РЅС‹С… РїРѕРїС‹С‚РѕРє РІС…РѕРґР°'
+                })
+            };
+        }
+
+        if (loginCaptchaStatus.required) {
+            if (!captchaAnswer) {
+                return {
+                    statusCode: 403,
+                    headers: buildJsonHeaders(),
+                    body: JSON.stringify({
+                        success: false,
+                        loginCaptchaRequired: true,
+                        errorCode: 'login_captcha_required',
+                        error: 'Р”Р»СЏ РІС…РѕРґР° С‚СЂРµР±СѓРµС‚СЃСЏ РєР°РїС‚С‡Р°'
+                    })
+                };
+            }
+
+            const captchaVerification = await verifyLoginCaptcha(ip, captchaAnswer, new Date());
+            if (!captchaVerification.ok) {
+                return {
+                    statusCode: 403,
+                    headers: buildJsonHeaders(),
+                    body: JSON.stringify({
+                        success: false,
+                        loginCaptchaRequired: true,
+                        errorCode: captchaVerification.errorCode || 'captcha_invalid',
+                        remainingAttempts: captchaVerification.remainingAttempts,
+                        error: 'РљР°РїС‚С‡Р° РЅРµ РїСЂРѕР№РґРµРЅР°'
+                    })
+                };
+            }
+        }
+
+        const authResult = await verifyAdminCredentials(username, password);
+        if (authResult.success) {
+            await registerLoginAttempt({
+                username,
+                success: true,
+                profileId: authResult.profileId,
+                ip
+            });
+            const session = await createAdminSession({
+                profileId: authResult.profileId,
+                ip,
+                userAgent,
+                now: new Date().toISOString()
+            });
+            await clearLoginCaptcha(ip);
+            return {
+                statusCode: 200,
+                ...buildCookieResponseMeta(buildSessionCookie(session.sessionId)),
+                body: JSON.stringify({
+                    success: true,
+                    sessionToken: session.sessionId,
+                    profileId: authResult.profileId,
+                    principalProfileId: authResult.profileId,
+                    profileName: authResult.profileName,
+                    role: authResult.role,
+                    isMainAdmin: authResult.isMainAdmin,
+                    loginCaptchaRequired: false
+                })
+            };
+        }
+
+        if (authResult.reason === 'expired') {
+            const profile = await findProfileByUsername(username);
+            return {
+                statusCode: 403,
+                headers: buildJsonHeaders(),
+                body: JSON.stringify({
+                    success: false,
+                    expired: true,
+                    canReactivate: true,
+                    error: authResult.error || 'РЎСЂРѕРє РґРµР№СЃС‚РІРёСЏ РїСЂРѕС„РёР»СЏ РёСЃС‚С‘Рє',
+                    profileId: profile?.id || '',
+                    profileName: profile?.name || username,
+                    username
+                })
+            };
+        }
+
+        const lockInfo = await registerLoginAttempt({
+            username,
+            success: false,
+            profileId: null,
+            reason: authResult.error || authResult.reason || 'credentials',
+            ip
+        });
+        if (lockInfo.lockUntil && lockInfo.lockUntil > Date.now()) {
+            await requireLoginCaptcha(ip, 'login_failed_lock');
+        }
+        return {
+            statusCode: authResult.reason === 'expired' || authResult.reason === 'inactive' ? 403 : 401,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify({
+                success: false,
+                error: authResult.error || 'РќРµРІРµСЂРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ',
+                remainingAttempts: lockInfo.remainingAttempts,
+                lockUntil: lockInfo.lockUntil || 0,
+                locked: !!(lockInfo.lockUntil && lockInfo.lockUntil > Date.now()),
+                loginCaptchaRequired: !!(lockInfo.lockUntil && lockInfo.lockUntil > Date.now())
+            })
+        };
+    } catch (e) {
+        return {
+            statusCode: 500,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify({ success: false, error: e.message })
+        };
+    }
+}
+
+async function handleGetCaptcha(event) {
+    try {
+        const q = event.queryStringParameters || event.query || event.params || {};
+        const mode = getCaptchaMode(q);
+        const ip = getClientIpFromEvent(event);
+
+        if (mode === 'login') {
+            const rateLimit = await reserveCaptchaRateLimit({ ip, action: 'refresh' });
+            if (!rateLimit.ok) return rateLimit.response;
+
+            const challenge = await issueLoginCaptcha(ip);
+            return {
+                statusCode: 200,
+                headers: buildJsonHeaders(),
+                body: JSON.stringify({
+                    success: true,
+                    mode: 'login',
+                    loginCaptchaRequired: true,
+                    captchaSvg: challenge.captchaSvg,
+                    expiresAt: challenge.expiresAt
+                })
+            };
+        }
+
+        const sessionId = getAdminSessionIdFromEvent(event);
+        if (!sessionId) {
+            return buildAdminSessionErrorResponse({
+                statusCode: 401,
+                clearCookie: true,
+                sessionInvalid: true,
+                errorCode: 'session_missing',
+                error: 'РЎРµСЃСЃРёСЏ РЅРµ РЅР°Р№РґРµРЅР°'
+            });
+        }
+
+        const session = await getAdminSession(sessionId);
+        if (!session) {
+            return buildAdminSessionErrorResponse({
+                statusCode: 401,
+                clearCookie: true,
+                sessionInvalid: true,
+                errorCode: 'session_not_found',
+                error: 'РЎРµСЃСЃРёСЏ РЅРµ РЅР°Р№РґРµРЅР°'
+            });
+        }
+        if (session.terminatedAt) {
+            return buildAdminSessionErrorResponse({
+                statusCode: 401,
+                clearCookie: true,
+                sessionInvalid: true,
+                errorCode: 'session_terminated',
+                error: 'РЎРµСЃСЃРёСЏ Р·Р°РІРµСЂС€РµРЅР°'
+            });
+        }
+        if (isSessionExpired(session, new Date())) {
+            await killAdminSession(sessionId, 'session_expired', new Date().toISOString());
+            return buildAdminSessionErrorResponse({
+                statusCode: 401,
+                clearCookie: true,
+                sessionInvalid: true,
+                expired: true,
+                errorCode: 'session_expired',
+                error: 'РЎРµСЃСЃРёСЏ РёСЃС‚РµРєР»Р°'
+            });
+        }
+
+        const rateLimit = await reserveCaptchaRateLimit({ sessionId, ip, action: 'refresh' });
+        if (!rateLimit.ok) return rateLimit.response;
+
+        const challenge = await issueSessionCaptcha(sessionId);
+        return {
+            statusCode: 200,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify({
+                success: true,
+                mode: 'session',
+                captchaRequired: true,
+                captchaSvg: challenge.captchaSvg,
+                expiresAt: challenge.expiresAt
+            })
+        };
+    } catch (e) {
+        return {
+            statusCode: 500,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify({ success: false, error: e.message })
+        };
+    }
+}
+
+async function handleVerifyCaptcha(event) {
+    try {
+        const q = event.queryStringParameters || event.query || event.params || {};
+        const body = JSON.parse(event.body || '{}');
+        const mode = getCaptchaMode(q, body);
+        const answer = String(body.answer || body.captchaAnswer || '').trim();
+        const ip = getClientIpFromEvent(event);
+        const userAgent = getUserAgentFromEvent(event);
+
+        if (!answer) {
+            return {
+                statusCode: 400,
+                headers: buildJsonHeaders(),
+                body: JSON.stringify({
+                    success: false,
+                    errorCode: 'captcha_answer_required',
+                    error: 'Р’РІРµРґРёС‚Рµ РѕС‚РІРµС‚ РєР°РїС‚С‡Рё'
+                })
+            };
+        }
+
+        if (mode === 'login') {
+            const rateLimit = await reserveCaptchaRateLimit({ ip, action: 'submit' });
+            if (!rateLimit.ok) return rateLimit.response;
+
+            const result = await verifyLoginCaptcha(ip, answer, new Date());
+            if (result.ok) {
+                return {
+                    statusCode: 200,
+                    headers: buildJsonHeaders(),
+                    body: JSON.stringify({
+                        success: true,
+                        loginCaptchaRequired: false
+                    })
+                };
+            }
+
+            return {
+                statusCode: 403,
+                headers: buildJsonHeaders(),
+                body: JSON.stringify({
+                    success: false,
+                    loginCaptchaRequired: true,
+                    remainingAttempts: result.remainingAttempts,
+                    errorCode: result.errorCode || 'captcha_invalid',
+                    error: 'РљР°РїС‚С‡Р° РЅРµ РїСЂРѕР№РґРµРЅР°'
+                })
+            };
+        }
+
+        const sessionId = getAdminSessionIdFromEvent(event);
+        if (!sessionId) {
+            return buildAdminSessionErrorResponse({
+                statusCode: 401,
+                clearCookie: true,
+                sessionInvalid: true,
+                errorCode: 'session_missing',
+                error: 'РЎРµСЃСЃРёСЏ РЅРµ РЅР°Р№РґРµРЅР°'
+            });
+        }
+
+        const rateLimit = await reserveCaptchaRateLimit({ sessionId, ip, action: 'submit' });
+        if (!rateLimit.ok) return rateLimit.response;
+
+        const result = await verifySessionCaptcha(sessionId, answer, {
+            ip,
+            userAgent,
+            now: new Date()
+        });
+        if (result.ok) {
+            return {
+                statusCode: 200,
+                headers: buildJsonHeaders(),
+                body: JSON.stringify({
+                    success: true,
+                    captchaRequired: false,
+                    sessionInvalid: false
+                })
+            };
+        }
+
+        if (result.terminateSession) {
+            await requireLoginCaptcha(ip, 'session_captcha_failed');
+            return {
+                statusCode: 403,
+                ...buildCookieResponseMeta(buildClearSessionCookie()),
+                body: JSON.stringify({
+                    success: false,
+                    sessionInvalid: true,
+                    loginCaptchaRequired: true,
+                    errorCode: result.errorCode || 'captcha_failed',
+                    error: 'РЎРµСЃСЃРёСЏ Р·Р°РІРµСЂС€РµРЅР° РїРѕСЃР»Рµ 3 РЅРµСѓРґР°С‡РЅС‹С… РїРѕРїС‹С‚РѕРє РєР°РїС‚С‡Рё'
+                })
+            };
+        }
+
+        return {
+            statusCode: 403,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify({
+                success: false,
+                captchaRequired: true,
+                sessionInvalid: false,
+                remainingAttempts: result.remainingAttempts,
+                errorCode: result.errorCode || 'captcha_invalid',
+                error: 'РљР°РїС‚С‡Р° РЅРµ РїСЂРѕР№РґРµРЅР°'
+            })
+        };
+    } catch (e) {
+        return {
+            statusCode: 500,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify({ success: false, error: e.message })
+        };
+    }
+}
+
+async function handleLogoutAdmin(event) {
+    try {
+        const sessionId = getAdminSessionIdFromEvent(event);
+        if (sessionId) {
+            await killAdminSession(sessionId, 'manual_logout', new Date().toISOString());
+        }
+        return {
+            statusCode: 200,
+            ...buildCookieResponseMeta(buildClearSessionCookie()),
+            body: JSON.stringify({ success: true })
+        };
+    } catch (e) {
+        return {
+            statusCode: 500,
+            headers: buildJsonHeaders(),
+            body: JSON.stringify({ success: false, error: e.message })
+        };
+    }
+}
+
+function extractQueuedPayloads(event) {
+    const rawBody = typeof event?.body === 'string' ? JSON.parse(event.body || '{}') : (event?.body || event || {});
+    if (!rawBody || (typeof rawBody === 'object' && Object.keys(rawBody).length === 0)) {
+        return [];
+    }
+
+    if (Array.isArray(rawBody?.messages)) {
+        return rawBody.messages
+            .map(entry => entry?.details?.message?.body || '')
+            .filter(Boolean)
+            .map(body => typeof body === 'string' ? JSON.parse(body) : body);
+    }
+
+    return Array.isArray(rawBody?.events)
+        ? rawBody.events
+        : [rawBody?.envelope || rawBody];
+}
+
+function extractWorkerEnvelopes(event) {
+    return extractQueuedPayloads(event);
+}
+
+async function workerHandlerWithDependencies(event, overrides = {}) {
+    const consumeIncomingEventImpl = overrides.consumeIncomingEvent || consumeIncomingEvent;
+    const processIncomingEventImpl = overrides.processIncomingEvent || processIncomingEvent;
+    const processOutboundActionImpl = overrides.processOutboundAction || processOutboundAction;
+    const envelopes = extractWorkerEnvelopes(event);
+
+    if (envelopes.length === 0) {
+        const processedCount = await consumeIncomingEventImpl(processIncomingEventImpl);
+        return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+            body: processedCount ? `worker-ok:${processedCount}` : 'worker-ok:0'
+        };
+    }
+
+    for (const envelope of envelopes) {
+        if (envelope && envelope.actionId && envelope.actionType && !envelope.eventType) {
+            await processOutboundActionImpl(envelope);
+            continue;
+        }
+        await processIncomingEventImpl(envelope);
+    }
+
+    return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+        body: `worker-ok:${envelopes.length}`
+    };
+}
+
+async function workerHandler(event) {
+    return workerHandlerWithDependencies(event);
+}
+
+async function senderHandlerWithDependencies(event, overrides = {}) {
+    const consumeOutboundActionImpl = overrides.consumeOutboundAction || consumeOutboundAction;
+    const processOutboundActionImpl = overrides.processOutboundAction || processOutboundAction;
+    const actions = extractQueuedPayloads(event);
+
+    if (actions.length === 0) {
+        const processedCount = await consumeOutboundActionImpl(processOutboundActionImpl);
+        return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+            body: processedCount ? `sender-ok:${processedCount}` : 'sender-ok:0'
+        };
+    }
+
+    for (const action of actions) {
+        await processOutboundActionImpl(action);
+    }
+
+    return {
+        statusCode: 200,
+        headers: { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' },
+        body: `sender-ok:${actions.length}`
+    };
+}
+
+async function senderHandler(event) {
+    return senderHandlerWithDependencies(event);
+}
+
+setIncomingEventConsumer(processIncomingEvent);
+
+module.exports = {
+    handler,
+    workerHandler,
+    senderHandler,
+    __testOnly: {
+        handleVkWebhookWithDependencies,
+        handleSaveSheetWithDependencies,
+        workerHandlerWithDependencies,
+        senderHandlerWithDependencies
+    }
+};

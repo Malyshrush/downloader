@@ -6157,14 +6157,15 @@ saveBtn.onclick = function() {
           fetch(baseUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+              body: JSON.stringify({
               action: 'upload_attachment',
               fileBase64: base64,
               fileName: file.name,
               fileType: file.type || 'application/octet-stream',
+              fileSize: file.size || 0,
               target: target,
               groupId: groupId,
-              communityId: groupId
+              communityId: communityId
             })
           }).then(function(response) {
             clearInterval(uploadAnimInterval);
@@ -6193,6 +6194,16 @@ saveBtn.onclick = function() {
   .then(function(result) {
     if (result.success) {
       var attachment = result.attachment;
+      return persistUploadedCommunityFileRecord({
+        fileName: file.name,
+        fileType: file.type || 'application/octet-stream',
+        fileSize: file.size || 0,
+        attachment: attachment,
+        communityId: communityId,
+        groupId: groupId
+      }).catch(function(error) {
+        console.warn('[Admin] Failed to persist uploaded file record:', error);
+      }).then(function() {
       // &#x1F6E0;&#xFE0F; ИСПРАВЛЕНИЕ: используем имя поля из параметра col
       var attachmentsField = col;
       if (!dataStore[tab][idx]) dataStore[tab][idx] = {};
@@ -6212,6 +6223,7 @@ saveBtn.onclick = function() {
       renderTable(tab, dataStore[tab]);
       statusEl.innerText = '? Вложение добавлено: ' + attachment;
       setTimeout(function() { modal.remove(); }, 1500);
+      });
     } else {
       throw new Error(result.error || 'Ошибка загрузки');
     }
@@ -8942,6 +8954,53 @@ window.resolveProfileLimitRequestById = async function(requestId, status) {
     }
 };
 
+window.persistUploadedCommunityFileRecord = async function(payload) {
+    var baseUrl = window.location.href.split('?')[0];
+    var response = await fetch(baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'record_uploaded_file',
+            profileId: getCurrentProfileId(),
+            communityId: payload.communityId,
+            groupId: payload.groupId,
+            fileName: payload.fileName,
+            fileType: payload.fileType,
+            fileSize: payload.fileSize,
+            attachment: payload.attachment
+        })
+    });
+    var result = await response.json();
+    if (!result.success) {
+        throw new Error(result.error || 'Не удалось записать файл в каталог');
+    }
+    return result;
+};
+
+window.formatProfileFileSize = function(bytes) {
+    var size = Number(bytes || 0);
+    if (!Number.isFinite(size) || size <= 0) return '0 B';
+    var units = ['B', 'KB', 'MB', 'GB'];
+    var unitIndex = 0;
+    while (size >= 1024 && unitIndex < units.length - 1) {
+        size = size / 1024;
+        unitIndex += 1;
+    }
+    var precision = unitIndex === 0 ? 0 : 1;
+    return size.toFixed(precision).replace(/\.0$/, '') + ' ' + units[unitIndex];
+};
+
+window.filterProfileFiles = function() {
+    var input = document.getElementById('profileFilesFilter');
+    var tbody = document.getElementById('profileFilesTableBody');
+    if (!input || !tbody) return;
+    var query = String(input.value || '').trim().toLowerCase();
+    Array.prototype.forEach.call(tbody.querySelectorAll('tr[data-file-search]'), function(row) {
+        var haystack = String(row.getAttribute('data-file-search') || '').toLowerCase();
+        row.style.display = !query || haystack.indexOf(query) >= 0 ? '' : 'none';
+    });
+};
+
 window.renderProfileDashboard = function() {
     var container = document.getElementById('profileDashboardContent');
     if (!container) return;
@@ -8960,11 +9019,42 @@ window.renderProfileDashboard = function() {
     var history = Array.isArray(data.limitHistory) ? data.limitHistory : [];
     var requests = Array.isArray(data.limitRequests) ? data.limitRequests : [];
     var packages = Array.isArray(data.supportPackages) ? data.supportPackages : [];
+    var communityFiles = data.communityFiles && typeof data.communityFiles === 'object' ? data.communityFiles : {};
     var promoStatus = data.promoActivationStatus || { attempts: 0, remainingAttempts: 3, blocked: false, nextResetAt: 0 };
     var activeCommunityId = String(window.currentCommunityId || '').trim();
     if (!window.selectedProfileSupportLimit) {
         window.selectedProfileSupportLimit = packages[0] || 1000;
     }
+
+    var selectedCommunity = communities.find(function(item) {
+        var communityKey = String(item.communityId || '').trim();
+        var vkGroupId = String(item.vkGroupId || item.communityId || '').trim();
+        return !!activeCommunityId && (activeCommunityId === communityKey || activeCommunityId === vkGroupId);
+    }) || communities[0] || null;
+    var selectedCommunityVkGroupId = selectedCommunity ? String(selectedCommunity.vkGroupId || selectedCommunity.communityId || '').trim() : '';
+    var selectedCommunityFiles = selectedCommunityVkGroupId && Array.isArray(communityFiles[selectedCommunityVkGroupId])
+        ? communityFiles[selectedCommunityVkGroupId]
+        : [];
+    var filesRowsHtml = selectedCommunityFiles.length
+        ? selectedCommunityFiles.map(function(item) {
+            var fileName = String(item.fileName || '').trim();
+            var fileType = String(item.fileType || '').trim();
+            var fileSize = formatProfileFileSize(item.fileSize);
+            var attachment = String(item.attachment || '').trim();
+            var searchText = [fileName, fileType, fileSize, attachment].join(' ').toLowerCase();
+            return '<tr data-file-search="' + escapeHtml(searchText) + '">' +
+                '<td>' + escapeHtml(fileName || 'Без названия') + '</td>' +
+                '<td>' + escapeHtml(fileType || 'Не указан') + '</td>' +
+                '<td>' + escapeHtml(fileSize) + '</td>' +
+                '<td><code>' + escapeHtml(attachment) + '</code></td>' +
+            '</tr>';
+        }).join('')
+        : '<tr><td colspan="4" class="community-empty-note" style="text-align:left;">' + escapeHtml(selectedCommunity ? 'Для этого сообщества файлы пока не загружались.' : 'Сначала выбери или подключи сообщество.') + '</td></tr>';
+    var filesSectionHtml =
+        '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Файлы</h3><div class="profile-manager-subtitle">Каталог файлов активного сообщества. Аттачмент можно повторно использовать во вложениях без новой загрузки.</div></div></div>' +
+        (selectedCommunity ? '<div class="profile-manager-subtitle" style="margin-bottom:12px;">Сейчас показано сообщество: <strong>' + escapeHtml(selectedCommunity.groupName || ('Сообщество ' + selectedCommunityVkGroupId)) + '</strong> (' + escapeHtml(selectedCommunityVkGroupId) + ')</div>' : '') +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;"><input type="text" id="profileFilesFilter" placeholder="Поиск по названию, типу, размеру или аттачменту" oninput="filterProfileFiles()" style="flex:1;min-width:280px;"></div>' +
+        '<div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th>Название</th><th>Тип</th><th>Размер</th><th>Аттачмент</th></tr></thead><tbody id="profileFilesTableBody">' + filesRowsHtml + '</tbody></table></div></div>';
 
     var promoSectionHtml = '';
     if (data.isMainAdmin) {
@@ -9011,6 +9101,7 @@ window.renderProfileDashboard = function() {
         '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Подключённые сообщества</h3><div class="profile-manager-subtitle">По каждому сообществу показаны пользователи и накопленная статистика обработки.</div></div></div>' +
             communitiesHtml +
         '</div>' +
+        filesSectionHtml +
         '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Поддержка автора</h3><div class="profile-manager-subtitle">Пока это ручной процесс: выбери пакет и отправь запрос главному админу.</div></div></div><div class="profile-card-row" style="margin-bottom:12px;"><span class="profile-card-label">Увеличения лимитов:</span></div><div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;">' + packages.map(function(limitValue) { var selected = Number(limitValue) === Number(window.selectedProfileSupportLimit); return '<button class="btn ' + (selected ? 'btn-save' : 'btn-neutral') + '" type="button" onclick="selectProfileLimitPackage(' + Number(limitValue) + ')">' + escapeHtml(Number(limitValue).toLocaleString('ru-RU')) + '</button>'; }).join('') + '</div><div class="profile-manager-subtitle">Выбран пакет: <strong>' + escapeHtml(Number(window.selectedProfileSupportLimit || packages[0] || 1000).toLocaleString('ru-RU')) + '</strong> запросов в сутки. Нажатие кнопки отправляет запрос главному админу.</div><div style="margin-top:12px;"><button class="btn btn-accent" type="button" onclick="requestSelectedProfileLimit()">Приобрести</button></div></div>' +
         '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">История начислений и запросов</h3><div class="profile-manager-subtitle">Здесь видно, когда лимит менялся и какие запросы уже были отправлены.</div></div></div>' +
             (history.length ? history.map(function(item) {

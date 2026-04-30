@@ -116,6 +116,7 @@ const { getBotVersionData, saveBotVersionData } = require('./modules/bot-version
 const {
     canProcessProfileEvents,
     recordProfileEventUsage,
+    recordUploadedCommunityFile,
     createProfileLimitRequest,
     resolveProfileLimitRequest,
     deleteProfileLimitRequest,
@@ -412,7 +413,7 @@ async function handleTimerTrigger(event) {
         // Пинг Render сервиса чтобы он не засыпал
         try {
             const axios = require('axios');
-            await axios.get('https://vk-uploader.onrender.com/upload', { timeout: 5000 }).catch(() => {});
+            await axios.get('https://vk-uploader.onrender.com/healthz', { timeout: 5000 }).catch(() => {});
             log('debug', '🔔 Render service pinged');
         } catch (pingError) {
             log('debug', '⚠️ Render ping failed (non-critical):', pingError.message);
@@ -650,6 +651,9 @@ async function handlePostRequest(event) {
             const body = JSON.parse(event.body);
             if (body.action === 'upload_attachment') {
                 return handleUploadAttachment(event);
+            }
+            if (body.action === 'record_uploaded_file') {
+                return handleRecordUploadedFile(event);
             }
         } catch (e) {
             // Не JSON body, продолжаем обычную обработку
@@ -2024,17 +2028,81 @@ async function handleUploadAttachment(event) {
 
         const buffer = Buffer.from(fileBase64, 'base64');
         const attachment = await uploadToVK(buffer, fileName, fileType, target, groupId || communityId || null);
+        await persistUploadedCommunityFileRecord({
+            ...body,
+            attachment,
+            fileSize: Number(body.fileSize || buffer.length || 0)
+        });
 
         return {
             statusCode: 200,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ success: true, attachment })
+            body: JSON.stringify({
+                success: true,
+                attachment,
+                fileName,
+                fileType,
+                fileSize: Number(body.fileSize || buffer.length || 0)
+            })
         };
     } catch (err) {
         return {
             statusCode: 500,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
             body: JSON.stringify({ success: false, error: err.message })
+        };
+    }
+}
+
+async function persistUploadedCommunityFileRecord(payload, overrides = {}) {
+    const resolveCommunityContextImpl = overrides.resolveCommunityContext || resolveCommunityContext;
+    const recordUploadedCommunityFileImpl = overrides.recordUploadedCommunityFile || recordUploadedCommunityFile;
+    const profileId = payload.profileId ? normalizeProfileId(payload.profileId) : null;
+    const requestedCommunityId = String(payload.communityId || payload.groupId || '').trim();
+    const fallbackGroupId = String(payload.groupId || '').trim();
+    const context =
+        await resolveCommunityContextImpl(requestedCommunityId || null, profileId || null) ||
+        await resolveCommunityContextImpl(fallbackGroupId || null, profileId || null);
+
+    if (!context) {
+        throw new Error('Не удалось определить сообщество для каталога файлов');
+    }
+
+    const vkGroupId = String(context.config?.vk_group_id || fallbackGroupId || context.communityId || '').trim();
+    await recordUploadedCommunityFileImpl({
+        profileId: context.profileId,
+        communityId: context.communityId,
+        vkGroupId,
+        groupName: context.config?.group_name || '',
+        fileName: payload.fileName,
+        fileType: payload.fileType,
+        fileSize: Number(payload.fileSize || 0),
+        attachment: payload.attachment
+    });
+
+    return {
+        success: true,
+        profileId: context.profileId,
+        communityId: context.communityId,
+        vkGroupId
+    };
+}
+
+async function handleRecordUploadedFile(event) {
+    try {
+        await loadBotConfig();
+        const body = JSON.parse(event.body || '{}');
+        const result = await persistUploadedCommunityFileRecord(body);
+        return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ success: true, ...result })
+        };
+    } catch (error) {
+        return {
+            statusCode: 500,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ success: false, error: error.message })
         };
     }
 }
