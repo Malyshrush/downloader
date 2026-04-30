@@ -1,82 +1,64 @@
-# 🚀 Деплой VK File Uploader на Render.com
+# Деплой Render Uploader
 
-## Шаг 1: Подготовка репозитория
+## Текущее состояние
 
-Папка `render-uploader` уже содержит все необходимые файлы:
-- `index.js` - основной сервер
-- `package.json` - зависимости
-- `README.md` - документация
-- `.gitignore` - игнорируемые файлы
+На `2026-04-30` live сервис `https://vk-uploader.onrender.com` ещё работает на старой сборке:
 
-## Шаг 2: Создание репозитория на GitHub
+- `GET /` -> `404`
+- `GET /healthz` -> `404`
 
-1. Создай новый репозиторий на GitHub: https://github.com/new
-   - Название: `vk-uploader`
-   - Описание: `VK file uploader service for PAPA BOT`
-   - Public или Private (любой)
+Это означает, что код из текущей ветки в Render ещё не выкачен, даже если Yandex Cloud уже задеплоен.
 
-2. Инициализируй Git в папке render-uploader:
-```bash
-cd render-uploader
-git init
-git add .
-git commit -m "Initial commit: VK file uploader service"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/vk-uploader.git
-git push -u origin main
+## Что именно деплоить
+
+Отдельной папки `render-uploader/` больше нет. Актуальный Render uploader теперь живёт прямо в подпроекте:
+
+- `PAPA BOT 2/index.js`
+- `PAPA BOT 2/package.json`
+- `PAPA BOT 2/src/modules/render-uploader-service.js`
+
+## Правильная конфигурация Render
+
+Если сервис `vk-uploader` уже существует в Render dashboard, у него должны быть такие настройки:
+
+- Repository: текущий GitHub-репозиторий проекта
+- Root Directory: `PAPA BOT 2`
+- Environment: `Node`
+- Build Command: `npm install`
+- Start Command: `npm start`
+
+Если хочешь протестировать именно эту ветку до merge:
+
+- Branch: `codex/ymq-ydb-idempotency`
+
+Если Render уже смотрит только на production-ветку, тогда сначала нужен merge этой ветки в основную ветку, а потом redeploy.
+
+## Как понять, что новый uploader реально выкатился
+
+После deploy Render должен отвечать так:
+
+```text
+GET https://vk-uploader.onrender.com/
+-> 200 {"ok":true,"service":"vk-uploader"}
+
+GET https://vk-uploader.onrender.com/healthz
+-> 200 {"ok":true,"service":"vk-uploader"}
 ```
 
-## Шаг 3: Деплой на Render.com
+Если по-прежнему `404`, значит Render всё ещё работает со старой сборкой или смотрит не в тот root directory / branch.
 
-1. Зайди на https://dashboard.render.com
-2. Нажми **New +** → **Web Service**
-3. Подключи GitHub репозиторий `vk-uploader`
-4. Настройки:
-   - **Name:** `vk-uploader`
-   - **Environment:** `Node`
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-   - **Plan:** `Free`
+## Что изменилось в новой версии uploader
 
-5. Нажми **Create Web Service**
+- больше нет `multer.memoryStorage()` для больших файлов;
+- файл сначала кладётся во временный файл, затем стримится в VK;
+- после обработки temp-файл удаляется;
+- upload path вынесен в `src/modules/render-uploader-service.js`;
+- `package-render.json` тоже обновлён и больше не указывает на несуществующий `server.js`.
 
-## Шаг 4: Получение URL
+## Минимальный smoke после выката Render
 
-После деплоя Render выдаст URL:
-```
-https://vk-uploader.onrender.com
-```
-
-## Шаг 5: Обновление кода
-
-URL уже обновлён в `adminPanelHTML.js`:
-```javascript
-var RENDER_UPLOADER_URL = 'https://vk-uploader.onrender.com/upload';
-```
-
-## Шаг 6: Проверка
-
-Проверь работу сервиса:
-```bash
-curl https://vk-uploader.onrender.com/upload
-```
-
-Должен вернуть ошибку 400 (это нормально, значит сервис работает).
-
-## ⚠️ Важно
-
-- Бесплатный план Render "засыпает" после 15 минут неактивности
-- Первый запрос после "сна" может занять 30-60 секунд
-- Для production рекомендуется платный план ($7/месяц)
-
-## Альтернатива: Railway.app
-
-Если Render не подходит, можно использовать Railway.app:
-1. https://railway.app
-2. New Project → Deploy from GitHub
-3. Выбери репозиторий `vk-uploader`
-4. Railway автоматически определит Node.js и задеплоит
-
----
-
-**Дата создания:** 2026-04-15
+1. Открыть `https://vk-uploader.onrender.com/healthz`.
+2. Убедиться, что ответ `200`.
+3. Загрузить в админке файл больше `3.5 MB`.
+4. Проверить, что ошибка больше не сводится к ложному wake-up сценарию.
+5. Убедиться, что файл появился в блоке `Файлы` на вкладке `ПРОФИЛЬ` для активного сообщества.
