@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-04-23T14:17:10.964Z",
+  "createdAt": "2026-04-30T12:48:09.520Z",
   "ymqEndpoint": "https://message-queue.api.cloud.yandex.net",
   "ydbDocApiEndpoint": "https://docapi.serverless.yandexcloud.net/ru-central1/b1gh3sun4tm32rd0jpd4/etnbufcfn4sjsrn3fa1s",
   "incomingQueue": {
@@ -40,6 +40,14 @@
   },
   "structuredTriggersTable": {
     "tableName": "structured_trigger_entries",
+    "tableStatus": "ACTIVE"
+  },
+  "messageRulesTable": {
+    "tableName": "message_rule_entries",
+    "tableStatus": "ACTIVE"
+  },
+  "commentRulesTable": {
+    "tableName": "comment_rule_entries",
     "tableStatus": "ACTIVE"
   },
   "profileUserSharedTable": {
