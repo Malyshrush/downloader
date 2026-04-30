@@ -61,7 +61,8 @@ const upload = multer({
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Cache-Control, Pragma, X-Requested-With, Accept, Origin');
+  res.header('Access-Control-Max-Age', '86400');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
@@ -78,6 +79,12 @@ app.get('/healthz', (_req, res) => {
 
 app.get('/upload-result', async (req, res) => {
   const uploadId = normalizeUploadId(req.query?.upload_id);
+  console.log('[UPLOAD RESULT] Lookup:', {
+    upload_id: uploadId || null,
+    has_cached_result: uploadId ? uploadResults.has(uploadId) : false,
+    in_flight: uploadId ? uploadInFlight.has(uploadId) : false
+  });
+
   if (!uploadId) {
     return res.status(400).json({ success: false, error: 'upload_id is required' });
   }

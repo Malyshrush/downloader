@@ -48,3 +48,25 @@ test('render upload result endpoint reports pending upload without duplicating w
     server.close();
   }
 });
+
+test('render service allows browser recovery CORS preflight headers', async () => {
+  const server = await listen(app);
+  try {
+    const port = server.address().port;
+    const response = await fetch(`http://127.0.0.1:${port}/upload-result?upload_id=upload_test_123`, {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://functions.yandexcloud.net',
+        'Access-Control-Request-Method': 'GET',
+        'Access-Control-Request-Headers': 'cache-control, pragma'
+      }
+    });
+
+    assert.equal(response.status, 200);
+    const allowedHeaders = response.headers.get('access-control-allow-headers') || '';
+    assert.match(allowedHeaders.toLowerCase(), /cache-control/);
+    assert.match(allowedHeaders.toLowerCase(), /pragma/);
+  } finally {
+    server.close();
+  }
+});

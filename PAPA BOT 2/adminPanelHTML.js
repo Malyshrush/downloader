@@ -6123,9 +6123,8 @@ saveBtn.onclick = function() {
 
             return new Promise(function(resolve, reject) {
               var poll = function() {
-                fetch(resultUrl, {
+                fetch(resultUrl + '&t=' + Date.now(), {
                   method: 'GET',
-                  cache: 'no-store',
                   signal: AbortSignal.timeout(5000)
                 }).then(function(response) {
                   if (response.status === 202 || response.status === 404) {
