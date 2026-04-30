@@ -1,4 +1,4 @@
-//=====adminPanelHTML.js=====//
+﻿//=====adminPanelHTML.js=====//
 const adminPanelHTML = `<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -188,6 +188,14 @@ select { background: var(--select-bg) !important; color: var(--input-text) !impo
 #switchOverlay .spinner { border-color: var(--overlay-spinner-border) !important; border-top-color: var(--overlay-spinner-top) !important; }
 #saveOverlay { background: var(--save-overlay-bg) !important; }
 #saveOverlay .save-text, #saveOverlay .save-dots { color: var(--save-text-color) !important; }
+body.captcha-lock { overflow: hidden; }
+body.captcha-lock .container {
+  filter: blur(14px);
+  opacity: 0.03;
+  pointer-events: none;
+  user-select: none;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
 
 /* Стиль селектора темы */
 .theme-selector {
@@ -469,12 +477,27 @@ bottom: -120px;
 background: var(--header-orb-2);
 }
 .page-header > * { position: relative; z-index: 1; }
-.page-title { max-width: 760px; }
+.page-title {
+flex: 1 1 auto;
+min-width: 0;
+max-width: none;
+}
 .page-title-row {
 display:flex;
 align-items:center;
 gap:12px;
-flex-wrap:wrap;
+flex-wrap:nowrap;
+}
+.page-title-row h1 {
+flex: 0 1 auto;
+min-width: 0;
+}
+.page-title-tools {
+position:relative;
+z-index:96;
+ margin-top: 12px;
+ margin-right: 6px;
+align-self: flex-end;
 }
 .page-eyebrow {
 display:inline-flex;
@@ -510,11 +533,29 @@ box-shadow: var(--soft-shadow);
 flex-wrap:wrap;
 backdrop-filter: blur(12px);
 }
+.page-title-tools .theme-switcher {
+justify-content:flex-end;
+}
+.theme-dock-slot {
+position:fixed;
+ right:24px;
+top:0;
+z-index:110;
+display:none;
+width:max-content;
+ pointer-events:none;
+ }
+.theme-dock-slot.is-visible {
+display:block;
+}
+.theme-dock-slot .theme-switcher {
+pointer-events:auto;
+}
 .page-header-side {
 display:flex;
 flex-direction:column;
 align-items:flex-end;
-gap:10px;
+gap:18px;
 }
 .version-chip-row {
 display:flex;
@@ -828,13 +869,16 @@ gap:8px;
 flex-wrap:wrap;
 margin-top:12px;
 }
-@media (max-width: 980px) {
-  .version-editor-grid { grid-template-columns: 1fr; }
-}
+  @media (max-width: 980px) {
+    .version-editor-grid { grid-template-columns: 1fr; }
+  .page-title-tools { position: static; width: 100%; margin-top: 0; margin-right: 0; align-self: stretch; }
+  .theme-dock-slot { display:none !important; }
+    }
 .tab {
 display:flex;
 gap:8px;
 overflow-x:auto;
+justify-content:flex-start;
 border: 1px solid var(--tab-border-strong);
 background: var(--bg-tab);
 margin-bottom: 20px;
@@ -843,6 +887,9 @@ padding: 10px;
 border-radius: 22px;
 box-shadow: var(--tab-shell-shadow), inset 0 1px 0 rgba(255,255,255,0.08);
 backdrop-filter: blur(16px);
+position: sticky;
+	top: 0;
+	z-index: 100;
 }
 .tab button {
 background: transparent;
@@ -855,6 +902,7 @@ color: var(--text-primary);
 border-radius: 16px;
 transition: background 0.18s ease, transform 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 position: relative;
+text-align:left;
 }
 .tab button:hover {
 background: var(--bg-table-hover);
@@ -1478,9 +1526,28 @@ color: #eff6ff;
   padding: 16px;
   box-shadow: var(--soft-shadow);
 }
+.profile-card.promo-card--status {
+  border-color: #999;
+}
 .profile-card.current {
   border-color: #22c55e;
   box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.18), var(--soft-shadow);
+}
+.profile-card.profile-card--active-community {
+  background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%);
+  color: white;
+  border-color: transparent;
+}
+.profile-card.profile-card--active-community .profile-card-name,
+.profile-card.profile-card--active-community .profile-card-id,
+.profile-card.profile-card--active-community .profile-card-row,
+.profile-card.profile-card--active-community .profile-card-label {
+  color: white;
+}
+.profile-card.profile-card--active-community .profile-card-badge {
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.14);
 }
 .profile-card-header {
   display:flex;
@@ -2141,6 +2208,8 @@ color: #eff6ff;
   body { padding: 12px; }
   .container { padding: 16px; border-radius: 18px; }
   .page-header { flex-direction: column; align-items: stretch; padding: 16px; }
+  .page-title-row { flex-wrap: wrap; }
+  .page-title-tools { width: 100%; margin-left: 0; }
   .theme-switcher { justify-content: space-between; border-radius: 18px; }
   .theme-btn { flex: 1 1 180px; justify-content: center; }
   h1 { font-size: 24px; }
@@ -2240,12 +2309,10 @@ color: #eff6ff;
 <button id="botVersionChip" class="version-chip" type="button" onclick="openBotVersionModal()">version ...</button>
 <button class="version-info-btn" type="button" title="Расшифровка версии" onclick="openBotVersionModal()">i</button>
 </div>
-<div class="theme-switcher">
-<button class="theme-btn" data-theme="light" onclick="setTheme('light')" title="Светлая" type="button"><span class="theme-icon">&#x2600;&#xFE0F;</span><span class="theme-name">Светлая</span></button>
-<button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Тёмная" type="button"><span class="theme-icon">&#x1F319;</span><span class="theme-name">Тёмная</span></button>
+<div id="headerThemeHost" class="page-title-tools"><div id="globalThemeSwitcher" class="theme-switcher"><button class="theme-btn" data-theme="light" onclick="setTheme('light')" title="Светлая" type="button"><span class="theme-icon">&#x2600;&#xFE0F;</span><span class="theme-name">Светлая</span></button><button class="theme-btn" data-theme="dark" onclick="setTheme('dark')" title="Тёмная" type="button"><span class="theme-icon">&#x1F319;</span><span class="theme-name">Тёмная</span></button></div></div>
 </div>
 </div>
-</div>
+<div id="themeDockSlot" class="theme-dock-slot"></div>
 <div id="botVersionModalOverlay" class="version-modal-overlay" style="display:none;" onclick="closeBotVersionModal(event)">
 <div class="version-modal" onclick="event.stopPropagation()">
 <div class="version-modal-header">
@@ -2286,7 +2353,7 @@ color: #eff6ff;
 <button class="tablinks" onclick="openTab(event,'Triggers')">&#x1F3AF; ТРИГГЕРЫ</button>
 <button class="tablinks" onclick="openTab(event,'Profile')">&#x1F4C7; ПРОФИЛЬ</button>
 <button class="tablinks" onclick="openTab(event,'Settings')">&#x2699;&#xFE0F; НАСТРОЙКА</button>
-
+<button class="tablinks" id="adminTabButton" onclick="openTab(event,'Admin')" style="display:none;">&#x1F6E1;&#xFE0F; АДМИН</button>
 </div>
 
 
@@ -2481,147 +2548,136 @@ color: #eff6ff;
 </div>
 
 <!-- ===== ВКЛАДКА НАСТРОЙКА (мульти-сообщества) ===== -->
-<div id="Admin" class="tabcontent" style="display:block;">
+<div id="Admin" class="tabcontent" style="display:none;">
 <div class="tab-panel-header tab-panel-header--settings"><div class="tab-panel-copy"><div class="tab-panel-kicker">Управление доступом</div><h2 class="tab-panel-title">Администрирование профилей и доступа</h2><p class="tab-panel-description">Главный админ создаёт профили, задаёт срок действия, выпускает промокоды для регистрации, обрабатывает восстановление доступа и просматривает логи входов.</p></div><div class="tab-panel-side"><div class="tab-panel-badge">Профили • Промокоды • Восстановление</div></div></div>
 <div id="loading-Admin">Загрузка...</div>
 
 <div id="legacyAdminAuditSurface" class="settings-surface profile-manager">
     <div class="profile-manager-header">
         <div>
-            <h3 class="profile-manager-title">Профили</h3>
+            <h3 class="profile-manager-title">Профили администраторов</h3>
             <div class="profile-manager-subtitle">Только главный админ может создавать и редактировать профили, задавать срок их действия и открывать любой профиль для работы.</div>
         </div>
         <div id="currentProfileChipAdmin" class="profile-current-chip">Активный профиль</div>
     </div>
-    
-    <!-- Кнопка создания профиля и форма -->
-    <div style="margin: 15px 0;">
-        <button class="btn btn-save" type="button" onclick="toggleProfileForm()">+ Создать Профиль</button>
-    </div>
-    
-    <!-- Форма создания профиля (скрыта по умолчанию, появляется под кнопкой) -->
-    <div id="profileCreateForm" style="display:none; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 8px; border: 1px dashed #ccc;">
-        <h4 id="profileFormTitle" style="margin-bottom: 15px;">Создание нового профиля</h4>
-        <div class="profile-form">
-            <input type="hidden" id="profileFormId">
+    <div id="adminProfilesStatus"></div>
+    <div class="settings-surface" style="margin-bottom:14px;">
+        <div class="profile-manager-header" style="cursor:pointer;" onclick="toggleAdminProfileFilters()">
+            <div id="adminProfileFiltersToggle" style="font-size:16px;">▼ 🔍 Фильтры Профилей</div>
+        </div>
+        <div id="adminProfileFiltersBlock" class="profile-form">
             <div class="profile-form-grid">
                 <div>
-                    <label><strong>Название профиля</strong></label>
-                    <input type="text" id="profileFormName" placeholder="Например: Отдел продаж">
+                    <label><strong>Общий поиск</strong></label>
+                    <input type="text" id="adminProfileFilterSearch" placeholder="Название / логин / почта / ID / промокод" oninput="renderAdminProfiles()">
+                </div>
+                <div>
+                    <label><strong>ID профиля</strong></label>
+                    <input type="text" id="adminProfileFilterId" placeholder="Например: 2" oninput="renderAdminProfiles()">
+                </div>
+                <div>
+                    <label><strong>Название</strong></label>
+                    <input type="text" id="adminProfileFilterName" placeholder="Например: Отдел продаж" oninput="renderAdminProfiles()">
                 </div>
                 <div>
                     <label><strong>Логин</strong></label>
-                    <input type="text" id="profileFormUsername" placeholder="Например: sales_admin">
+                    <input type="text" id="adminProfileFilterUsername" placeholder="Например: sales_admin" oninput="renderAdminProfiles()">
                 </div>
                 <div>
-                    <label><strong>Пароль</strong></label>
-                    <input type="text" id="profileFormPassword" placeholder="Новый пароль или временный пароль">
+                    <label><strong>Почта</strong></label>
+                    <input type="text" id="adminProfileFilterEmail" placeholder="Например: admin@example.com" oninput="renderAdminProfiles()">
                 </div>
                 <div>
-                    <label><strong>Email для восстановления</strong></label>
-                    <input type="email" id="profileFormEmail" placeholder="Например: admin@example.com">
+                    <label><strong>Промокод</strong></label>
+                    <input type="text" id="adminProfileFilterPromo" placeholder="Например: PAPA-2026-001" oninput="renderAdminProfiles()">
                 </div>
                 <div>
-                    <label><strong>Срок действия в минутах</strong></label>
-                    <input type="number" id="profileFormDuration" min="1" placeholder="Пусто = бесконечно">
+                    <label><strong>Роль</strong></label>
+                    <select id="adminProfileFilterRole" onchange="renderAdminProfiles()">
+                        <option value="">Все роли</option>
+                        <option value="main_admin">Главный админ</option>
+                        <option value="admin">Профиль</option>
+                    </select>
                 </div>
                 <div>
-                    <label><strong>Запросы к PAPA BOT</strong></label>
-                    <input type="number" id="profileFormRequestsLimit" min="1" placeholder="Лимит запросов в день">
+                    <label><strong>Статус</strong></label>
+                    <select id="adminProfileFilterActive" onchange="renderAdminProfiles()">
+                        <option value="">Все статусы</option>
+                        <option value="active">Активные</option>
+                        <option value="inactive">Отключённые</option>
+                    </select>
+                </div>
+                <div>
+                    <label><strong>Срок действия</strong></label>
+                    <select id="adminProfileFilterExpiry" onchange="renderAdminProfiles()">
+                        <option value="">Все варианты</option>
+                        <option value="active">Не истёк</option>
+                        <option value="expired">Истёк</option>
+                        <option value="infinite">Бессрочный</option>
+                    </select>
+                </div>
+                <div>
+                    <label><strong>Осталось минут от</strong></label>
+                    <input type="number" id="adminProfileFilterDurationMin" min="0" placeholder="Например: 60" oninput="renderAdminProfiles()">
+                </div>
+                <div>
+                    <label><strong>Осталось минут до</strong></label>
+                    <input type="number" id="adminProfileFilterDurationMax" min="0" placeholder="Например: 1440" oninput="renderAdminProfiles()">
+                </div>
+                <div>
+                    <label><strong>Лимит от</strong></label>
+                    <input type="number" id="adminProfileFilterLimitMin" min="0" placeholder="Например: 1000" oninput="renderAdminProfiles()">
+                </div>
+                <div>
+                    <label><strong>Лимит до</strong></label>
+                    <input type="number" id="adminProfileFilterLimitMax" min="0" placeholder="Например: 50000" oninput="renderAdminProfiles()">
                 </div>
             </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap; margin-top:10px;">
-                <button class="btn btn-save" type="button" onclick="saveAdminProfile()">💾 Сохранить профиль</button>
-                <button class="btn btn-neutral" type="button" onclick="toggleProfileForm()">Отмена</button>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+                <button class="btn btn-neutral" type="button" onclick="resetAdminProfileFilters()">Сбросить фильтры</button>
             </div>
-            <div class="profile-form-note">Если поле срока действия пустое, профиль действует бессрочно. При сохранении существующего профиля новый срок считается от текущего момента.</div>
         </div>
     </div>
-    
-    <!-- Фильтр профилей (кроме Главного админа) - скрытый по умолчанию -->
-    <div style="margin: 20px 0 10px 0;">
-        <span style="cursor:pointer; font-weight:bold; font-size:14px;" onclick="window.toggleProfileFilters()">
-            <span id="profileFiltersArrow">▶</span> 🔍 Фильтр профилей
-        </span>
-        <div id="profileFiltersContent" style="display:none; margin-top:10px;">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <input type="text" id="profileFilterName" placeholder="Название профиля..." 
-                       style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;"
-                       onkeyup="window.filterProfiles()">
-                <input type="text" id="profileFilterId" placeholder="ID профиля..." 
-                       style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;"
-                       onkeyup="window.filterProfiles()">
-                <input type="text" id="profileFilterExpiry" placeholder="Доступ до (дата)..." 
-                       style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;"
-                       onkeyup="window.filterProfiles()">
-                <input type="text" id="profileFilterRequests" placeholder="Лимит запросов..." 
-                       style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;"
-                       onkeyup="filterProfiles()">
+    <div style="margin-bottom:14px;">
+        <button id="toggleCreateProfileBtn" class="btn btn-accent" type="button" onclick="toggleCreateProfileForm()">+ Создать Профиль</button>
+    </div>
+    <div id="adminProfileForm" class="profile-form" style="display:none;">
+        <div class="profile-form-title" style="font-size:18px;font-weight:700;margin-bottom:12px;">Создание профиля</div>
+        <input type="hidden" id="profileFormId">
+        <div class="profile-form-grid">
+            <div>
+                <label><strong>Название профиля</strong></label>
+                <input type="text" id="profileFormName" placeholder="Например: Отдел продаж">
+            </div>
+            <div>
+                <label><strong>Логин</strong></label>
+                <input type="text" id="profileFormUsername" placeholder="Например: sales_admin">
+            </div>
+            <div>
+                <label><strong>Пароль</strong></label>
+                <input type="text" id="profileFormPassword" placeholder="Новый пароль или временный пароль">
+            </div>
+            <div>
+                <label><strong>Email для восстановления</strong></label>
+                <input type="email" id="profileFormEmail" placeholder="Например: admin@example.com">
+            </div>
+            <div>
+                <label><strong>Срок действия в минутах</strong></label>
+                <input type="number" id="profileFormDuration" min="1" placeholder="Пусто = бесконечно">
+            </div>
+            <div>
+                <label><strong>Лимит запросов в сутки</strong></label>
+                <input type="number" id="profileFormRequestsLimit" min="1" placeholder="Например: 1000">
             </div>
         </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-save" type="button" onclick="saveAdminProfile()">💾 Сохранить профиль</button>
+            <button class="btn btn-neutral" type="button" onclick="closeAdminProfileForm()">Отмена</button>
+        </div>
+        <div class="profile-form-note">Если поле срока действия пустое, профиль действует бесконечно. При сохранении существующего профиля новый срок считается от текущего момента.</div>
     </div>
-    
-    <div id="adminProfilesStatus"></div>
     <div id="adminProfilesList" class="profile-grid"></div>
 </div>
-
-<script>
-window.toggleProfileForm = function() {
-    var form = document.getElementById('profileCreateForm');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    // Сбрасываем заголовок при закрытии формы
-    if (form.style.display === 'none') {
-        var formTitle = document.getElementById('profileFormTitle');
-        if (formTitle) formTitle.textContent = 'Создание нового профиля';
-    }
-};
-
-window.toggleProfileFilters = function() {
-    var content = document.getElementById('profileFiltersContent');
-    var arrow = document.getElementById('profileFiltersArrow');
-    if (!content || !arrow) return;
-    var isHidden = content.style.display === '' || content.style.display === 'none';
-    content.style.display = isHidden ? 'block' : 'none';
-    arrow.textContent = isHidden ? '▼' : '▶';
-};
-
-window.filterProfiles = function() {
-    var nameFilter = (document.getElementById('profileFilterName')?.value || '').toLowerCase();
-    var idFilter = (document.getElementById('profileFilterId')?.value || '').toLowerCase();
-    var expiryFilter = (document.getElementById('profileFilterExpiry')?.value || '').toLowerCase();
-    var requestsFilter = (document.getElementById('profileFilterRequests')?.value || '').toLowerCase();
-    
-    var cards = document.querySelectorAll('#adminProfilesList .profile-card');
-    cards.forEach(function(card) {
-        var nameEl = card.querySelector('.profile-card-name');
-        var idEl = card.querySelector('.profile-card-id');
-        var requestsEl = card.querySelector('.profile-card-label');
-        
-        var name = nameEl ? nameEl.textContent.toLowerCase() : '';
-        var idText = idEl ? idEl.textContent : '';
-        var id = idText.replace('ID профиля: ', '').toLowerCase();
-        
-        // Ищем лимит запросов в карточке
-        var cardText = card.textContent.toLowerCase();
-        var requestsMatch = cardText.match(/лимит запросов[:\s]*(\d+)/);
-        var requestsValue = requestsMatch ? requestsMatch[1] : '';
-        
-        // Главный админ всегда видим
-        if (name.includes('главный админ')) {
-            card.style.display = '';
-        } else {
-            var matchesName = nameFilter === '' || name.includes(nameFilter);
-            var matchesId = idFilter === '' || id.includes(idFilter);
-            var matchesExpiry = expiryFilter === '' || cardText.includes(expiryFilter.toLowerCase());
-            var matchesRequests = requestsFilter === '' || requestsValue.includes(requestsFilter);
-            
-            card.style.display = (matchesName && matchesId && matchesExpiry && matchesRequests) ? '' : 'none';
-        }
-    });
-};
-</script>
-
-</script>
 
 <div class="settings-surface profile-manager">
     <div class="profile-manager-header">
@@ -2630,14 +2686,19 @@ window.filterProfiles = function() {
             <div class="profile-manager-subtitle">Пользователь сможет создать аккаунт только после ввода действующего промокода. После трёх неверных попыток ввод блокируется на 24 часа.</div>
         </div>
     </div>
-    
     <div id="promoCodesStatus"></div>
-    <div class="profile-form">
+    <div style="margin-bottom:14px;">
+        <button id="togglePromoFormBtn" class="btn btn-accent" type="button" onclick="togglePromoForm()">+ Добавить Промокод</button>
+    </div>
+    <div id="promoFormBlock" class="profile-form" style="display:none;">
         <input type="hidden" id="promoFormId">
         <div class="profile-form-grid">
             <div>
                 <label><strong>Промокод</strong></label>
-                <input type="text" id="promoFormCode" placeholder="Например: PAPA-2026-001">
+                <div style="display:flex;gap:6px;align-items:center;">
+                    <input type="text" id="promoFormCode" placeholder="Например: PAPA-2026-001" style="flex:1;">
+                    <button class="btn btn-accent" type="button" onclick="generatePromoCode()" title="Сгенерировать промокод" style="padding:6px 10px;font-size:14px;">❇️</button>
+                </div>
             </div>
             <div>
                 <label><strong>Описание</strong></label>
@@ -2648,48 +2709,64 @@ window.filterProfiles = function() {
                 <input type="number" id="promoFormDuration" min="1" placeholder="Пусто = бесконечно">
             </div>
             <div>
+                <label><strong>Лимит запросов в сутки</strong></label>
+                <input type="number" id="promoFormRequestsLimit" min="1" placeholder="Например: 1000">
+            </div>
+            <div>
                 <label><strong>Количество активаций</strong></label>
                 <input type="number" id="promoFormMaxUses" min="1" value="1">
             </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-save" type="button" onclick="savePromoCode()">🎟️ Сохранить промокод</button>
-            <button class="btn btn-neutral" type="button" onclick="resetPromoForm()">Очистить форму</button>
+            <button class="btn btn-neutral" type="button" onclick="closePromoForm()">Отмена</button>
         </div>
     </div>
-    
-    <!-- Фильтр промокодов (ниже формы создания, скрытый по умолчанию) -->
-    <div style="margin: 20px 0 10px 0;">
-        <span style="cursor:pointer; font-weight:bold; font-size:14px;" onclick="try { window.togglePromoFilters(); } catch(e) { console.error('togglePromoFilters error:', e); }">
-            <span id="promoFiltersArrow">▶</span> 🔍 ПРОМОКОДЫ
-        </span>
-        <div id="promoFiltersContent" style="display:none; margin-top:10px;">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <input type="text" id="promoFilterCode" placeholder="Поиск по промокоду..." 
-                       style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;" onkeyup="window.filterPromoCodes()">
-                <input type="text" id="promoFilterLabel" placeholder="Поиск по описанию..." 
-                       style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;" onkeyup="window.filterPromoCodes()">
-                <input type="number" id="promoFilterDuration" placeholder="Срок (минуты)..." 
-                       style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;" onkeyup="window.filterPromoCodes()">
-                <input type="number" id="promoFilterMaxUses" placeholder="Активаций..." 
-                       style="padding:10px; border:1px solid #ddd; border-radius:6px; font-size:14px;" onkeyup="window.filterPromoCodes()">
+    <div class="settings-surface" style="margin-bottom:14px;">
+        <div class="profile-manager-header" style="cursor:pointer;" onclick="togglePromoFilters()">
+            <div id="promoFiltersToggle" style="font-size:16px;">▶ 🔍 Фильтры Промокодов</div>
+        </div>
+        <div id="promoFiltersBlock" class="profile-form" style="display:none;">
+            <div class="profile-form-grid">
+                <div>
+                    <label><strong>Общий поиск</strong></label>
+                    <input type="text" id="promoFilterSearch" placeholder="Код / описание" oninput="renderPromoCodes()">
+                </div>
+                <div>
+                    <label><strong>Статус</strong></label>
+                    <select id="promoFilterStatus" onchange="renderPromoCodes()">
+                        <option value="">Все</option>
+                        <option value="available">Доступен</option>
+                        <option value="used">Использован</option>
+                    </select>
+                </div>
+                <div>
+                    <label><strong>Активаций от</strong></label>
+                    <input type="number" id="promoFilterUsesMin" min="0" placeholder="Например: 0" oninput="renderPromoCodes()">
+                </div>
+                <div>
+                    <label><strong>Активаций до</strong></label>
+                    <input type="number" id="promoFilterUsesMax" min="0" placeholder="Например: 10" oninput="renderPromoCodes()">
+                </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+                <button class="btn btn-neutral" type="button" onclick="resetPromoFilters()">Сбросить фильтры</button>
             </div>
         </div>
     </div>
-    
     <div id="promoCodesList" class="profile-grid" style="margin-top:14px;"></div>
 </div>
 
-<!-- Увеличение лимитов - перенесено выше Восстановления и логов -->
-<div class="settings-surface profile-manager" id="limitIncreaseSection">
+<div class="settings-surface profile-manager">
     <div class="profile-manager-header">
         <div>
             <h3 class="profile-manager-title">Увеличение лимитов</h3>
-            <div class="profile-manager-subtitle">Профили отправляют сюда запросы на увеличение лимита запросов к PAPA BOT.</div>
+            <div class="profile-manager-subtitle">Запросы профилей на увеличение суточного лимита PAPA BOT. Блок виден постоянно и доступен только главному админу.</div>
         </div>
     </div>
-    <div id="limitIncreaseStatus"></div>
-    <div id="limitIncreaseList" class="profile-grid"></div>
+    <div id="adminLimitRequestsPanel" class="app-log-grid">
+        <div class="community-empty-note">Запросы на увеличение лимита загрузятся после открытия вкладки.</div>
+    </div>
 </div>
 
 <div class="settings-surface profile-manager">
@@ -2712,9 +2789,7 @@ window.filterProfiles = function() {
         </div>
     </div>
     <div class="app-log-toolbar">
-        <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
-            <div id="appLogFilterRow" class="app-log-filter-row"></div>
-        </div>
+        <div id="appLogFilterRow" class="app-log-filter-row"></div>
         <div class="app-log-actions">
             <label class="structured-trigger-toggle"><input id="appLogsEnabledToggle" type="checkbox" onchange="toggleAppLogsEnabled(this.checked)">Логирование включено</label>
             <button class="btn btn-neutral tab-refresh-btn" type="button" onclick="loadAppLogs(true)">↻ Обновить журнал</button>
@@ -2724,9 +2799,6 @@ window.filterProfiles = function() {
     </div>
     <div id="appLogsFileLabel" class="app-log-file-label"></div>
     <div id="appLogsStatus"></div>
-    <div id="adminAuditPanel" class="app-log-grid" style="display:none;">
-        <div class="community-empty-note">Админ-события загрузятся после открытия вкладки.</div>
-    </div>
     <div id="appLogsList" class="app-log-grid">
         <div class="community-empty-note">Журнал загрузится после открытия вкладки.</div>
     </div>
@@ -2785,7 +2857,6 @@ window.filterProfiles = function() {
 <div id="Settings" class="tabcontent">
 <div class="tab-panel-header tab-panel-header--settings-danger"><div class="tab-panel-copy"><div class="tab-panel-kicker">Подключение и инфраструктура</div><h2 class="tab-panel-title">Настройка сообществ и VK API</h2><p class="tab-panel-description">Подключайте новые сообщества, проверяйте токены, настраивайте Callback API и храните служебные данные для работы бота в каждом сообществе отдельно.</p></div><div class="tab-panel-side"><div class="tab-panel-badge">Сообщества • Токены • Callback API</div></div></div>
 <div id="loading-Settings">Загрузка...</div>
-<div class="settings-surface profile-manager" id="legacyProfileManager">
     <!-- <div class="info-box"> -->
         <!-- <strong>?? Управление сообществами</strong><br> -->
         <!-- • Каждое сообщество имеет независимые настройки.<br> -->
@@ -2974,10 +3045,18 @@ recoveryEmail: 'admin@example.com'
 
 
 // ИСПОЛЬЗУЕМ localStorage ВМЕСТО sessionStorage
+function getAdminSessionToken() {
+try {
+return String(localStorage.getItem('adminSessionToken') || '').trim();
+} catch (e) {
+return '';
+}
+}
+
 function checkAuthSession() {
 try {
 var sessionAuth = localStorage.getItem('adminAuthenticated');
-var sessionToken = localStorage.getItem('adminToken');
+var sessionToken = getAdminSessionToken();
 if (sessionAuth === 'true' && sessionToken) {
 return true;
 }
@@ -3020,6 +3099,7 @@ localStorage.setItem('lockoutUntil', '0');
 function clearAuthSession() {
 localStorage.removeItem('adminAuthenticated');
 localStorage.removeItem('adminToken');
+localStorage.removeItem('adminSessionToken');
 localStorage.removeItem('adminProfileId');
 localStorage.removeItem('adminProfileName');
 localStorage.removeItem('adminPrincipalProfileId');
@@ -3087,8 +3167,14 @@ return 'client_fallback';
 }
 
 window.completeAuthSession = function(data) {
+var sessionToken = String((data && data.sessionToken) || '').trim();
 localStorage.setItem('adminAuthenticated', 'true');
-localStorage.setItem('adminToken', data.token || 'authenticated');
+localStorage.removeItem('adminToken');
+if (sessionToken) {
+localStorage.setItem('adminSessionToken', sessionToken);
+} else {
+localStorage.removeItem('adminSessionToken');
+}
 localStorage.setItem('adminProfileId', data.profileId || '1');
 localStorage.setItem('adminProfileName', data.profileName || ('Профиль ' + (data.profileId || '1')));
 localStorage.setItem('adminPrincipalProfileId', data.principalProfileId || data.profileId || '1');
@@ -3098,10 +3184,208 @@ localStorage.setItem('adminIsMainAdmin', data.isMainAdmin ? 'true' : 'false');
 resetAttempts();
 };
 
+window.authUiState = window.authUiState || {
+loginCaptchaRequired: false,
+sessionCaptchaRequired: false
+};
+
+function getSessionCaptchaOverlayMarkup() {
+return '<div id="sessionCaptchaOverlay" class="session-captcha-overlay" style="display:none;position:fixed;inset:0;background:var(--modal-overlay);backdrop-filter:blur(14px);z-index:1000003;align-items:center;justify-content:center;padding:24px;">' +
+'<div class="session-captcha-modal" style="width:min(480px,100%);background:var(--modal-bg);border:1px solid var(--section-border);border-radius:24px;padding:28px;box-shadow:0 32px 90px rgba(15,23,42,0.42);">' +
+'<h2 style="margin:0 0 10px 0;color:var(--text-primary);">Подтверждение безопасности</h2>' +
+'<p style="margin:0 0 16px 0;color:var(--text-secondary);">Обнаружено подозрительное изменение сети или устройства. Пройди каптчу, чтобы продолжить работу.</p>' +
+'<div id="sessionCaptchaImage" style="margin-bottom:14px;min-height:96px;display:flex;align-items:center;justify-content:center;padding:14px;border:1px dashed var(--border-color);border-radius:18px;background:var(--surface-soft);color:var(--text-secondary);font-size:14px;">Загружаем каптчу...</div>' +
+'<label for="sessionCaptchaAnswer" style="display:block;margin:0 0 8px 0;color:var(--text-primary);font-size:13px;font-weight:700;">Введите символы с картинки</label>' +
+'<input id="sessionCaptchaAnswer" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Например: AB12CD" style="width:100%;padding:12px;margin-bottom:12px;border:1px solid var(--border-color);border-radius:12px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
+'<div class="profile-card-actions" style="display:flex;gap:10px;flex-wrap:wrap;">' +
+'<button class="btn btn-save" type="button" onclick="submitSessionCaptcha()">Подтвердить</button>' +
+'<button id="sessionCaptchaRefreshButton" class="btn btn-neutral" type="button" onclick="refreshSessionCaptcha()">Обновить каптчу</button>' +
+'</div>' +
+'<div id="sessionCaptchaStatus" style="margin-top:14px;font-size:13px;"></div>' +
+'</div>' +
+'</div>';
+}
+
+function ensureSessionCaptchaOverlay() {
+if (document.getElementById('sessionCaptchaOverlay')) return;
+document.body.insertAdjacentHTML('beforeend', getSessionCaptchaOverlayMarkup());
+}
+
+function setSessionCaptchaLock(visible) {
+ensureSessionCaptchaOverlay();
+document.body.classList.toggle('captcha-lock', !!visible);
+var overlay = document.getElementById('sessionCaptchaOverlay');
+if (overlay) overlay.style.display = visible ? 'flex' : 'none';
+if (!visible) {
+var statusEl = document.getElementById('sessionCaptchaStatus');
+if (statusEl) statusEl.innerHTML = '';
+var inputEl = document.getElementById('sessionCaptchaAnswer');
+if (inputEl) inputEl.value = '';
+}
+}
+
+function toggleLoginCaptcha(visible) {
+window.authUiState.loginCaptchaRequired = !!visible;
+var section = document.getElementById('loginCaptchaSection');
+if (section) section.style.display = visible ? 'block' : 'none';
+if (!visible) {
+var answerEl = document.getElementById('loginCaptchaAnswer');
+if (answerEl) answerEl.value = '';
+}
+}
+
+function performForcedLogout(message) {
+window.authUiState.sessionCaptchaRequired = false;
+window.authUiState.loginCaptchaRequired = false;
+setSessionCaptchaLock(false);
+forceLogoutToLogin(message || 'Сессия завершена. Войдите снова.');
+toggleLoginCaptcha(false);
+}
+
+function buildAdminRequestHeaders(headers) {
+var nextHeaders = Object.assign({}, headers || {});
+var sessionToken = getAdminSessionToken();
+if (sessionToken && !nextHeaders['X-Admin-Session'] && !nextHeaders['x-admin-session']) {
+nextHeaders['X-Admin-Session'] = sessionToken;
+}
+return nextHeaders;
+}
+
+function isAdminRequestUrl(url) {
+if (!url || typeof url !== 'string') return false;
+if (/^https?:\\/\\//i.test(url) && url.indexOf(window.location.origin) !== 0) return false;
+return true;
+}
+
+function isSessionCaptchaChallengeResponse(url, data) {
+return !!(
+typeof url === 'string' &&
+url.indexOf('getCaptcha=1') !== -1 &&
+url.indexOf('mode=session') !== -1 &&
+data &&
+typeof data.captchaSvg === 'string'
+);
+}
+
+window.sessionCaptchaRefreshInFlight = null;
+
+function setSessionCaptchaRefreshButtonState(pending) {
+var button = document.getElementById('sessionCaptchaRefreshButton');
+if (!button) return;
+button.disabled = !!pending;
+button.style.opacity = pending ? '0.65' : '1';
+button.style.cursor = pending ? 'wait' : 'pointer';
+button.textContent = pending ? 'Обновляем...' : 'Обновить каптчу';
+}
+
+async function fetchAdminJson(url, options) {
+var response = await fetch(url, {
+credentials: 'include',
+...(options || {}),
+headers: buildAdminRequestHeaders({
+'Content-Type': 'application/json',
+...((options && options.headers) ? options.headers : {})
+})
+});
+var text = await response.text();
+var data = {};
+try {
+data = text ? JSON.parse(text) : {};
+} catch (e) {
+throw new Error(text || 'Некорректный ответ сервера');
+}
+if (data && data.captchaRequired && !isSessionCaptchaChallengeResponse(url, data)) {
+window.authUiState.sessionCaptchaRequired = true;
+setSessionCaptchaLock(true);
+await refreshSessionCaptcha();
+throw new Error('CAPTCHA_REQUIRED');
+}
+if (data && data.sessionInvalid) {
+performForcedLogout(data.error || 'Сессия недействительна');
+throw new Error('SESSION_INVALID');
+}
+return data;
+}
+
+async function refreshLoginCaptcha() {
+var baseUrl = window.location.href.split('?')[0];
+var data = await fetchAdminJson(baseUrl + '?getCaptcha=1&mode=login', { method: 'GET' });
+var box = document.getElementById('loginCaptchaBox');
+if (box) box.innerHTML = data.captchaSvg || '';
+toggleLoginCaptcha(true);
+}
+
+async function refreshSessionCaptcha() {
+if (window.sessionCaptchaRefreshInFlight) {
+return window.sessionCaptchaRefreshInFlight;
+}
+var baseUrl = window.location.href.split('?')[0];
+var box = document.getElementById('sessionCaptchaImage');
+var statusEl = document.getElementById('sessionCaptchaStatus');
+var answerEl = document.getElementById('sessionCaptchaAnswer');
+var previousMarkup = box ? box.innerHTML : '';
+var hasPreviousMarkup = !!(previousMarkup && previousMarkup.indexOf('Загружаем каптчу') === -1);
+if (statusEl) statusEl.innerHTML = makeInlineText('info', 'Обновляем каптчу...');
+if (box && !hasPreviousMarkup) {
+box.innerHTML = '<div style="color:var(--text-secondary);font-size:14px;">Загружаем каптчу...</div>';
+}
+setSessionCaptchaRefreshButtonState(true);
+window.sessionCaptchaRefreshInFlight = (async function() {
+var data = await fetchAdminJson(baseUrl + '?getCaptcha=1&mode=session', { method: 'GET' });
+if (data && data.errorCode === 'captcha_rate_limited') {
+var cooldownSeconds = Math.max(1, Math.ceil((Number(data.cooldownMs) || 0) / 1000));
+if (box && previousMarkup) box.innerHTML = previousMarkup;
+if (statusEl) statusEl.innerHTML = makeInlineText('error', 'Подожди ' + cooldownSeconds + ' сек. и обнови каптчу снова.');
+return data;
+}
+if (box) {
+box.innerHTML = data.captchaSvg || previousMarkup || '<div style="color:var(--text-secondary);font-size:14px;">Не удалось загрузить картинку капчи. Нажмите "Обновить каптчу".</div>';
+}
+if (statusEl) statusEl.innerHTML = '';
+if (answerEl) {
+answerEl.value = '';
+answerEl.focus();
+}
+return data;
+})().catch(function(e) {
+if (box && previousMarkup) box.innerHTML = previousMarkup;
+if (statusEl) statusEl.innerHTML = makeInlineText('error', e.message || 'Не удалось обновить каптчу.');
+throw e;
+}).finally(function() {
+setSessionCaptchaRefreshButtonState(false);
+window.sessionCaptchaRefreshInFlight = null;
+});
+return window.sessionCaptchaRefreshInFlight;
+}
+
+async function submitSessionCaptcha() {
+var baseUrl = window.location.href.split('?')[0];
+var answerEl = document.getElementById('sessionCaptchaAnswer');
+var statusEl = document.getElementById('sessionCaptchaStatus');
+var answer = answerEl ? answerEl.value.trim() : '';
+if (!answer) {
+if (statusEl) statusEl.innerHTML = makeInlineText('error', 'Введите ответ каптчи.');
+return;
+}
+try {
+var data = await fetchAdminJson(baseUrl + '?verifyCaptcha=1', {
+method: 'POST',
+body: JSON.stringify({ mode: 'session', answer: answer })
+});
+if (data && data.success) {
+window.authUiState.sessionCaptchaRequired = false;
+setSessionCaptchaLock(false);
+}
+} catch (e) {
+if (e && e.message === 'CAPTCHA_REQUIRED' || e && e.message === 'SESSION_INVALID') return;
+if (statusEl) statusEl.innerHTML = makeInlineText('error', e.message || 'Не удалось подтвердить каптчу.');
+}
+}
+
 function appendProfileIdToUrl(url) {
 if (!url || typeof url !== 'string') return url;
 if (/^https?:\\/\\//i.test(url) && url.indexOf(window.location.origin) !== 0) return url;
-if (url.indexOf('verifyAuth') !== -1 || url.indexOf('requestRecovery') !== -1) return url;
+if (url.indexOf('verifyAuth') !== -1 || url.indexOf('loginAdmin') !== -1 || url.indexOf('requestRecovery') !== -1 || url.indexOf('getCaptcha') !== -1 || url.indexOf('verifyCaptcha') !== -1 || url.indexOf('logoutAdmin') !== -1) return url;
 if (/[?&]profileId=/.test(url)) return url;
 var profileId = getCurrentProfileId();
 if (!profileId) return url;
@@ -3117,15 +3401,27 @@ return url;
 if (window.fetch && !window.__adminProfileFetchWrapped) {
 var originalFetch = window.fetch.bind(window);
 window.fetch = function(input, init) {
+var nextInit = init ? Object.assign({}, init) : {};
+if (!nextInit.credentials) nextInit.credentials = 'include';
 if (typeof input === 'string') {
-return originalFetch(appendProfileIdToUrl(input), init).then(async function(response) {
+if (isAdminRequestUrl(input)) {
+nextInit.headers = buildAdminRequestHeaders(nextInit.headers);
+}
+return originalFetch(appendProfileIdToUrl(input), nextInit).then(async function(response) {
 try {
-if (response && response.status === 401 || response && response.status === 403) {
+if (response && (response.status === 401 || response.status === 403)) {
 var cloned = response.clone();
 var data = await cloned.json().catch(function() { return null; });
+if (data && data.captchaRequired) {
+window.authUiState.sessionCaptchaRequired = true;
+setSessionCaptchaLock(true);
+setTimeout(function() {
+refreshSessionCaptcha();
+}, 0);
+}
 if (data && data.sessionInvalid) {
 setTimeout(function() {
-forceLogoutToLogin(data.error || 'Сессия завершена. Войдите снова.');
+performForcedLogout(data.error || 'Сессия завершена. Войдите снова.');
 }, 0);
 }
 }
@@ -3133,7 +3429,7 @@ forceLogoutToLogin(data.error || 'Сессия завершена. Войдит�
 return response;
 });
 }
-return originalFetch(input, init);
+return originalFetch(input, nextInit);
 };
 window.__adminProfileFetchWrapped = true;
 }
@@ -3141,12 +3437,12 @@ window.__adminProfileFetchWrapped = true;
 function applyAdminAccessUI() {
 var adminTabButton = document.getElementById('adminTabButton');
 if (adminTabButton) {
-adminTabButton.style.display = 'none';
+adminTabButton.style.display = isMainAdminSession() ? '' : 'none';
 }
 var adminTab = document.getElementById('Admin');
-if (adminTab) {
-adminTab.style.display = 'block';
-adminTab.classList.add('active');
+if (adminTab && !isMainAdminSession()) {
+adminTab.style.display = 'none';
+adminTab.classList.remove('active');
 }
 }
 
@@ -3197,6 +3493,11 @@ return '<div id="authModal">' +
 '<p style="color:var(--text-secondary);margin-bottom:20px;font-size:13px;">Осталось попыток: <strong style="color:' + attemptColor + ';font-size:16px;">' + remainingAttempts + '</strong></p>' +
 '<input type="text" id="loginUsername" placeholder="Логин" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
 '<input type="password" id="loginPassword" placeholder="Пароль" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
+'<div id="loginCaptchaSection" style="display:none;margin-top:10px;">' +
+'<div id="loginCaptchaBox" style="margin-bottom:12px;"></div>' +
+'<input type="text" id="loginCaptchaAnswer" placeholder="Введите символы с картинки" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
+'<button type="button" onclick="refreshLoginCaptcha()" style="width:100%;padding:11px;background:#64748b;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;margin-bottom:6px;">Обновить каптчу</button>' +
+'</div>' +
 '<button onclick="performLogin()" style="width:100%;padding:14px;background:#4CAF50;color:white;border:none;border-radius:6px;cursor:pointer;font-size:16px;font-weight:bold;margin-top:10px;">&#x1F680; Войти</button>' +
 '<button onclick="openRegisterModal()" style="width:100%;padding:12px;background:#2563eb;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold;margin-top:10px;">&#x2728; Создать аккаунт</button>' +
 '<div id="loginStatus" style="margin-top:15px;color:#f44336;font-size:13px;"></div>' +
@@ -3306,6 +3607,7 @@ const settings = {
 window.performLogin = async function() {
 var username = document.getElementById('loginUsername').value.trim();
 var password = document.getElementById('loginPassword').value.trim();
+var captchaAnswerEl = document.getElementById('loginCaptchaAnswer');
 var statusEl = document.getElementById('loginStatus');
 if (!username || !password) {
 statusEl.innerText = '? Введите логин и пароль';
@@ -3314,24 +3616,19 @@ return;
 try {
 var baseUrl = window.location.href.split('?')[0];
 debug('?&#x1F916; Auth request to: ' + baseUrl);
-var res = await fetch(baseUrl + '?verifyAuth', {
+var data = await fetchAdminJson(baseUrl + '?loginAdmin=1', {
 method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({ username: username, password: password })
+body: JSON.stringify({
+username: username,
+password: password,
+captchaAnswer: window.authUiState.loginCaptchaRequired && captchaAnswerEl ? captchaAnswerEl.value.trim() : ''
+})
 });
-var text = await res.text();
-debug('?&#x1F916; Auth response: ' + text.substring(0, 200));
-var data;
-try {
-data = JSON.parse(text);
-} catch (e) {
-statusEl.innerText = '❌ Ошибка сервера: ' + text.substring(0, 100);
-debug('? JSON parse error: ' + e.message);
-return;
-}
 if (data.success) {
 debug('&#x1F916; Auth successful for ' + username);
- window.completeAuthSession(data);
+window.completeAuthSession(data);
+toggleLoginCaptcha(false);
+setSessionCaptchaLock(false);
 var modal = document.getElementById('authModal');
 if (modal) modal.remove();
 statusEl.innerText = '? Вход выполнен!';
@@ -3351,6 +3648,9 @@ if (authModal) authModal.style.display = 'none';
 document.body.insertAdjacentHTML('beforeend', showReactivationModal(window.pendingExpiredLogin.profileName));
 } else {
 debug('&#x1F916; Auth failed: ' + (data.error || 'Unknown error'));
+if (data.loginCaptchaRequired) {
+await refreshLoginCaptcha();
+}
 if (typeof data.remainingAttempts === 'number') {
 var attemptsUsed = Math.max(0, AUTH_CONFIG.maxAttempts - data.remainingAttempts);
 localStorage.setItem('loginAttempts', attemptsUsed.toString());
@@ -3383,6 +3683,9 @@ setTimeout(function() { location.reload(); }, 2000);
 }
 }
 } catch (e) {
+if (e && (e.message === 'CAPTCHA_REQUIRED' || e.message === 'SESSION_INVALID')) {
+return;
+}
 debug('&#x1F916; Auth error: ' + e.message);
 statusEl.innerText = '❌ Ошибка: ' + e.message;
 }
@@ -3613,13 +3916,15 @@ return false;
 }
 
 var baseUrl = window.location.href.split('?')[0];
-var res = await fetch(baseUrl + '?validateSession');
-var data = await res.json().catch(function() { return null; });
-if (!res.ok || !data || !data.success) {
+var data = await fetchAdminJson(baseUrl + '?validateSession', { method: 'GET' });
+if (!data || !data.success) {
 forceLogoutToLogin(data && data.error ? data.error : 'Сессия больше не действует. Войдите снова.');
 return false;
 }
 } catch(e) {
+if (e && (e.message === 'CAPTCHA_REQUIRED' || e.message === 'SESSION_INVALID')) {
+return false;
+}
 console.error('checkAuthOnLoad error:', e);
 forceLogoutToLogin('Не удалось проверить сессию. Войдите снова.');
 return false;
@@ -5746,10 +6051,11 @@ saveBtn.onclick = function() {
     
     // Community Token — первый из массива vk_tokens
     communityToken = communityConfig.vk_tokens?.[0] || communityConfig.vk_token || '';
-    userToken = communityConfig.user_token || communityToken; // Fallback на Community Token
+    userToken = communityConfig.user_token || '';
     groupId = communityConfig.vk_group_id || '';
 
     if (!communityToken) throw new Error('VK Token (Community Token) не настроен. Проверьте НАСТРОЙКА сообщества.');
+    if (!userToken) throw new Error('User Token не настроен. Проверьте НАСТРОЙКА сообщества.');
     if (!groupId) throw new Error('VK Group ID не настроен');
 
     statusEl.innerText = '🌕 Загрузка в VK через сервис ' + (useRenderService ? 'Render' : 'PAPA BOT');
@@ -5782,69 +6088,90 @@ saveBtn.onclick = function() {
           formData.append('group_id', groupId);
           formData.append('target', target);
 
-          fetch(RENDER_UPLOADER_URL, {
-            method: 'POST',
-            body: formData,
-            signal: AbortSignal.timeout(120000)
-          }).then(function(response) {
+          var RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
+          var RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
+          var RENDER_WAKE_TIMEOUT_MS = 60000;
+          var RENDER_WAKE_POLL_INTERVAL_MS = 5000;
+
+          var uploadViaRender = function(timeoutMs) {
+            return fetch(RENDER_UPLOADER_URL, {
+              method: 'POST',
+              body: formData,
+              signal: AbortSignal.timeout(timeoutMs)
+            }).then(function(response) {
+              if (!response.ok) {
+                return response.text().then(function(text) {
+                  throw new Error('Render service error: ' + response.status + ' - ' + text.substring(0, 200));
+                });
+              }
+              return response;
+            });
+          };
+
+          var isRenderWakeCandidate = function(error) {
+            var message = String((error && error.message) || '').toLowerCase();
+            return !!(
+              (error && error.name === 'AbortError') ||
+              message.includes('fetch') ||
+              message.includes('502') ||
+              message.includes('503') ||
+              message.includes('504') ||
+              message.includes('timeout') ||
+              message.includes('network')
+            );
+          };
+
+          uploadViaRender(RENDER_INITIAL_UPLOAD_TIMEOUT_MS).then(function(response) {
             clearInterval(uploadAnimInterval);
-            if (!response.ok) {
-              return response.text().then(function(text) {
-                throw new Error('Render service error: ' + response.status + ' - ' + text.substring(0, 200));
-              });
-            }
             resolve(response);
           }).catch(function(error) {
             clearInterval(uploadAnimInterval);
-            
-            // Если ошибка связана с таймаутом или недоступностью - пробуем разбудить
-            if (error.name === 'AbortError' || error.message.includes('fetch') || error.message.includes('502')) {
-              statusEl.innerText = '😴 Пытаемся разбудить сервис Render...';
-              
-              // Пробуем разбудить сервис несколькими запросами
-              var wakeUpAttempts = 0;
-              var maxWakeUpAttempts = 3;
-              
-              var tryWakeUp = function() {
-                wakeUpAttempts++;
-                statusEl.innerText = '😴 Пытаемся разбудить сервис Render (попытка ' + wakeUpAttempts + '/' + maxWakeUpAttempts + ')...';
-                
-                fetch(RENDER_UPLOADER_URL, {
-                  method: 'POST',
-                  body: new FormData(), // Пустой запрос для пробуждения
-                  signal: AbortSignal.timeout(30000)
-                }).then(function() {
-                  // Сервис проснулся, пробуем загрузить файл
-                  statusEl.innerText = '🌕 Загрузка в VK через сервис Render';
-                  
-                  fetch(RENDER_UPLOADER_URL, {
-                    method: 'POST',
-                    body: formData,
-                    signal: AbortSignal.timeout(120000)
-                  }).then(function(response) {
-                    if (!response.ok) {
-                      return response.text().then(function(text) {
-                        throw new Error('Render service error: ' + response.status + ' - ' + text.substring(0, 200));
-                      });
-                    }
-                    resolve(response);
-                  }).catch(function(retryError) {
-                    reject(new Error('Render проснулся, но загрузка не удалась: ' + retryError.message));
-                  });
-                }).catch(function(wakeError) {
-                  if (wakeUpAttempts < maxWakeUpAttempts) {
-                    // Ждём 5 секунд и пробуем снова
-                    setTimeout(tryWakeUp, 5000);
-                  } else {
-                    reject(new Error('Не удалось разбудить Render после ' + maxWakeUpAttempts + ' попыток. Попробуйте файл меньше 3MB.'));
-                  }
-                });
-              };
-              
-              tryWakeUp();
-            } else {
+
+            if (!isRenderWakeCandidate(error)) {
               reject(new Error('Render недоступен: ' + error.message));
+              return;
             }
+
+            statusEl.innerText = '😴 Пытаемся разбудить сервис Render...';
+
+            var wakeStartedAt = Date.now();
+            var wakeUpAttempts = 0;
+
+            var tryWakeUp = function() {
+              var elapsedWakeMs = Date.now() - wakeStartedAt;
+              var remainingWakeMs = RENDER_WAKE_TIMEOUT_MS - elapsedWakeMs;
+
+              if (remainingWakeMs <= 0) {
+                reject(new Error('Не удалось разбудить Render в течение 60 секунд. Попробуйте ещё раз.'));
+                return;
+              }
+
+              wakeUpAttempts++;
+              statusEl.innerText = '😴 Пытаемся разбудить сервис Render (попытка ' + wakeUpAttempts + ', осталось ' + Math.ceil(remainingWakeMs / 1000) + ' сек)...';
+
+              fetch(RENDER_UPLOADER_URL, {
+                method: 'POST',
+                body: new FormData(),
+                signal: AbortSignal.timeout(Math.min(30000, remainingWakeMs))
+              }).then(function() {
+                statusEl.innerText = '🌕 Render проснулся, повторяем загрузку...';
+                return uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS);
+              }).then(function(response) {
+                resolve(response);
+              }).catch(function() {
+                var currentElapsedWakeMs = Date.now() - wakeStartedAt;
+                var currentRemainingWakeMs = RENDER_WAKE_TIMEOUT_MS - currentElapsedWakeMs;
+
+                if (currentRemainingWakeMs <= 0) {
+                  reject(new Error('Не удалось разбудить Render в течение 60 секунд. Попробуйте ещё раз.'));
+                  return;
+                }
+
+                setTimeout(tryWakeUp, Math.min(RENDER_WAKE_POLL_INTERVAL_MS, currentRemainingWakeMs));
+              });
+            };
+
+            tryWakeUp();
           });
         } else {
           // Загружаем через PAPA BOT backend для маленьких файлов
@@ -8170,15 +8497,174 @@ window.renderTriggersHub = function() {
     }).join('');
 };
 
+window.toggleAdminProfileFilters = function() {
+    var block = document.getElementById('adminProfileFiltersBlock');
+    var toggle = document.getElementById('adminProfileFiltersToggle');
+    if (!block || !toggle) return;
+    var isHidden = block.style.display === 'none';
+    block.style.display = isHidden ? '' : 'none';
+    toggle.textContent = isHidden ? '▼ 🔍 Фильтры Профилей' : '▶ 🔍 Фильтры Профилей';
+};
+
+window.toggleCreateProfileForm = function() {
+    var form = document.getElementById('adminProfileForm');
+    var btn = document.getElementById('toggleCreateProfileBtn');
+    if (!form) return;
+    var isHidden = form.style.display === 'none';
+    if (isHidden) {
+        resetAdminProfileForm();
+        var title = form.querySelector('.profile-form-title');
+        if (title) title.textContent = 'Создание профиля';
+        var statusEl = document.getElementById('adminProfilesStatus');
+        if (statusEl) statusEl.innerHTML = '';
+        form.style.display = '';
+        if (btn) btn.textContent = '✕ Закрыть';
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        closeAdminProfileForm();
+    }
+};
+
+window.ensureCreateProfileFormVisible = function() {
+    var form = document.getElementById('adminProfileForm');
+    var btn = document.getElementById('toggleCreateProfileBtn');
+    if (form && form.style.display === 'none') {
+        form.style.display = '';
+        if (btn) btn.textContent = '✕ Закрыть';
+    }
+};
+
+window.editAdminProfile = function(profileId) {
+    if (!isMainAdminSession()) return;
+    var profile = (window.adminProfiles || []).find(function(item) { return item.id === profileId; });
+    if (!profile) return;
+    document.getElementById('profileFormId').value = profile.id || '';
+    document.getElementById('profileFormName').value = profile.name || '';
+    document.getElementById('profileFormUsername').value = profile.username || '';
+    document.getElementById('profileFormPassword').value = '';
+    document.getElementById('profileFormEmail').value = profile.recoveryEmail || '';
+    document.getElementById('profileFormDuration').value = profile.remainingMinutes || '';
+    document.getElementById('profileFormRequestsLimit').value = profile.requestsLimit || '';
+    var form = document.getElementById('adminProfileForm');
+    if (form) {
+        form.style.display = '';
+        var title = form.querySelector('.profile-form-title');
+        if (title) title.textContent = 'Редактирование профиля';
+    }
+    var btn = document.getElementById('toggleCreateProfileBtn');
+    if (btn) btn.textContent = '✕ Закрыть';
+    var statusEl = document.getElementById('adminProfilesStatus');
+    if (statusEl) {
+        var lifetimeLabel = profile.expiresAt
+            ? ('Сейчас доступ действует до <strong>' + escapeHtml(new Date(profile.expiresAt).toLocaleString('ru-RU')) + '</strong>.')
+            : 'Сейчас профиль бессрочный.';
+        statusEl.innerHTML = makeInlineNotice('info', 'Редактирование профиля <strong>' + escapeHtml(profile.name || ('Профиль ' + profile.id)) + '</strong>. Для смены пароля введите новый пароль. ' + lifetimeLabel);
+    }
+    form?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+};
+
+window.closeAdminProfileForm = function() {
+    var form = document.getElementById('adminProfileForm');
+    var btn = document.getElementById('toggleCreateProfileBtn');
+    if (form) form.style.display = 'none';
+    if (btn) btn.textContent = '+ Создать Профиль';
+    resetAdminProfileForm();
+    var statusEl = document.getElementById('adminProfilesStatus');
+    if (statusEl) statusEl.innerHTML = '';
+};
+
 window.resetAdminProfileForm = function() {
-    const fields = ['profileFormId', 'profileFormName', 'profileFormUsername', 'profileFormPassword', 'profileFormEmail', 'profileFormDuration', 'profileFormRequestsLimit'];
+    var fields = ['profileFormId', 'profileFormName', 'profileFormUsername', 'profileFormPassword', 'profileFormEmail', 'profileFormDuration', 'profileFormRequestsLimit'];
     fields.forEach(function(id) {
-        const el = document.getElementById(id);
+        var el = document.getElementById(id);
         if (el) el.value = '';
     });
-    // Также сбрасываем заголовок формы на "Создание нового профиля"
-    var formTitle = document.getElementById('profileFormTitle');
-    if (formTitle) formTitle.textContent = 'Создание нового профиля';
+};
+
+window.resetAdminProfileFilters = function() {
+    const defaults = {
+        adminProfileFilterSearch: '',
+        adminProfileFilterId: '',
+        adminProfileFilterName: '',
+        adminProfileFilterUsername: '',
+        adminProfileFilterEmail: '',
+        adminProfileFilterPromo: '',
+        adminProfileFilterRole: '',
+        adminProfileFilterActive: '',
+        adminProfileFilterExpiry: '',
+        adminProfileFilterDurationMin: '',
+        adminProfileFilterDurationMax: '',
+        adminProfileFilterLimitMin: '',
+        adminProfileFilterLimitMax: ''
+    };
+    Object.keys(defaults).forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.value = defaults[id];
+    });
+    renderAdminProfiles();
+};
+
+window.togglePromoForm = function() {
+    var form = document.getElementById('promoFormBlock');
+    var btn = document.getElementById('togglePromoFormBtn');
+    if (!form) return;
+    var isHidden = form.style.display === 'none';
+    if (isHidden) {
+        resetPromoForm();
+        form.style.display = '';
+        if (btn) btn.textContent = '✕ Закрыть';
+        form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+        closePromoForm();
+    }
+};
+
+window.closePromoForm = function() {
+    var form = document.getElementById('promoFormBlock');
+    var btn = document.getElementById('togglePromoFormBtn');
+    if (form) form.style.display = 'none';
+    if (btn) btn.textContent = '+ Добавить Промокод';
+    resetPromoForm();
+};
+
+window.togglePromoFilters = function() {
+    var block = document.getElementById('promoFiltersBlock');
+    var toggle = document.getElementById('promoFiltersToggle');
+    if (!block || !toggle) return;
+    var isHidden = block.style.display === 'none';
+    block.style.display = isHidden ? '' : 'none';
+    toggle.textContent = isHidden ? '▼ 🔍 Фильтры Промокодов' : '▶ 🔍 Фильтры Промокодов';
+};
+
+window.resetPromoFilters = function() {
+    var defaults = {
+        promoFilterSearch: '',
+        promoFilterStatus: '',
+        promoFilterUsesMin: '',
+        promoFilterUsesMax: ''
+    };
+    Object.keys(defaults).forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.value = defaults[id];
+    });
+    renderPromoCodes();
+};
+
+window.generatePromoCode = function() {
+    var chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/*-$%@!_';
+    var parts = [];
+    for (var p = 0; p < 5; p++) {
+        var part = '';
+        for (var i = 0; i < 5; i++) {
+            part += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        parts.push(part);
+    }
+    var el = document.getElementById('promoFormCode');
+    if (el) {
+        el.value = parts.join('-');
+        el.focus();
+    }
 };
 
 window.resetPromoForm = function() {
@@ -8187,35 +8673,13 @@ window.resetPromoForm = function() {
         promoFormCode: '',
         promoFormLabel: '',
         promoFormDuration: '',
+        promoFormRequestsLimit: '',
         promoFormMaxUses: '1'
     };
     Object.keys(defaults).forEach(function(id) {
         const el = document.getElementById(id);
         if (el) el.value = defaults[id];
     });
-};
-
-window.editAdminProfile = function(profileId) {
-    const profile = (window.adminProfiles || []).find(function(item) { return item.id === profileId; });
-    if (!profile) return;
-    document.getElementById('profileFormId').value = profile.id || '';
-    document.getElementById('profileFormName').value = profile.name || '';
-    document.getElementById('profileFormUsername').value = profile.username || '';
-    document.getElementById('profileFormPassword').value = '';
-    document.getElementById('profileFormEmail').value = profile.recoveryEmail || '';
-    document.getElementById('profileFormDuration').value = profile.expiresAt ? Math.floor((new Date(profile.expiresAt) - new Date()) / 60000) : '';
-    document.getElementById('profileFormRequestsLimit').value = profile.requestsLimit || '';
-    
-    // Меняем заголовок на "Редактирование профиля"
-    var formTitle = document.getElementById('profileFormTitle');
-    if (formTitle) formTitle.textContent = 'Редактирование профиля';
-    
-    // Открываем форму редактирования
-    var form = document.getElementById('profileCreateForm');
-    if (form) form.style.display = 'block';
-    
-    const statusEl = document.getElementById('adminProfilesStatus');
-    if (statusEl) statusEl.innerHTML = makeInlineNotice('info', 'Редактирование профиля <strong>' + escapeHtml(profile.name || ('Профиль ' + profile.id)) + '</strong>. Для смены пароля введите новый пароль.');
 };
 
 window.switchAdminWorkingProfile = function(profileId) {
@@ -8231,31 +8695,79 @@ window.renderAdminProfiles = function() {
     const chips = ['currentProfileChip', 'currentProfileChipAdmin'];
     if (!listEl) return;
 
-    let profiles = window.adminProfiles || [];
-    
-    // Сортировка: Главный админ всегда первый
-    profiles.sort(function(a, b) {
-        if (a.role === 'main_admin' && b.role !== 'main_admin') return -1;
-        if (a.role !== 'main_admin' && b.role === 'main_admin') return 1;
-        return 0;
-    });
-    
+    const allProfiles = window.adminProfiles || [];
     const currentProfileId = getCurrentProfileId();
-    const currentProfile = profiles.find(function(item) { return item.id === currentProfileId; });
+    const currentProfile = allProfiles.find(function(item) { return item.id === currentProfileId; });
     chips.forEach(function(id) {
         const chip = document.getElementById(id);
         if (chip) chip.textContent = currentProfile ? ('Рабочий профиль: ' + currentProfile.name) : ('Рабочий профиль: ' + currentProfileId);
     });
 
+    const search = String(document.getElementById('adminProfileFilterSearch')?.value || '').trim().toLowerCase();
+    const idFilter = String(document.getElementById('adminProfileFilterId')?.value || '').trim().toLowerCase();
+    const nameFilter = String(document.getElementById('adminProfileFilterName')?.value || '').trim().toLowerCase();
+    const usernameFilter = String(document.getElementById('adminProfileFilterUsername')?.value || '').trim().toLowerCase();
+    const emailFilter = String(document.getElementById('adminProfileFilterEmail')?.value || '').trim().toLowerCase();
+    const promoFilter = String(document.getElementById('adminProfileFilterPromo')?.value || '').trim().toLowerCase();
+    const roleFilter = String(document.getElementById('adminProfileFilterRole')?.value || '').trim();
+    const activeFilter = String(document.getElementById('adminProfileFilterActive')?.value || '').trim();
+    const expiryFilter = String(document.getElementById('adminProfileFilterExpiry')?.value || '').trim();
+    const durationMinRaw = String(document.getElementById('adminProfileFilterDurationMin')?.value || '').trim();
+    const durationMaxRaw = String(document.getElementById('adminProfileFilterDurationMax')?.value || '').trim();
+    const limitMinRaw = String(document.getElementById('adminProfileFilterLimitMin')?.value || '').trim();
+    const limitMaxRaw = String(document.getElementById('adminProfileFilterLimitMax')?.value || '').trim();
+    const durationMin = durationMinRaw ? Number(durationMinRaw) : null;
+    const durationMax = durationMaxRaw ? Number(durationMaxRaw) : null;
+    const limitMin = limitMinRaw ? Number(limitMinRaw) : null;
+    const limitMax = limitMaxRaw ? Number(limitMaxRaw) : null;
+    const profiles = allProfiles.filter(function(profile) {
+        const haystack = [
+            profile.id,
+            profile.name,
+            profile.username,
+            profile.recoveryEmail,
+            profile.role,
+            profile.promoCodeUsed,
+            profile.lastLoginAt,
+            profile.createdAt,
+            profile.expiresAt,
+            profile.requestsLimit
+        ].join(' ').toLowerCase();
+        if (search && haystack.indexOf(search) === -1) return false;
+        if (idFilter && String(profile.id || '').toLowerCase().indexOf(idFilter) === -1) return false;
+        if (nameFilter && String(profile.name || '').toLowerCase().indexOf(nameFilter) === -1) return false;
+        if (usernameFilter && String(profile.username || '').toLowerCase().indexOf(usernameFilter) === -1) return false;
+        if (emailFilter && String(profile.recoveryEmail || '').toLowerCase().indexOf(emailFilter) === -1) return false;
+        if (promoFilter && String(profile.promoCodeUsed || '').toLowerCase().indexOf(promoFilter) === -1) return false;
+        if (roleFilter && profile.role !== roleFilter) return false;
+        if (activeFilter === 'active' && profile.active === false) return false;
+        if (activeFilter === 'inactive' && profile.active !== false) return false;
+        if (expiryFilter === 'expired' && !profile.isExpired) return false;
+        if (expiryFilter === 'active' && profile.isExpired) return false;
+        if (expiryFilter === 'infinite' && profile.expiresAt) return false;
+        var remainingMinutes = Number.isFinite(Number(profile.remainingMinutes)) ? Number(profile.remainingMinutes) : null;
+        if (durationMin !== null && (remainingMinutes === null || remainingMinutes < durationMin)) return false;
+        if (durationMax !== null && (remainingMinutes === null || remainingMinutes > durationMax)) return false;
+        var requestsLimit = profile.requestsLimit ? Number(profile.requestsLimit) : null;
+        if (limitMin !== null && (!requestsLimit || requestsLimit < limitMin)) return false;
+        if (limitMax !== null && requestsLimit !== null && requestsLimit > limitMax) return false;
+        if (limitMax !== null && requestsLimit === null) return false;
+        return true;
+    });
+
     if (profiles.length === 0) {
-        listEl.innerHTML = '<div class="community-empty-note">Профили пока не найдены.</div>';
+        listEl.innerHTML = '<div class="community-empty-note">Профили по текущим фильтрам не найдены.</div>';
         return;
     }
 
     listEl.innerHTML = profiles.map(function(profile) {
         var roleLabel = profile.role === 'main_admin' ? 'Главный админ' : 'Обычный профиль';
         var expiresLabel = profile.expiresAt ? new Date(profile.expiresAt).toLocaleString('ru-RU') : 'Бессрочно';
+        var remainingMinutesLabel = profile.remainingMinutes === null || profile.remainingMinutes === undefined
+            ? (profile.expiresAt ? 'Истёк' : 'Бессрочно')
+            : String(profile.remainingMinutes);
         var openButton = '<button class="btn btn-accent" type="button" onclick="switchAdminWorkingProfile(&quot;' + escapeHtml(profile.id) + '&quot;)" style="min-width:auto;">Открыть профиль</button>';
+        var requestsLimitLabel = profile.requestsLimit ? String(profile.requestsLimit) : 'Не задан';
         var deleteButton = profile.role === 'main_admin'
             ? '<button class="btn btn-neutral" type="button" disabled style="opacity:0.6;cursor:not-allowed;">Главный профиль</button>'
             : '<button class="btn btn-delete" type="button" onclick="deleteAdminProfileById(&quot;' + escapeHtml(profile.id) + '&quot;)" style="min-width:auto;">Удалить</button>';
@@ -8270,8 +8782,10 @@ window.renderAdminProfiles = function() {
             '<div class="profile-card-details">' +
                 '<div class="profile-card-row"><span class="profile-card-label">Логин:</span> ' + escapeHtml(profile.username || 'не задан') + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Email:</span> ' + escapeHtml(profile.recoveryEmail || 'не задан') + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Промокод:</span> ' + escapeHtml(profile.promoCodeUsed || 'не использовался') + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Осталось минут:</span> ' + escapeHtml(remainingMinutesLabel) + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Лимит запросов:</span> ' + escapeHtml(requestsLimitLabel) + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Доступ до:</span> ' + escapeHtml(expiresLabel) + '</div>' +
-                '<div class="profile-card-row"><span class="profile-card-label">Лимит запросов:</span> ' + escapeHtml(profile.requestsLimit ? String(profile.requestsLimit) : 'не задан') + '</div>' +
             '</div>' +
             '<div class="profile-card-actions">' +
                 '<button class="btn btn-info" type="button" onclick="editAdminProfile(&quot;' + escapeHtml(profile.id) + '&quot;)" style="min-width:auto;">Редактировать</button>' +
@@ -8285,17 +8799,41 @@ window.renderAdminProfiles = function() {
 window.renderPromoCodes = function() {
     const listEl = document.getElementById('promoCodesList');
     if (!listEl) return;
-    const promoCodes = window.adminDashboard.promoCodes || [];
-    if (!promoCodes.length) {
-        listEl.innerHTML = '<div class="community-empty-note">Промокоды ещё не созданы.</div>';
+    const allPromoCodes = window.adminDashboard.promoCodes || [];
+    const search = String(document.getElementById('promoFilterSearch')?.value || '').trim().toLowerCase();
+    const statusFilter = String(document.getElementById('promoFilterStatus')?.value || '').trim();
+    const usesMinRaw = String(document.getElementById('promoFilterUsesMin')?.value || '').trim();
+    const usesMaxRaw = String(document.getElementById('promoFilterUsesMax')?.value || '').trim();
+    const usesMin = usesMinRaw ? Number(usesMinRaw) : null;
+    const usesMax = usesMaxRaw ? Number(usesMaxRaw) : null;
+
+    const filtered = allPromoCodes.filter(function(promo) {
+        var haystack = [promo.code, promo.label, promo.createdAt].join(' ').toLowerCase();
+        if (search && haystack.indexOf(search) === -1) return false;
+        if (statusFilter === 'available' && promo.usedCount >= promo.maxUses) return false;
+        if (statusFilter === 'used' && promo.usedCount < promo.maxUses) return false;
+        if (usesMin !== null && promo.usedCount < usesMin) return false;
+        if (usesMax !== null && promo.usedCount > usesMax) return false;
+        return true;
+    });
+
+    if (!filtered.length) {
+        listEl.innerHTML = '<div class="community-empty-note">Промокоды по текущим фильтрам не найдены.</div>';
         return;
     }
-    listEl.innerHTML = promoCodes.map(function(promo) {
+    listEl.innerHTML = filtered.map(function(promo) {
         var durationLabel = promo.durationMinutes ? (promo.durationMinutes + ' мин.') : 'Бессрочно';
-        return '<div class="profile-card">' +
-            '<div class="profile-card-header"><div><div class="profile-card-name">' + escapeHtml(promo.code) + '</div><div class="profile-card-id">' + escapeHtml(promo.label || 'Без описания') + '</div></div><span class="profile-card-badge">Использовано ' + escapeHtml(String(promo.usedCount)) + '/' + escapeHtml(String(promo.maxUses)) + '</span></div>' +
+        var requestsLimitLabel = promo.dailyRequestsLimit ? String(promo.dailyRequestsLimit) : 'Не задан';
+        var isFullyUsed = promo.usedCount >= promo.maxUses;
+        var isExpired = promo.expiresAt ? (new Date(promo.expiresAt).getTime() <= Date.now()) : false;
+        var isDeprecated = isFullyUsed || isExpired;
+        var statusBg = isDeprecated ? 'rgba(229,57,53,0.5)' : 'rgba(67,160,71,0.5)';
+        var cardClass = 'profile-card promo-card--status';
+        return '<div class="' + escapeHtml(cardClass) + '" style="background:' + escapeHtml(statusBg) + ';">' +
+            '<div class="profile-card-header"><div><div class="profile-card-name">' + escapeHtml(promo.code) + '</div><div class="profile-card-id">' + escapeHtml(promo.label || 'Без описания') + '</div></div><span class="profile-card-badge" style="background:' + (isDeprecated ? '#e53935' : '#43a047') + ';color:#fff;">Использовано ' + escapeHtml(String(promo.usedCount)) + '/' + escapeHtml(String(promo.maxUses)) + '</span></div>' +
             '<div class="profile-card-details">' +
                 '<div class="profile-card-row"><span class="profile-card-label">Срок профиля:</span> ' + escapeHtml(durationLabel) + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Лимит запросов:</span> ' + escapeHtml(requestsLimitLabel) + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Создан:</span> ' + escapeHtml(new Date(promo.createdAt).toLocaleString('ru-RU')) + '</div>' +
             '</div>' +
             '<div class="profile-card-actions">' +
@@ -8338,7 +8876,6 @@ window.renderRecoveryRequests = function() {
     renderAdminAuditPanel();
 };
 
-window.adminJournalMode = 'app';
 window.profileDashboardData = null;
 window.selectedProfileSupportLimit = null;
 window.groupManagerState = { search: '', editingIndex: -1 };
@@ -8381,41 +8918,10 @@ window.openAdminTabDirect = function() {
     openTab(null, 'Admin');
 };
 
-window.setAdminJournalMode = function(mode) {
-    window.adminJournalMode = mode === 'admin' ? 'admin' : 'app';
-    var appPanel = document.getElementById('appLogsList');
-    var adminPanel = document.getElementById('adminAuditPanel');
-    if (appPanel) appPanel.style.display = window.adminJournalMode === 'app' ? '' : 'none';
-    if (adminPanel) adminPanel.style.display = window.adminJournalMode === 'admin' ? '' : 'none';
-    document.querySelectorAll('.app-log-toolbar .app-log-actions button').forEach(function(btn) {
-        if (btn.textContent === 'ЖУРНАЛ' || btn.textContent === 'АДМИН') {
-            var isActive = btn.textContent === (window.adminJournalMode === 'app' ? 'ЖУРНАЛ' : 'АДМИН');
-            btn.className = 'btn ' + (isActive ? 'btn-save' : 'btn-neutral') + ' tab-refresh-btn';
-        }
-    });
-};
-
 window.renderAdminAuditPanel = function() {
-    var panel = document.getElementById('adminAuditPanel');
+    var panel = document.getElementById('adminLimitRequestsPanel');
     if (!panel) return;
-    var recoveryRequests = window.adminDashboard?.recoveryRequests || [];
-    var loginLogs = window.adminDashboard?.loginLogs || [];
     var limitRequests = window.adminDashboard?.limitRequests || [];
-
-    var recoveryHtml = recoveryRequests.length ? recoveryRequests.map(function(item) {
-        var actionHtml = item.status === 'pending'
-            ? '<button class="btn btn-save" type="button" onclick="resolveRecoveryRequestById(&quot;' + escapeHtml(item.id) + '&quot;, &quot;' + escapeHtml(item.profileId || '') + '&quot;)">Сбросить пароль</button>'
-            : '<span class="profile-card-badge">Обработано</span>';
-        return '<div class="app-log-card">' +
-            '<div class="app-log-card-header"><div><div class="app-log-card-title">Запрос на восстановление</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div><div class="app-log-card-badge">' + escapeHtml(item.status || 'pending') + '</div></div>' +
-            '<div class="app-log-card-summary">' + escapeHtml(item.username || 'Профиль без логина') + ' / ' + escapeHtml(item.recoveryEmail || 'email не задан') + '</div>' +
-            '<div class="app-log-card-details">' +
-                '<div class="app-log-card-detail">Профиль: ' + escapeHtml(item.profileId || 'не найден') + '</div>' +
-                (item.tempPassword ? '<div class="app-log-card-detail">Временный пароль: ' + escapeHtml(item.tempPassword) + '</div>' : '') +
-            '</div>' +
-            '<div class="profile-card-actions">' + actionHtml + '</div>' +
-        '</div>';
-    }).join('') : '<div class="community-empty-note">Запросов на восстановление пока нет.</div>';
 
     var limitHtml = limitRequests.length ? limitRequests.map(function(item) {
         var actions = item.status === 'pending'
@@ -8432,20 +8938,7 @@ window.renderAdminAuditPanel = function() {
         '</div>';
     }).join('') : '<div class="community-empty-note">Запросов на увеличение лимита пока нет.</div>';
 
-    var loginHtml = loginLogs.length ? loginLogs.map(function(item) {
-        return '<div class="app-log-card">' +
-            '<div class="app-log-card-header"><div><div class="app-log-card-title">' + escapeHtml(item.type || 'Событие входа') + '</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div><div class="app-log-card-badge">ПРОФИЛЬ ' + escapeHtml(item.profileId || '-') + '</div></div>' +
-            '<div class="app-log-card-summary">Пользователь: ' + escapeHtml(item.username || '-') + '</div>' +
-            '<div class="app-log-card-details"><div class="app-log-card-detail">Причина: ' + escapeHtml(item.reason || 'не указана') + '</div></div>' +
-        '</div>';
-    }).join('') : '<div class="community-empty-note">Журнал входов пока пуст.</div>';
-
-    panel.innerHTML =
-        '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Запросы на восстановление</h3><div class="profile-manager-subtitle">Здесь видны входящие запросы пользователей на восстановление доступа.</div></div></div>' + recoveryHtml + '</div>' +
-        '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Увеличение лимитов</h3><div class="profile-manager-subtitle">Профили отправляют сюда запросы на увеличение лимита запросов к PAPA BOT.</div></div></div>' + limitHtml + '</div>' +
-        '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Успешные и неуспешные входы</h3><div class="profile-manager-subtitle">Журнал авторизации и причин отказов по профилям.</div></div></div>' + loginHtml + '</div>';
-
-    setAdminJournalMode(window.adminJournalMode);
+    panel.innerHTML = limitHtml;
 };
 
 window.resolveProfileLimitRequestById = async function(requestId, status) {
@@ -8488,32 +8981,57 @@ window.renderProfileDashboard = function() {
     var history = Array.isArray(data.limitHistory) ? data.limitHistory : [];
     var requests = Array.isArray(data.limitRequests) ? data.limitRequests : [];
     var packages = Array.isArray(data.supportPackages) ? data.supportPackages : [];
+    var promoStatus = data.promoActivationStatus || { attempts: 0, remainingAttempts: 3, blocked: false, nextResetAt: 0 };
+    var activeCommunityId = String(window.currentCommunityId || '').trim();
     if (!window.selectedProfileSupportLimit) {
         window.selectedProfileSupportLimit = packages[0] || 1000;
     }
+
+    var promoSectionHtml = '';
+    if (data.isMainAdmin) {
+        promoSectionHtml = '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Активация промокода</h3><div class="profile-manager-subtitle">Промокоды в этой вкладке доступны только обычным профилям.</div></div></div><div class="community-empty-note">Главному админу промокоды не требуются.</div></div>';
+    } else {
+        var resetLabel = promoStatus.nextResetAt ? formatRuDateTime(promoStatus.nextResetAt) : '00:00 МСК';
+        var promoHint = promoStatus.blocked
+            ? ('Лимит попыток ввода исчерпан до ' + resetLabel + '. Новый ввод станет доступен после 00:00 МСК.')
+            : ('Осталось попыток ввода сегодня: ' + escapeHtml(String(promoStatus.remainingAttempts || 0)) + ' из 3.');
+        var disabledAttr = promoStatus.blocked ? 'disabled' : '';
+        promoSectionHtml = '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Активация промокода</h3><div class="profile-manager-subtitle">Промокод доначисляет срок жизни профиля и суточный лимит запросов, указанные в самом промокоде.</div></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;"><input type="text" id="profilePromoCodeInput" placeholder="Введите активный промокод" ' + disabledAttr + ' style="flex:1;min-width:260px;"><button class="btn btn-accent" type="button" onclick="activateProfilePromoCode()" ' + disabledAttr + '>Активировать</button></div><div class="profile-manager-subtitle" style="margin-top:10px;">' + promoHint + '</div><div id="profilePromoActivationStatus" style="margin-top:10px;"></div></div>';
+    }
+
+    var communitiesHtml = communities.length
+        ? '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:start;">' + communities.map(function(item) {
+            var communityKey = String(item.communityId || '').trim();
+            var vkGroupId = String(item.vkGroupId || item.communityId || '').trim();
+            var isActiveCommunity = !!activeCommunityId && (activeCommunityId === communityKey || activeCommunityId === vkGroupId);
+            var cardClass = 'profile-card' + (isActiveCommunity ? ' profile-card--active-community' : '');
+            var activeBadge = isActiveCommunity
+                ? '<span class="profile-card-badge">🟢 Активно</span>'
+                : '';
+            return '<div class="' + cardClass + '">' +
+                '<div class="profile-card-header"><div><div class="profile-card-name">' + escapeHtml(item.groupName || ('Сообщество ' + vkGroupId)) + '</div><div class="profile-card-id">VK Group ID: ' + escapeHtml(vkGroupId) + '</div></div>' + activeBadge + '</div>' +
+                '<div class="profile-card-details">' +
+                    '<div class="profile-card-row"><span class="profile-card-label">Пользователей:</span> ' + escapeHtml(String(item.usersCount || 0)) + '</div>' +
+                    '<div class="profile-card-row"><span class="profile-card-label">Обработано сообщений:</span> ' + escapeHtml(String(item.messages || 0)) + '</div>' +
+                    '<div class="profile-card-row"><span class="profile-card-label">Обработано комментариев:</span> ' + escapeHtml(String(item.comments || 0)) + '</div>' +
+                    '<div class="profile-card-row"><span class="profile-card-label">Срабатываний триггеров:</span> ' + escapeHtml(String(item.triggers || 0)) + '</div>' +
+                    '<div class="profile-card-row"><span class="profile-card-label">Запросов к PAPA BOT:</span> ' + escapeHtml(String(item.papaRequests || 0)) + '</div>' +
+                    (item.lastEventAt ? '<div class="profile-card-row"><span class="profile-card-label">Последняя активность:</span> ' + escapeHtml(formatRuDateTime(item.lastEventAt)) + '</div>' : '') +
+                '</div>' +
+            '</div>';
+        }).join('') + '</div>'
+        : '<div class="community-empty-note">Пока ни одно сообщество не подключено.</div>';
 
     container.innerHTML = foreignProfileBanner +
         '<div class="profile-manager-header"><div><h3 class="profile-manager-title">' + escapeHtml(data.profileName || getCurrentProfileName()) + '</h3><div class="profile-manager-subtitle">Текущий профиль: ' + escapeHtml(getCurrentProfileId()) + '. Здесь можно выйти из профиля, посмотреть статистику и запросить увеличение лимита.</div></div><div class="profile-card-actions"><button class="btn btn-delete" type="button" onclick="exitProfileSession()">Выйти с профиля</button></div></div>' +
         '<div class="profile-grid">' +
             '<div class="profile-card current"><div class="profile-card-name">Лимит запросов в сутки</div><div class="profile-card-details"><div class="profile-card-row"><span class="profile-card-label">Лимит:</span> ' + escapeHtml(data.dailyLimit ? String(data.dailyLimit) : 'Без ограничений') + '</div><div class="profile-card-row"><span class="profile-card-label">Использовано сегодня:</span> ' + escapeHtml(String(data.dailyUsed || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Осталось:</span> ' + escapeHtml(data.dailyRemaining === null ? 'Без ограничений' : String(data.dailyRemaining)) + '</div></div></div>' +
-            '<div class="profile-card"><div class="profile-card-name">Суммарная активность</div><div class="profile-card-details"><div class="profile-card-row"><span class="profile-card-label">Запросы к PAPA BOT:</span> ' + escapeHtml(String(data.totalPapaRequests || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Сообщения:</span> ' + escapeHtml(String(data.totalMessages || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Комментарии:</span> ' + escapeHtml(String(data.totalComments || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Триггеры:</span> ' + escapeHtml(String(data.totalTriggers || 0)) + '</div></div></div>' +
+            '<div class="profile-card"><div class="profile-card-name">Суммарная активность</div><div class="profile-card-details"><div class="profile-card-row"><span class="profile-card-label">Запросов к PAPA BOT:</span> ' + escapeHtml(String(data.totalPapaRequests || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Сообщения:</span> ' + escapeHtml(String(data.totalMessages || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Комментарии:</span> ' + escapeHtml(String(data.totalComments || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Триггеры:</span> ' + escapeHtml(String(data.totalTriggers || 0)) + '</div></div></div>' +
         '</div>' +
+        promoSectionHtml +
         '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Подключённые сообщества</h3><div class="profile-manager-subtitle">По каждому сообществу показаны пользователи и накопленная статистика обработки.</div></div></div>' +
-            (communities.length ? communities.map(function(item) {
-                var isActive = item.vkGroupId === window.currentCommunityId || item.communityId === window.currentCommunityId;
-                return '<div class="profile-card" style="margin-bottom:12px;' + (isActive ? ' border: 2px solid #4caf50;' : '') + '">' +
-                    '<div class="profile-card-header"><div><div class="profile-card-name">' + escapeHtml(item.groupName || ('Сообщество ' + item.vkGroupId)) + '</div><div class="profile-card-id">VK Group ID: ' + escapeHtml(item.vkGroupId || item.communityId || '') + '</div></div><div style="display:flex; align-items:center; gap:8px;"><span class="profile-card-badge">Пользователей: ' + escapeHtml(String(item.usersCount || 0)) + '</span><span style="padding:4px 8px; border-radius:4px; font-size:12px; font-weight:bold;' + (isActive ? 'background:#4caf50;color:#fff;' : 'background:#f44336;color:#fff;') + '">' + (isActive ? '🟢 АКТИВНО' : '🔴 НЕ АКТИВНО') + '</span></div></div>' +
-                    '<div class="profile-card-details">' +
-                        '<div class="profile-card-row"><span class="profile-card-label">Обработано сообщений:</span> ' + escapeHtml(String(item.messages || 0)) + '</div>' +
-                        '<div class="profile-card-row"><span class="profile-card-label">Обработано комментариев:</span> ' + escapeHtml(String(item.comments || 0)) + '</div>' +
-                        '<div class="profile-card-row"><span class="profile-card-label">Срабатываний триггеров:</span> ' + escapeHtml(String(item.triggers || 0)) + '</div>' +
-                        '<div class="profile-card-row"><span class="profile-card-label">Запросов PAPA BOT:</span> ' + escapeHtml(String(item.papaRequests || 0)) + '</div>' +
-                        (item.lastEventAt ? '<div class="profile-card-row"><span class="profile-card-label">Последняя активность:</span> ' + escapeHtml(formatRuDateTime(item.lastEventAt)) + '</div>' : '') +
-                    '</div>' +
-                '</div>';
-            }).join('') : '<div class="community-empty-note">Пока ни одно сообщество не подключено.</div>') +
+            communitiesHtml +
         '</div>' +
-        '<div id="profileSupportStatus"></div>' +
         '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Поддержка автора</h3><div class="profile-manager-subtitle">Пока это ручной процесс: выбери пакет и отправь запрос главному админу.</div></div></div><div class="profile-card-row" style="margin-bottom:12px;"><span class="profile-card-label">Увеличения лимитов:</span></div><div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;">' + packages.map(function(limitValue) { var selected = Number(limitValue) === Number(window.selectedProfileSupportLimit); return '<button class="btn ' + (selected ? 'btn-save' : 'btn-neutral') + '" type="button" onclick="selectProfileLimitPackage(' + Number(limitValue) + ')">' + escapeHtml(Number(limitValue).toLocaleString('ru-RU')) + '</button>'; }).join('') + '</div><div class="profile-manager-subtitle">Выбран пакет: <strong>' + escapeHtml(Number(window.selectedProfileSupportLimit || packages[0] || 1000).toLocaleString('ru-RU')) + '</strong> запросов в сутки. Нажатие кнопки отправляет запрос главному админу.</div><div style="margin-top:12px;"><button class="btn btn-accent" type="button" onclick="requestSelectedProfileLimit()">Приобрести</button></div></div>' +
         '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">История начислений и запросов</h3><div class="profile-manager-subtitle">Здесь видно, когда лимит менялся и какие запросы уже были отправлены.</div></div></div>' +
             (history.length ? history.map(function(item) {
@@ -8521,7 +9039,10 @@ window.renderProfileDashboard = function() {
                 (item.note ? '<div class="app-log-card-summary">' + escapeHtml(item.note) + '</div>' : '') + '</div>';
             }).join('') : '<div class="community-empty-note">Начислений лимита пока не было.</div>') +
             (requests.length ? '<div style="height:12px"></div>' + requests.map(function(item) {
-                return '<div class="app-log-card"><div class="app-log-card-header"><div><div class="app-log-card-title">Запрос на лимит</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div><div class="app-log-card-badge">' + escapeHtml(item.status || 'pending') + '</div></div><div class="app-log-card-summary">' + escapeHtml(String(item.requestedLimit || 0)) + ' запросов в сутки</div><div class="profile-card-actions"><button class="btn btn-delete" type="button" onclick="deleteProfileLimitRequest(&quot;' + escapeHtml(item.id) + '&quot;)">🗑️ Удалить</button></div></div>';
+                var deleteButton = item.status === 'pending'
+                    ? '<div class="profile-card-actions" style="margin-top:10px;"><button class="btn btn-delete" type="button" onclick="deleteProfileLimitRequestById(&quot;' + escapeHtml(item.id) + '&quot;)">Удалить запрос</button></div>'
+                    : '';
+                return '<div class="app-log-card"><div class="app-log-card-header"><div><div class="app-log-card-title">Запрос на лимит</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div><div class="app-log-card-badge">' + escapeHtml(item.status || 'pending') + '</div></div><div class="app-log-card-summary">' + escapeHtml(String(item.requestedLimit || 0)) + ' запросов в сутки</div>' + deleteButton + '</div>';
             }).join('') : '') +
         '</div>';
 };
@@ -8532,7 +9053,9 @@ window.loadProfileDashboard = async function() {
     try {
         if (loadingEl) loadingEl.style.display = 'block';
         var baseUrl = window.location.href.split('?')[0];
-        var res = await fetch(baseUrl + '?getProfileDashboard');
+        var profileId = encodeURIComponent(getCurrentProfileId() || getPrincipalProfileId() || '1');
+        var principalProfileId = encodeURIComponent(getPrincipalProfileId() || '1');
+        var res = await fetch(baseUrl + '?getProfileDashboard=1&profileId=' + profileId + '&principalProfileId=' + principalProfileId);
         var data = await res.json();
         if (!data.success) throw new Error(data.error || 'Не удалось загрузить профиль');
         window.profileDashboardData = data.dashboard;
@@ -8545,8 +9068,49 @@ window.loadProfileDashboard = async function() {
     }
 };
 
+window.activateProfilePromoCode = async function() {
+    var statusEl = document.getElementById('profilePromoActivationStatus') || document.getElementById('profileDashboardStatus');
+    var inputEl = document.getElementById('profilePromoCodeInput');
+    var code = String(inputEl && inputEl.value || '').trim();
+    if (!code) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ Введите промокод.');
+        return;
+    }
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?activateProfilePromoCode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                code: code,
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId()
+            })
+        });
+        var data = await res.json();
+        if (data.dashboard) {
+            window.profileDashboardData = data.dashboard;
+            renderProfileDashboard();
+        } else if (window.profileDashboardData && data.promoActivationStatus) {
+            window.profileDashboardData.promoActivationStatus = data.promoActivationStatus;
+            renderProfileDashboard();
+        }
+        statusEl = document.getElementById('profilePromoActivationStatus') || document.getElementById('profileDashboardStatus');
+        if (!data.success) {
+            throw new Error(data.error || 'Не удалось активировать промокод');
+        }
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', '✅ Промокод активирован. Показатели профиля обновлены.');
+        if (isMainAdminSession()) {
+            await loadAdminProfiles();
+        }
+    } catch (e) {
+        statusEl = document.getElementById('profilePromoActivationStatus') || document.getElementById('profileDashboardStatus');
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+    }
+};
+
 window.requestProfileLimitIncrease = async function(limitValue) {
-    var statusEl = document.getElementById('profileSupportStatus') || document.getElementById('profileDashboardStatus');
+    var statusEl = document.getElementById('profileDashboardStatus');
     try {
         var baseUrl = window.location.href.split('?')[0];
         var res = await fetch(baseUrl + '?requestProfileLimit', {
@@ -8556,16 +9120,10 @@ window.requestProfileLimitIncrease = async function(limitValue) {
         });
         var data = await res.json();
         if (!data.success) throw new Error(data.error || 'Не удалось отправить запрос');
-        if (statusEl) {
-            statusEl.innerHTML = makeInlineNotice('success', '✅ Запрос отправлен, ждите одобрения.');
-            setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
-        }
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', '✅ Запрос отправлен, ждите одобрения.');
         await loadProfileDashboard();
     } catch (e) {
-        if (statusEl) {
-            statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
-            setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
-        }
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
     }
 };
 
@@ -8578,13 +9136,11 @@ window.requestSelectedProfileLimit = function() {
     requestProfileLimitIncrease(window.selectedProfileSupportLimit || 1000);
 };
 
-// 🔥 НОВОЕ: Удаление запроса на лимит
-window.deleteProfileLimitRequest = async function(requestId) {
-    var statusEl = document.getElementById('profileSupportStatus') || document.getElementById('profileDashboardStatus');
+window.deleteProfileLimitRequestById = async function(requestId) {
+    var statusEl = document.getElementById('profileDashboardStatus');
+    if (!requestId) return;
+    if (!confirm('Удалить этот запрос на лимит?')) return;
     try {
-        if (!confirm('Вы уверены, что хотите удалить этот запрос?')) {
-            return;
-        }
         var baseUrl = window.location.href.split('?')[0];
         var res = await fetch(baseUrl + '?deleteProfileLimitRequest', {
             method: 'POST',
@@ -8593,16 +9149,13 @@ window.deleteProfileLimitRequest = async function(requestId) {
         });
         var data = await res.json();
         if (!data.success) throw new Error(data.error || 'Не удалось удалить запрос');
-        if (statusEl) {
-            statusEl.innerHTML = makeInlineNotice('success', '✅ Запрос удален.');
-            setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
-        }
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', '✅ Запрос на лимит удалён.');
         await loadProfileDashboard();
-    } catch (e) {
-        if (statusEl) {
-            statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
-            setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
+        if (isMainAdminSession()) {
+            await loadAdminProfiles();
         }
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
     }
 };
 
@@ -9304,6 +9857,10 @@ window.loadAdminProfiles = async function() {
 
 window.saveAdminProfile = async function() {
     const statusEl = document.getElementById('adminProfilesStatus');
+    if (!isMainAdminSession()) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ Только главный админ может создавать и редактировать профили.');
+        return;
+    }
     const payload = {
         id: (document.getElementById('profileFormId')?.value || '').trim(),
         name: (document.getElementById('profileFormName')?.value || '').trim(),
@@ -9329,11 +9886,8 @@ window.saveAdminProfile = async function() {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Не удалось сохранить профиль');
-        if (statusEl) {
-            statusEl.innerHTML = makeInlineNotice('success', '✅ Профиль сохранён.');
-            setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
-        }
-        resetAdminProfileForm();
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', '✅ Профиль сохранён.');
+        closeAdminProfileForm();
         await loadAdminProfiles();
     } catch (e) {
         if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ Ошибка сохранения профиля: ' + e.message);
@@ -9342,6 +9896,10 @@ window.saveAdminProfile = async function() {
 
 window.deleteAdminProfileById = async function(profileId) {
     const statusEl = document.getElementById('adminProfilesStatus');
+    if (!isMainAdminSession()) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ Только главный админ может удалять профили.');
+        return;
+    }
     const profile = (window.adminProfiles || []).find(function(item) { return item.id === profileId; });
     if (!profileId) return;
     if (!confirm('Удалить профиль "' + (profile?.name || profileId) + '"?')) return;
@@ -9370,6 +9928,7 @@ window.savePromoCode = async function() {
         code: (document.getElementById('promoFormCode')?.value || '').trim(),
         label: (document.getElementById('promoFormLabel')?.value || '').trim(),
         durationMinutes: (document.getElementById('promoFormDuration')?.value || '').trim(),
+        dailyRequestsLimit: (document.getElementById('promoFormRequestsLimit')?.value || '').trim(),
         maxUses: (document.getElementById('promoFormMaxUses')?.value || '1').trim(),
         principalProfileId: getPrincipalProfileId()
     };
@@ -9386,11 +9945,8 @@ window.savePromoCode = async function() {
         });
         const data = await res.json();
         if (!data.success) throw new Error(data.error || 'Не удалось сохранить промокод');
-        if (statusEl) {
-            statusEl.innerHTML = makeInlineNotice('success', '✅ Промокод сохранён.');
-            setTimeout(function() { statusEl.innerHTML = ''; }, 3000);
-        }
-        resetPromoForm();
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', '✅ Промокод сохранён.');
+        closePromoForm();
         await loadAdminProfiles();
     } catch (e) {
         if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ Ошибка сохранения промокода: ' + e.message);
@@ -10548,6 +11104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Инициализация темы при загрузке
     initTheme();
+    window.updateThemeDocking && window.updateThemeDocking();
 });
 
 // ===== УПРАВЛЕНИЕ ТЕМАМИ =====
@@ -10569,61 +11126,56 @@ function initTheme() {
         btn.classList.toggle('active', btn.getAttribute('data-theme') === saved);
     });
 }
+
+window.updateThemeDocking = function() {
+    const themeHost = document.getElementById('headerThemeHost');
+    const themeDockSlot = document.getElementById('themeDockSlot');
+    const themeSwitcher = document.getElementById('globalThemeSwitcher');
+    const tabs = document.querySelector('.tab');
+    if (!themeHost || !themeDockSlot || !themeSwitcher || !tabs) return;
+
+    if (themeDockSlot.parentElement !== document.body) {
+        document.body.appendChild(themeDockSlot);
+    }
+
+    if (window.innerWidth <= 980) {
+        if (themeSwitcher.parentElement !== themeHost) {
+            themeHost.appendChild(themeSwitcher);
+        }
+        themeDockSlot.classList.remove('is-visible');
+        themeDockSlot.style.top = '';
+        return;
+    }
+
+    const tabsRect = tabs.getBoundingClientRect();
+    const shouldDock = window.scrollY > 12;
+    if (shouldDock) {
+        if (themeSwitcher.parentElement !== themeDockSlot) {
+            themeDockSlot.appendChild(themeSwitcher);
+        }
+        themeDockSlot.classList.add('is-visible');
+        themeDockSlot.style.top = (tabsRect.bottom + 2) + 'px';
+    } else {
+        if (themeSwitcher.parentElement !== themeHost) {
+            themeHost.appendChild(themeSwitcher);
+        }
+        themeDockSlot.classList.remove('is-visible');
+        themeDockSlot.style.top = '';
+    }
+};
+
+window.addEventListener('scroll', function() {
+    window.updateThemeDocking && window.updateThemeDocking();
+}, { passive: true });
+
+window.addEventListener('resize', function() {
+    window.updateThemeDocking && window.updateThemeDocking();
+});
 // ===== КОНЕЦ УПРАВЛЕНИЯ ТЕМАМИ =====
 
 
 
 })(); // ? Конец IIFE
-
-// 🔥 ИСПРАВЛЕНИЕ: Функции для работы с промокодами в глобальном scope
-window.togglePromoFilters = function() {
-    var content = document.getElementById('promoFiltersContent');
-    var arrow = document.getElementById('promoFiltersArrow');
-    console.log('togglePromoFilters called', content, arrow);
-    if (!content || !arrow) {
-        console.log('Elements not found! Trying to find them again...');
-        setTimeout(function() {
-            var retryContent = document.getElementById('promoFiltersContent');
-            var retryArrow = document.getElementById('promoFiltersArrow');
-            if (retryContent && retryArrow) {
-                var isHidden = retryContent.style.display === 'none';
-                retryContent.style.display = isHidden ? 'block' : 'none';
-                retryArrow.textContent = isHidden ? '▼' : '▶';
-            }
-        }, 100);
-        return;
-    }
-    var isHidden = content.style.display === 'none';
-    console.log('isHidden:', isHidden);
-    content.style.display = isHidden ? 'block' : 'none';
-    arrow.textContent = isHidden ? '▼' : '▶';
-    console.log('new display:', content.style.display);
-};
-
-window.filterPromoCodes = function() {
-    var codeFilter = (document.getElementById('promoFilterCode')?.value || '').toLowerCase();
-    var labelFilter = (document.getElementById('promoFilterLabel')?.value || '').toLowerCase();
-    var durationFilter = (document.getElementById('promoFilterDuration')?.value || '').toLowerCase();
-    var maxUsesFilter = (document.getElementById('promoFilterMaxUses')?.value || '').toLowerCase();
-    
-    var cards = document.querySelectorAll('#promoCodesList .profile-card');
-    cards.forEach(function(card) {
-        var codeEl = card.querySelector('.profile-card-name');
-        var idEl = card.querySelector('.profile-card-id');
-        
-        var code = codeEl ? codeEl.textContent.toLowerCase() : '';
-        var label = idEl ? idEl.textContent.toLowerCase() : '';
-        
-        var cardText = card.textContent.toLowerCase();
-        
-        var matchesCode = codeFilter === '' || code.includes(codeFilter);
-        var matchesLabel = labelFilter === '' || label.includes(labelFilter);
-        var matchesDuration = durationFilter === '' || cardText.includes(durationFilter);
-        var matchesMaxUses = maxUsesFilter === '' || cardText.includes(maxUsesFilter);
-        
-        card.style.display = (matchesCode && matchesLabel && matchesDuration && matchesMaxUses) ? '' : 'none';
-    });
-};
 </script>
 
 </div> <!-- ? Закрытие container -->

@@ -6088,69 +6088,90 @@ saveBtn.onclick = function() {
           formData.append('group_id', groupId);
           formData.append('target', target);
 
-          fetch(RENDER_UPLOADER_URL, {
-            method: 'POST',
-            body: formData,
-            signal: AbortSignal.timeout(120000)
-          }).then(function(response) {
+          var RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
+          var RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
+          var RENDER_WAKE_TIMEOUT_MS = 60000;
+          var RENDER_WAKE_POLL_INTERVAL_MS = 5000;
+
+          var uploadViaRender = function(timeoutMs) {
+            return fetch(RENDER_UPLOADER_URL, {
+              method: 'POST',
+              body: formData,
+              signal: AbortSignal.timeout(timeoutMs)
+            }).then(function(response) {
+              if (!response.ok) {
+                return response.text().then(function(text) {
+                  throw new Error('Render service error: ' + response.status + ' - ' + text.substring(0, 200));
+                });
+              }
+              return response;
+            });
+          };
+
+          var isRenderWakeCandidate = function(error) {
+            var message = String((error && error.message) || '').toLowerCase();
+            return !!(
+              (error && error.name === 'AbortError') ||
+              message.includes('fetch') ||
+              message.includes('502') ||
+              message.includes('503') ||
+              message.includes('504') ||
+              message.includes('timeout') ||
+              message.includes('network')
+            );
+          };
+
+          uploadViaRender(RENDER_INITIAL_UPLOAD_TIMEOUT_MS).then(function(response) {
             clearInterval(uploadAnimInterval);
-            if (!response.ok) {
-              return response.text().then(function(text) {
-                throw new Error('Render service error: ' + response.status + ' - ' + text.substring(0, 200));
-              });
-            }
             resolve(response);
           }).catch(function(error) {
             clearInterval(uploadAnimInterval);
-            
-            // Если ошибка связана с таймаутом или недоступностью - пробуем разбудить
-            if (error.name === 'AbortError' || error.message.includes('fetch') || error.message.includes('502')) {
-              statusEl.innerText = '😴 Пытаемся разбудить сервис Render...';
-              
-              // Пробуем разбудить сервис несколькими запросами
-              var wakeUpAttempts = 0;
-              var maxWakeUpAttempts = 3;
-              
-              var tryWakeUp = function() {
-                wakeUpAttempts++;
-                statusEl.innerText = '😴 Пытаемся разбудить сервис Render (попытка ' + wakeUpAttempts + '/' + maxWakeUpAttempts + ')...';
-                
-                fetch(RENDER_UPLOADER_URL, {
-                  method: 'POST',
-                  body: new FormData(), // Пустой запрос для пробуждения
-                  signal: AbortSignal.timeout(30000)
-                }).then(function() {
-                  // Сервис проснулся, пробуем загрузить файл
-                  statusEl.innerText = '🌕 Загрузка в VK через сервис Render';
-                  
-                  fetch(RENDER_UPLOADER_URL, {
-                    method: 'POST',
-                    body: formData,
-                    signal: AbortSignal.timeout(120000)
-                  }).then(function(response) {
-                    if (!response.ok) {
-                      return response.text().then(function(text) {
-                        throw new Error('Render service error: ' + response.status + ' - ' + text.substring(0, 200));
-                      });
-                    }
-                    resolve(response);
-                  }).catch(function(retryError) {
-                    reject(new Error('Render проснулся, но загрузка не удалась: ' + retryError.message));
-                  });
-                }).catch(function(wakeError) {
-                  if (wakeUpAttempts < maxWakeUpAttempts) {
-                    // Ждём 5 секунд и пробуем снова
-                    setTimeout(tryWakeUp, 5000);
-                  } else {
-                    reject(new Error('Не удалось разбудить Render после ' + maxWakeUpAttempts + ' попыток. Попробуйте файл меньше 3MB.'));
-                  }
-                });
-              };
-              
-              tryWakeUp();
-            } else {
+
+            if (!isRenderWakeCandidate(error)) {
               reject(new Error('Render недоступен: ' + error.message));
+              return;
             }
+
+            statusEl.innerText = '😴 Пытаемся разбудить сервис Render...';
+
+            var wakeStartedAt = Date.now();
+            var wakeUpAttempts = 0;
+
+            var tryWakeUp = function() {
+              var elapsedWakeMs = Date.now() - wakeStartedAt;
+              var remainingWakeMs = RENDER_WAKE_TIMEOUT_MS - elapsedWakeMs;
+
+              if (remainingWakeMs <= 0) {
+                reject(new Error('Не удалось разбудить Render в течение 60 секунд. Попробуйте ещё раз.'));
+                return;
+              }
+
+              wakeUpAttempts++;
+              statusEl.innerText = '😴 Пытаемся разбудить сервис Render (попытка ' + wakeUpAttempts + ', осталось ' + Math.ceil(remainingWakeMs / 1000) + ' сек)...';
+
+              fetch(RENDER_UPLOADER_URL, {
+                method: 'POST',
+                body: new FormData(),
+                signal: AbortSignal.timeout(Math.min(30000, remainingWakeMs))
+              }).then(function() {
+                statusEl.innerText = '🌕 Render проснулся, повторяем загрузку...';
+                return uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS);
+              }).then(function(response) {
+                resolve(response);
+              }).catch(function() {
+                var currentElapsedWakeMs = Date.now() - wakeStartedAt;
+                var currentRemainingWakeMs = RENDER_WAKE_TIMEOUT_MS - currentElapsedWakeMs;
+
+                if (currentRemainingWakeMs <= 0) {
+                  reject(new Error('Не удалось разбудить Render в течение 60 секунд. Попробуйте ещё раз.'));
+                  return;
+                }
+
+                setTimeout(tryWakeUp, Math.min(RENDER_WAKE_POLL_INTERVAL_MS, currentRemainingWakeMs));
+              });
+            };
+
+            tryWakeUp();
           });
         } else {
           // Загружаем через PAPA BOT backend для маленьких файлов
