@@ -19,7 +19,7 @@ function buildTimeoutError(message = 'timeout exceeded') {
 }
 
 (async function main() {
-  await run('uploadViaRenderService retries with extended timeout before wake checks', async () => {
+  await run('uploadViaRenderService succeeds on extended retry before final backoff', async () => {
     const calls = [];
     let uploadAttempt = 0;
 
@@ -49,10 +49,6 @@ function buildTimeoutError(message = 'timeout exceeded') {
           }
           return { success: true, attachment: 'video1_2' };
         },
-        pingRender: async attempt => {
-          calls.push(['ping', attempt]);
-          return attempt >= 1;
-        },
         sleep: async ms => {
           calls.push(['sleep', ms]);
         }
@@ -66,7 +62,7 @@ function buildTimeoutError(message = 'timeout exceeded') {
     ]);
   });
 
-  await run('uploadViaRenderService treats signal timed out as wake candidate and retries before wake', async () => {
+  await run('uploadViaRenderService treats signal timed out as retryable', async () => {
     const calls = [];
     let uploadAttempt = 0;
 
@@ -95,10 +91,6 @@ function buildTimeoutError(message = 'timeout exceeded') {
           }
           return { success: true, attachment: 'video1_3' };
         },
-        pingRender: async attempt => {
-          calls.push(['ping', attempt]);
-          return attempt >= 1;
-        },
         sleep: async ms => {
           calls.push(['sleep', ms]);
         }
@@ -112,7 +104,7 @@ function buildTimeoutError(message = 'timeout exceeded') {
     ]);
   });
 
-  await run('uploadViaRenderService wakes Render only after extended retry also fails', async () => {
+  await run('uploadViaRenderService uses final backoff retry after two timeout failures', async () => {
     const calls = [];
     let uploadAttempt = 0;
 
@@ -139,10 +131,6 @@ function buildTimeoutError(message = 'timeout exceeded') {
           }
           return { success: true, attachment: 'video1_4' };
         },
-        pingRender: async attempt => {
-          calls.push(['ping', attempt]);
-          return attempt >= 2;
-        },
         sleep: async ms => {
           calls.push(['sleep', ms]);
         }
@@ -153,14 +141,12 @@ function buildTimeoutError(message = 'timeout exceeded') {
     assert.deepEqual(calls, [
       ['upload', 1],
       ['upload', 2],
-      ['ping', 1],
-      ['sleep', 5000],
-      ['ping', 2],
+      ['sleep', 10000],
       ['upload', 3]
     ]);
   });
 
-  await run('uploadViaRenderService exposes distinct error after successful wake but failed final retry', async () => {
+  await run('uploadViaRenderService exposes distinct error after final retry fails', async () => {
     let uploadAttempt = 0;
 
     await assert.rejects(
@@ -186,11 +172,10 @@ function buildTimeoutError(message = 'timeout exceeded') {
             }
             throw new Error('vk upload timed out');
           },
-          pingRender: async () => true,
           sleep: async () => {}
         }
       ),
-      /Render woke up, but upload failed: vk upload timed out/
+      /Render responded, but upload failed: vk upload timed out/
     );
   });
 })().then(() => {

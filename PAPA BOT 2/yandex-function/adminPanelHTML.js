@@ -6091,8 +6091,7 @@ saveBtn.onclick = function() {
 
           var RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
           var RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
-          var RENDER_WAKE_TIMEOUT_MS = 60000;
-          var RENDER_WAKE_POLL_INTERVAL_MS = 5000;
+          var RENDER_FINAL_RETRY_DELAY_MS = 10000;
 
           var uploadViaRender = function(timeoutMs) {
             return fetch(RENDER_UPLOADER_URL, {
@@ -6134,45 +6133,6 @@ saveBtn.onclick = function() {
               return;
             }
 
-            var wakeStartedAt = Date.now();
-            var wakeUpAttempts = 0;
-
-            var tryWakeUp = function() {
-              var elapsedWakeMs = Date.now() - wakeStartedAt;
-              var remainingWakeMs = RENDER_WAKE_TIMEOUT_MS - elapsedWakeMs;
-
-              if (remainingWakeMs <= 0) {
-                reject(new Error('Не удалось разбудить Render в течение 60 секунд. Попробуйте ещё раз.'));
-                return;
-              }
-
-              wakeUpAttempts++;
-              statusEl.innerText = '😴 Пытаемся разбудить сервис Render (попытка ' + wakeUpAttempts + ', осталось ' + Math.ceil(remainingWakeMs / 1000) + ' сек)...';
-
-              fetch(RENDER_SERVICE_URL, {
-                method: 'GET',
-                signal: AbortSignal.timeout(Math.min(30000, remainingWakeMs))
-              }).then(function() {
-                statusEl.innerText = '🌕 Render проснулся, повторяем загрузку...';
-                return uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS).then(function(response) {
-                  resolve(response);
-                }).catch(function(retryError) {
-                  reject(new Error('Render проснулся, но загрузка не завершилась: ' + retryError.message));
-                });
-              }).catch(function() {
-
-                var currentElapsedWakeMs = Date.now() - wakeStartedAt;
-                var currentRemainingWakeMs = RENDER_WAKE_TIMEOUT_MS - currentElapsedWakeMs;
-
-                if (currentRemainingWakeMs <= 0) {
-                  reject(new Error('Не удалось разбудить Render в течение 60 секунд. Попробуйте ещё раз.'));
-                  return;
-                }
-
-                setTimeout(tryWakeUp, Math.min(RENDER_WAKE_POLL_INTERVAL_MS, currentRemainingWakeMs));
-              });
-            };
-
             statusEl.innerText = '⏳ Render долго отвечает, повторяем загрузку с увеличенным ожиданием...';
             uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS).then(function(response) {
               resolve(response);
@@ -6182,8 +6142,14 @@ saveBtn.onclick = function() {
                 return;
               }
 
-              statusEl.innerText = '😴 Пытаемся разбудить сервис Render...';
-              tryWakeUp();
+              statusEl.innerText = '⌛ Render всё ещё обрабатывает файл, делаем последнюю попытку...';
+              setTimeout(function() {
+                uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS).then(function(response) {
+                  resolve(response);
+                }).catch(function(finalError) {
+                  reject(new Error('Render отвечает, но загрузка не завершилась: ' + finalError.message));
+                });
+              }, RENDER_FINAL_RETRY_DELAY_MS);
             });
           });
         } else {

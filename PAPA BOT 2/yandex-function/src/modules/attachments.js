@@ -9,8 +9,7 @@ const { getUserToken, getVkToken, getVkGroupId } = require('./config');
 const { vkGet } = require('./vk-api');
 const RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
 const RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
-const RENDER_WAKE_TIMEOUT_MS = 60000;
-const RENDER_WAKE_POLL_INTERVAL_MS = 5000;
+const RENDER_FINAL_RETRY_DELAY_MS = 10000;
 
 // Поля вложений для разных типов
 const ATTACHMENT_FIELDS = {
@@ -660,38 +659,6 @@ function isRenderWakeCandidate(error) {
     );
 }
 
-async function waitForRenderServiceWake(renderUrl, overrides = {}) {
-    const pingRender = overrides.pingRender || (async () => {
-        try {
-            await axios.get(renderUrl, { timeout: 5000, validateStatus: () => true });
-            return true;
-        } catch (error) {
-            return false;
-        }
-    });
-    const sleepImpl = overrides.sleep || sleep;
-    const startedAt = Date.now();
-    let attempt = 0;
-
-    while ((Date.now() - startedAt) < RENDER_WAKE_TIMEOUT_MS) {
-        attempt += 1;
-        const awake = await pingRender(attempt);
-        if (awake) {
-            return true;
-        }
-
-        const elapsed = Date.now() - startedAt;
-        const remaining = RENDER_WAKE_TIMEOUT_MS - elapsed;
-        if (remaining <= 0) {
-            break;
-        }
-
-        await sleepImpl(Math.min(RENDER_WAKE_POLL_INTERVAL_MS, remaining));
-    }
-
-    return false;
-}
-
 async function uploadViaRenderServiceWithDependencies(buffer, filename, mimeType, target, groupId, overrides = {}) {
     const renderUrl = overrides.renderUrl || process.env.RENDER_UPLOAD_URL || 'https://vk-uploader.onrender.com';
     const getUserTokenImpl = overrides.getUserToken || getUserToken;
@@ -739,17 +706,15 @@ async function uploadViaRenderServiceWithDependencies(buffer, filename, mimeType
             }
         }
 
-        log('warn', `[RENDER UPLOAD] Extended retry failed, waking Render service: ${error.message}`);
-        const awake = await waitForRenderServiceWake(renderUrl, overrides);
-        if (!awake) {
-            throw new Error('Render service did not wake within 60 seconds');
-        }
+        log('warn', `[RENDER UPLOAD] Extended retry failed, waiting before final retry: ${error.message}`);
+        const sleepImpl = overrides.sleep || sleep;
+        await sleepImpl(RENDER_FINAL_RETRY_DELAY_MS);
 
-        log('info', '[RENDER UPLOAD] Render service woke up, retrying upload');
+        log('info', '[RENDER UPLOAD] Performing final retry after backoff');
         try {
             return await executeUpload(RENDER_RETRY_UPLOAD_TIMEOUT_MS);
         } catch (retryError) {
-            throw new Error(`Render woke up, but upload failed: ${retryError.message}`);
+            throw new Error(`Render responded, but upload failed: ${retryError.message}`);
         }
     }
 }
@@ -812,7 +777,6 @@ module.exports = {
     uploadToVK,
     __testOnly: {
         isRenderWakeCandidate,
-        waitForRenderServiceWake,
         uploadViaRenderServiceWithDependencies
     }
 };
