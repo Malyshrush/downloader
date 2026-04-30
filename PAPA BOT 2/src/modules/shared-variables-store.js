@@ -93,14 +93,14 @@ function createSharedVariablesStore(config = buildEventRuntimeConfig(process.env
           Item: item
         }
       }));
-    const requests = deleteRequests.concat(putRequests);
-
-    for (const chunk of chunkItems(requests, 25)) {
-      await getDocumentClient().send(new BatchWriteCommand({
-        RequestItems: {
-          [tableName]: chunk
-        }
-      }));
+    for (const requests of [deleteRequests, putRequests]) {
+      for (const chunk of chunkItems(requests, 25)) {
+        await getDocumentClient().send(new BatchWriteCommand({
+          RequestItems: {
+            [tableName]: chunk
+          }
+        }));
+      }
     }
 
     return { ok: true };

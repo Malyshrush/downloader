@@ -123,6 +123,36 @@ function createConfig(overrides = {}) {
       ]
     });
   });
+
+  await run('shared variables store sends replace deletes before puts to avoid duplicate batch keys', async () => {
+    const writeBatches = [];
+    const store = createSharedVariablesStore(
+      createConfig(),
+      {
+        queryItems: async () => ({
+          Items: [
+            {
+              profileScope: '7',
+              variableName: 'pvs_score',
+              value: 'old'
+            }
+          ]
+        }),
+        documentClient: {
+          send: async command => {
+            writeBatches.push(command.input.RequestItems.shared_variables_catalog);
+            return {};
+          }
+        }
+      }
+    );
+
+    await store.replaceVariables('7', { pvs_score: '100' });
+
+    assert.equal(writeBatches.length, 2);
+    assert.ok(writeBatches[0][0].DeleteRequest);
+    assert.ok(writeBatches[1][0].PutRequest);
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {

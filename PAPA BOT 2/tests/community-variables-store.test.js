@@ -291,6 +291,38 @@ function createConfig(overrides = {}) {
     });
   });
 
+  await run('community variables store sends replace deletes before puts to avoid duplicate batch keys', async () => {
+    const writeBatches = [];
+    const store = createCommunityVariablesStore(
+      createConfig(),
+      {
+        queryItems: async () => ({
+          Items: [
+            {
+              communityScope: '8:community-7',
+              variableKey: 'global:gp_limit',
+              entryType: 'global',
+              variableName: 'gp_limit',
+              value: 'old'
+            }
+          ]
+        }),
+        documentClient: {
+          send: async command => {
+            writeBatches.push(command.input.RequestItems.community_variable_entries);
+            return {};
+          }
+        }
+      }
+    );
+
+    await store.replaceGlobalVariables('community-7', { gp_limit: '500' }, '8');
+
+    assert.equal(writeBatches.length, 2);
+    assert.ok(writeBatches[0][0].DeleteRequest);
+    assert.ok(writeBatches[1][0].PutRequest);
+  });
+
   await run('community variables store appends only missing user catalog entries', async () => {
     const putCalls = [];
     const store = createCommunityVariablesStore(

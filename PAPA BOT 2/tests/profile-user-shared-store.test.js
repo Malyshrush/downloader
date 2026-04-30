@@ -174,6 +174,41 @@ function createConfig(overrides = {}) {
     assert.equal(batchCalls[0].putItems[0].userId, '42');
     assert.deepEqual(batchCalls[0].putItems[0].variables, { pvs_score: '100' });
   });
+
+  await run('profile user shared store sends replace deletes before puts to avoid duplicate batch keys', async () => {
+    const writeBatches = [];
+    const store = createProfileUserSharedStore(
+      createConfig(),
+      {
+        queryItems: async () => ({
+          Items: [
+            {
+              profileScope: '7',
+              userId: '42',
+              variables: { pvs_score: 'old' }
+            }
+          ]
+        }),
+        documentClient: {
+          send: async command => {
+            writeBatches.push(command.input.RequestItems.profile_user_shared_state);
+            return {};
+          }
+        }
+      }
+    );
+
+    await store.replaceUserEntries('7', [
+      {
+        userId: '42',
+        variables: { pvs_score: '100' }
+      }
+    ]);
+
+    assert.equal(writeBatches.length, 2);
+    assert.ok(writeBatches[0][0].DeleteRequest);
+    assert.ok(writeBatches[1][0].PutRequest);
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {

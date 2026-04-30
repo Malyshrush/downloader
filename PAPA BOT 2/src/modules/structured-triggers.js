@@ -15,45 +15,10 @@ const { addAppLog } = require('./app-logs');
 const { getGlobalVariables, updateGlobalVariables, getProfileUserSharedVariables, updateProfileUserSharedVariables } = require('./variables');
 const { recordStructuredTriggerExecution } = require('./profile-dashboard');
 const { createStructuredTriggerStore } = require('./structured-trigger-store');
+const { deleteConversationWithUser, removeUserFromCommunity } = require('./vk-api');
 
-// ==========================================
-// Callback Proxy — для методов, требующих User Token
-// ==========================================
-const CALLBACK_PROXY_URL = process.env.CALLBACK_PROXY_URL || 'https://vk-callback-proxy.onrender.com';
-const CALLBACK_SECRET = process.env.CALLBACK_SECRET || 'papa-bot-callback-secret-2026';
 const axios = require('axios');
 const structuredTriggerStore = createStructuredTriggerStore();
-
-/**
- * Отправляет запрос на callback-proxy в режиме fire-and-forget.
- * НЕ ждёт ответа — Render на free тарифе может спать >30 сек.
- */
-function callCallbackProxy(action, groupId, userId, userToken) {
-    const url = CALLBACK_PROXY_URL + '/webhook';
-    log('info', '🌐 callCallbackProxy (fire-and-forget): action=' + action + ', group=' + groupId + ', user=' + userId);
-
-    // Отправляем и НЕ ждём
-    axios.post(url, {
-        secret: CALLBACK_SECRET,
-        action,
-        groupId: String(groupId),
-        userId: String(userId),
-        userToken
-    }, {
-        timeout: 60000
-    }).then(response => {
-        if (response.data.success) {
-            log('info', '✅ callCallbackProxy success: ' + action + ' for user=' + userId);
-        } else {
-            log('error', '❌ callCallbackProxy error: ' + (response.data.error || 'Unknown'), response.data);
-        }
-    }).catch(err => {
-        log('error', '❌ callCallbackProxy failed: ' + err.message);
-    });
-
-    // Сразу возвращаем — функция не блокирует основной поток
-    return Promise.resolve();
-}
 
 const SUPPORTED_TYPES = [
     'message_new',
@@ -713,47 +678,35 @@ async function executeStructuredAction(row, normalizedRow, details, communityId,
         }
 
         if (actionCode === 'approve_group_request' && actionCommunityId) {
-            // WORKAROUND: VK заблокировал Standalone-приложения, поэтому получить User Token для groups.approveRequest
-            // невозможно (токен привязан к IP клиента, а бот на сервере).
-            // Решение: используем метод groups.add с Community Token (токеном сообщества).
-            // Community Token не привязан к IP и работает с сервера.
-            // Вызов groups.add для пользователя с заявкой автоматически одобряет её.
-            
-            const { getVkToken } = require('./config');
-            const communityToken = await getVkToken(0, actionCommunityId, profileId);
-            
-            if (!communityToken) {
-                log('error', '❌ approve_group_request: Не найден токен сообщества для ' + actionCommunityId);
-            } else {
-                try {
-                    const res = await axios.post('https://api.vk.com/method/groups.add', null, {
-                        params: {
-                            group_id: Math.abs(parseInt(actionCommunityId)),
-                            user_id: parseInt(details.userId),
-                            access_token: communityToken,
-                            v: '5.199'
-                        }
-                    });
-                    
-                    if (res.data.error) {
-                        log('warn', '⚠️ groups.add error (возможно, у токена нет прав manage_community): ' + res.data.error.error_msg);
-                    } else {
-                        log('info', '✅ Заявка одобрена через groups.add (user=' + details.userId + ')');
-                    }
-                } catch (e) {
-                    log('error', '❌ groups.add failed: ' + e.message);
-                }
+            const { getUserToken } = require('./config');
+            const userToken = await getUserToken(actionCommunityId, profileId);
+            if (!userToken) {
+                throw new Error('Не найден User Token для одобрения заявки в сообщество');
             }
+
+            const res = await axios.post('https://api.vk.com/method/groups.approveRequest', null, {
+                params: {
+                    group_id: Math.abs(parseInt(actionCommunityId)),
+                    user_id: parseInt(details.userId),
+                    access_token: userToken,
+                    v: '5.199'
+                },
+                timeout: 25000
+            });
+
+            if (res.data && res.data.error) {
+                throw new Error('groups.approveRequest failed: ' + res.data.error.error_msg);
+            }
+            log('info', '✅ Заявка одобрена через groups.approveRequest (user=' + details.userId + ')');
             continue;
         }
 
         if (actionCode === 'remove_from_community' && actionCommunityId) {
-            // groups.removeUser требует User Token — вызываем через callback-proxy
             const { getUserToken } = require('./config');
             const userToken = await getUserToken(actionCommunityId, profileId);
             log('debug', '🔑 remove_from_community: using userToken for community ' + actionCommunityId + ', token_start=' + (userToken ? String(userToken).substring(0, 10) : 'NONE'));
             if (!userToken) throw new Error('Не найден User Token для удаления пользователя из сообщества');
-            await callCallbackProxy('remove_user', actionCommunityId, details.userId, userToken);
+            await removeUserFromCommunity(actionCommunityId, details.userId, userToken);
             continue;
         }
 
@@ -763,12 +716,11 @@ async function executeStructuredAction(row, normalizedRow, details, communityId,
         }
 
         if (actionCode === 'delete_user_conversation' || actionCode === 'delete_user_data_and_conversation') {
-            // messages.deleteConversation требует User Token — вызываем через callback-proxy
             const { getUserToken } = require('./config');
             const userToken = await getUserToken(communityId, profileId);
             log('debug', '🔑 delete_conversation: using userToken for community ' + communityId + ', token_start=' + (userToken ? String(userToken).substring(0, 10) : 'NONE'));
             if (!userToken) throw new Error('Не найден User Token для удаления переписки');
-            await callCallbackProxy('delete_conversation', communityId, details.userId, userToken);
+            await deleteConversationWithUser(details.userId, userToken);
             if (actionCode === 'delete_user_data') continue;
         }
 

@@ -115,14 +115,14 @@ function createProfileUserSharedStore(config = buildEventRuntimeConfig(process.e
           Item: item
         }
       }));
-    const requests = deleteRequests.concat(putRequests);
-
-    for (const chunk of chunkItems(requests, 25)) {
-      await getDocumentClient().send(new BatchWriteCommand({
-        RequestItems: {
-          [tableName]: chunk
-        }
-      }));
+    for (const requests of [deleteRequests, putRequests]) {
+      for (const chunk of chunkItems(requests, 25)) {
+        await getDocumentClient().send(new BatchWriteCommand({
+          RequestItems: {
+            [tableName]: chunk
+          }
+        }));
+      }
     }
 
     return { ok: true };
