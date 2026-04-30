@@ -16,6 +16,12 @@ test('admin panel no longer hardcodes wake-up messaging for Render uploads', () 
 });
 
 test('admin panel surfaces a distinct final upload failure after retries', () => {
-    assert.match(adminPanelHTML, /Render всё ещё обрабатывает файл, делаем последнюю попытку/);
-    assert.match(adminPanelHTML, /Render отвечает, но загрузка не завершилась:/);
+    assert.match(adminPanelHTML, /Render всё ещё обрабатывает файл, восстанавливаем результат или делаем последнюю попытку/);
+    assert.match(adminPanelHTML, /Render загрузил файл, но браузер не получил ответ:/);
+});
+
+test('admin panel sends render upload_id and can recover completed uploads', () => {
+    assert.match(adminPanelHTML, /formData\.append\('upload_id', uploadId\)/);
+    assert.match(adminPanelHTML, /\/upload-result\?upload_id=/);
+    assert.match(adminPanelHTML, /recoverRenderResult\(60000\)/);
 });

@@ -6076,6 +6076,7 @@ saveBtn.onclick = function() {
           // Загружаем через Render для больших файлов
           var RENDER_SERVICE_URL = 'https://vk-uploader.onrender.com';
           var RENDER_UPLOADER_URL = 'https://vk-uploader.onrender.com/upload';
+          var uploadId = 'upload_' + Date.now() + '_' + Math.random().toString(36).slice(2, 12);
           
           var formData = new FormData();
           var byteString = atob(base64);
@@ -6088,6 +6089,7 @@ saveBtn.onclick = function() {
           formData.append('community_token', communityToken);
           formData.append('group_id', groupId);
           formData.append('target', target);
+          formData.append('upload_id', uploadId);
 
           var RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
           var RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
@@ -6105,6 +6107,58 @@ saveBtn.onclick = function() {
                 });
               }
               return response;
+            });
+          };
+
+          var responseFromUploadResult = function(result) {
+            return new Response(JSON.stringify(result), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            });
+          };
+
+          var recoverRenderResult = function(timeoutMs) {
+            var startedAt = Date.now();
+            var resultUrl = RENDER_SERVICE_URL + '/upload-result?upload_id=' + encodeURIComponent(uploadId);
+
+            return new Promise(function(resolve, reject) {
+              var poll = function() {
+                fetch(resultUrl, {
+                  method: 'GET',
+                  cache: 'no-store',
+                  signal: AbortSignal.timeout(5000)
+                }).then(function(response) {
+                  if (response.status === 202 || response.status === 404) {
+                    if (Date.now() - startedAt >= timeoutMs) {
+                      throw new Error('Render result is not ready');
+                    }
+                    setTimeout(poll, 2000);
+                    return null;
+                  }
+
+                  if (!response.ok) {
+                    return response.text().then(function(text) {
+                      throw new Error('Render result error: ' + response.status + ' - ' + text.substring(0, 200));
+                    });
+                  }
+
+                  return response.json().then(function(result) {
+                    if (!result || !result.success) {
+                      throw new Error((result && result.error) || 'Render result failed');
+                    }
+                    resolve(responseFromUploadResult(result));
+                    return null;
+                  });
+                }).catch(function(error) {
+                  if (Date.now() - startedAt >= timeoutMs) {
+                    reject(error);
+                    return;
+                  }
+                  setTimeout(poll, 2000);
+                });
+              };
+
+              poll();
             });
           };
 
@@ -6126,30 +6180,48 @@ saveBtn.onclick = function() {
             clearInterval(uploadAnimInterval);
             resolve(response);
           }).catch(function(error) {
-            clearInterval(uploadAnimInterval);
-
             if (!isRenderWakeCandidate(error)) {
+              clearInterval(uploadAnimInterval);
               reject(new Error('Render недоступен: ' + error.message));
               return;
             }
 
-            statusEl.innerText = '⏳ Render долго отвечает, повторяем загрузку с увеличенным ожиданием...';
+            statusEl.innerText = '⏳ Render долго отвечает, проверяем результат и повторяем при необходимости...';
+            recoverRenderResult(15000).then(function(response) {
+              clearInterval(uploadAnimInterval);
+              resolve(response);
+            }).catch(function() {
             uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS).then(function(response) {
+              clearInterval(uploadAnimInterval);
               resolve(response);
             }).catch(function(retryError) {
               if (!isRenderWakeCandidate(retryError)) {
+                clearInterval(uploadAnimInterval);
                 reject(new Error('Render недоступен: ' + retryError.message));
                 return;
               }
 
-              statusEl.innerText = '⌛ Render всё ещё обрабатывает файл, делаем последнюю попытку...';
+              statusEl.innerText = '⌛ Render всё ещё обрабатывает файл, восстанавливаем результат или делаем последнюю попытку...';
+              recoverRenderResult(30000).then(function(response) {
+                clearInterval(uploadAnimInterval);
+                resolve(response);
+              }).catch(function() {
               setTimeout(function() {
                 uploadViaRender(RENDER_RETRY_UPLOAD_TIMEOUT_MS).then(function(response) {
+                  clearInterval(uploadAnimInterval);
                   resolve(response);
                 }).catch(function(finalError) {
-                  reject(new Error('Render отвечает, но загрузка не завершилась: ' + finalError.message));
+                  recoverRenderResult(60000).then(function(response) {
+                    clearInterval(uploadAnimInterval);
+                    resolve(response);
+                  }).catch(function(recoveryError) {
+                    clearInterval(uploadAnimInterval);
+                    reject(new Error('Render загрузил файл, но браузер не получил ответ: ' + finalError.message + '. Recovery: ' + recoveryError.message));
+                  });
                 });
               }, RENDER_FINAL_RETRY_DELAY_MS);
+              });
+            });
             });
           });
         } else {
