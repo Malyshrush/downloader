@@ -7,6 +7,10 @@ const FormData = require('form-data');
 const { log } = require('../utils/logger');
 const { getUserToken, getVkToken, getVkGroupId } = require('./config');
 const { vkGet } = require('./vk-api');
+const RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
+const RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
+const RENDER_WAKE_TIMEOUT_MS = 60000;
+const RENDER_WAKE_POLL_INTERVAL_MS = 5000;
 
 // Поля вложений для разных типов
 const ATTACHMENT_FIELDS = {
@@ -457,7 +461,7 @@ async function uploadDocToMessages(buffer, filename, mimeType, groupId) {
         if (fileSizeMB > 3.5) {
             log('info', `📎 [DOC UPLOAD] File >3.5MB, using Render service...`);
             try {
-                const result = await uploadViaRenderService(buffer, filename, mimeType, 'messages', absGroupId);
+                const result = await uploadViaRenderServiceWithDependencies(buffer, filename, mimeType, 'messages', absGroupId);
                 log('info', `✅ [DOC UPLOAD] Success via Render: ${result}`);
                 return result;
             } catch (renderError) {
@@ -535,7 +539,7 @@ async function uploadVideoToMessages(buffer, filename, mimeType, groupId) {
     if (fileSizeMB > 3.5) {
         log('info', `🎬 [VIDEO UPLOAD] File >3.5MB, using Render service...`);
         try {
-            const result = await uploadViaRenderService(buffer, filename, mimeType, 'messages', absGroupId);
+            const result = await uploadViaRenderServiceWithDependencies(buffer, filename, mimeType, 'messages', absGroupId);
             log('info', `✅ [VIDEO UPLOAD] Success via Render: ${result}`);
             return result;
         } catch (renderError) {
@@ -622,6 +626,121 @@ async function processAttachmentForComment(attachment, groupId) {
     return processAttachmentWithUserToken(attachment, groupId);
 }
 
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function createRenderUploadFormData(buffer, filename, mimeType, userToken, groupId, target) {
+    const formData = new FormData();
+    formData.append('file', buffer, { filename, contentType: mimeType });
+    formData.append('user_token', userToken);
+    formData.append('group_id', Math.abs(parseInt(groupId)));
+    formData.append('target', target);
+    return formData;
+}
+
+function isRenderWakeCandidate(error) {
+    const status = error?.response?.status;
+    if ([502, 503, 504].includes(status)) return true;
+
+    const code = String(error?.code || '').toUpperCase();
+    if (['ECONNABORTED', 'ETIMEDOUT', 'ECONNRESET', 'ENOTFOUND', 'EHOSTUNREACH'].includes(code)) {
+        return true;
+    }
+
+    const message = String(error?.message || '').toLowerCase();
+    return (
+        message.includes('timeout') ||
+        message.includes('timed out') ||
+        message.includes('socket hang up') ||
+        message.includes('network error') ||
+        message.includes('service unavailable') ||
+        message.includes('bad gateway') ||
+        message.includes('gateway timeout')
+    );
+}
+
+async function waitForRenderServiceWake(renderUrl, overrides = {}) {
+    const pingRender = overrides.pingRender || (async () => {
+        try {
+            await axios.get(`${renderUrl}/upload`, { timeout: 5000 });
+            return true;
+        } catch (error) {
+            return false;
+        }
+    });
+    const sleepImpl = overrides.sleep || sleep;
+    const startedAt = Date.now();
+    let attempt = 0;
+
+    while ((Date.now() - startedAt) < RENDER_WAKE_TIMEOUT_MS) {
+        attempt += 1;
+        const awake = await pingRender(attempt);
+        if (awake) {
+            return true;
+        }
+
+        const elapsed = Date.now() - startedAt;
+        const remaining = RENDER_WAKE_TIMEOUT_MS - elapsed;
+        if (remaining <= 0) {
+            break;
+        }
+
+        await sleepImpl(Math.min(RENDER_WAKE_POLL_INTERVAL_MS, remaining));
+    }
+
+    return false;
+}
+
+async function uploadViaRenderServiceWithDependencies(buffer, filename, mimeType, target, groupId, overrides = {}) {
+    const renderUrl = overrides.renderUrl || process.env.RENDER_UPLOAD_URL || 'https://vk-uploader.onrender.com';
+    const getUserTokenImpl = overrides.getUserToken || getUserToken;
+    const createFormDataImpl = overrides.createFormData || createRenderUploadFormData;
+    const uploadRequest = overrides.uploadRequest || (async (url, formData, timeoutMs) => {
+        const response = await axios.post(url, formData, {
+            headers: formData.getHeaders(),
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            timeout: timeoutMs
+        });
+        return response.data;
+    });
+
+    const userToken = await getUserTokenImpl(groupId?.toString());
+    if (!userToken) {
+        throw new Error('User Token не настроен для загрузки через Render');
+    }
+
+    const uploadUrl = `${renderUrl}/upload`;
+    log('info', `[RENDER UPLOAD] Uploading to ${uploadUrl}`);
+
+    const executeUpload = async timeoutMs => {
+        const formData = createFormDataImpl(buffer, filename, mimeType, userToken, groupId, target);
+        const payload = await uploadRequest(uploadUrl, formData, timeoutMs);
+        if (!payload?.success) {
+            throw new Error(payload?.error || 'Render upload failed');
+        }
+        return payload.attachment;
+    };
+
+    try {
+        return await executeUpload(RENDER_INITIAL_UPLOAD_TIMEOUT_MS);
+    } catch (error) {
+        if (!isRenderWakeCandidate(error)) {
+            throw error;
+        }
+
+        log('warn', `[RENDER UPLOAD] Initial upload failed, waking Render service: ${error.message}`);
+        const awake = await waitForRenderServiceWake(renderUrl, overrides);
+        if (!awake) {
+            throw new Error('Render service did not wake within 60 seconds');
+        }
+
+        log('info', '[RENDER UPLOAD] Render service woke up, retrying upload');
+        return executeUpload(RENDER_RETRY_UPLOAD_TIMEOUT_MS);
+    }
+}
+
 /**
  * Загрузить файл через Render сервис (deprecated - не используется)
  */
@@ -677,5 +796,10 @@ module.exports = {
     uploadPhotoToMessages,
     uploadDocToMessages,
     uploadVideoToMessages,
-    uploadToVK
+    uploadToVK,
+    __testOnly: {
+        isRenderWakeCandidate,
+        waitForRenderServiceWake,
+        uploadViaRenderServiceWithDependencies
+    }
 };

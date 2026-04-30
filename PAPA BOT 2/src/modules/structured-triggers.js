@@ -1,7 +1,7 @@
 const { log } = require('../utils/logger');
 const { getSheetData } = require('./storage');
-const { sendMessageAndPerformActions } = require('./messages');
-const { sendCommentAndPerformActions } = require('./comments');
+const { sendMessageAndPerformActions, loadMessageRows } = require('./messages');
+const { sendCommentAndPerformActions, loadCommentRows } = require('./comments');
 const {
     checkUserGroups,
     updateUserGroups,
@@ -417,12 +417,21 @@ function normalizeActionCode(value) {
     return normalized;
 }
 
+function inferLegacyActionCode(row) {
+    if (String(row['ДОБАВИТЬ ГРУППУ'] || '').trim()) return 'add_group';
+    if (String(row['УДАЛИТЬ ГРУППУ'] || '').trim()) return 'remove_group';
+    if (String(row['Бот'] || '').trim() && String(row['Шаг'] || '').trim()) return 'add_to_bot';
+    if (String(row['Название переменной'] || '').trim()) return 'user_var_update';
+    return '';
+}
+
 function normalizeRow(row) {
     const legacyEventType = normalizeValue(row['Тип события']);
     const legacyCheckType = normalizeValue(row['Проверка']);
     const eventCode = normalizeValue(row['Код события']) || mapLegacyEventCode(legacyEventType, legacyCheckType);
     const conditionCode = normalizeValue(row['Код условия']) || mapLegacyCondition(eventCode, legacyCheckType || normalizeValue(row['Условие']));
     const extraConditionCode = normalizeValue(row['Код доп. условия'] || row['Доп. условие']);
+    const inferredActionCode = normalizeActionCode(row['Код действия'] || row['Действие']) || inferLegacyActionCode(row);
 
     let actions = [];
     try {
@@ -433,7 +442,7 @@ function normalizeRow(row) {
     }
     if (!actions.length) {
         actions = [{
-            action: normalizeActionCode(row['Код действия'] || row['Действие']),
+            action: inferredActionCode,
             actionGroup: String(row['Группа'] || row['ДОБАВИТЬ ГРУППУ'] || row['УДАЛИТЬ ГРУППУ'] || '').trim(),
             actionBot: String(row['Бот'] || '').trim(),
             actionStep: String(row['Шаг'] || '').trim(),
@@ -451,7 +460,7 @@ function normalizeRow(row) {
         conditionValue: String(row['Значение'] || '').trim(),
         extraConditionCode,
         extraValue: String(row['Доп. значение'] || '').trim(),
-        actionCode: normalizeActionCode(row['Код действия'] || row['Действие']),
+        actionCode: inferredActionCode,
         targetGroup: String(row['Группа'] || row['ДОБАВИТЬ ГРУППУ'] || row['УДАЛИТЬ ГРУППУ'] || '').trim(),
         targetBot: String(row['Бот'] || '').trim(),
         targetStep: String(row['Шаг'] || '').trim(),
@@ -551,7 +560,37 @@ function resolveActionCommunityId(actionCommunityId, details) {
     return '';
 }
 
-async function executeStructuredAction(row, normalizedRow, details, communityId, profileId) {
+async function resolveTriggeredStepExecution(actionBot, actionStep, communityId, profileId, overrides = {}) {
+    const messageRows = await (overrides.loadMessageRows || loadMessageRows)(communityId, profileId, overrides);
+    const commentRows = await (overrides.loadCommentRows || loadCommentRows)(communityId, profileId, overrides);
+    const normalizedBot = String(actionBot || '').trim().toLowerCase();
+    const normalizedStep = String(actionStep || '').trim().toLowerCase();
+    const matches = [];
+
+    for (const row of Array.isArray(messageRows) ? messageRows : []) {
+        if (String(row['Бот'] || '').trim().toLowerCase() === normalizedBot &&
+            String(row['Шаг'] || '').trim().toLowerCase() === normalizedStep) {
+            matches.push({ source: 'messages', row });
+        }
+    }
+
+    for (const row of Array.isArray(commentRows) ? commentRows : []) {
+        if (String(row['Бот'] || '').trim().toLowerCase() === normalizedBot &&
+            String(row['Шаг'] || '').trim().toLowerCase() === normalizedStep) {
+            matches.push({ source: 'comments', row });
+        }
+    }
+
+    if (!matches.length) {
+        throw new Error(`Не найден шаг "${actionStep}" для бота "${actionBot}"`);
+    }
+    if (matches.length > 1) {
+        throw new Error(`Найдено несколько шагов "${actionStep}" для бота "${actionBot}"`);
+    }
+    return matches[0];
+}
+
+async function executeStructuredAction(row, normalizedRow, details, communityId, profileId, overrides = {}) {
     const answer = String(row['Ответ'] || '').trim();
     if (answer) {
         if (normalizedRow.eventCode === 'wall_comment_add') {
@@ -577,17 +616,42 @@ async function executeStructuredAction(row, normalizedRow, details, communityId,
         const actionCommunityId = resolveActionCommunityId(action.actionCommunityId, details);
 
         if (actionCode === 'add_group' && actionGroup) {
-            await updateUserGroups(details.userId, actionGroup, '', communityId, profileId);
+            await (overrides.updateUserGroups || updateUserGroups)(details.userId, actionGroup, '', communityId, profileId);
             continue;
         }
 
         if (actionCode === 'remove_group' && actionGroup) {
-            await updateUserGroups(details.userId, '', actionGroup, communityId, profileId);
+            await (overrides.updateUserGroups || updateUserGroups)(details.userId, '', actionGroup, communityId, profileId);
             continue;
         }
 
         if (actionCode === 'add_to_bot' && actionBot && actionStep) {
-            await updateUserBotAndStep(details.userId, actionBot, actionStep, communityId, profileId);
+            const resolvedStep = await resolveTriggeredStepExecution(actionBot, actionStep, communityId, profileId, overrides);
+            if (resolvedStep.source === 'messages') {
+                await (overrides.sendMessageAndPerformActions || sendMessageAndPerformActions)(
+                    details.userId,
+                    resolvedStep.row,
+                    { group_id: details.groupId },
+                    false,
+                    communityId,
+                    profileId
+                );
+                continue;
+            }
+
+            if (resolvedStep.source === 'comments') {
+                if (normalizedRow.eventCode !== 'wall_comment_add') {
+                    throw new Error(`Шаг "${actionStep}" бота "${actionBot}" находится во вкладке комментариев и не может быть выполнен для события ${details.eventType}`);
+                }
+                await (overrides.sendCommentAndPerformActions || sendCommentAndPerformActions)(
+                    details.object,
+                    details.groupId,
+                    resolvedStep.row,
+                    communityId,
+                    profileId
+                );
+                continue;
+            }
             continue;
         }
 
@@ -775,7 +839,7 @@ async function processStructuredTriggersWithDependencies(data, profileId = '1', 
             profileId
         });
 
-        await executeStructuredAction(row, normalizedRow, details, details.communityId, profileId);
+        await executeStructuredAction(row, normalizedRow, details, details.communityId, profileId, overrides);
         await (overrides.recordStructuredTriggerExecution || recordStructuredTriggerExecution)(profileId, details.communityId);
         handledAny = true;
 
@@ -795,6 +859,7 @@ module.exports = {
     processStructuredTriggers,
     __testOnly: {
         loadStructuredTriggerRows,
-        processStructuredTriggersWithDependencies
+        processStructuredTriggersWithDependencies,
+        resolveTriggeredStepExecution
     }
 };

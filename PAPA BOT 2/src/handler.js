@@ -1214,6 +1214,7 @@ async function handleReactivateExpiredProfile(event) {
  * Сохранение данных листа
  */
 async function handleSaveSheet(event) {
+    return handleSaveSheetWithDependencies(event);
     try {
         const q = event.queryStringParameters || {};
         const body = JSON.parse(event.body || '{}');
@@ -1282,6 +1283,98 @@ async function handleSaveSheet(event) {
     } catch (e) {
         return {
             statusCode: 500,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ success: false, error: e.message })
+        };
+    }
+}
+
+function collectSheetBotNames(rows) {
+    const names = new Set();
+    for (const row of Array.isArray(rows) ? rows : []) {
+        const botName = String(row && row['Бот'] ? row['Бот'] : '').trim().toLowerCase();
+        if (botName) names.add(botName);
+    }
+    return names;
+}
+
+async function validateUniqueBotNamesAcrossSheets(sheetName, nextRows, communityId, profileId, overrides = {}) {
+    if (sheetName !== 'СООБЩЕНИЯ' && sheetName !== 'КОММЕНТАРИИ В ПОСТАХ') {
+        return;
+    }
+
+    const getSheetDataImpl = overrides.getSheetData || getSheetData;
+    const oppositeSheet = sheetName === 'СООБЩЕНИЯ' ? 'КОММЕНТАРИИ В ПОСТАХ' : 'СООБЩЕНИЯ';
+    const nextBotNames = collectSheetBotNames(nextRows);
+    const oppositeBotNames = collectSheetBotNames(await getSheetDataImpl(oppositeSheet, communityId, profileId));
+
+    for (const botName of nextBotNames) {
+        if (oppositeBotNames.has(botName)) {
+            throw Object.assign(new Error(`Бот с именем "${botName}" уже существует во вкладке "${oppositeSheet}". Выберите другое имя.`), {
+                statusCode: 400
+            });
+        }
+    }
+}
+
+async function handleSaveSheetWithDependencies(event, overrides = {}) {
+    try {
+        const q = event.queryStringParameters || {};
+        const body = JSON.parse(event.body || '{}');
+        const sheetName = q.save;
+        const getRequestProfileIdImpl = overrides.getRequestProfileId || getRequestProfileId;
+        const isProfileScopedSheetImpl = overrides.isProfileScopedSheet || isProfileScopedSheet;
+        const getActiveCommunityIdImpl = overrides.getActiveCommunityId || getActiveCommunityId;
+        const loadBotConfigImpl = overrides.loadBotConfig || loadBotConfig;
+        const getFullConfigImpl = overrides.getFullConfig || getFullConfig;
+        const invalidateCacheImpl = overrides.invalidateCache || invalidateCache;
+        const getSheetDataImpl = overrides.getSheetData || getSheetData;
+        const saveSheetDataImpl = overrides.saveSheetData || saveSheetData;
+        const logImpl = overrides.log || log;
+        const profileId = getRequestProfileIdImpl(q, body);
+        const communityId = isProfileScopedSheetImpl(sheetName) ? null : (q.communityId || getActiveCommunityIdImpl(profileId));
+
+        logImpl('debug', `handleSaveSheet community=${communityId} profile=${profileId}`);
+
+        let fileCommunityId = communityId;
+        await loadBotConfigImpl(profileId);
+        const fullConfig = getFullConfigImpl(profileId);
+        if (!isProfileScopedSheetImpl(sheetName) && fullConfig?.communities?.[communityId]?.vk_group_id) {
+            fileCommunityId = fullConfig.communities[communityId].vk_group_id.toString();
+        }
+
+        await validateUniqueBotNamesAcrossSheets(sheetName, body, fileCommunityId, profileId, overrides);
+        invalidateCacheImpl(sheetName, fileCommunityId, profileId);
+
+        if (sheetName === 'РАССЫЛКА') {
+            const currentData = await getSheetDataImpl(sheetName, fileCommunityId, profileId);
+            const updatedData = body.map((newRow, idx) => ({
+                ...newRow,
+                'Статус': currentData[idx]?.['Статус'] || newRow['Статус'],
+                'Фактическое время отправки': currentData[idx]?.['Фактическое время отправки'] || newRow['Фактическое время отправки'],
+                'Ошибка': currentData[idx]?.['Ошибка'] || newRow['Ошибка']
+            }));
+            await saveSheetDataImpl(sheetName, updatedData, fileCommunityId, profileId);
+        } else if (sheetName === 'ПОЛЬЗОВАТЕЛИ') {
+            const cleanedData = body.map(row => {
+                if (row['ГРУППА'] && typeof row['ГРУППА'] === 'string') {
+                    row['ГРУППА'] = row['ГРУППА'].trim();
+                }
+                return row;
+            });
+            await saveSheetDataImpl(sheetName, cleanedData, fileCommunityId, profileId);
+        } else {
+            await saveSheetDataImpl(sheetName, body, fileCommunityId, profileId);
+        }
+
+        return {
+            statusCode: 200,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ success: true })
+        };
+    } catch (e) {
+        return {
+            statusCode: e.statusCode || 500,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
             body: JSON.stringify({ success: false, error: e.message })
         };
@@ -2772,6 +2865,7 @@ module.exports = {
     senderHandler,
     __testOnly: {
         handleVkWebhookWithDependencies,
+        handleSaveSheetWithDependencies,
         workerHandlerWithDependencies,
         senderHandlerWithDependencies
     }
