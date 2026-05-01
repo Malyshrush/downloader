@@ -208,6 +208,104 @@ async function run(name, fn) {
       { ID: '77', 'Переменная ПВС': '777', 'Значение ПВС': '444' }
     ]);
   });
+
+  await run('applySheetRuntimeOverlay reads messages comments and triggers from structured stores', async () => {
+    const messageRows = await storage.__testOnly.applySheetRuntimeOverlay(
+      'СООБЩЕНИЯ',
+      [{ 'Триггер': 'legacy' }],
+      'community-1',
+      '7',
+      {
+        messageRuleStore: {
+          isEnabled: () => true,
+          listRuleRows: async (communityId, profileId) => {
+            assert.equal(communityId, 'community-1');
+            assert.equal(profileId, '7');
+            return { initialized: true, rows: [{ 'Триггер': 'runtime-message' }] };
+          }
+        }
+      }
+    );
+    assert.deepEqual(messageRows, [{ 'Триггер': 'runtime-message' }]);
+
+    const commentRows = await storage.__testOnly.applySheetRuntimeOverlay(
+      'КОММЕНТАРИИ В ПОСТАХ',
+      [{ 'Триггер': 'legacy' }],
+      'community-1',
+      '7',
+      {
+        commentRuleStore: {
+          isEnabled: () => true,
+          listRuleRows: async () => ({ initialized: true, rows: [{ 'Триггер': 'runtime-comment' }] })
+        }
+      }
+    );
+    assert.deepEqual(commentRows, [{ 'Триггер': 'runtime-comment' }]);
+
+    const triggerRows = await storage.__testOnly.applySheetRuntimeOverlay(
+      'ТРИГГЕРЫ',
+      [{ 'Название': 'legacy' }],
+      'community-1',
+      '7',
+      {
+        structuredTriggerStore: {
+          isEnabled: () => true,
+          listTriggerRows: async () => ({ initialized: true, rows: [{ 'Название': 'runtime-trigger' }] })
+        }
+      }
+    );
+    assert.deepEqual(triggerRows, [{ 'Название': 'runtime-trigger' }]);
+  });
+
+  await run('applySheetRuntimeOverlay reads variable sheets from structured stores', async () => {
+    const variableRows = await storage.__testOnly.applySheetRuntimeOverlay(
+      'ПЕРЕМЕННЫЕ',
+      [{ 'Глобальная': 'legacy' }],
+      'community-1',
+      '7',
+      {
+        communityVariablesStore: {
+          isEnabled: () => true,
+          listVariableState: async (communityId, profileId) => {
+            assert.equal(communityId, 'community-1');
+            assert.equal(profileId, '7');
+            return {
+              globalInitialized: true,
+              globalVars: { gp1: '100' },
+              vkInitialized: true,
+              vkVars: { '%vk_user%': 'имя пользователя' },
+              userCatalogInitialized: true,
+              userVariableNames: ['pp1']
+            };
+          }
+        }
+      }
+    );
+    assert.deepEqual(variableRows, [
+      { 'Пользовательская': 'pp1', 'Глобальная': '', 'Значение ГП': '', 'ПЕРЕМЕННЫЕ ВК': '', 'Значение/Описание ПВК': '' },
+      { 'Пользовательская': '', 'Глобальная': 'gp1', 'Значение ГП': '100', 'ПЕРЕМЕННЫЕ ВК': '', 'Значение/Описание ПВК': '' },
+      { 'Пользовательская': '', 'Глобальная': '', 'Значение ГП': '', 'ПЕРЕМЕННЫЕ ВК': '%vk_user%', 'Значение/Описание ПВК': 'имя пользователя' }
+    ]);
+
+    const sharedRows = await storage.__testOnly.applySheetRuntimeOverlay(
+      'ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ',
+      [{ 'Переменная ПВС': 'legacy', 'Значение ПВС': 'stale' }],
+      null,
+      '7',
+      {
+        sharedVariablesStore: {
+          isEnabled: () => true,
+          listVariables: async profileScope => {
+            assert.equal(profileScope, '7');
+            return { pvs777: '444' };
+          }
+        }
+      }
+    );
+    assert.deepEqual(sharedRows, [
+      { 'Переменная ПВС': 'pvs777', 'Значение ПВС': '444' }
+    ]);
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {

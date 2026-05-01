@@ -4347,7 +4347,8 @@ const columns = {
 ],
 
 'Shared_Variables': [
-{ name: 'Переменная ПВС', class: 'th-orange', hint: 'Имя ПВС пользователей профиля. Здесь показываются названия межсообщественных пользовательских переменных, встречающихся в текущем профиле.' }
+{ name: 'Переменная ПВС', class: 'th-orange', hint: 'Имя ПВС пользователей профиля. Здесь показываются названия межсообщественных пользовательских переменных, встречающихся в текущем профиле.' },
+{ name: 'Значение ПВС', class: 'th-orange', hint: 'Актуальные значения этой ПВС по профилю. Сохраняется в structured catalog и используется как справочник.' }
 ],
 
 'VK_Variables': [
@@ -4481,7 +4482,8 @@ if (tab === 'Variables') {
     }
     dataStore['Shared_Variables'] = Array.isArray(sharedData) ? sharedData.map(function(row) {
         return {
-            'Переменная ПВС': row['Переменная ПВС'] || ''
+            'Переменная ПВС': row['Переменная ПВС'] || '',
+            'Значение ПВС': row['Значение ПВС'] || ''
         };
     }) : [];
 }
@@ -7764,14 +7766,6 @@ syncDataFromTable(tab);
 
 // Для Variables/Variables_User/VK_Variables - объединяем перед сохранением
 let saveData = dataStore[tab];
-if (tab === 'Users') {
-    saveData = (dataStore['Users'] || []).map(function(row) {
-        var clone = Object.assign({}, row);
-        delete clone['Переменная ПВС'];
-        delete clone['Значение ПВС'];
-        return clone;
-    });
-}
 if (tab === 'Variables' || tab === 'Variables_User' || tab === 'VK_Variables') {
     const userVars = dataStore['Variables_User'] || [];
     const mainVars = dataStore['Variables'] || [];
@@ -7897,14 +7891,6 @@ window.saveDataDirectly = async function(tab) {
         const vkGroupId = communityConfig.vk_group_id || window.currentCommunityId || '';
 
         let dataToSave = dataStore[tab] || [];
-        if (tab === 'Users') {
-            dataToSave = (dataStore['Users'] || []).map(function(row) {
-                var clone = Object.assign({}, row);
-                delete clone['Переменная ПВС'];
-                delete clone['Значение ПВС'];
-                return clone;
-            });
-        }
         if (tab === 'Variables' || tab === 'Variables_User' || tab === 'VK_Variables') {
             const userVars = dataStore['Variables_User'] || [];
             const mainVars = dataStore['Variables'] || [];

@@ -176,6 +176,23 @@ const memoryCache = { data: {}, lastUpdated: {}, ttl: {
     'КОММЕНТАРИИ В ПОСТАХ': 300000, 'ТРИГГЕРЫ': 5000, 'ЛОГИ ПРИЛОЖЕНИЯ': 0, 'ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ': 5000, 'ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ': 5000, 'РАССЫЛКА': 0, 'ОТЛОЖЕННЫЕ': 3000
 }};
 
+function getSheetCacheTtl(sheetName) {
+    if (
+        (sheetName === 'ПОЛЬЗОВАТЕЛИ' && isUserStateStoreEnabled()) ||
+        (sheetName === 'ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ' && isProfileUserSharedStoreEnabled()) ||
+        (sheetName === 'ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ' && isSharedVariablesStoreEnabled()) ||
+        (sheetName === 'ПЕРЕМЕННЫЕ' && isCommunityVariablesStoreEnabled()) ||
+        (sheetName === 'СООБЩЕНИЯ' && isMessageRuleStoreEnabled()) ||
+        (sheetName === 'КОММЕНТАРИИ В ПОСТАХ' && isCommentRuleStoreEnabled()) ||
+        (sheetName === 'ТРИГГЕРЫ' && isStructuredTriggerStoreEnabled()) ||
+        (sheetName === 'РАССЫЛКА' && isMailingDeliveryStoreEnabled()) ||
+        (sheetName === 'ОТЛОЖЕННЫЕ' && isDelayedDeliveryStoreEnabled())
+    ) {
+        return 0;
+    }
+    return memoryCache.ttl[sheetName] || 300000;
+}
+
 // S3 запрос с таймаутом
 async function s3Send(command) {
     return Promise.race([
@@ -333,6 +350,48 @@ function buildCommunityVariableStateFromRows(rows) {
     };
 }
 
+function buildCommunityVariableRowsFromState(state) {
+    const rows = [];
+
+    for (const name of Array.isArray(state && state.userVariableNames) ? state.userVariableNames : []) {
+        const variableName = normalizeVariableName(name);
+        if (!variableName) continue;
+        rows.push({
+            'Пользовательская': variableName,
+            'Глобальная': '',
+            'Значение ГП': '',
+            'ПЕРЕМЕННЫЕ ВК': '',
+            'Значение/Описание ПВК': ''
+        });
+    }
+
+    for (const [name, value] of Object.entries(state && state.globalVars || {})) {
+        const variableName = normalizeVariableName(name);
+        if (!variableName) continue;
+        rows.push({
+            'Пользовательская': '',
+            'Глобальная': variableName,
+            'Значение ГП': String(value || '').trim(),
+            'ПЕРЕМЕННЫЕ ВК': '',
+            'Значение/Описание ПВК': ''
+        });
+    }
+
+    for (const [name, value] of Object.entries(state && state.vkVars || {})) {
+        const variableName = normalizeVariableName(name);
+        if (!variableName) continue;
+        rows.push({
+            'Пользовательская': '',
+            'Глобальная': '',
+            'Значение ГП': '',
+            'ПЕРЕМЕННЫЕ ВК': variableName,
+            'Значение/Описание ПВК': String(value || '').trim()
+        });
+    }
+
+    return rows;
+}
+
 function buildProfileUserSharedEntriesFromRows(rows) {
     const byUserId = new Map();
 
@@ -437,6 +496,27 @@ function buildSharedVariableCatalogMap(rows) {
     return variables;
 }
 
+function buildSharedVariableRowsFromCatalog(variables) {
+    return Object.entries(variables || {})
+        .map(function([name, value]) {
+            const variableName = normalizeVariableName(name);
+            if (!variableName) return null;
+            return {
+                'Переменная ПВС': variableName,
+                'Значение ПВС': String(value || '').trim()
+            };
+        })
+        .filter(Boolean);
+}
+
+async function readStructuredRuleRows(store, communityId, profileId, fallbackRows) {
+    if (!store || typeof store.isEnabled !== 'function' || !store.isEnabled() || typeof store.listRuleRows !== 'function') {
+        return fallbackRows;
+    }
+    const snapshot = await store.listRuleRows(communityId, profileId);
+    return snapshot && snapshot.initialized ? (Array.isArray(snapshot.rows) ? snapshot.rows : []) : fallbackRows;
+}
+
 function applyMailingRuntimeState(row, state) {
     if (!state) return cloneValue(row);
     const merged = cloneValue(row);
@@ -486,12 +566,49 @@ async function applySheetRuntimeOverlay(sheetName, rows, communityId, profileId 
     const isDelayedSheet = sheetName === 'ОТЛОЖЕННЫЕ' || sheetName === 'РћРўР›РћР–Р•РќРќР«Р•';
     const isUsersSheet = sheetName === 'ПОЛЬЗОВАТЕЛИ' || sheetName === 'РџРћР›Р¬Р—РћР’РђРўР•Р›Р';
     const isProfileSharedSheet = sheetName === 'ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ' || sheetName === 'РџР’РЎ РџРћР›Р¬Р—РћР’РђРўР•Р›Р•Р™ РџР РћР¤РР›РЇ' || sheetName === 'Р СџР вЂ™Р РЋ Р СџР С›Р вЂєР В¬Р вЂ”Р С›Р вЂ™Р С’Р СћР вЂўР вЂєР вЂўР в„ў Р СџР В Р С›Р В¤Р ВР вЂєР Р‡';
+    const isMessageSheet = sheetName === 'СООБЩЕНИЯ' || sheetName === 'РЎРћРћР‘Р©Р•РќРРЇ';
+    const isCommentSheet = sheetName === 'КОММЕНТАРИИ В ПОСТАХ' || sheetName === 'РљРћРњРњР•РќРўРђР РР Р’ РџРћРЎРўРђРҐ';
+    const isTriggerSheet = sheetName === 'ТРИГГЕРЫ' || sheetName === 'РўР РР“Р“Р•Р Р«';
+    const isVariablesSheet = sheetName === 'ПЕРЕМЕННЫЕ' || sheetName === 'РџР•Р Р•РњР•РќРќР«Р•';
+    const isSharedSheet = sheetName === 'ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ' || sheetName === 'РџР•Р Р•РњР•РќРќР«Р• Р’РЎР•РҐ РЎРћРћР‘Р©Р•РЎРўР’';
 
-    if (!isMailingSheet && !isDelayedSheet && !isUsersSheet && !isProfileSharedSheet) {
+    if (!isMailingSheet && !isDelayedSheet && !isUsersSheet && !isProfileSharedSheet && !isMessageSheet && !isCommentSheet && !isTriggerSheet && !isVariablesSheet && !isSharedSheet) {
         return rows;
     }
-    if (!isUsersSheet && !isProfileSharedSheet && (!Array.isArray(rows) || rows.length === 0)) {
+    if (!isUsersSheet && !isProfileSharedSheet && !isMessageSheet && !isCommentSheet && !isTriggerSheet && !isVariablesSheet && !isSharedSheet && (!Array.isArray(rows) || rows.length === 0)) {
         return rows;
+    }
+
+    if (isMessageSheet) {
+        return readStructuredRuleRows(getMessageRuleStore(overrides), communityId, profileId, rows);
+    }
+
+    if (isCommentSheet) {
+        return readStructuredRuleRows(getCommentRuleStore(overrides), communityId, profileId, rows);
+    }
+
+    if (isTriggerSheet) {
+        if (!isStructuredTriggerStoreEnabled(overrides)) {
+            return rows;
+        }
+        const snapshot = await getStructuredTriggerStore(overrides).listTriggerRows(communityId, profileId);
+        return snapshot && snapshot.initialized ? (Array.isArray(snapshot.rows) ? snapshot.rows : []) : rows;
+    }
+
+    if (isVariablesSheet) {
+        if (!isCommunityVariablesStoreEnabled(overrides)) {
+            return rows;
+        }
+        const state = await getCommunityVariablesStore(overrides).listVariableState(communityId, profileId);
+        const initialized = Boolean(state && (state.globalInitialized || state.vkInitialized || state.userCatalogInitialized));
+        return initialized ? buildCommunityVariableRowsFromState(state) : rows;
+    }
+
+    if (isSharedSheet) {
+        if (!isSharedVariablesStoreEnabled(overrides)) {
+            return rows;
+        }
+        return buildSharedVariableRowsFromCatalog(await getSharedVariablesStore(overrides).listVariables(profileId));
     }
 
     if (isUsersSheet) {
@@ -822,7 +939,7 @@ async function getSheetData(sheetName, communityId, profileId = '1') {
 
     const cacheKey = communityId ? `${pid}_${sheetName}_${communityId}` : `${pid}_${sheetName}`;
     const now = Date.now();
-    const ttl = isUserStateStoreEnabled() && sheetName === 'ПОЛЬЗОВАТЕЛИ' ? 0 : (memoryCache.ttl[sheetName] || 300000);
+    const ttl = getSheetCacheTtl(sheetName);
 
     // Debug logging
     log('debug', `📂 getSheetData: sheet=${sheetName}, communityId=${communityId}, fileName=${fileName}, cacheKey=${cacheKey}, cacheHit=${!!memoryCache.data[cacheKey] && (now - memoryCache.lastUpdated[cacheKey]) < ttl}`);

@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-05-01T05:19:37.245Z",
+  "createdAt": "2026-05-01T05:46:34.253Z",
   "ymqEndpoint": "https://message-queue.api.cloud.yandex.net",
   "ydbDocApiEndpoint": "https://docapi.serverless.yandexcloud.net/ru-central1/b1gh3sun4tm32rd0jpd4/etnbufcfn4sjsrn3fa1s",
   "incomingQueue": {
