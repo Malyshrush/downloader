@@ -354,6 +354,45 @@ function buildProfileUserSharedEntriesFromRows(rows) {
     });
 }
 
+function buildProfileUserSharedVariablesFromUserRow(row) {
+    const names = String(row && row['\u041f\u0435\u0440\u0435\u043c\u0435\u043d\u043d\u0430\u044f \u041f\u0412\u0421'] || '')
+        .split(/\r?\n/)
+        .map(item => normalizeVariableName(item))
+        .filter(Boolean);
+    const values = String(row && row['\u0417\u043d\u0430\u0447\u0435\u043d\u0438\u0435 \u041f\u0412\u0421'] || '')
+        .split(/\r?\n/);
+    const variables = {};
+
+    names.forEach(function(name, index) {
+        variables[name] = String(values[index] || '').trim();
+    });
+
+    return variables;
+}
+
+function buildSharedVariableCatalogMapFromEntries(entries) {
+    const byName = new Map();
+
+    for (const entry of Array.isArray(entries) ? entries : []) {
+        for (const [name, value] of Object.entries(entry && entry.variables || {})) {
+            const variableName = normalizeVariableName(name);
+            if (!variableName) continue;
+            if (!byName.has(variableName)) {
+                byName.set(variableName, { name: variableName, values: new Set() });
+            }
+            if (String(value || '').trim()) {
+                byName.get(variableName).values.add(String(value || '').trim());
+            }
+        }
+    }
+
+    const variables = {};
+    for (const item of byName.values()) {
+        variables[item.name] = Array.from(item.values).join('\n');
+    }
+    return variables;
+}
+
 function buildSharedVariableCatalogMap(rows) {
     const byName = new Map();
 
@@ -490,6 +529,26 @@ async function syncUsersSheet(sheetName, rows, communityId, profileId = '1', ove
         buildUserScope(communityId, profileId),
         normalizedRows
     );
+    if (isProfileUserSharedStoreEnabled(overrides)) {
+        const profileSharedStore = getProfileUserSharedStore(overrides);
+        for (const row of normalizedRows) {
+            const userId = String(row && row.ID || '').trim();
+            if (!userId) continue;
+            await profileSharedStore.putUserVariables(
+                profileId,
+                userId,
+                buildProfileUserSharedVariablesFromUserRow(row)
+            );
+        }
+
+        if (isSharedVariablesStoreEnabled(overrides) && typeof profileSharedStore.listUserEntries === 'function') {
+            const entries = await profileSharedStore.listUserEntries(profileId);
+            await getSharedVariablesStore(overrides).replaceVariables(
+                profileId,
+                buildSharedVariableCatalogMapFromEntries(entries)
+            );
+        }
+    }
 
     return {
         synced: true,

@@ -102,6 +102,64 @@ async function run(name, fn) {
     ]);
   });
 
+  await run('syncStructuredReadModelSheet syncs users PVS columns back into structured shared variables', async () => {
+    const userRows = [];
+    const sharedWrites = [];
+    const catalogWrites = [];
+    const sharedMemory = new Map([
+      ['42', { old: 'stale' }],
+      ['77', { keep: 'yes' }]
+    ]);
+    const rows = [
+      { ID: '42', 'Переменная ПВС': '', 'Значение ПВС': '' },
+      { ID: '77', 'Переменная ПВС': '777', 'Значение ПВС': '444' }
+    ];
+
+    const result = await storage.__testOnly.syncStructuredReadModelSheet(
+      'ПОЛЬЗОВАТЕЛИ',
+      rows,
+      'community-1',
+      '7',
+      {
+        userStateStore: {
+          isEnabled: () => true,
+          replaceUserRows: async (userScope, nextRows) => {
+            userRows.push({ userScope, nextRows });
+            return { backend: 'ydb-user-state', stored: nextRows.length, deleted: 0 };
+          }
+        },
+        profileUserSharedStore: {
+          isEnabled: () => true,
+          putUserVariables: async (profileScope, userId, variables) => {
+            sharedWrites.push({ profileScope, userId, variables });
+            sharedMemory.set(String(userId), Object.assign({}, variables));
+          },
+          listUserEntries: async profileScope => {
+            assert.equal(profileScope, '7');
+            return Array.from(sharedMemory.entries()).map(([userId, variables]) => ({ userId, variables }));
+          }
+        },
+        sharedVariablesStore: {
+          isEnabled: () => true,
+          replaceVariables: async (profileScope, variables) => {
+            catalogWrites.push({ profileScope, variables });
+            return { stored: true };
+          }
+        }
+      }
+    );
+
+    assert.equal(result.synced, true);
+    assert.equal(userRows.length, 1);
+    assert.deepEqual(sharedWrites, [
+      { profileScope: '7', userId: '42', variables: {} },
+      { profileScope: '7', userId: '77', variables: { '777': '444' } }
+    ]);
+    assert.deepEqual(catalogWrites, [
+      { profileScope: '7', variables: { '777': '444' } }
+    ]);
+  });
+
   await run('applySheetRuntimeOverlay reads users from structured user state for admin table', async () => {
     const rows = await storage.__testOnly.applySheetRuntimeOverlay(
       'ПОЛЬЗОВАТЕЛИ',
