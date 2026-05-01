@@ -14,6 +14,7 @@ const { createCommentRuleStore } = require('./comment-rule-store');
 const { createCommunityVariablesStore } = require('./community-variables-store');
 const { createProfileUserSharedStore } = require('./profile-user-shared-store');
 const { createSharedVariablesStore } = require('./shared-variables-store');
+const { createUserStateStore, buildUserScope } = require('./user-state-store');
 
 const BUCKET_NAME = process.env.BUCKET_NAME || 'bot-data-storage';
 const S3_TIMEOUT_MS = 10000; // 10 секунд таймаут
@@ -36,6 +37,7 @@ const commentRuleStore = createCommentRuleStore();
 const communityVariablesStore = createCommunityVariablesStore();
 const profileUserSharedStore = createProfileUserSharedStore();
 const sharedVariablesStore = createSharedVariablesStore();
+const userStateStore = createUserStateStore();
 const rawS3Client = s3Client;
 
 const FILE_BASE = {
@@ -232,6 +234,15 @@ function isStructuredTriggerStoreEnabled(overrides = {}) {
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
 }
 
+function getUserStateStore(overrides = {}) {
+    return overrides.userStateStore || userStateStore;
+}
+
+function isUserStateStoreEnabled(overrides = {}) {
+    const store = getUserStateStore(overrides);
+    return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
+}
+
 function isMessageRuleStoreEnabled(overrides = {}) {
     const store = getMessageRuleStore(overrides);
     return Boolean(store && typeof store.isEnabled === 'function' && store.isEnabled());
@@ -413,12 +424,21 @@ function applyDelayedRuntimeState(row, state) {
 async function applySheetRuntimeOverlay(sheetName, rows, communityId, profileId = '1', overrides = {}) {
     const isMailingSheet = sheetName === 'РАССЫЛКА' || sheetName === 'Р РђРЎРЎР«Р›РљРђ';
     const isDelayedSheet = sheetName === 'ОТЛОЖЕННЫЕ' || sheetName === 'РћРўР›РћР–Р•РќРќР«Р•';
+    const isUsersSheet = sheetName === 'ПОЛЬЗОВАТЕЛИ' || sheetName === 'РџРћР›Р¬Р—РћР’РђРўР•Р›Р';
 
-    if (!isMailingSheet && !isDelayedSheet) {
+    if (!isMailingSheet && !isDelayedSheet && !isUsersSheet) {
         return rows;
     }
-    if (!Array.isArray(rows) || rows.length === 0) {
+    if (!isUsersSheet && (!Array.isArray(rows) || rows.length === 0)) {
         return rows;
+    }
+
+    if (isUsersSheet) {
+        if (!isUserStateStoreEnabled(overrides)) {
+            return rows;
+        }
+        const runtimeRows = await getUserStateStore(overrides).listUserRows(buildUserScope(communityId, profileId));
+        return Array.isArray(runtimeRows) && runtimeRows.length ? runtimeRows : rows;
     }
 
     if (isMailingSheet && !isMailingDeliveryStoreEnabled(overrides)) {
@@ -450,6 +470,33 @@ async function applySheetRuntimeOverlay(sheetName, rows, communityId, profileId 
         result.push(applyDelayedRuntimeState(row, runtimeState));
     }
     return result;
+}
+
+async function syncUsersSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
+    const isUsersSheet = sheetName === 'ПОЛЬЗОВАТЕЛИ' || sheetName === 'РџРћР›Р¬Р—РћР’РђРўР•Р›Р';
+    if (!isUsersSheet) {
+        return { synced: false, backend: 'skipped' };
+    }
+    if (!isUserStateStoreEnabled(overrides)) {
+        return { synced: false, backend: 'disabled' };
+    }
+
+    const normalizedRows = Array.isArray(rows)
+        ? rows
+            .map(row => cloneValue(row && typeof row === 'object' ? row : {}))
+            .filter(row => String(row && row.ID || '').trim())
+        : [];
+    const result = await getUserStateStore(overrides).replaceUserRows(
+        buildUserScope(communityId, profileId),
+        normalizedRows
+    );
+
+    return {
+        synced: true,
+        backend: result.backend || 'ydb-user-state',
+        stored: result.stored || 0,
+        deleted: result.deleted || 0
+    };
 }
 
 async function syncStructuredTriggerSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
@@ -611,6 +658,7 @@ async function syncDelayedSheet(sheetName, rows, communityId, profileId = '1', o
 
 async function syncStructuredReadModelSheet(sheetName, rows, communityId, profileId = '1', overrides = {}) {
     const handlers = [
+        syncUsersSheet,
         syncStructuredTriggerSheet,
         syncMessageRuleSheet,
         syncCommentRuleSheet,
@@ -672,7 +720,7 @@ function invalidateCache(sheetName, communityId, profileId = '1') {
     const cacheKey = communityId ? `${pid}_${sheetName}_${communityId}` : `${pid}_${sheetName}`;
     delete memoryCache.data[cacheKey];
     delete memoryCache.lastUpdated[cacheKey];
-    if (sheetName === 'СООБЩЕНИЯ' || sheetName === 'КОММЕНТАРИИ В ПОСТАХ' || sheetName === 'ПЕРЕМЕННЫЕ') {
+    if (sheetName === 'СООБЩЕНИЯ' || sheetName === 'КОММЕНТАРИИ В ПОСТАХ' || sheetName === 'ПЕРЕМЕННЫЕ' || sheetName === 'ПОЛЬЗОВАТЕЛИ') {
         const uk = communityId ? `${pid}_ПОЛЬЗОВАТЕЛИ_${communityId}` : `${pid}_ПОЛЬЗОВАТЕЛИ`;
         delete memoryCache.data[uk]; delete memoryCache.lastUpdated[uk];
     }
@@ -685,7 +733,7 @@ async function getSheetData(sheetName, communityId, profileId = '1') {
 
     const cacheKey = communityId ? `${pid}_${sheetName}_${communityId}` : `${pid}_${sheetName}`;
     const now = Date.now();
-    const ttl = memoryCache.ttl[sheetName] || 300000;
+    const ttl = isUserStateStoreEnabled() && sheetName === 'ПОЛЬЗОВАТЕЛИ' ? 0 : (memoryCache.ttl[sheetName] || 300000);
 
     // Debug logging
     log('debug', `📂 getSheetData: sheet=${sheetName}, communityId=${communityId}, fileName=${fileName}, cacheKey=${cacheKey}, cacheHit=${!!memoryCache.data[cacheKey] && (now - memoryCache.lastUpdated[cacheKey]) < ttl}`);
@@ -738,7 +786,7 @@ async function saveSheetData(sheetName, data, communityId, profileId = '1') {
         await syncStructuredReadModelSheet(sheetName, data, communityId, pid);
         const cacheKey = communityId ? `${pid}_${sheetName}_${communityId}` : `${pid}_${sheetName}`;
         delete memoryCache.data[cacheKey]; delete memoryCache.lastUpdated[cacheKey];
-        if (sheetName === 'СООБЩЕНИЯ' || sheetName === 'КОММЕНТАРИИ В ПОСТАХ' || sheetName === 'ПЕРЕМЕННЫЕ') {
+        if (sheetName === 'СООБЩЕНИЯ' || sheetName === 'КОММЕНТАРИИ В ПОСТАХ' || sheetName === 'ПЕРЕМЕННЫЕ' || sheetName === 'ПОЛЬЗОВАТЕЛИ') {
             const uk = communityId ? `${pid}_ПОЛЬЗОВАТЕЛИ_${communityId}` : `${pid}_ПОЛЬЗОВАТЕЛИ`;
             delete memoryCache.data[uk]; delete memoryCache.lastUpdated[uk];
         }
@@ -800,6 +848,7 @@ module.exports = {
         syncCommunityVariablesSheet,
         syncProfileUserSharedSheet,
         syncSharedVariablesSheet,
+        syncUsersSheet,
         syncStructuredReadModelSheet
     }
 };

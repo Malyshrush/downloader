@@ -70,6 +70,59 @@ async function run(name, fn) {
     assert.equal(calls[0].profileId, '7');
     assert.equal(calls[0].nextRows[0]['Шаг'], 'welcome');
   });
+  await run('syncStructuredReadModelSheet syncs users rows into structured user state', async () => {
+    const calls = [];
+    const rows = [
+      { ID: '42', 'Текущий Бот': 'Bot A', 'Текущий Шаг': 'Step 1' },
+      { ID: '', 'Текущий Бот': 'Ignored' }
+    ];
+
+    const result = await storage.__testOnly.syncStructuredReadModelSheet(
+      'ПОЛЬЗОВАТЕЛИ',
+      rows,
+      'community-1',
+      '7',
+      {
+        userStateStore: {
+          isEnabled: () => true,
+          replaceUserRows: async (userScope, nextRows) => {
+            calls.push({ userScope, nextRows });
+            return { backend: 'ydb-user-state', stored: nextRows.length, deleted: 3 };
+          }
+        }
+      }
+    );
+
+    assert.equal(result.synced, true);
+    assert.equal(result.backend, 'ydb-user-state');
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].userScope, '7:community-1');
+    assert.deepEqual(calls[0].nextRows, [
+      { ID: '42', 'Текущий Бот': 'Bot A', 'Текущий Шаг': 'Step 1' }
+    ]);
+  });
+
+  await run('applySheetRuntimeOverlay reads users from structured user state for admin table', async () => {
+    const rows = await storage.__testOnly.applySheetRuntimeOverlay(
+      'ПОЛЬЗОВАТЕЛИ',
+      [{ ID: '42', 'Текущий Бот': 'Legacy Bot' }],
+      'community-1',
+      '7',
+      {
+        userStateStore: {
+          isEnabled: () => true,
+          listUserRows: async userScope => {
+            assert.equal(userScope, '7:community-1');
+            return [{ ID: '42', 'Текущий Бот': 'Runtime Bot', 'Текущий Шаг': 'Runtime Step' }];
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(rows, [
+      { ID: '42', 'Текущий Бот': 'Runtime Bot', 'Текущий Шаг': 'Runtime Step' }
+    ]);
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {

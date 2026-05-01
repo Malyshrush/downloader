@@ -133,6 +133,48 @@ function createConfig(overrides = {}) {
       }
     ]);
   });
+
+  await run('user state store replaces all rows in one scope with deletes before puts', async () => {
+    const writeBatches = [];
+    const store = createUserStateStore(
+      createConfig(),
+      {
+        queryItems: async request => {
+          assert.equal(request.userScope, '7:community-a');
+          return {
+            Items: [
+              {
+                userScope: '7:community-a',
+                userId: '42',
+                row: { ID: '42', Name: 'Old' }
+              }
+            ]
+          };
+        },
+        documentClient: {
+          send: async command => {
+            writeBatches.push(command.input.RequestItems.user_state_rows);
+            return {};
+          }
+        }
+      }
+    );
+
+    const result = await store.replaceUserRows('7:community-a', [
+      { ID: '42', Name: 'Alice' },
+      { ID: '77', Name: 'Bob' },
+      { ID: '', Name: 'Ignored' },
+      { ID: '42', Name: 'Duplicate ignored' }
+    ]);
+
+    assert.equal(result.stored, 2);
+    assert.equal(result.deleted, 1);
+    assert.equal(writeBatches.length, 2);
+    assert.ok(writeBatches[0][0].DeleteRequest);
+    assert.ok(writeBatches[1][0].PutRequest);
+    assert.equal(writeBatches[1][0].PutRequest.Item.userId, '42');
+    assert.equal(writeBatches[1][1].PutRequest.Item.userId, '77');
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {

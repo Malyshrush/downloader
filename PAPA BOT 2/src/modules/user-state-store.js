@@ -92,6 +92,39 @@ function createUserStateStore(config = buildEventRuntimeConfig(process.env), ove
     return { ok: true };
   });
 
+  const batchWriteItems = overrides.batchWriteItems || (async operations => {
+    const { BatchWriteCommand } = require('@aws-sdk/lib-dynamodb');
+    const deleteRequests = (Array.isArray(operations && operations.deleteKeys) ? operations.deleteKeys : [])
+      .map(key => ({
+        DeleteRequest: {
+          Key: {
+            userScope: key.userScope,
+            userId: key.userId
+          }
+        }
+      }));
+    const putRequests = (Array.isArray(operations && operations.putItems) ? operations.putItems : [])
+      .map(item => ({
+        PutRequest: {
+          Item: item
+        }
+      }));
+
+    for (const requests of [deleteRequests, putRequests]) {
+      for (let index = 0; index < requests.length; index += 25) {
+        const chunk = requests.slice(index, index + 25);
+        if (!chunk.length) continue;
+        await getDocumentClient().send(new BatchWriteCommand({
+          RequestItems: {
+            [tableName]: chunk
+          }
+        }));
+      }
+    }
+
+    return { ok: true };
+  });
+
   const queryItems = overrides.queryItems || (async ({ userScope, startKey }) => {
     const { QueryCommand } = require('@aws-sdk/lib-dynamodb');
     return getDocumentClient().send(new QueryCommand({
@@ -237,13 +270,85 @@ function createUserStateStore(config = buildEventRuntimeConfig(process.env), ove
     return rows;
   }
 
+  async function listUserItems(userScope) {
+    if (!enabled) {
+      return [];
+    }
+
+    const normalizedScope = String(userScope || '').trim();
+    if (!normalizedScope) {
+      return [];
+    }
+
+    const items = [];
+    let startKey;
+
+    do {
+      const response = await queryItems({
+        userScope: normalizedScope,
+        startKey
+      });
+      items.push(...(Array.isArray(response && response.Items) ? response.Items : []));
+      startKey = response && response.LastEvaluatedKey;
+    } while (startKey);
+
+    return cloneValue(items);
+  }
+
+  async function replaceUserRows(userScope, rows = []) {
+    if (!enabled) {
+      return { stored: 0, deleted: 0, backend: 'disabled' };
+    }
+
+    const normalizedScope = String(userScope || '').trim();
+    if (!normalizedScope) {
+      throw new Error('userScope is required');
+    }
+
+    const existing = await listUserItems(normalizedScope);
+    const deleteKeys = existing
+      .map(item => ({
+        userScope: normalizedScope,
+        userId: normalizeUserId(item && item.userId)
+      }))
+      .filter(item => item.userId);
+
+    const seenIds = new Set();
+    const putItems = [];
+    for (const row of Array.isArray(rows) ? rows : []) {
+      const nextRow = cloneValue(row && typeof row === 'object' ? row : {});
+      const userId = normalizeUserId(nextRow && nextRow.ID);
+      if (!userId || seenIds.has(userId)) continue;
+      seenIds.add(userId);
+      nextRow.ID = userId;
+      putItems.push({
+        userScope: normalizedScope,
+        userId,
+        updatedAt: new Date().toISOString(),
+        row: nextRow
+      });
+    }
+
+    await batchWriteItems({
+      deleteKeys,
+      putItems
+    });
+
+    return {
+      stored: putItems.length,
+      deleted: deleteKeys.length,
+      backend: 'ydb-user-state'
+    };
+  }
+
   return {
     isEnabled: () => enabled,
     getUserRow,
     putUserRow,
     updateUserRow,
     deleteUserRow,
-    listUserRows
+    listUserRows,
+    replaceUserRows
   };
 }
 
