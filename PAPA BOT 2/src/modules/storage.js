@@ -354,6 +354,27 @@ function buildProfileUserSharedEntriesFromRows(rows) {
     });
 }
 
+function buildProfileUserSharedRowsFromEntries(entries) {
+    const rows = [];
+
+    for (const entry of Array.isArray(entries) ? entries : []) {
+        const userId = String(entry && entry.userId || '').trim();
+        if (!userId) continue;
+
+        for (const [name, value] of Object.entries(entry && entry.variables || {})) {
+            const variableName = normalizeVariableName(name);
+            if (!variableName) continue;
+            rows.push({
+                ID: userId,
+                'Переменная ПВС': variableName,
+                'Значение ПВС': String(value || '').trim()
+            });
+        }
+    }
+
+    return rows;
+}
+
 function buildProfileUserSharedVariablesFromUserRow(row) {
     const names = String(row && row['\u041f\u0435\u0440\u0435\u043c\u0435\u043d\u043d\u0430\u044f \u041f\u0412\u0421'] || '')
         .split(/\r?\n/)
@@ -464,11 +485,12 @@ async function applySheetRuntimeOverlay(sheetName, rows, communityId, profileId 
     const isMailingSheet = sheetName === 'РАССЫЛКА' || sheetName === 'Р РђРЎРЎР«Р›РљРђ';
     const isDelayedSheet = sheetName === 'ОТЛОЖЕННЫЕ' || sheetName === 'РћРўР›РћР–Р•РќРќР«Р•';
     const isUsersSheet = sheetName === 'ПОЛЬЗОВАТЕЛИ' || sheetName === 'РџРћР›Р¬Р—РћР’РђРўР•Р›Р';
+    const isProfileSharedSheet = sheetName === 'ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ' || sheetName === 'РџР’РЎ РџРћР›Р¬Р—РћР’РђРўР•Р›Р•Р™ РџР РћР¤РР›РЇ' || sheetName === 'Р СџР вЂ™Р РЋ Р СџР С›Р вЂєР В¬Р вЂ”Р С›Р вЂ™Р С’Р СћР вЂўР вЂєР вЂўР в„ў Р СџР В Р С›Р В¤Р ВР вЂєР Р‡';
 
-    if (!isMailingSheet && !isDelayedSheet && !isUsersSheet) {
+    if (!isMailingSheet && !isDelayedSheet && !isUsersSheet && !isProfileSharedSheet) {
         return rows;
     }
-    if (!isUsersSheet && (!Array.isArray(rows) || rows.length === 0)) {
+    if (!isUsersSheet && !isProfileSharedSheet && (!Array.isArray(rows) || rows.length === 0)) {
         return rows;
     }
 
@@ -478,6 +500,14 @@ async function applySheetRuntimeOverlay(sheetName, rows, communityId, profileId 
         }
         const runtimeRows = await getUserStateStore(overrides).listUserRows(buildUserScope(communityId, profileId));
         return Array.isArray(runtimeRows) && runtimeRows.length ? runtimeRows : rows;
+    }
+
+    if (isProfileSharedSheet) {
+        if (!isProfileUserSharedStoreEnabled(overrides)) {
+            return rows;
+        }
+        const entries = await getProfileUserSharedStore(overrides).listUserEntries(profileId);
+        return buildProfileUserSharedRowsFromEntries(entries);
     }
 
     if (isMailingSheet && !isMailingDeliveryStoreEnabled(overrides)) {

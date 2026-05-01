@@ -181,6 +181,33 @@ async function run(name, fn) {
       { ID: '42', 'Текущий Бот': 'Runtime Bot', 'Текущий Шаг': 'Runtime Step' }
     ]);
   });
+
+  await run('applySheetRuntimeOverlay reads profile shared variables from structured store', async () => {
+    const rows = await storage.__testOnly.applySheetRuntimeOverlay(
+      'ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ',
+      [
+        { ID: '42', 'Переменная ПВС': 'legacy', 'Значение ПВС': 'stale' }
+      ],
+      null,
+      '7',
+      {
+        profileUserSharedStore: {
+          isEnabled: () => true,
+          listUserEntries: async profileScope => {
+            assert.equal(profileScope, '7');
+            return [
+              { userId: '77', variables: { '777': '444' } },
+              { userId: '42', variables: {} }
+            ];
+          }
+        }
+      }
+    );
+
+    assert.deepEqual(rows, [
+      { ID: '77', 'Переменная ПВС': '777', 'Значение ПВС': '444' }
+    ]);
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {
