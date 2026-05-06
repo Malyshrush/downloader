@@ -119,4 +119,37 @@ run('touchSession clears suspicious security state after verified captcha pass',
     assert.equal(session.suspiciousChangeCount, 0);
     assert.equal(session.captchaReason, '');
     assert.equal(session.captchaChallenge, null);
+    assert.equal(Boolean(session.securityVerifiedUntil), true);
+});
+
+run('computeSessionRisk allows temporary VPN drift after verified captcha pass', () => {
+    const session = createSessionRecord({
+        sessionId: 'sess_6',
+        profileId: '2',
+        ip: '203.0.113.10',
+        userAgent: 'Mozilla/5.0',
+        now: '2026-04-21T10:00:00.000Z'
+    });
+
+    touchSession(session, {
+        ip: '198.51.100.25',
+        userAgent: 'Mozilla/5.0',
+        now: '2026-04-21T10:06:00.000Z',
+        verified: true
+    });
+
+    const graceRisk = computeSessionRisk(session, {
+        ip: '198.51.100.99',
+        userAgent: 'Mozilla/5.0',
+        now: new Date('2026-04-21T10:10:00.000Z')
+    });
+    assert.equal(graceRisk.requiresCaptcha, false);
+    assert.equal(graceRisk.trustedGrace, true);
+
+    const expiredGraceRisk = computeSessionRisk(session, {
+        ip: '198.51.100.100',
+        userAgent: 'curl/8.0',
+        now: new Date('2026-04-21T10:37:00.000Z')
+    });
+    assert.equal(expiredGraceRisk.requiresCaptcha, true);
 });

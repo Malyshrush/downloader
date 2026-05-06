@@ -48,3 +48,9 @@ test('admin panel keeps current session captcha visible when refresh is rate lim
     assert.match(adminPanelHTML, /previousMarkup/);
     assert.match(adminPanelHTML, /Подожди.*каптч/i);
 });
+
+test('admin panel persists refreshed session token after successful session captcha', () => {
+    assert.match(adminPanelHTML, /if \(data\.sessionToken\)/);
+    assert.match(adminPanelHTML, /localStorage\.setItem\('adminSessionToken', data\.sessionToken\)/);
+    assert.match(adminPanelHTML, /reloadActiveTabAfterSessionCaptcha\(\)/);
+});

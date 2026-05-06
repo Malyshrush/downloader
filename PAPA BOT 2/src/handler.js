@@ -2819,13 +2819,15 @@ async function handleVerifyCaptcha(event) {
             now: new Date()
         });
         if (result.ok) {
+            const verifiedSessionId = result.session?.sessionId || sessionId;
             return {
                 statusCode: 200,
-                headers: buildJsonHeaders(),
+                ...buildCookieResponseMeta(buildSessionCookie(verifiedSessionId)),
                 body: JSON.stringify({
                     success: true,
                     captchaRequired: false,
-                    sessionInvalid: false
+                    sessionInvalid: false,
+                    sessionToken: verifiedSessionId
                 })
             };
         }

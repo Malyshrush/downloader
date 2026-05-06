@@ -3409,6 +3409,9 @@ method: 'POST',
 body: JSON.stringify({ mode: 'session', answer: answer })
 });
 if (data && data.success) {
+if (data.sessionToken) {
+localStorage.setItem('adminSessionToken', data.sessionToken);
+}
 window.authUiState.sessionCaptchaRequired = false;
 setSessionCaptchaLock(false);
 reloadActiveTabAfterSessionCaptcha();

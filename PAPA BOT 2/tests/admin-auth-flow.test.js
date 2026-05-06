@@ -361,6 +361,43 @@ test('verifyCaptcha clears cookie and forces login captcha after session termina
     assert.equal(payload.sessionInvalid, true);
 });
 
+test('verifyCaptcha refreshes session cookie and exposes session token after successful session captcha', async () => {
+    const handler = loadHandlerWithMocks({
+        'src/modules/admin-sessions.js': {
+            ...buildBaseMocks()['src/modules/admin-sessions.js'],
+            verifySessionCaptcha: async (sessionId, answer, context) => ({
+                ok: answer === 'AB12CD',
+                session: {
+                    sessionId,
+                    profileId: '2',
+                    lastVerifiedIp: context.ip,
+                    lastUserAgent: context.userAgent,
+                    captchaRequired: false
+                }
+            })
+        }
+    });
+
+    const response = await handler({
+        httpMethod: 'POST',
+        queryStringParameters: { verifyCaptcha: '1' },
+        headers: {
+            cookie: 'adminSessionId=sess_vpn_1',
+            'user-agent': 'Mozilla/5.0',
+            'x-forwarded-for': '198.51.100.25'
+        },
+        body: JSON.stringify({ mode: 'session', answer: 'AB12CD' })
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.match(String(response.headers['Set-Cookie'] || response.headers['set-cookie'] || ''), /adminSessionId=sess_vpn_1/);
+    assert.match(String(response.multiValueHeaders?.['Set-Cookie']?.[0] || ''), /adminSessionId=sess_vpn_1/);
+    const payload = JSON.parse(response.body);
+    assert.equal(payload.success, true);
+    assert.equal(payload.captchaRequired, false);
+    assert.equal(payload.sessionToken, 'sess_vpn_1');
+});
+
 test('logoutAdmin clears session cookie', async () => {
     const handler = loadHandlerWithMocks();
     const response = await handler({
