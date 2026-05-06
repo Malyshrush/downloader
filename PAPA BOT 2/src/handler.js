@@ -113,6 +113,7 @@ const {
     deleteAppLogsFile
 } = require('./modules/app-logs');
 const { getBotVersionData, saveBotVersionData } = require('./modules/bot-version-store');
+const { getClientIpFromHeaders } = require('./modules/client-ip');
 const {
     canProcessProfileEvents,
     recordProfileEventUsage,
@@ -196,11 +197,7 @@ function getAdminSessionIdFromEvent(event = {}) {
 }
 
 function getClientIpFromEvent(event = {}) {
-    const forwarded = String(event.headers?.['x-forwarded-for'] || event.headers?.['X-Forwarded-For'] || '').trim();
-    if (forwarded) {
-        return forwarded.split(',')[0].trim();
-    }
-    return String(event.headers?.['x-real-ip'] || event.headers?.['X-Real-IP'] || '').trim();
+    return getClientIpFromHeaders(event.headers || {});
 }
 
 function getUserAgentFromEvent(event = {}) {
@@ -2983,6 +2980,7 @@ module.exports = {
         handleVkWebhookWithDependencies,
         handleSaveSheetWithDependencies,
         handleRecoverRenderUpload,
+        getClientIpFromEvent,
         workerHandlerWithDependencies,
         senderHandlerWithDependencies
     }
