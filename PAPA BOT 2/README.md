@@ -89,3 +89,5 @@ The project is not "fully done" yet. The current remaining work is narrower:
 
 Use `PAPA BOT 1` only as a behavioral reference.
 All architectural changes happen in `PAPA BOT 2`.
+
+Before any Yandex deploy or prepare flow, `scripts/deploy.js` must create a mandatory local project snapshot in `backup_papa_bot/`. The legacy `--skip-backup` flag is intentionally ignored for deploy safety.

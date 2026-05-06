@@ -2,6 +2,7 @@
 .vs/
 dist/
 backups/
+backup_papa_bot/
 мусор/
 *.pid
 *.tmp.json

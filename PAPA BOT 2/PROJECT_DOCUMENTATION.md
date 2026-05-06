@@ -102,11 +102,18 @@ node scripts/deploy.js
 The deploy pipeline:
 
 1. syncs `displayVersion`
-2. creates a backup
+2. creates a mandatory full project snapshot in `backup_papa_bot/<timestamp>/PAPA BOT 2`
 3. prepares `dist/`
 4. installs production dependencies
 5. trims the deployment bundle
 6. deploys a new Yandex Cloud Function version
+
+Backup rule:
+
+- every deploy or prepare flow must create a local project backup first
+- `--skip-backup` is a legacy compatibility flag and must not bypass the mandatory project backup
+- backup snapshots are stored in `backup_papa_bot/` and are ignored by git
+- recursive/build-heavy folders are excluded from the snapshot: `.git`, `node_modules`, `dist`, `backups`, `backup_papa_bot`, `.claude`, `.vs`
 
 ## Required Post-Deploy Verification
 

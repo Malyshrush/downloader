@@ -10,7 +10,7 @@
  * 
  * Использование:
  *   node scripts/deploy.js
- *   node scripts/deploy.js --skip-backup  (пропустить бэкап)
+ *   node scripts/deploy.js --skip-backup  (legacy flag; mandatory project backup is still created)
  *   node scripts/deploy.js --prepare-only (только подготовить dist/ без деплоя)
  *   node scripts/deploy.js --only-logs    (только скачать логи)
  */
@@ -49,7 +49,16 @@ const CONFIG = {
     ycPath: path.join(process.env.USERPROFILE, 'yandex-cloud', 'bin', 'yc.exe'),
     projectRoot: path.join(__dirname, '..'),
     distDir: path.join(__dirname, '..', 'dist'),
-    backupsDir: path.join(__dirname, '..', 'backups'),
+    backupsDir: path.join(__dirname, '..', 'backup_papa_bot'),
+    backupExcludedNames: new Set([
+        '.git',
+        '.claude',
+        '.vs',
+        'node_modules',
+        'dist',
+        'backups',
+        'backup_papa_bot'
+    ]),
     
     // Белый список переменных для деплоя
     envWhitelist: [
@@ -134,57 +143,60 @@ function syncBotVersionFile() {
 function createBackup() {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupPath = path.join(CONFIG.backupsDir, timestamp);
+    const projectBackupPath = path.join(backupPath, path.basename(CONFIG.projectRoot));
     
-    log(`\n📦 Создание резервной копии...`, 'cyan');
+    log(`\n📦 Создание обязательного backup проекта...`, 'cyan');
     
-    // Создаём папку бэкапа
     if (!fs.existsSync(CONFIG.backupsDir)) {
         fs.mkdirSync(CONFIG.backupsDir, { recursive: true });
     }
     fs.mkdirSync(backupPath, { recursive: true });
+
+    const counters = { files: 0, dirs: 0 };
+    copyProjectSnapshot(CONFIG.projectRoot, projectBackupPath, counters);
+
+    const manifest = {
+        createdAt: new Date().toISOString(),
+        projectRoot: CONFIG.projectRoot,
+        backupPath: projectBackupPath,
+        excludedNames: Array.from(CONFIG.backupExcludedNames),
+        files: counters.files,
+        directories: counters.dirs
+    };
+    fs.writeFileSync(path.join(backupPath, 'backup-manifest.json'), JSON.stringify(manifest, null, 2), 'utf8');
+
+    log(`✅ Backup сохранён: ${path.relative(CONFIG.projectRoot, projectBackupPath)}`, 'green');
+    log(`   Скопировано файлов: ${counters.files}`, 'white');
     
-    // Копируем важные файлы
-    const filesToBackup = [
-        'index.js',
-        'package.json',
-        'adminPanelHTML.js',
-        'bot-version.json',
-        'README.md'
-    ];
-    
-    const srcModules = [
-        'src/modules',
-        'src/utils',
-        'src/handler.js',
-        'src/local-server.js'
-    ];
-    
-    let copiedCount = 0;
-    
-    // Копируем корневые файлы
-    for (const file of filesToBackup) {
-        const src = path.join(CONFIG.projectRoot, file);
-        const dest = path.join(backupPath, file);
-        if (fs.existsSync(src)) {
-            fs.copyFileSync(src, dest);
-            copiedCount++;
+    return projectBackupPath;
+}
+
+function shouldSkipBackupEntry(srcPath) {
+    return CONFIG.backupExcludedNames.has(path.basename(srcPath));
+}
+
+function copyProjectSnapshot(src, dest, counters) {
+    if (shouldSkipBackupEntry(src)) return;
+
+    const stats = fs.lstatSync(src);
+    if (stats.isSymbolicLink()) return;
+
+    if (stats.isDirectory()) {
+        if (!fs.existsSync(dest)) {
+            fs.mkdirSync(dest, { recursive: true });
         }
-    }
-    
-    // Копируем src/
-    for (const srcPath of srcModules) {
-        const src = path.join(CONFIG.projectRoot, srcPath);
-        const dest = path.join(backupPath, srcPath);
-        if (fs.existsSync(src)) {
-            copyRecursive(src, dest);
-            copiedCount++;
+        counters.dirs++;
+
+        for (const entry of fs.readdirSync(src)) {
+            const srcPath = path.join(src, entry);
+            if (shouldSkipBackupEntry(srcPath)) continue;
+            copyProjectSnapshot(srcPath, path.join(dest, entry), counters);
         }
+        return;
     }
-    
-    log(`✅ Бэкап сохранён: ${path.relative(CONFIG.projectRoot, backupPath)}`, 'green');
-    log(`   Скопировано файлов: ${copiedCount}`, 'white');
-    
-    return backupPath;
+
+    fs.copyFileSync(src, dest);
+    counters.files++;
 }
 
 /**
@@ -523,10 +535,11 @@ async function main() {
         return;
     }
     
-    // 1. Бэкап
-    if (!skipBackup) {
-        createBackup();
+    // 1. Бэкап. This is mandatory for deploy/prepare flows; --skip-backup is kept only for old command compatibility.
+    if (skipBackup) {
+        log('\n⚠️ --skip-backup ignored: mandatory project backup is required before deploy.', 'yellow');
     }
+    createBackup();
 
     provisionEventInfra();
     
@@ -573,9 +586,17 @@ async function main() {
     }
 }
 
-// Запуск
-main().catch(error => {
-    log(`\n💥 Критическая ошибка:`, 'red');
-    log(error.stack || error.message, 'red');
-    process.exit(1);
-});
+if (require.main === module) {
+    main().catch(error => {
+        log(`\n💥 Критическая ошибка:`, 'red');
+        log(error.stack || error.message, 'red');
+        process.exit(1);
+    });
+}
+
+module.exports = {
+    CONFIG,
+    createBackup,
+    copyProjectSnapshot,
+    shouldSkipBackupEntry
+};
