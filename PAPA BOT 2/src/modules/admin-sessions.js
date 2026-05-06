@@ -6,7 +6,6 @@ const { log } = require('../utils/logger');
 
 const SESSIONS_FILE_KEY = 'admin_sessions.json';
 const SESSION_TIMEOUT_MS = 12 * 60 * 60 * 1000;
-const SECURITY_VERIFICATION_GRACE_MS = 30 * 60 * 1000;
 
 function createEmptySessionStore() {
     return { sessions: {} };
@@ -36,8 +35,7 @@ function normalizeSessionRecord(raw = {}) {
         loginCaptchaFailCount: Math.max(0, parseInt(raw.loginCaptchaFailCount, 10) || 0),
         terminatedAt: raw.terminatedAt || null,
         terminateReason: String(raw.terminateReason || '').trim(),
-        captchaReason: String(raw.captchaReason || '').trim(),
-        securityVerifiedUntil: raw.securityVerifiedUntil || ''
+        captchaReason: String(raw.captchaReason || '').trim()
     };
 }
 
@@ -86,15 +84,6 @@ function isSessionExpired(session, now = new Date()) {
 }
 
 function computeSessionRisk(session, { ip, userAgent, now = new Date() }) {
-    const securityVerifiedUntilMs = new Date(session?.securityVerifiedUntil || 0).getTime();
-    if (securityVerifiedUntilMs && securityVerifiedUntilMs > now.getTime()) {
-        return {
-            total: 0,
-            requiresCaptcha: false,
-            trustedGrace: true
-        };
-    }
-
     let total = 0;
     const currentIp = String(ip || '').trim();
     const currentUserAgent = String(userAgent || '').trim();
@@ -134,7 +123,6 @@ function touchSession(session, { ip, userAgent, now = new Date().toISOString(), 
         session.suspiciousChangeCount = 0;
         session.captchaReason = '';
         session.captchaChallenge = null;
-        session.securityVerifiedUntil = new Date(new Date(now).getTime() + SECURITY_VERIFICATION_GRACE_MS).toISOString();
     }
     return session;
 }
@@ -344,9 +332,7 @@ async function validateAdminSessionRequest({ sessionId = '', ip = '', userAgent 
         };
     }
 
-    touchSession(session, risk.trustedGrace
-        ? { ip, userAgent, now: now.toISOString() }
-        : { now: now.toISOString() });
+    touchSession(session, { now: now.toISOString() });
     const store = await loadAdminSessions();
     const nextStore = upsertSession(store, session);
     await saveAdminSessions(nextStore);
@@ -389,7 +375,6 @@ async function saveAdminSessions(data) {
 module.exports = {
     SESSIONS_FILE_KEY,
     SESSION_TIMEOUT_MS,
-    SECURITY_VERIFICATION_GRACE_MS,
     createEmptySessionStore,
     normalizeSessionRecord,
     normalizeSessionStore,

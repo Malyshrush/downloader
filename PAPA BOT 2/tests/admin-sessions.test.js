@@ -119,10 +119,9 @@ run('touchSession clears suspicious security state after verified captcha pass',
     assert.equal(session.suspiciousChangeCount, 0);
     assert.equal(session.captchaReason, '');
     assert.equal(session.captchaChallenge, null);
-    assert.equal(Boolean(session.securityVerifiedUntil), true);
 });
 
-run('computeSessionRisk allows temporary VPN drift after verified captcha pass', () => {
+run('computeSessionRisk requires captcha when IP changes again after verified captcha pass', () => {
     const session = createSessionRecord({
         sessionId: 'sess_6',
         profileId: '2',
@@ -138,18 +137,17 @@ run('computeSessionRisk allows temporary VPN drift after verified captcha pass',
         verified: true
     });
 
-    const graceRisk = computeSessionRisk(session, {
-        ip: '198.51.100.99',
+    const sameVpnRisk = computeSessionRisk(session, {
+        ip: '198.51.100.25',
         userAgent: 'Mozilla/5.0',
         now: new Date('2026-04-21T10:10:00.000Z')
     });
-    assert.equal(graceRisk.requiresCaptcha, false);
-    assert.equal(graceRisk.trustedGrace, true);
+    assert.equal(sameVpnRisk.requiresCaptcha, false);
 
-    const expiredGraceRisk = computeSessionRisk(session, {
-        ip: '198.51.100.100',
-        userAgent: 'curl/8.0',
-        now: new Date('2026-04-21T10:37:00.000Z')
+    const changedVpnRisk = computeSessionRisk(session, {
+        ip: '198.51.100.99',
+        userAgent: 'Mozilla/5.0',
+        now: new Date('2026-04-21T10:11:00.000Z')
     });
-    assert.equal(expiredGraceRisk.requiresCaptcha, true);
+    assert.equal(changedVpnRisk.requiresCaptcha, true);
 });
