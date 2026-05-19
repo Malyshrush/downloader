@@ -9,7 +9,7 @@ function buildVkLaunchSignPayload(params) {
         .filter(key => key.startsWith('vk_'))
         .filter(key => key !== 'sign')
         .sort()
-        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(clean(params[key]))}`)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(String(params[key] ?? ''))}`)
         .join('&');
 }
 
