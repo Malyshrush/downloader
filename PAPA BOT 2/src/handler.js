@@ -111,7 +111,7 @@ const {
 } = require('./modules/miniapp-groups');
 const { verifyVkLaunchParams } = require('./modules/miniapp-auth');
 const { saveMiniAppAssetWithDependencies } = require('./modules/miniapp-assets');
-const { ensureMiniAppUser, updateUserGroups } = require('./modules/users');
+const { ensureMiniAppUser, getUserRow, updateUserGroups } = require('./modules/users');
 const {
     addAppLog,
     getAppLogs,
@@ -433,6 +433,41 @@ async function handleMiniAppUploadAssetWithDependencies(event, overrides = {}) {
     }
 }
 
+function extractMiniAppLaunchParamsFromQuery(query = {}) {
+    const params = {};
+    for (const [key, value] of Object.entries(query || {})) {
+        if (key === 'sign' || key.startsWith('vk_')) {
+            params[key] = value;
+        }
+    }
+    return params;
+}
+
+function parseMiniAppSubscribedNames(row) {
+    return String((row && row['ГРУППА']) || '')
+        .split(/[\r\n,]+/)
+        .map((item) => item.trim().toLowerCase())
+        .filter(Boolean);
+}
+
+async function loadMiniAppSubscribedNames(query, resolved, overrides = {}) {
+    const launchParams = extractMiniAppLaunchParamsFromQuery(query);
+    if (!launchParams.sign || !launchParams.vk_user_id) {
+        return [];
+    }
+
+    const auth = verifyVkLaunchParams(launchParams, {
+        secret: overrides.miniAppSecret || process.env.VK_MINIAPP_SECRET
+    });
+    if (!auth.ok || (auth.groupId && String(auth.groupId) !== String(query.c))) {
+        return [];
+    }
+
+    const getUserRowImpl = overrides.getUserRow || getUserRow;
+    const row = await getUserRowImpl(auth.userId, resolved.communityId, resolved.profileId);
+    return parseMiniAppSubscribedNames(row);
+}
+
 async function handleMiniAppRequestWithDependencies(event, overrides = {}) {
     const q = event.queryStringParameters || event.query || event.params || {};
     const profileId = getRequestProfileId(q, {});
@@ -490,10 +525,11 @@ async function handleMiniAppRequestWithDependencies(event, overrides = {}) {
     }
 
     if (event.httpMethod === 'GET' && q.miniapp === 'groups') {
+        const subscribedNames = await loadMiniAppSubscribedNames(q, resolved, overrides);
         return miniAppJson(200, {
             success: true,
             communityId: resolved.communityId,
-            groups: listVisibleMiniAppGroups(groups)
+            groups: listVisibleMiniAppGroups(groups, { subscribedNames })
         });
     }
 
@@ -509,7 +545,7 @@ async function handleMiniAppRequestWithDependencies(event, overrides = {}) {
         return miniAppJson(200, {
             success: true,
             communityId: resolved.communityId,
-            group: toDetailDto(group)
+            group: toDetailDto(group, (await loadMiniAppSubscribedNames(q, resolved, overrides)).includes(String(group.name || '').toLowerCase()))
         });
     }
 
