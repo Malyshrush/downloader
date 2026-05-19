@@ -104,6 +104,12 @@ const { setupVkCallbackServer } = require('./modules/callback-setup');
 const { uploadToVK } = require('./modules/attachments');
 const { getTokenPermissions } = require('./modules/vk-api');
 const {
+    normalizeMiniAppGroupRows,
+    listVisibleMiniAppGroups,
+    findMiniAppGroupBySlug,
+    toDetailDto
+} = require('./modules/miniapp-groups');
+const {
     addAppLog,
     getAppLogs,
     getAppLogFileName,
@@ -334,6 +340,94 @@ function buildSessionErrorResponse(result) {
 /**
  * Главный обработчик событий
  */
+function miniAppJson(statusCode, payload) {
+    return {
+        statusCode,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify(payload)
+    };
+}
+
+async function resolveMiniAppCommunity(c, profileId = '1', overrides = {}) {
+    const requested = String(c || '').trim();
+    if (!requested) return null;
+    if (overrides.resolveCommunity) {
+        return overrides.resolveCommunity(requested, profileId);
+    }
+
+    await loadBotConfig(profileId);
+    const config = getFullConfig(profileId);
+    const communities = config.communities || {};
+    for (const [internalCommunityId, communityConfig] of Object.entries(communities)) {
+        const vkGroupId = String(communityConfig?.vk_group_id || '').trim();
+        if (String(internalCommunityId) === requested || vkGroupId === requested) {
+            return {
+                profileId,
+                communityId: vkGroupId || requested,
+                internalCommunityId,
+                config: communityConfig
+            };
+        }
+    }
+    return null;
+}
+
+async function loadMiniAppGroupsForCommunity(resolved, overrides = {}) {
+    const getSheetDataImpl = overrides.getSheetData || getSheetData;
+    const rows = await getSheetDataImpl('ГРУППЫ', resolved.communityId, resolved.profileId);
+    return normalizeMiniAppGroupRows(rows);
+}
+
+async function handleMiniAppRequestWithDependencies(event, overrides = {}) {
+    const q = event.queryStringParameters || event.query || event.params || {};
+    const profileId = getRequestProfileId(q, {});
+    if (overrides.initializeStorage) {
+        await overrides.initializeStorage();
+    } else if (!overrides.getSheetData && !overrides.resolveCommunity) {
+        await initializeStorage();
+    }
+
+    const resolved = await resolveMiniAppCommunity(q.c, profileId, overrides);
+    if (!resolved) {
+        return miniAppJson(404, {
+            success: false,
+            error: 'community_not_found',
+            message: 'Сообщество не найдено'
+        });
+    }
+
+    const groups = await loadMiniAppGroupsForCommunity(resolved, overrides);
+    if (event.httpMethod === 'GET' && q.miniapp === 'groups') {
+        return miniAppJson(200, {
+            success: true,
+            communityId: resolved.communityId,
+            groups: listVisibleMiniAppGroups(groups)
+        });
+    }
+
+    if (event.httpMethod === 'GET' && q.miniapp === 'group') {
+        const group = findMiniAppGroupBySlug(groups, q.g);
+        if (!group) {
+            return miniAppJson(404, {
+                success: false,
+                error: 'group_not_found',
+                message: 'Группа не найдена'
+            });
+        }
+        return miniAppJson(200, {
+            success: true,
+            communityId: resolved.communityId,
+            group: toDetailDto(group)
+        });
+    }
+
+    return miniAppJson(404, {
+        success: false,
+        error: 'miniapp_route_not_found',
+        message: 'Mini App route not found'
+    });
+}
+
 async function handler(event) {
     log('info', '🔔 RAW REQUEST:', {
         method: event.httpMethod,
@@ -437,6 +531,10 @@ async function handleTimerTrigger(event) {
 async function handleGetRequest(event) {
     const q = event.queryStringParameters || event.query || event.params || {};
     const profileId = getRequestProfileId(q);
+
+    if (q.miniapp !== undefined) {
+        return handleMiniAppRequestWithDependencies(event);
+    }
 
     // Загрузка настроек для админ-панели
     if (q.getSettings) {
@@ -2982,6 +3080,7 @@ module.exports = {
         handleRecoverRenderUpload,
         getClientIpFromEvent,
         workerHandlerWithDependencies,
-        senderHandlerWithDependencies
+        senderHandlerWithDependencies,
+        handleMiniAppRequestWithDependencies
     }
 };
