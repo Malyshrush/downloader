@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 const { __testOnly } = require('../src/handler');
+const { signVkLaunchParams } = require('../src/modules/miniapp-auth');
 
 function parse(response) {
     return JSON.parse(response.body);
@@ -63,4 +64,71 @@ test('Mini App group list rejects unknown community', async () => {
 
     assert.equal(response.statusCode, 404);
     assert.equal(parse(response).error, 'community_not_found');
+});
+
+test('Mini App subscribe verifies launch params and adds group', async () => {
+    const secret = 'miniapp-secret';
+    const launch = { vk_app_id: '999', vk_user_id: '123', vk_group_id: '229445618' };
+    const calls = [];
+    const response = await __testOnly.handleMiniAppRequestWithDependencies({
+        httpMethod: 'POST',
+        queryStringParameters: { miniapp: 'subscribe', c: '229445618', g: 'vip' },
+        body: JSON.stringify({ launchParams: { ...launch, sign: signVkLaunchParams(launch, secret) } })
+    }, {
+        miniAppSecret: secret,
+        getSheetData: async () => [
+            { 'Группа': 'vip', 'MiniApp включен': 'да', 'MiniApp slug': 'vip', 'MiniApp заголовок': 'VIP' }
+        ],
+        resolveCommunity: async () => ({ communityId: '229445618', profileId: '1' }),
+        ensureMiniAppUser: async (userId, communityId, profileId) => calls.push(['ensure', userId, communityId, profileId]),
+        updateUserGroups: async (userId, add, remove, communityId, profileId) => calls.push(['groups', userId, add, remove, communityId, profileId])
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(parse(response).subscribed, true);
+    assert.deepEqual(calls, [
+        ['ensure', '123', '229445618', '1'],
+        ['groups', '123', 'vip', '', '229445618', '1']
+    ]);
+});
+
+test('Mini App subscribe rejects invalid launch signature', async () => {
+    const response = await __testOnly.handleMiniAppRequestWithDependencies({
+        httpMethod: 'POST',
+        queryStringParameters: { miniapp: 'subscribe', c: '229445618', g: 'vip' },
+        body: JSON.stringify({ launchParams: { vk_user_id: '123', sign: 'bad' } })
+    }, {
+        miniAppSecret: 'miniapp-secret',
+        getSheetData: async () => [
+            { 'Группа': 'vip', 'MiniApp включен': 'да', 'MiniApp slug': 'vip', 'MiniApp заголовок': 'VIP' }
+        ],
+        resolveCommunity: async () => ({ communityId: '229445618', profileId: '1' })
+    });
+
+    assert.equal(response.statusCode, 401);
+    assert.equal(parse(response).error, 'invalid_vk_sign');
+});
+
+test('Mini App unsubscribe removes group idempotently', async () => {
+    const secret = 'miniapp-secret';
+    const launch = { vk_app_id: '999', vk_user_id: '123', vk_group_id: '229445618' };
+    const calls = [];
+    const response = await __testOnly.handleMiniAppRequestWithDependencies({
+        httpMethod: 'POST',
+        queryStringParameters: { miniapp: 'unsubscribe', c: '229445618', g: 'vip' },
+        body: JSON.stringify({ launchParams: { ...launch, sign: signVkLaunchParams(launch, secret) } })
+    }, {
+        miniAppSecret: secret,
+        getSheetData: async () => [
+            { 'Группа': 'vip', 'MiniApp включен': 'да', 'MiniApp slug': 'vip', 'MiniApp заголовок': 'VIP' }
+        ],
+        resolveCommunity: async () => ({ communityId: '229445618', profileId: '1' }),
+        updateUserGroups: async (userId, add, remove, communityId, profileId) => calls.push(['groups', userId, add, remove, communityId, profileId])
+    });
+
+    assert.equal(response.statusCode, 200);
+    assert.equal(parse(response).subscribed, false);
+    assert.deepEqual(calls, [
+        ['groups', '123', '', 'vip', '229445618', '1']
+    ]);
 });

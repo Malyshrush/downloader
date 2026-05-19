@@ -117,6 +117,32 @@ async function mutateUserRowWithDependencies(userId, communityId = null, profile
     };
 }
 
+async function ensureMiniAppUserWithDependencies(userId, communityId = null, profileId = '1', overrides = {}) {
+    const existing = await getUserRowWithDependencies(userId, communityId, profileId, overrides);
+    if (existing) return existing;
+    const normalizedUserId = normalizeUserId(userId);
+    const row = {
+        [COLUMN_ID]: normalizedUserId,
+        [COLUMN_NAME]: 'VK ' + normalizedUserId,
+        [COLUMN_CONSENTS_SUMMARY]: '',
+        [COLUMN_CONSENTS_JSON]: '{}',
+        [COLUMN_GROUPS]: '',
+        [COLUMN_USER_VARIABLE_NAMES]: '',
+        [COLUMN_USER_VARIABLE_VALUES]: '',
+        [COLUMN_SHARED_VARIABLE_NAMES]: '',
+        [COLUMN_SHARED_VARIABLE_VALUES]: '',
+        [COLUMN_CURRENT_BOT]: '',
+        [COLUMN_CURRENT_STEP]: '',
+        [COLUMN_SENT_STEPS]: '',
+        [COLUMN_GROUP_HISTORY]: '{}'
+    };
+    return updateUserRowWithDependencies(normalizedUserId, row, communityId, profileId, overrides);
+}
+
+async function ensureMiniAppUser(userId, communityId = null, profileId = '1') {
+    return ensureMiniAppUserWithDependencies(userId, communityId, profileId);
+}
+
 async function updateUserData(userId, communityId = null, profileId = '1') {
     try {
         const cid = communityId;
@@ -656,6 +682,7 @@ async function listUsers(communityId = null, profileId = '1') {
 
 module.exports = {
     updateUserData,
+    ensureMiniAppUser,
     getUserVKName,
     addNewUserToSheet,
     getUserVariables,
@@ -675,6 +702,7 @@ module.exports = {
         getUserVariablesWithDependencies,
         listUsersWithDependencies,
         mutateUserRowWithDependencies,
+        ensureMiniAppUserWithDependencies,
         addNewUserToSheetWithDependencies,
         updateUserVariablesWithDependencies,
         updateUserBotAndStepWithDependencies,

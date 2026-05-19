@@ -109,6 +109,8 @@ const {
     findMiniAppGroupBySlug,
     toDetailDto
 } = require('./modules/miniapp-groups');
+const { verifyVkLaunchParams } = require('./modules/miniapp-auth');
+const { ensureMiniAppUser, updateUserGroups } = require('./modules/users');
 const {
     addAppLog,
     getAppLogs,
@@ -378,6 +380,20 @@ async function loadMiniAppGroupsForCommunity(resolved, overrides = {}) {
     return normalizeMiniAppGroupRows(rows);
 }
 
+function parseJsonBody(event) {
+    try {
+        return JSON.parse(event.body || '{}');
+    } catch (error) {
+        return {};
+    }
+}
+
+function verifyMiniAppRequest(body, overrides = {}) {
+    return verifyVkLaunchParams(body.launchParams || {}, {
+        secret: overrides.miniAppSecret || process.env.VK_MINIAPP_SECRET
+    });
+}
+
 async function handleMiniAppRequestWithDependencies(event, overrides = {}) {
     const q = event.queryStringParameters || event.query || event.params || {};
     const profileId = getRequestProfileId(q, {});
@@ -397,6 +413,43 @@ async function handleMiniAppRequestWithDependencies(event, overrides = {}) {
     }
 
     const groups = await loadMiniAppGroupsForCommunity(resolved, overrides);
+    if (event.httpMethod === 'POST' && (q.miniapp === 'subscribe' || q.miniapp === 'unsubscribe')) {
+        const body = parseJsonBody(event);
+        const auth = verifyMiniAppRequest(body, overrides);
+        if (!auth.ok) {
+            return miniAppJson(401, {
+                success: false,
+                error: auth.error,
+                message: 'Не удалось подтвердить пользователя VK'
+            });
+        }
+        if (auth.groupId && String(auth.groupId) !== String(q.c)) {
+            return miniAppJson(403, {
+                success: false,
+                error: 'community_mismatch',
+                message: 'Сообщество Mini App не совпадает со ссылкой'
+            });
+        }
+        const group = findMiniAppGroupBySlug(groups, q.g);
+        if (!group) {
+            return miniAppJson(404, {
+                success: false,
+                error: 'group_not_found',
+                message: 'Группа не найдена'
+            });
+        }
+        const updateGroupsImpl = overrides.updateUserGroups || updateUserGroups;
+        const groupName = group.groupName || group.name;
+        if (q.miniapp === 'subscribe') {
+            const ensureUserImpl = overrides.ensureMiniAppUser || ensureMiniAppUser;
+            await ensureUserImpl(auth.userId, resolved.communityId, resolved.profileId);
+            await updateGroupsImpl(auth.userId, groupName, '', resolved.communityId, resolved.profileId);
+            return miniAppJson(200, { success: true, subscribed: true, group: toDetailDto(group, true) });
+        }
+        await updateGroupsImpl(auth.userId, '', groupName, resolved.communityId, resolved.profileId);
+        return miniAppJson(200, { success: true, subscribed: false, group: toDetailDto(group, false) });
+    }
+
     if (event.httpMethod === 'GET' && q.miniapp === 'groups') {
         return miniAppJson(200, {
             success: true,
@@ -739,6 +792,10 @@ async function handleGetRequest(event) {
  */
 async function handlePostRequest(event) {
     const q = event.queryStringParameters || event.query || event.params || {};
+
+    if (q.miniapp !== undefined) {
+        return handleMiniAppRequestWithDependencies(event);
+    }
 
     // Обработка action из body (для загрузки вложений из админ-панели)
     if (event.body && event.httpMethod === 'POST') {
