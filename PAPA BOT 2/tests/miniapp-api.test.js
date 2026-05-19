@@ -132,3 +132,29 @@ test('Mini App unsubscribe removes group idempotently', async () => {
         ['groups', '123', '', 'vip', '229445618', '1']
     ]);
 });
+
+test('Mini App admin asset upload accepts data URLs', async () => {
+    const response = await __testOnly.handleMiniAppUploadAssetWithDependencies({
+        httpMethod: 'POST',
+        queryStringParameters: { miniappUploadAsset: '1' },
+        body: JSON.stringify({
+            profileId: '7',
+            communityId: '229445618',
+            contentType: 'image/png',
+            dataUrl: 'data:image/png;base64,aGVsbG8=',
+            baseUrl: 'https://api.example'
+        })
+    }, {
+        saveMiniAppAsset: async (payload) => ({
+            url: payload.baseUrl + '?miniappAsset=asset_abc',
+            assetId: 'asset_abc',
+            key: [payload.profileId, payload.communityId, payload.contentType, payload.buffer.toString('utf8')].join(':')
+        })
+    });
+
+    const payload = parse(response);
+    assert.equal(response.statusCode, 200);
+    assert.equal(payload.success, true);
+    assert.equal(payload.url, 'https://api.example?miniappAsset=asset_abc');
+    assert.equal(payload.key, '7:229445618:image/png:hello');
+});

@@ -1596,6 +1596,15 @@ color: #eff6ff;
   gap:8px;
   margin-top: 14px;
 }
+.group-action-btn {
+  min-height: 34px;
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .profile-form {
   border: 1px solid var(--section-border);
   background: var(--surface-muted);
@@ -9371,6 +9380,29 @@ function getNormalizedUserGroups(userRow) {
     }).filter(Boolean);
 }
 
+function getMiniAppBaseUrl() {
+    try {
+        return window.VK_MINIAPP_APP_URL || localStorage.getItem('VK_MINIAPP_APP_URL') || 'https://vk.com/appXXXX';
+    } catch (e) {
+        return 'https://vk.com/appXXXX';
+    }
+}
+
+function getCurrentMiniAppCommunityId() {
+    var communityId = String(window.currentCommunityId || '').trim();
+    var settings = window.cachedBotSettings || window.lastBotSettings || {};
+    var config = settings.communities && settings.communities[communityId] ? settings.communities[communityId] : {};
+    return String(config.vk_group_id || config.group_id || communityId || '').trim();
+}
+
+function buildMiniAppGroupLink(row) {
+    var vkGroupId = getCurrentMiniAppCommunityId();
+    var slug = String((row && (row['MiniApp slug'] || row['Группа'])) || '').trim();
+    var base = getMiniAppBaseUrl();
+    if (!vkGroupId || !base) return '';
+    return base + '#c=' + encodeURIComponent(vkGroupId) + (slug ? '&g=' + encodeURIComponent(slug) : '');
+}
+
 window.renderGroupsManager = function() {
     var container = document.getElementById('groupsManager');
     if (!container) return;
@@ -9403,10 +9435,13 @@ window.renderGroupsManager = function() {
                 var history = getGroupHistoryEntry(user, groupName);
                 return '<div class="app-log-card-detail">' + escapeHtml(String(user['ИМЯ'] || user['ID'] || 'Пользователь')) + ' (ID ' + escapeHtml(String(user['ID'] || '')) + ')' + (history.leftAt ? ' • вышел: ' + escapeHtml(formatRuDateTime(history.leftAt)) : '') + '</div>';
             }).join('') : '<div class="community-empty-note">Выходов из группы пока не было.</div>';
+            var miniAppLink = buildMiniAppGroupLink(group);
+            var miniAppLinkHtml = miniAppLink ? '<div class="profile-card-row"><span class="profile-card-label">Mini App:</span><input readonly value="' + escapeHtml(miniAppLink) + '" onclick="this.select()" style="margin-left:8px;max-width:520px;"></div>' : '';
+            var miniAppBadge = String(group['MiniApp включен'] || '').trim() ? '<span class="profile-card-badge">Mini App</span>' : '';
             return '<div class="profile-card" style="margin-bottom:12px;">' +
-                '<div class="profile-card-header"><div><div class="profile-card-name">' + escapeHtml(groupName || 'Без названия') + '</div><div class="profile-card-id">' + escapeHtml(group['Описание'] || 'Описание не заполнено') + '</div></div><span class="profile-card-badge">Участников: ' + escapeHtml(String(members.length)) + '</span></div>' +
-                '<div class="profile-card-details"><div class="profile-card-row"><span class="profile-card-label">Сейчас в группе:</span></div>' + membersHtml + '<div class="profile-card-row" style="margin-top:10px;"><span class="profile-card-label">Уже вышли из группы:</span></div>' + formerMembersHtml + '</div>' +
-                '<div class="profile-card-actions"><button class="btn btn-info" type="button" onclick="openGroupForm(' + idx + ')">Редактировать</button><button class="btn btn-save" type="button" onclick="manageGroupMembers(' + idx + ', true)">Добавить пользователей</button><button class="btn btn-neutral" type="button" onclick="manageGroupMembers(' + idx + ', false)">Удалить пользователей</button><button class="btn btn-delete" type="button" onclick="deleteGroupByIndex(' + idx + ')">Удалить группу</button></div>' +
+                '<div class="profile-card-header"><div><div class="profile-card-name">' + escapeHtml(groupName || 'Без названия') + '</div><div class="profile-card-id">' + escapeHtml(group['Описание'] || 'Описание не заполнено') + '</div></div><div class="profile-card-actions">' + miniAppBadge + '<span class="profile-card-badge">Участников: ' + escapeHtml(String(members.length)) + '</span></div></div>' +
+                '<div class="profile-card-details">' + miniAppLinkHtml + '<div class="profile-card-row"><span class="profile-card-label">Сейчас в группе:</span></div>' + membersHtml + '<div class="profile-card-row" style="margin-top:10px;"><span class="profile-card-label">Уже вышли из группы:</span></div>' + formerMembersHtml + '</div>' +
+                '<div class="profile-card-actions"><button class="btn btn-info group-action-btn" type="button" onclick="openGroupForm(' + idx + ')">Редактировать</button><button class="btn btn-save group-action-btn" type="button" onclick="manageGroupMembers(' + idx + ', true)">Добавить пользователей</button><button class="btn btn-neutral group-action-btn" type="button" onclick="manageGroupMembers(' + idx + ', false)">Удалить пользователей</button><button class="btn btn-delete group-action-btn" type="button" onclick="deleteGroupByIndex(' + idx + ')">Удалить группу</button></div>' +
             '</div>';
         }).join('') : '<div class="community-empty-note">Группы пока не созданы.</div>');
 
@@ -9423,7 +9458,37 @@ function renderGroupFormPanel() {
         return;
     }
     var row = groups[editIndex] || { 'Группа': '', 'Описание': '' };
-    panel.innerHTML = '<div class="settings-surface profile-manager" style="margin-bottom:12px;"><div class="profile-manager-header"><div><h3 class="profile-manager-title">' + (groups[editIndex] ? 'Редактирование группы' : 'Новая группа') + '</h3></div></div><div class="profile-form-grid"><div><label><strong>Название группы</strong></label><input id="groupFormName" type="text" value="' + escapeHtml(row['Группа'] || '') + '" placeholder="Например: vip"></div><div><label><strong>Описание группы</strong></label><input id="groupFormDescription" type="text" value="' + escapeHtml(row['Описание'] || '') + '" placeholder="Кто входит в группу и зачем она нужна"></div></div><div class="profile-card-actions"><button class="btn btn-save" type="button" onclick="saveGroupForm()">Сохранить группу</button><button class="btn btn-neutral" type="button" onclick="closeGroupForm()">Отмена</button></div></div>';
+    var miniAppEnabled = String(row['MiniApp включен'] || '').trim();
+    var miniAppHidden = String(row['MiniApp скрыть из списка'] || '').trim();
+    var miniAppSlug = row['MiniApp slug'] || '';
+    var miniAppTitle = row['MiniApp заголовок'] || '';
+    var miniAppDescription = row['MiniApp описание'] || '';
+    var miniAppIconUrl = row['MiniApp иконка URL'] || '';
+    var miniAppIconFile = row['MiniApp иконка файл'] || '';
+    var miniAppBannerUrl = row['MiniApp баннер URL'] || '';
+    var miniAppBannerFile = row['MiniApp баннер файл'] || '';
+    var miniAppSubscribeText = row['MiniApp текст подписки'] || 'Подписаться';
+    var miniAppUnsubscribeText = row['MiniApp текст отписки'] || 'Отписаться';
+    var miniAppLink = buildMiniAppGroupLink(row);
+    panel.innerHTML = '<div class="settings-surface profile-manager" style="margin-bottom:12px;"><div class="profile-manager-header"><div><h3 class="profile-manager-title">' + (groups[editIndex] ? 'Редактирование группы' : 'Новая группа') + '</h3></div></div>' +
+        '<div class="profile-form-grid"><div><label><strong>Название группы</strong></label><input id="groupFormName" type="text" value="' + escapeHtml(row['Группа'] || '') + '" placeholder="Например: vip"></div><div><label><strong>Описание группы</strong></label><input id="groupFormDescription" type="text" value="' + escapeHtml(row['Описание'] || '') + '" placeholder="Кто входит в группу и зачем она нужна"></div></div>' +
+        '<details class="settings-surface" open style="margin-top:12px;"><summary style="cursor:pointer;font-weight:700;">Визуал Mini App</summary>' +
+            '<div class="profile-form-grid" style="margin-top:12px;">' +
+                '<label><input id="groupFormMiniAppEnabled" type="checkbox" ' + (miniAppEnabled ? 'checked' : '') + '> MiniApp включен</label>' +
+                '<label><input id="groupFormMiniAppHidden" type="checkbox" ' + (miniAppHidden ? 'checked' : '') + '> MiniApp скрыть из списка</label>' +
+                '<div><label><strong>MiniApp slug</strong></label><input id="groupFormMiniAppSlug" type="text" value="' + escapeHtml(miniAppSlug) + '" placeholder="vip"></div>' +
+                '<div><label><strong>MiniApp заголовок</strong></label><input id="groupFormMiniAppTitle" type="text" value="' + escapeHtml(miniAppTitle) + '" placeholder="Заголовок для пользователя"></div>' +
+                '<div style="grid-column:1/-1;"><label><strong>MiniApp описание</strong></label><textarea id="groupFormMiniAppDescription" rows="3" placeholder="Описание, которое увидит пользователь">' + escapeHtml(miniAppDescription) + '</textarea></div>' +
+                '<div><label><strong>MiniApp иконка URL</strong></label><input id="groupFormMiniAppIconUrl" type="url" value="' + escapeHtml(miniAppIconUrl) + '" placeholder="https://..."></div>' +
+                '<div><label><strong>MiniApp баннер URL</strong></label><input id="groupFormMiniAppBannerUrl" type="url" value="' + escapeHtml(miniAppBannerUrl) + '" placeholder="https://..."></div>' +
+                '<div><label><strong>MiniApp иконка файл</strong></label><input id="groupFormMiniAppIconFile" type="text" readonly value="' + escapeHtml(miniAppIconFile) + '"><button class="btn btn-info group-action-btn" type="button" onclick="uploadMiniAppGroupImage(&quot;icon&quot;)">Загрузить</button></div>' +
+                '<div><label><strong>MiniApp баннер файл</strong></label><input id="groupFormMiniAppBannerFile" type="text" readonly value="' + escapeHtml(miniAppBannerFile) + '"><button class="btn btn-info group-action-btn" type="button" onclick="uploadMiniAppGroupImage(&quot;banner&quot;)">Загрузить</button></div>' +
+                '<div><label><strong>MiniApp текст подписки</strong></label><input id="groupFormMiniAppSubscribeText" type="text" value="' + escapeHtml(miniAppSubscribeText) + '" placeholder="Подписаться"></div>' +
+                '<div><label><strong>MiniApp текст отписки</strong></label><input id="groupFormMiniAppUnsubscribeText" type="text" value="' + escapeHtml(miniAppUnsubscribeText) + '" placeholder="Отписаться"></div>' +
+                '<div style="grid-column:1/-1;"><label><strong>Ссылка Mini App</strong></label><input readonly value="' + escapeHtml(miniAppLink) + '" onclick="this.select()" placeholder="Ссылка появится после выбора сообщества и slug"></div>' +
+            '</div>' +
+        '</details>' +
+        '<div class="profile-card-actions"><button class="btn btn-save" type="button" onclick="saveGroupForm()">Сохранить группу</button><button class="btn btn-neutral" type="button" onclick="closeGroupForm()">Отмена</button></div></div>';
 }
 
 window.openGroupForm = function(index) {
@@ -9452,6 +9517,7 @@ window.saveGroupForm = async function() {
         var groups = dataStore['Groups'] || [];
         var groupName = String(document.getElementById('groupFormName')?.value || '').trim();
         var description = String(document.getElementById('groupFormDescription')?.value || '').trim();
+        var getValue = function(id) { return String(document.getElementById(id)?.value || '').trim(); };
         if (!groupName) throw new Error('Введите название группы');
         if (groups.some(function(item, idx) { return idx !== editIndex && String(item['Группа'] || '').trim().toLowerCase() === groupName.toLowerCase(); })) {
             throw new Error('Группа с таким названием уже существует');
@@ -9470,7 +9536,21 @@ window.saveGroupForm = async function() {
             });
             await saveDataDirectly('Users');
         }
-        groups[editIndex] = { 'Группа': groupName, 'Описание': description };
+        groups[editIndex] = Object.assign({}, groups[editIndex] || {}, {
+            'Группа': groupName,
+            'Описание': description,
+            'MiniApp включен': document.getElementById('groupFormMiniAppEnabled')?.checked ? 'да' : '',
+            'MiniApp скрыть из списка': document.getElementById('groupFormMiniAppHidden')?.checked ? 'да' : '',
+            'MiniApp slug': getValue('groupFormMiniAppSlug'),
+            'MiniApp заголовок': getValue('groupFormMiniAppTitle'),
+            'MiniApp описание': getValue('groupFormMiniAppDescription'),
+            'MiniApp иконка URL': getValue('groupFormMiniAppIconUrl'),
+            'MiniApp иконка файл': getValue('groupFormMiniAppIconFile'),
+            'MiniApp баннер URL': getValue('groupFormMiniAppBannerUrl'),
+            'MiniApp баннер файл': getValue('groupFormMiniAppBannerFile'),
+            'MiniApp текст подписки': getValue('groupFormMiniAppSubscribeText') || 'Подписаться',
+            'MiniApp текст отписки': getValue('groupFormMiniAppUnsubscribeText') || 'Отписаться'
+        });
         await saveDataDirectly('Groups');
         window.groupManagerState.editingIndex = -1;
         renderGroupsManager();
@@ -9517,6 +9597,49 @@ window.manageGroupMembers = async function(groupIndex, addMode) {
     } catch (e) {
         if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
     }
+};
+
+window.uploadMiniAppGroupImage = async function(kind) {
+    var statusEl = document.getElementById('status-Groups');
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/jpeg,image/webp';
+    input.onchange = async function() {
+        var file = input.files && input.files[0];
+        if (!file) return;
+        try {
+            var dataUrl = await new Promise(function(resolve, reject) {
+                var reader = new FileReader();
+                reader.onload = function() { resolve(String(reader.result || '')); };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+            var baseUrl = window.location.href.split('?')[0];
+            var response = await fetch(baseUrl + '?miniappUploadAsset=1', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    kind: kind === 'banner' ? 'banner' : 'icon',
+                    fileName: file.name,
+                    contentType: file.type,
+                    dataUrl: dataUrl,
+                    baseUrl: baseUrl,
+                    communityId: window.currentCommunityId,
+                    profileId: getCurrentProfileId()
+                })
+            });
+            var payload = await response.json();
+            if (!payload.success) throw new Error(payload.error || 'Не удалось загрузить изображение');
+            var targetId = kind === 'banner' ? 'groupFormMiniAppBannerFile' : 'groupFormMiniAppIconFile';
+            var target = document.getElementById(targetId);
+            if (target) target.value = payload.url || '';
+            if (statusEl) statusEl.innerHTML = makeInlineNotice('success', '✅ Изображение загружено.');
+        } catch (e) {
+            if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+        }
+    };
+    input.click();
 };
 
 window.deleteGroupByIndex = async function(groupIndex) {

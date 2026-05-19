@@ -110,6 +110,7 @@ const {
     toDetailDto
 } = require('./modules/miniapp-groups');
 const { verifyVkLaunchParams } = require('./modules/miniapp-auth');
+const { saveMiniAppAssetWithDependencies } = require('./modules/miniapp-assets');
 const { ensureMiniAppUser, updateUserGroups } = require('./modules/users');
 const {
     addAppLog,
@@ -392,6 +393,44 @@ function verifyMiniAppRequest(body, overrides = {}) {
     return verifyVkLaunchParams(body.launchParams || {}, {
         secret: overrides.miniAppSecret || process.env.VK_MINIAPP_SECRET
     });
+}
+
+function parseMiniAppDataUrl(dataUrl, fallbackContentType = '') {
+    const match = String(dataUrl || '').match(/^data:([^;]+);base64,(.+)$/);
+    if (!match) {
+        throw new Error('Некорректный формат изображения');
+    }
+
+    return {
+        contentType: String(match[1] || fallbackContentType || '').trim(),
+        buffer: Buffer.from(match[2], 'base64')
+    };
+}
+
+async function handleMiniAppUploadAssetWithDependencies(event, overrides = {}) {
+    try {
+        const q = event.queryStringParameters || event.query || event.params || {};
+        const body = JSON.parse(event.body || '{}');
+        const profileId = getRequestProfileId(q, body);
+        const communityId = String(body.communityId || q.communityId || getActiveCommunityId(profileId) || '').trim();
+        if (!communityId) {
+            return miniAppJson(400, { success: false, error: 'community_required' });
+        }
+
+        const parsedImage = parseMiniAppDataUrl(body.dataUrl, body.contentType);
+        const saveAssetImpl = overrides.saveMiniAppAsset || saveMiniAppAssetWithDependencies;
+        const result = await saveAssetImpl({
+            profileId,
+            communityId,
+            contentType: parsedImage.contentType,
+            buffer: parsedImage.buffer,
+            baseUrl: body.baseUrl || process.env.PAPA_BOT_PUBLIC_URL || process.env.VK_MINIAPP_APP_URL || ''
+        }, overrides);
+
+        return miniAppJson(200, { success: true, url: result.url, assetId: result.assetId, key: result.key });
+    } catch (e) {
+        return miniAppJson(400, { success: false, error: e.message });
+    }
 }
 
 async function handleMiniAppRequestWithDependencies(event, overrides = {}) {
@@ -866,6 +905,7 @@ async function handlePostRequest(event) {
         q.resolveRecovery !== undefined ||
         q.deleteCommunity !== undefined ||
         q.uploadAttachment !== undefined ||
+        q.miniappUploadAsset !== undefined ||
         q.testSend !== undefined ||
         q.checkTokenPermissions !== undefined ||
         q.saveBotVersion !== undefined ||
@@ -962,6 +1002,10 @@ async function handlePostRequest(event) {
     }
 
     // Тестовая отправка сообщения пользователю
+    if (q.miniappUploadAsset !== undefined) {
+        return handleMiniAppUploadAssetWithDependencies(event);
+    }
+
     if (q.testSend !== undefined) {
         return handleTestSend(event);
     }
@@ -3138,6 +3182,7 @@ module.exports = {
         getClientIpFromEvent,
         workerHandlerWithDependencies,
         senderHandlerWithDependencies,
-        handleMiniAppRequestWithDependencies
+        handleMiniAppRequestWithDependencies,
+        handleMiniAppUploadAssetWithDependencies
     }
 };
