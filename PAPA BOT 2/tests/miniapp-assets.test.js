@@ -26,6 +26,20 @@ test('validateMiniAppImageUpload rejects non-image content', () => {
     }), /Unsupported Mini App image type/);
 });
 
+test('validateMiniAppImageUpload rejects empty buffer before checking content type', () => {
+    assert.throws(() => validateMiniAppImageUpload({
+        contentType: undefined,
+        buffer: Buffer.alloc(0)
+    }), /Mini App image is empty/);
+});
+
+test('validateMiniAppImageUpload rejects non-buffer image as empty', () => {
+    assert.throws(() => validateMiniAppImageUpload({
+        contentType: 'image/png',
+        buffer: null
+    }), /Mini App image is empty/);
+});
+
 test('buildMiniAppAssetKey scopes assets by profile and community', () => {
     const key = buildMiniAppAssetKey({
         profileId: '1',

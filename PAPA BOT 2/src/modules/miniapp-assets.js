@@ -20,8 +20,8 @@ function getBucketName() {
 
 function validateMiniAppImageUpload({ contentType, buffer } = {}) {
     const type = clean(contentType).toLowerCase();
-    if (!MIME_TO_EXTENSION[type]) throw new Error('Unsupported Mini App image type');
     if (!Buffer.isBuffer(buffer) || buffer.length === 0) throw new Error('Mini App image is empty');
+    if (!MIME_TO_EXTENSION[type]) throw new Error('Unsupported Mini App image type');
     if (buffer.length > MAX_IMAGE_BYTES) throw new Error('Mini App image is too large');
     return { contentType: type, extension: MIME_TO_EXTENSION[type] };
 }
