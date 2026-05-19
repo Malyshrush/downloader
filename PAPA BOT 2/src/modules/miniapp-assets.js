@@ -14,6 +14,14 @@ function clean(value) {
     return String(value || '').trim();
 }
 
+function cleanKeySegment(value, fallback = '') {
+    const segment = clean(value) || fallback;
+    if (!/^[a-zA-Z0-9_-]+$/.test(segment)) {
+        throw new Error('Invalid Mini App asset key segment');
+    }
+    return segment;
+}
+
 function getBucketName() {
     return process.env.BUCKET_NAME || DEFAULT_BUCKET_NAME;
 }
@@ -31,7 +39,11 @@ function createMiniAppAssetId() {
 }
 
 function buildMiniAppAssetKey({ profileId, communityId, assetId, extension }) {
-    return `miniapp-assets/profile_${clean(profileId) || '1'}/community_${clean(communityId)}/${clean(assetId)}.${clean(extension)}`;
+    const safeProfileId = cleanKeySegment(profileId, '1');
+    const safeCommunityId = cleanKeySegment(communityId);
+    const safeAssetId = cleanKeySegment(assetId);
+    const safeExtension = cleanKeySegment(extension);
+    return `miniapp-assets/profile_${safeProfileId}/community_${safeCommunityId}/${safeAssetId}.${safeExtension}`;
 }
 
 function createMiniAppAssetUrl({ baseUrl, assetId }) {
@@ -80,7 +92,10 @@ async function streamToBuffer(stream) {
 async function readMiniAppAssetWithDependencies(assetId, overrides = {}) {
     const cleanAssetId = clean(assetId);
     const lookup = overrides.lookupAsset ? await overrides.lookupAsset(cleanAssetId) : null;
-    const key = lookup && lookup.key ? lookup.key : cleanAssetId;
+    if (!lookup || !lookup.key) {
+        throw new Error('Mini App asset lookup is required');
+    }
+    const key = lookup.key;
     const contentType = lookup && lookup.contentType ? lookup.contentType : undefined;
     const s3Client = overrides.s3Client || getS3Client();
     const result = await s3Client.send(new GetObjectCommand({

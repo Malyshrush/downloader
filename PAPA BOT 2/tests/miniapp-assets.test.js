@@ -5,7 +5,8 @@ const {
     validateMiniAppImageUpload,
     buildMiniAppAssetKey,
     createMiniAppAssetUrl,
-    saveMiniAppAssetWithDependencies
+    saveMiniAppAssetWithDependencies,
+    readMiniAppAssetWithDependencies
 } = require('../src/modules/miniapp-assets');
 
 test('validateMiniAppImageUpload accepts png and jpeg under size limit', () => {
@@ -51,6 +52,15 @@ test('buildMiniAppAssetKey scopes assets by profile and community', () => {
     assert.equal(key, 'miniapp-assets/profile_1/community_229445618/asset_abc.png');
 });
 
+test('buildMiniAppAssetKey rejects path-like segments', () => {
+    assert.throws(() => buildMiniAppAssetKey({
+        profileId: '1',
+        communityId: '../secret',
+        assetId: 'asset_abc',
+        extension: 'png'
+    }), /Invalid Mini App asset key segment/);
+});
+
 test('createMiniAppAssetUrl points to PAPA BOT public asset endpoint', () => {
     const url = createMiniAppAssetUrl({
         baseUrl: 'https://bot.example/handler',
@@ -92,4 +102,36 @@ test('saveMiniAppAssetWithDependencies writes image to S3 and returns public url
         contentType: 'image/png',
         url: 'https://bot.example/handler?miniappAsset=asset_abc'
     });
+});
+
+test('readMiniAppAssetWithDependencies requires explicit asset lookup', async () => {
+    await assert.rejects(() => readMiniAppAssetWithDependencies('asset_abc', {
+        s3Client: { send: async () => ({}) }
+    }), /Mini App asset lookup is required/);
+});
+
+test('readMiniAppAssetWithDependencies reads looked up asset from S3', async () => {
+    const fakeS3Client = {
+        async send(command) {
+            assert.deepEqual(command.input, {
+                Bucket: 'bot-data-storage',
+                Key: 'miniapp-assets/profile_1/community_229445618/asset_abc.png'
+            });
+            return {
+                ContentType: 'image/png',
+                Body: [Buffer.from('png')]
+            };
+        }
+    };
+
+    const result = await readMiniAppAssetWithDependencies('asset_abc', {
+        s3Client: fakeS3Client,
+        lookupAsset: async () => ({
+            key: 'miniapp-assets/profile_1/community_229445618/asset_abc.png',
+            contentType: 'image/png'
+        })
+    });
+
+    assert.equal(result.contentType, 'image/png');
+    assert.equal(result.buffer.toString('utf8'), 'png');
 });
