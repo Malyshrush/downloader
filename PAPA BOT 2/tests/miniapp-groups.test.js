@@ -92,6 +92,20 @@ test('findMiniAppGroupBySlug returns null for disabled groups', () => {
     assert.equal(findMiniAppGroupBySlug(groups, 'disabled'), null);
 });
 
+test('findMiniAppGroupBySlug returns null for blank or invalid lookup slugs', () => {
+    const groups = normalizeMiniAppGroupRows([
+        {
+            'Группа': '',
+            'MiniApp включен': '1',
+            'MiniApp slug': ''
+        }
+    ]);
+
+    assert.equal(groups[0].slug, 'group');
+    assert.equal(findMiniAppGroupBySlug(groups, ''), null);
+    assert.equal(findMiniAppGroupBySlug(groups, '!!!'), null);
+});
+
 test('normalizeMiniAppGroupRows rejects duplicate enabled slugs', () => {
     assert.throws(
         () => normalizeMiniAppGroupRows([

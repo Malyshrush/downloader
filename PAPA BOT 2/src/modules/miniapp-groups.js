@@ -84,6 +84,18 @@ function normalizeMiniAppSlug(value, fallbackValue = '') {
     return normalized || 'group';
 }
 
+function normalizeMiniAppLookupSlug(value) {
+    const source = toText(value);
+    if (!source) {
+        return '';
+    }
+
+    return transliterateBasicRussian(source.toLowerCase())
+        .replace(/[^a-z0-9_-]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^[-_]+|[-_]+$/g, '');
+}
+
 function pickUrl(manualUrl, uploadedFileUrl) {
     return toText(manualUrl) || toText(uploadedFileUrl);
 }
@@ -149,7 +161,11 @@ function listVisibleMiniAppGroups(groups = [], options = {}) {
 }
 
 function findMiniAppGroupBySlug(groups = [], slug) {
-    const normalizedSlug = normalizeMiniAppSlug(slug);
+    const normalizedSlug = normalizeMiniAppLookupSlug(slug);
+    if (!normalizedSlug) {
+        return null;
+    }
+
     return (Array.isArray(groups) ? groups : []).find((group) => (
         group && group.enabled && group.slug === normalizedSlug
     )) || null;
