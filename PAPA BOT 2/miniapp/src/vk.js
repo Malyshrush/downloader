@@ -37,7 +37,7 @@ export async function initVkBridge() {
 export async function allowMessagesFromGroup(communityId) {
   const groupId = Number(communityId);
   if (!Number.isFinite(groupId) || groupId <= 0) {
-    throw new Error('Не удалось определить VK ID сообщества');
+    throw new Error('\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043e\u043f\u0440\u0435\u0434\u0435\u043b\u0438\u0442\u044c VK ID \u0441\u043e\u043e\u0431\u0449\u0435\u0441\u0442\u0432\u0430');
   }
   return bridge.send('VKWebAppAllowMessagesFromGroup', { group_id: groupId });
 }
