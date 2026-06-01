@@ -399,6 +399,7 @@
 ## Recent runtime/UI notes
 
 - VK Mini App groups MVP is implemented as a separate miniapp/ Vite/React frontend that opens links in the format vk.com/appXXXX#c=<vk_group_id>&g=<slug>, renders either the visible group list or a direct group card, requests VK community message permission before first subscribe, and toggles subscribe/unsubscribe through PAPA BOT API.
+- When VK opens the Mini App without a #c route during moderation or direct discovery, the frontend can use VITE_DEFAULT_COMMUNITY_ID to show an explanatory PAPA BOT intro and the configured community's visible group list instead of a placeholder screen.
 - PAPA BOT exposes Mini App public/read endpoints for community-scoped groups, hidden direct-link groups, signed launch-param subscription status reads, signed subscribe/unsubscribe mutations, and admin-only Mini App image upload for group icons/banners.
 - The admin Groups UI includes Mini App visual fields per group: enabled, hidden from list, slug, user-facing title/description, icon URL/file, banner URL/file, subscribe button text, unsubscribe button text, and generated Mini App link. Group action buttons share the compact group-action-btn sizing class.
 - Mini App group rows are normalized by src/modules/miniapp-groups.js, VK launch signatures by src/modules/miniapp-auth.js, and image assets by src/modules/miniapp-assets.js; coverage lives in tests/miniapp-*.test.js plus tests/admin-panel-groups-ui.test.js.
