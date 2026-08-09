@@ -4,6 +4,7 @@ const adminPanelHTML = `<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <title>Админ-панель &#x1F916; PAPA BOT</title>
+<link rel="icon" type="image/jpeg" href="?favicon=2">
 <style>
 
 /* ===== ТЕМЫ: CSS-переменные ===== */
@@ -515,6 +516,189 @@ text-transform: uppercase;
 color: var(--accent-strong);
 margin-bottom: 12px;
 }
+.page-eyebrow-row {
+display:flex;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:12px;
+}
+.page-eyebrow-row .page-eyebrow {
+margin-bottom:0;
+}
+.platform-switch {
+display:inline-grid;
+grid-template-columns:repeat(2,118px);
+gap:8px;
+}
+.platform-switch-btn {
+width:118px;
+height:38px;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+border-radius:999px;
+border:1px solid transparent;
+color:#ffffff;
+font-size:12px;
+font-weight:900;
+letter-spacing:0.02em;
+cursor:pointer;
+box-shadow:0 8px 18px rgba(15,23,42,0.16);
+transition:transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
+}
+.platform-switch-btn:hover {
+transform:translateY(-1px);
+}
+.platform-switch-btn--vk {
+background:linear-gradient(135deg,#2787f5 0%,#1769d2 100%);
+}
+.platform-switch-btn--telegram {
+background:linear-gradient(135deg,#38bdf8 0%,#229ed9 100%);
+}
+.platform-switch-btn:not(.active) {
+opacity:0.58;
+box-shadow:none;
+}
+.platform-switch-btn.active {
+outline:3px solid rgba(255,255,255,0.82);
+outline-offset:2px;
+}
+.telegram-bot-grid {
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+gap:14px;
+margin:14px 0;
+}
+.telegram-bot-card {
+border:1px solid var(--section-border);
+border-radius:18px;
+padding:16px;
+background:var(--surface-card);
+box-shadow:var(--soft-shadow);
+}
+.telegram-bot-card.is-active {
+border-color:rgba(34,158,217,0.7);
+box-shadow:0 14px 32px rgba(34,158,217,0.18);
+}
+.telegram-bot-card-title {
+font-size:17px;
+font-weight:900;
+color:var(--heading-color);
+}
+.telegram-bot-card-meta {
+margin-top:6px;
+font-size:12px;
+line-height:1.55;
+color:var(--text-secondary);
+word-break:break-word;
+}
+.telegram-bot-card-actions {
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:14px;
+}
+.telegram-bot-card-actions .telegram-action-btn {
+width:156px;
+height:44px;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+}
+.telegram-form-grid {
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+.telegram-form-field {
+display:flex;
+flex-direction:column;
+gap:6px;
+}
+.telegram-form-field label {
+font-size:12px;
+font-weight:800;
+color:var(--text-primary);
+}
+.telegram-form-field input {
+width:100%;
+box-sizing:border-box;
+padding:11px 12px;
+border:1px solid var(--input-border);
+border-radius:10px;
+background:var(--input-bg);
+color:var(--input-text);
+}
+.telegram-chat-toolbar {
+display:flex;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+margin:14px 0;
+}
+.telegram-chat-buttons {
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+.telegram-chat-button {
+min-width:156px;
+height:44px;
+}
+.telegram-chat-button.is-active {
+outline:3px solid rgba(34,158,217,0.32);
+border-color:#22a6df;
+}
+.telegram-chat-editor {
+margin:12px 0;
+padding:16px;
+border:1px solid var(--section-border);
+border-radius:16px;
+background:var(--surface-muted);
+}
+.telegram-chat-bot-list {
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-top:12px;
+}
+.telegram-chat-bot-card {
+min-width:240px;
+padding:14px;
+border:1px solid var(--section-border);
+border-radius:14px;
+background:var(--surface-card);
+}
+.telegram-chat-bot-card.is-active {
+border-color:#22a6df;
+box-shadow:0 10px 24px rgba(34,158,217,0.16);
+}
+.telegram-scenario-context {
+border-color:rgba(34,158,217,0.65);
+}
+.telegram-attachment-catalog {
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:10px;
+}
+@media (max-width:720px) {
+.platform-switch {
+width:100%;
+grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.platform-switch-btn {
+width:100%;
+}
+.telegram-form-grid {
+grid-template-columns:1fr;
+}
+.telegram-bot-card-actions .telegram-action-btn {
+flex:1 1 140px;
+width:auto;
+}
+}
 .page-subtitle {
 margin-top: 10px;
 font-size: 14px;
@@ -567,6 +751,7 @@ justify-content:flex-end;
 .version-chip {
 display:inline-flex;
 align-items:center;
+max-width:100%;
 padding:9px 12px;
 border-radius:999px;
 background: var(--surface-muted);
@@ -577,6 +762,277 @@ font-weight:800;
 letter-spacing:0.05em;
 color: var(--text-primary);
 white-space:nowrap;
+overflow-x:auto;
+scrollbar-width:thin;
+}
+.version-chip .version-segments {
+flex-wrap:nowrap;
+}
+.version-notification-btn {
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:6px;
+min-height:34px;
+padding:8px 12px;
+border-radius:999px;
+border:1px solid var(--section-border);
+background: var(--surface-muted);
+color: var(--text-primary);
+box-shadow: var(--soft-shadow);
+font-size:13px;
+font-weight:900;
+cursor:pointer;
+white-space:nowrap;
+}
+.version-notification-btn.has-unread {
+border-color: rgba(34,197,94,0.42);
+background: linear-gradient(135deg, rgba(220,252,231,0.96) 0%, rgba(187,247,208,0.94) 100%);
+color:#052e16;
+}
+.version-notification-count {
+display:none;
+color:#16a34a;
+font-weight:900;
+}
+.version-notification-btn.has-unread .version-notification-count {
+display:inline;
+}
+.delivery-incident-alert-btn {
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:6px;
+min-width:46px;
+min-height:34px;
+padding:8px 12px;
+border-radius:999px;
+border:1px solid rgba(248,113,113,0.52);
+background:linear-gradient(135deg,rgba(127,29,29,0.96),rgba(220,38,38,0.96));
+color:#fff;
+box-shadow:0 8px 22px rgba(220,38,38,0.24);
+font-size:12px;
+font-weight:1000;
+letter-spacing:0.08em;
+cursor:pointer;
+white-space:nowrap;
+}
+.delivery-incident-alert-btn:not(.has-unread) {
+border-color:var(--section-border);
+background:var(--surface-muted);
+color:var(--text-muted);
+box-shadow:var(--soft-shadow);
+}
+.delivery-incident-alert-btn.has-unread {
+animation:delivery-incident-pulse 1.35s ease-in-out infinite;
+}
+.delivery-incident-alert-btn.is-collapsed {
+min-width:34px;
+width:34px;
+padding:8px;
+opacity:0.72;
+}
+.delivery-incident-alert-btn:not(.is-collapsed) .delivery-incident-alert-collapsed-mark,
+.delivery-incident-alert-btn.is-collapsed .delivery-incident-alert-label,
+.delivery-incident-alert-btn.is-collapsed .delivery-incident-alert-count {
+display:none;
+}
+@keyframes delivery-incident-pulse {
+0%,100% { transform:scale(1); box-shadow:0 8px 22px rgba(220,38,38,0.22); }
+50% { transform:scale(1.06); box-shadow:0 8px 28px rgba(239,68,68,0.52); }
+}
+.delivery-incident-panel {
+margin:14px 0 18px;
+padding:16px;
+border:1px solid rgba(248,113,113,0.3);
+border-radius:18px;
+background:linear-gradient(145deg,rgba(127,29,29,0.09),var(--bg-tab));
+}
+.delivery-incident-panel-header {
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:14px;
+margin-bottom:12px;
+}
+.delivery-incident-panel-title { font-size:17px; font-weight:900; color:var(--text-primary); }
+.delivery-incident-panel-copy { margin-top:4px; font-size:13px; line-height:1.55; color:var(--text-secondary); }
+.delivery-incident-list { display:grid; gap:12px; }
+.delivery-incident-card {
+padding:15px;
+border:1px solid var(--section-border);
+border-left:4px solid #ef4444;
+border-radius:14px;
+background:var(--bg-container);
+box-shadow:var(--soft-shadow);
+}
+.delivery-incident-card.is-resolved { border-left-color:#22c55e; }
+.delivery-incident-card.is-cancelled { border-left-color:#64748b; opacity:0.86; }
+.delivery-incident-card-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.delivery-incident-card-title { font-size:15px; font-weight:900; color:var(--text-primary); }
+.delivery-incident-card-meta,
+.delivery-incident-card-detail { margin-top:5px; font-size:12px; line-height:1.5; color:var(--text-secondary); }
+.delivery-incident-card-error {
+margin-top:10px;
+padding:10px 12px;
+border-radius:10px;
+background:rgba(239,68,68,0.09);
+color:var(--text-primary);
+font-size:13px;
+line-height:1.55;
+}
+.delivery-incident-card-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+.delivery-incident-status {
+padding:5px 8px;
+border-radius:999px;
+background:rgba(239,68,68,0.12);
+color:#dc2626;
+font-size:11px;
+font-weight:900;
+white-space:nowrap;
+}
+.delivery-incident-card.is-resolved .delivery-incident-status { color:#15803d; background:rgba(34,197,94,0.13); }
+.delivery-incident-card.is-cancelled .delivery-incident-status { color:#64748b; background:rgba(100,116,139,0.13); }
+.version-notification-list {
+display:grid;
+gap:18px;
+}
+.version-notification-tabs {
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px;
+margin:0 0 16px;
+}
+.version-notification-tab {
+min-height:44px;
+padding:10px 16px;
+border:1px solid var(--section-border);
+border-radius:14px;
+background:var(--surface-strong);
+color:var(--text-secondary);
+font-size:14px;
+font-weight:900;
+cursor:pointer;
+}
+.version-notification-tab.is-active {
+border-color:var(--accent-color);
+background:var(--accent-soft);
+color:var(--heading-color);
+box-shadow:0 8px 20px rgba(15,23,42,0.1);
+}
+.version-notification-tab-count {
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:24px;
+height:24px;
+margin-left:7px;
+padding:0 7px;
+border-radius:999px;
+background:var(--modal-bg);
+border:1px solid var(--section-border);
+font-size:12px;
+}
+.version-notification-group {
+display:grid;
+gap:10px;
+padding:16px;
+border:1px solid var(--section-border);
+border-radius:20px;
+background:var(--surface-strong);
+box-shadow:var(--soft-shadow);
+}
+.version-notification-group-header {
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+}
+.version-notification-group-title {
+font-size:17px;
+line-height:1.35;
+font-weight:900;
+color:var(--heading-color);
+}
+.version-notification-group-count {
+flex:0 0 auto;
+padding:6px 10px;
+border-radius:999px;
+background:var(--accent-soft);
+border:1px solid var(--section-border);
+font-size:12px;
+font-weight:900;
+color:var(--heading-color);
+}
+.version-notification-card {
+border:1px solid var(--section-border);
+border-radius:14px;
+background:var(--modal-bg);
+overflow:hidden;
+box-shadow:0 8px 20px rgba(15,23,42,0.08);
+}
+.version-notification-card[open] {
+border-color:var(--accent-color);
+box-shadow:0 12px 28px rgba(15,23,42,0.13);
+}
+.version-notification-card-summary {
+display:flex;
+align-items:center;
+gap:10px;
+padding:15px 17px;
+cursor:pointer;
+list-style:none;
+font-size:15px;
+line-height:1.45;
+font-weight:900;
+color:var(--heading-color);
+}
+.version-notification-card-summary::-webkit-details-marker {
+display:none;
+}
+.version-notification-card-summary::after {
+content:'›';
+margin-left:auto;
+font-size:25px;
+line-height:1;
+color:var(--text-secondary);
+transform:rotate(90deg);
+transition:transform .18s ease;
+}
+.version-notification-card[open] .version-notification-card-summary::after {
+transform:rotate(-90deg);
+}
+.version-notification-card-title {
+font-size:15px;
+font-weight:900;
+color: var(--heading-color);
+}
+.version-notification-card-heading {
+display:grid;
+gap:3px;
+}
+.version-notification-card-date {
+font-size:12px;
+line-height:1.35;
+font-weight:700;
+color:var(--text-secondary);
+}
+.version-notification-card-text {
+padding:0 17px 17px;
+border-top:1px solid var(--section-border);
+padding-top:14px;
+font-size:15px;
+line-height:1.7;
+color: var(--text-secondary);
+}
+.version-notification-empty {
+padding:20px;
+border:1px solid var(--section-border);
+border-radius:18px;
+background:var(--surface-strong);
+font-size:15px;
+line-height:1.6;
+color:var(--text-secondary);
 }
 .version-segments {
 display:inline-flex;
@@ -595,6 +1051,9 @@ opacity: 0.9;
 .version-segment {
 font-weight:900;
 }
+.version-segment.has-tooltip {
+cursor:help;
+}
 .version-segment.seg-0 { color:#ef4444; }
 .version-segment.seg-1 { color:#f97316; }
 .version-segment.seg-2 { color:#eab308; }
@@ -607,6 +1066,10 @@ font-weight:900;
 .version-segment.seg-9 { color:#a855f7; }
 .version-segment.seg-10 { color:#ec4899; }
 .version-segment.seg-11 { color:#f43f5e; }
+.version-segment.seg-12 { color:#22d3ee; }
+.version-segment.telegram-segment {
+text-shadow:0 0 14px currentColor;
+}
 .version-segments--large {
 font-size:18px;
 line-height:1.45;
@@ -658,9 +1121,26 @@ max-height:80vh;
 overflow:auto;
 border-radius:22px;
 border:1px solid var(--section-border);
-background: var(--bg-card);
+background: var(--modal-bg);
 box-shadow: 0 24px 60px rgba(15,23,42,0.28);
 padding:18px;
+}
+.version-notifications-modal {
+width:min(1040px, 100%);
+background:var(--modal-bg);
+padding:22px;
+}
+.version-notifications-modal .version-modal-title {
+font-size:24px;
+}
+.version-notifications-modal .version-modal-subtitle {
+font-size:14px;
+line-height:1.55;
+}
+.version-notifications-summary {
+background:var(--surface-strong);
+font-size:14px;
+line-height:1.65;
 }
 .capabilities-grid {
 display:grid;
@@ -705,6 +1185,142 @@ margin-top:6px;
 font-size:13px;
 line-height:1.6;
 color: var(--text-secondary);
+}
+.tab-help-overlay {
+position:fixed;
+inset:0;
+display:none;
+align-items:flex-start;
+justify-content:center;
+padding:70px 18px 18px;
+background:rgba(2,6,23,0.72);
+z-index:10090;
+}
+.tab-help-modal {
+width:min(1080px, 100%);
+max-height:calc(100vh - 100px);
+overflow:auto;
+border-radius:18px;
+border:1px solid var(--section-border);
+background:var(--modal-bg);
+color:var(--text-primary);
+box-shadow:0 28px 80px rgba(0,0,0,0.42);
+}
+.tab-help-header {
+position:sticky;
+top:0;
+z-index:2;
+display:flex;
+align-items:flex-start;
+justify-content:space-between;
+gap:16px;
+padding:18px 20px;
+border-bottom:1px solid var(--section-border);
+background:linear-gradient(135deg, rgba(37,99,235,0.16) 0%, rgba(14,165,233,0.08) 100%), var(--modal-bg);
+}
+.tab-help-kicker {
+display:inline-flex;
+align-items:center;
+padding:5px 9px;
+border-radius:999px;
+background:var(--surface-muted);
+border:1px solid var(--section-border);
+font-size:11px;
+font-weight:900;
+letter-spacing:0.05em;
+text-transform:uppercase;
+color:var(--accent-strong);
+}
+.tab-help-title {
+margin:8px 0 0;
+font-size:24px;
+line-height:1.15;
+font-weight:900;
+letter-spacing:0;
+color:var(--heading-color);
+}
+.tab-help-subtitle {
+margin:8px 0 0;
+font-size:13px;
+line-height:1.55;
+color:var(--text-secondary);
+}
+.tab-help-close {
+min-width:42px;
+height:38px;
+padding:0 12px;
+border-radius:10px;
+border:1px solid var(--section-border);
+background:var(--surface-muted);
+color:var(--text-primary);
+font-size:20px;
+font-weight:900;
+cursor:pointer;
+}
+.tab-help-body {
+display:grid;
+gap:14px;
+padding:18px 20px 22px;
+}
+.tab-help-section {
+border:1px solid var(--section-border);
+border-radius:12px;
+background:var(--surface-card);
+padding:14px;
+}
+.tab-help-section-title {
+margin:0 0 10px;
+font-size:15px;
+line-height:1.25;
+font-weight:900;
+color:var(--heading-color);
+}
+.tab-help-list {
+display:grid;
+gap:8px;
+margin:0;
+padding:0;
+list-style:none;
+}
+.tab-help-list li {
+position:relative;
+padding-left:18px;
+font-size:13px;
+line-height:1.55;
+color:var(--text-secondary);
+}
+.tab-help-list li::before {
+content:'';
+position:absolute;
+left:0;
+top:0.75em;
+width:7px;
+height:7px;
+border-radius:999px;
+background:var(--accent-strong);
+}
+.tab-help-grid {
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+gap:12px;
+}
+.tab-help-card {
+border:1px solid var(--section-border);
+border-radius:10px;
+background:var(--surface-soft);
+padding:12px;
+}
+.tab-help-card-title {
+font-size:13px;
+font-weight:900;
+line-height:1.35;
+color:var(--heading-color);
+margin-bottom:6px;
+}
+.tab-help-card-text {
+font-size:12px;
+line-height:1.55;
+color:var(--text-secondary);
 }
 .version-close-btn {
 min-width:auto;
@@ -790,6 +1406,13 @@ font-size:12px;
 font-weight:900;
 margin-bottom:4px;
 }
+.version-history-date {
+font-size:10px;
+line-height:1.4;
+font-weight:700;
+color:var(--text-secondary);
+margin-bottom:5px;
+}
 .version-history-text {
 font-size:11px;
 line-height:1.55;
@@ -861,7 +1484,8 @@ font: inherit;
 }
 .version-editor-fields textarea {
 min-height:88px;
-resize:vertical;
+resize:both;
+overflow:auto;
 }
 .version-editor-actions {
 display:flex;
@@ -962,6 +1586,13 @@ position: relative;
 z-index: 1;
 }
 .tab-panel-copy { max-width: 760px; }
+.tab-panel-kicker-row {
+display:flex;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:10px;
+}
 .tab-panel-kicker {
 display:inline-flex;
 align-items:center;
@@ -973,7 +1604,31 @@ font-size:11px;
 font-weight:800;
 letter-spacing:0.06em;
 text-transform:uppercase;
-margin-bottom:10px;
+margin-bottom:0;
+}
+.tab-help-btn {
+display:inline-flex;
+align-items:center;
+justify-content:center;
+height:30px;
+min-width:92px;
+padding:0 13px;
+border-radius:999px;
+border:1px solid rgba(255,255,255,0.24);
+background:rgba(255,255,255,0.20);
+color:white;
+font-size:11px;
+font-weight:900;
+letter-spacing:0.05em;
+text-transform:uppercase;
+cursor:pointer;
+box-shadow:inset 0 1px 0 rgba(255,255,255,0.18), 0 8px 18px rgba(15,23,42,0.16);
+transition:background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+.tab-help-btn:hover {
+background:rgba(255,255,255,0.30);
+transform:translateY(-1px);
+box-shadow:inset 0 1px 0 rgba(255,255,255,0.22), 0 12px 24px rgba(15,23,42,0.22);
 }
 .tab-panel-title {
 margin:0;
@@ -1022,6 +1677,21 @@ table { width: max-content; min-width: 100%; border-collapse: separate; border-s
 th, td { border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); padding: 8px 8px; text-align: left; min-width: 80px; color: var(--text-primary); vertical-align: top; box-shadow: var(--table-cell-shadow); }
 th:first-child, td:first-child { border-left: 1px solid var(--border-color); }
 th { color: white; position: sticky; top: 0; z-index: 10; background: var(--table-head-default); box-shadow: inset 0 -1px 0 rgba(255,255,255,0.08), 0 6px 12px rgba(15, 23, 42, 0.12); font-size: 13px; letter-spacing: 0.02em; position: sticky; }
+table.table-has-sticky-columns .sticky-col { position: sticky; z-index: 20; background-clip: padding-box; }
+table.table-has-sticky-columns th.sticky-col { z-index: 35; }
+table.table-has-sticky-columns tbody tr:nth-child(odd) td.sticky-col { background: var(--bg-table-odd); }
+table.table-has-sticky-columns tbody tr:nth-child(even) td.sticky-col { background: var(--bg-table-even); }
+table.table-has-sticky-columns tbody tr:hover td.sticky-col { background: linear-gradient(0deg, var(--table-hover-glow), var(--table-hover-glow)), var(--bg-table-hover); }
+table.table-has-sticky-columns .sticky-col-3 { box-shadow: 8px 0 18px rgba(15, 23, 42, 0.16), var(--table-cell-shadow); }
+table.sticky-table-bot-flow .sticky-col-1 { left: 0; min-width: 220px; width: 220px; max-width: 220px; }
+table.sticky-table-bot-flow .sticky-col-2 { left: 220px; min-width: 230px; width: 230px; max-width: 230px; }
+table.sticky-table-bot-flow .sticky-col-3 { left: 450px; min-width: 180px; width: 180px; max-width: 180px; }
+table.sticky-table-mailing-flow .sticky-col-1 { left: 0; min-width: 130px; width: 130px; max-width: 130px; }
+table.sticky-table-mailing-flow .sticky-col-2 { left: 130px; min-width: 240px; width: 240px; max-width: 240px; }
+table.sticky-table-mailing-flow .sticky-col-3 { left: 370px; min-width: 240px; width: 240px; max-width: 240px; }
+table.sticky-table-users-flow .sticky-col-1 { left: 0; min-width: 190px; width: 190px; max-width: 190px; }
+table.sticky-table-users-flow .sticky-col-2 { left: 190px; min-width: 200px; width: 200px; max-width: 200px; }
+table.sticky-table-users-flow .sticky-col-3 { left: 390px; min-width: 260px; width: 260px; max-width: 260px; }
 tr:first-child th:first-child { border-top-left-radius: 16px; }
 tr:first-child th:last-child { border-top-right-radius: 16px; }
 th .col-name { display: block; font-weight: 800; font-size: 13px; line-height: 1.28; padding-right: 28px; text-wrap: balance; }
@@ -1072,7 +1742,7 @@ border-color: var(--accent-color);
 box-shadow: 0 0 0 3px var(--focus-ring);
 }
 textarea { resize: both; min-height: 36px; min-width: 150px; overflow: auto; }
-textarea.editable-cell { resize: both; min-height: 40px; min-width: 100px; overflow: auto; font-family: inherit; line-height: 1.45; font-size: 12px; width: 100%; box-sizing: border-box; padding: 9px 10px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-textarea); color: var(--text-input); }
+textarea.editable-cell { resize: both; height: 82px; min-height: 82px; min-width: 100px; overflow: auto; font-family: inherit; line-height: 1.45; font-size: 12px; width: 100%; box-sizing: border-box; padding: 9px 10px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-textarea); color: var(--text-input); }
 .editable-cell::placeholder { color: var(--text-secondary); }
 .cell-editor-wrap {
 position: relative;
@@ -1157,13 +1827,28 @@ vertical-align: middle;
 .status.error { background: var(--bg-status-error); color: var(--text-status-error); display: block; }
 .scroll { overflow-x: auto; max-height: 600px; overflow-y: auto; border-radius: 22px; border: 1px solid var(--section-border); background: var(--surface-soft); box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), var(--soft-shadow); padding: 10px; }
 .info-box { background: var(--bg-info); padding: 14px 16px; border-radius: 16px; margin-bottom: 16px; border: 1px solid var(--section-border); border-left: 5px solid var(--info-box-border); color: var(--text-primary); box-shadow: var(--soft-shadow); }
+.info-box--with-action { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.info-box-message { flex:1; min-width:260px; }
+.btn-bug-report { background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); color:#7f1d1d; border:1px solid rgba(127,29,29,0.22); min-width:170px; }
+.btn-bug-report:hover { background: linear-gradient(135deg, #fca5a5 0%, #f87171 100%); color:#7f1d1d; }
+.btn-suggestion-report { background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%); color:#14532d; border:1px solid rgba(20,83,45,0.22); min-width:170px; }
+.btn-suggestion-report:hover { background: linear-gradient(135deg, #86efac 0%, #4ade80 100%); color:#14532d; }
+.bug-status-badge,
+.bug-status-action-btn { min-width:150px; text-align:center; }
+.bug-status--submitted { background:#dc2626 !important; color:#fff !important; }
+.bug-status--in-progress { background:#2563eb !important; color:#fff !important; }
+.bug-status--not-bug { background:#e5e7eb !important; color:#374151 !important; }
+.bug-status--fixed { background:#16a34a !important; color:#fff !important; }
+.bug-report-thumb-grid { display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; }
+.bug-report-thumb { width:150px; height:96px; object-fit:cover; border-radius:10px; border:1px solid var(--section-border); cursor:pointer; background:var(--surface-soft); }
+.bug-report-thumb:hover { filter:brightness(1.08); transform:translateY(-1px); }
 .debug { background: var(--bg-debug); padding: 12px 14px; margin-top: 20px; border-radius: 16px; border: 1px solid var(--section-border); border-left: 5px solid var(--debug-border); font-size: 11px; max-height: 200px; overflow-y: auto; white-space: pre-wrap; color: var(--text-primary); }
 .tooltip { position: fixed; z-index: 10000; background: var(--bg-tooltip); color: var(--text-tooltip); padding: 10px; border-radius: 4px; font-size: 12px; max-width: 500px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); pointer-events: none; display: none; line-height: 1.5; }
 .tooltip.show { display: block; }
 .tooltip code { background: var(--tooltip-code-bg); padding: 2px 6px; border-radius: 6px; font-family: monospace; }
 select { padding: 8px 10px; font-size: 12px; }
 .hint { font-size: 11px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
-.section-header { text-align: center; font-weight: 900; font-size: 13px; letter-spacing: 0.05em; padding: 10px 8px !important; }
+.section-header { text-align: center; font-weight: 900; font-size: 19.5px !important; letter-spacing: 0.05em; padding: 10px 8px !important; color: #111827 !important; opacity: 1 !important; text-shadow: none !important; }
 .color-link-cell { min-width: 120px; }
 .color-link-cell select, .color-link-cell input { width: 100%; padding: 2px; font-size: 11px; }
 .color-link-cell .link-input { display: none; }
@@ -1179,6 +1864,9 @@ select { padding: 8px 10px; font-size: 12px; }
 }
 .cell-with-copy .editable-cell {
   padding-bottom: 34px;
+}
+.cell-with-reply-placement .editable-cell {
+  padding-bottom: 38px;
 }
 .cell-with-trigger-mode .editable-cell {
   padding-right: 10px;
@@ -1231,6 +1919,7 @@ select { padding: 8px 10px; font-size: 12px; }
 }
 .attach-btn { background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%) !important; }
 .kb-btn-cell { background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%) !important; }
+.kb-btn-cell.kb-btn-cell--has-buttons { background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%) !important; }
 .test-btn { background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%) !important; }
 .copy-btn-cell {
   position: absolute !important;
@@ -1246,10 +1935,31 @@ select { padding: 8px 10px; font-size: 12px; }
   background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
   box-shadow: var(--button-shadow) !important;
 }
+.comment-reply-placement-toggle {
+  position: absolute !important;
+  left: 6px !important;
+  bottom: 6px !important;
+  min-width: 112px;
+  border: 1px solid rgba(148, 163, 184, 0.72) !important;
+  border-radius: 10px !important;
+  padding: 4px 8px !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  color: #f8fafc !important;
+  background: linear-gradient(135deg, #64748b 0%, #475569 100%) !important;
+  box-shadow: var(--button-shadow) !important;
+  cursor: pointer;
+}
+.comment-reply-placement-toggle.is-comment {
+  border-color: rgba(134, 239, 172, 0.92) !important;
+  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%) !important;
+}
 .attach-btn:hover,
 .kb-btn-cell:hover,
 .test-btn:hover,
-.copy-btn-cell:hover {
+.copy-btn-cell:hover,
+.comment-reply-placement-toggle:hover {
   transform: translateY(-1px);
   box-shadow: var(--button-shadow-strong) !important;
 }
@@ -1318,6 +2028,664 @@ color: #eff6ff;
     border-radius: 16px !important;
     padding: 12px 14px !important;
     box-shadow: var(--soft-shadow) !important;
+}
+.bot-switcher-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+    gap: 14px;
+    align-items: start;
+}
+.bot-switcher-title {
+    color: var(--bot-switcher-text);
+    font-size: 13px;
+    font-weight: 900;
+    margin: 0 0 8px 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.bot-template-panel {
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 14px;
+    padding: 10px;
+    background: rgba(15, 23, 42, 0.22);
+}
+.bot-template-select {
+    width: 100%;
+    min-height: 38px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-input);
+    color: var(--text-input);
+    padding: 8px 10px;
+    font-weight: 800;
+}
+.bot-template-picker {
+    position: relative;
+    width: 100%;
+}
+.bot-template-current {
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 38px 8px 10px;
+    background: var(--bg-input);
+    color: var(--text-input);
+    font-weight: 900;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+}
+.bot-template-current::after {
+    content: '▾';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.bot-template-menu {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 10020;
+    max-height: 430px;
+    overflow: auto;
+    padding: 8px;
+    border: 1px solid var(--section-border);
+    border-radius: 12px;
+    background: var(--modal-bg);
+    box-shadow: var(--container-shadow);
+}
+.bot-template-picker.is-open .bot-template-menu {
+    display: block;
+}
+.bot-template-group {
+    margin: 6px 0 8px;
+    font-weight: 900;
+    color: var(--text-color);
+}
+.bot-template-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 26px;
+    gap: 8px;
+    align-items: center;
+    margin: 2px 0;
+}
+.bot-template-load {
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: transparent;
+    color: var(--text-color);
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+}
+.bot-template-load:hover {
+    background: rgba(37,99,235,0.32);
+}
+.bot-template-delete {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    border: 2px solid rgba(127,29,29,0.70);
+    background: #ef4444;
+    color: #050505;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 1000;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.40), 0 3px 0 #991b1b;
+}
+.bot-template-delete:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), 0 1px 0 #991b1b;
+}
+.bot-template-notice,
+.bot-template-table-notice {
+    margin-top: 8px;
+    font-size: 12px;
+}
+.bot-template-save-star {
+    display: block;
+    margin: 7px auto 0;
+    min-width: 34px;
+    height: 30px;
+    border: 0;
+    border-radius: 999px;
+    color: #111827;
+    background: linear-gradient(180deg, #fde68a 0%, #f59e0b 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.70), 0 4px 0 #92400e, 0 8px 14px rgba(2,6,23,0.24);
+    cursor: pointer;
+    font-size: 17px;
+    line-height: 1;
+}
+.bot-template-save-star:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.55), 0 2px 0 #92400e, 0 5px 10px rgba(2,6,23,0.20);
+}
+@media (max-width: 900px) {
+    .bot-switcher-layout {
+        grid-template-columns: 1fr;
+    }
+}
+.comment-activities-switcher {
+    background: var(--bot-switcher-bg) !important;
+    color: var(--bot-switcher-text) !important;
+    border: 1px solid var(--bot-switcher-border) !important;
+    border-left: 5px solid #2563eb !important;
+    border-radius: 16px !important;
+    padding: 12px 14px !important;
+    margin: 8px 0 !important;
+    box-shadow: var(--soft-shadow) !important;
+}
+.comment-activity-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10003;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    background: rgba(2,6,23,0.72);
+}
+.comment-activity-modal {
+    width: min(980px, 100%);
+    max-height: calc(100vh - 36px);
+    overflow: auto;
+    background: var(--modal-bg);
+    color: var(--text-color);
+    border: 1px solid var(--section-border);
+    border-radius: 18px;
+    box-shadow: var(--container-shadow);
+    padding: 18px;
+}
+.comment-activity-modal-status-sticky {
+    position: sticky;
+    top: -18px;
+    z-index: 5;
+    margin: -4px 0 10px;
+}
+.comment-activity-modal-status-sticky:empty {
+    display: none;
+}
+.comment-activity-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+.comment-activity-mention-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.comment-activity-editor-block {
+    border: 1px solid rgba(148, 163, 184, 0.26);
+    border-radius: 16px;
+    padding: 14px;
+    margin-top: 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 10px 22px rgba(2,6,23,0.10);
+}
+.comment-activity-editor-block--main {
+    background: linear-gradient(135deg, rgba(37,99,235,0.15), rgba(15,23,42,0.20));
+    border-color: rgba(59,130,246,0.34);
+}
+.comment-activity-editor-block--repeat {
+    background: linear-gradient(135deg, rgba(124,58,237,0.16), rgba(15,23,42,0.20));
+    border-color: rgba(168,85,247,0.34);
+}
+.comment-activity-editor-block--service {
+    background: linear-gradient(135deg, rgba(14,165,233,0.14), rgba(15,23,42,0.20));
+    border-color: rgba(56,189,248,0.32);
+}
+.comment-activity-editor-block--mention {
+    background: linear-gradient(135deg, rgba(20,184,166,0.14), rgba(15,23,42,0.20));
+    border-color: rgba(45,212,191,0.30);
+}
+.comment-activity-editor-block--words {
+    background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(15,23,42,0.20));
+    border-color: rgba(251,191,36,0.30);
+}
+.comment-activity-editor-block--stats {
+    background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(15,23,42,0.20));
+    border-color: rgba(74,222,128,0.30);
+}
+.comment-activity-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.comment-activity-field--full {
+    grid-column: 1 / -1;
+}
+.comment-activity-field label {
+    font-weight: 900;
+    font-size: 12px;
+}
+.comment-activity-field input,
+.comment-activity-field textarea {
+    width: 100%;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 9px 10px;
+    background: var(--bg-input);
+    color: var(--text-input);
+    font-weight: 700;
+}
+.comment-activity-field textarea {
+    min-height: 72px;
+    resize: both;
+    overflow: auto;
+    line-height: 1.45;
+}
+.comment-activity-keyword-row {
+    border: 1px solid var(--section-border);
+    border-radius: 14px;
+    padding: 12px;
+    background: var(--surface-soft);
+    margin-top: 10px;
+}
+.comment-activity-template-picker {
+    position: relative;
+    min-width: 280px;
+}
+.comment-activity-template-current {
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 8px 38px 8px 10px;
+    background: var(--bg-input);
+    color: var(--text-input);
+    font-weight: 900;
+    text-align: left;
+    cursor: pointer;
+    position: relative;
+}
+.comment-activity-template-current::after {
+    content: '▾';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.comment-activity-template-menu {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 10020;
+    max-height: 430px;
+    overflow: auto;
+    padding: 8px;
+    border: 1px solid var(--section-border);
+    border-radius: 12px;
+    background: var(--modal-bg);
+    box-shadow: var(--container-shadow);
+}
+.comment-activity-template-picker.is-open .comment-activity-template-menu {
+    display: block;
+}
+.comment-activity-template-group {
+    margin: 6px 0 8px;
+    font-weight: 900;
+    color: var(--text-color);
+}
+.comment-activity-template-row {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 26px;
+    gap: 8px;
+    align-items: center;
+    margin: 2px 0;
+}
+.comment-activity-template-load {
+    border: 0;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: transparent;
+    color: var(--text-color);
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+}
+.comment-activity-template-load:hover {
+    background: rgba(37,99,235,0.32);
+}
+.comment-activity-template-delete {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    border: 2px solid rgba(127,29,29,0.70);
+    background: #ef4444;
+    color: #050505;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 1000;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.40), 0 3px 0 #991b1b;
+}
+.comment-activity-template-delete:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.30), 0 1px 0 #991b1b;
+}
+.comment-activity-template-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+.comment-activity-template-notice {
+    min-height: 18px;
+    font-size: 12px;
+    font-weight: 800;
+}
+.comment-activity-template-notice.success { color: #22c55e; }
+.comment-activity-template-notice.error { color: #f87171; }
+.comment-activity-attach-btn {
+    min-width: 42px;
+    height: 38px;
+    padding: 0 14px !important;
+    align-self: end;
+}
+.admin-floating-tooltip {
+    position: fixed;
+    z-index: 10090;
+    pointer-events: none;
+    max-width: min(520px, calc(100vw - 24px));
+    padding: 10px 12px;
+    border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 10px;
+    background: rgba(15,23,42,0.96);
+    color: #f8fafc;
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 800;
+    box-shadow: 0 14px 32px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.12);
+    white-space: pre-wrap;
+}
+.comment-activity-answer-no-repeat {
+    border: 1px solid rgba(148, 163, 184, 0.75);
+    border-radius: 999px;
+    padding: 5px 10px;
+    background: linear-gradient(180deg, rgba(30,41,59,.95), rgba(15,23,42,.95));
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 3px 0 rgba(15,23,42,.9);
+    white-space: nowrap;
+}
+.comment-activity-answer-no-repeat-same {
+    border-color: rgba(251, 191, 36, 0.9);
+    background: linear-gradient(180deg, rgba(120,53,15,.95), rgba(69,26,3,.95));
+    color: #fde68a;
+}
+.comment-activity-answer-no-repeat.is-on {
+    border-color: rgba(134, 239, 172, 0.95);
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 55%, #15803d 100%);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.42), 0 3px 0 #166534, 0 8px 14px rgba(34,197,94,.24);
+}
+.comment-activity-answer-no-repeat-same.is-on {
+    border-color: rgba(134, 239, 172, 0.95);
+    background: linear-gradient(180deg, #22c55e 0%, #16a34a 55%, #15803d 100%);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.42), 0 3px 0 #166534, 0 8px 14px rgba(34,197,94,.24);
+}
+.comment-activity-answer-no-repeat:active {
+    transform: translateY(2px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 0 rgba(15,23,42,.9);
+}
+.comment-activity-toggle-btn {
+    width: 100%;
+    border: 1px solid rgba(125, 211, 252, 0.85);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, #38bdf8 0%, #0ea5e9 52%, #0369a1 100%);
+    color: #fff;
+    font-weight: 900;
+    cursor: pointer;
+    min-height: 42px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 4px 0 #075985, 0 9px 16px rgba(14,165,233,.24);
+    text-shadow: 0 1px 1px rgba(0,0,0,.35);
+    transform: translateY(0);
+}
+.comment-activity-toggle-btn.is-off {
+    border-color: rgba(252, 165, 165, 0.85);
+    background: linear-gradient(180deg, #fecaca 0%, #f87171 52%, #dc2626 100%);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 4px 0 #991b1b, 0 9px 16px rgba(248,113,113,.24);
+}
+.comment-activity-toggle-btn:active {
+    transform: translateY(3px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 1px 0 rgba(0,0,0,.35), 0 4px 10px rgba(0,0,0,.18);
+}
+.comment-activity-reply-placement {
+    width: 100%;
+    min-height: 42px;
+    border: 1px solid rgba(148, 163, 184, 0.72);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: linear-gradient(180deg, #94a3b8 0%, #64748b 52%, #475569 100%);
+    color: #fff;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 4px 0 #334155, 0 9px 16px rgba(71,85,105,.24);
+}
+.comment-activity-reply-placement.is-comment {
+    border-color: rgba(134, 239, 172, 0.92);
+    background: linear-gradient(180deg, #4ade80 0%, #22c55e 52%, #15803d 100%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.42), 0 4px 0 #166534, 0 9px 16px rgba(34,197,94,.24);
+}
+.comment-activity-reply-placement:active {
+    transform: translateY(3px);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 1px 0 rgba(15,23,42,.9);
+}
+.comment-activity-answer-row {
+    padding: 14px;
+    border: 1px solid rgba(96, 165, 250, 0.42);
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(15,23,42,.58), rgba(30,41,59,.72));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 8px 20px rgba(2,8,23,.12);
+}
+.comment-activity-answer-row + .comment-activity-answer-row {
+    margin-top: 16px;
+}
+.comment-activity-answer-head {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    padding-bottom:8px;
+    border-bottom:1px solid rgba(148,163,184,.22);
+}
+.comment-activity-answer-title {
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    font-weight:900;
+    color:#e2e8f0;
+}
+.comment-activity-answer-title-badge {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:28px;
+    height:28px;
+    border-radius:999px;
+    background:linear-gradient(180deg,#60a5fa,#2563eb);
+    color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 3px 0 #1d4ed8;
+}
+.comment-activity-answer-head-actions {
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    flex-wrap:wrap;
+}
+.comment-activity-answer-order {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 8px;
+    border:1px solid rgba(96,165,250,.55);
+    border-radius:999px;
+    background:rgba(15,23,42,.72);
+    color:#dbeafe;
+    font-size:11px;
+    font-weight:900;
+}
+.comment-activity-answer-order input {
+    width:58px;
+    min-height:26px;
+    padding:3px 6px;
+    border:1px solid rgba(147,197,253,.65);
+    border-radius:999px;
+    background:rgba(15,23,42,.95);
+    color:#fff;
+    font-size:12px;
+    font-weight:900;
+    text-align:center;
+}
+.comment-activity-answer-main-grid {
+    display:grid;
+    grid-template-columns:minmax(260px,1fr) minmax(260px,1fr);
+    gap:14px;
+    align-items:start;
+}
+.comment-activity-answer-controls-grid {
+    display:grid;
+    grid-template-columns:110px minmax(190px,1fr) minmax(190px,1fr) 110px;
+    gap:10px;
+    align-items:end;
+}
+.comment-activity-answer-limit-grid {
+    display:grid;
+    grid-template-columns:140px minmax(220px,1fr) minmax(220px,1fr);
+    gap:10px;
+    align-items:start;
+    padding:12px;
+    border:1px solid rgba(56,189,248,.24);
+    border-radius:14px;
+    background:rgba(8,47,73,.26);
+}
+.comment-activity-limit-hint {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:20px;
+    height:20px;
+    border-radius:999px;
+    border:1px solid rgba(125,211,252,.9);
+    background:linear-gradient(180deg,#38bdf8,#0284c7);
+    color:#fff;
+    font-size:12px;
+    font-weight:1000;
+    cursor:help;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 2px 0 #075985;
+}
+@media (max-width: 860px) {
+    .comment-activity-answer-main-grid,
+    .comment-activity-answer-controls-grid,
+    .comment-activity-answer-limit-grid,
+    .comment-activity-mention-grid {
+        grid-template-columns:1fr;
+    }
+}
+.bot-switcher-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 6px;
+}
+.bot-switcher-chip {
+    display: inline-flex;
+    align-items: stretch;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 12px;
+    border: 1px solid rgba(148, 163, 184, 0.38);
+    background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(15,23,42,0.28) 100%);
+    box-shadow: 0 8px 16px rgba(15,23,42,0.18), inset 0 1px 0 rgba(255,255,255,0.20);
+}
+.bot-switcher-chip--active {
+    border-color: rgba(168, 85, 247, 0.78);
+    box-shadow: 0 0 0 2px rgba(168,85,247,0.24), 0 12px 22px rgba(15,23,42,0.22), inset 0 1px 0 rgba(255,255,255,0.22);
+}
+.bot-switcher-chip--disabled {
+    opacity: 0.88;
+}
+.bot-name-3d-btn,
+.bot-status-toggle,
+.bot-add-3d-btn {
+    min-height: 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 900;
+    line-height: 1.1;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.26);
+    box-shadow: 0 4px 0 rgba(15,23,42,0.30), inset 0 1px 0 rgba(255,255,255,0.28);
+    transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+}
+.bot-name-3d-btn {
+    min-width: 44px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    background: linear-gradient(180deg, #f8fafc 0%, #dbeafe 100%);
+    color: #1e293b;
+    text-shadow: none;
+}
+.bot-switcher-chip--active .bot-name-3d-btn {
+    background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+    color: #fff;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.28);
+}
+.bot-active-marker {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.30);
+}
+.bot-status-toggle {
+    min-width: 38px;
+    padding: 0 10px;
+    font-size: 16px;
+}
+.bot-status-toggle--enabled {
+    background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+}
+.bot-status-toggle--disabled {
+    background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+}
+.bot-add-3d-btn {
+    min-width: 128px;
+    padding: 0 12px;
+    background: linear-gradient(180deg, #c084fc 0%, #9333ea 100%);
+}
+.bot-name-3d-btn:hover,
+.bot-status-toggle:hover,
+.bot-add-3d-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+}
+.bot-name-3d-btn:active,
+.bot-status-toggle:active,
+.bot-add-3d-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 rgba(15,23,42,0.32), inset 0 1px 0 rgba(255,255,255,0.18);
 }
 
 /* Панель фильтров пользователей */
@@ -1503,6 +2871,174 @@ color: #eff6ff;
   font-size: 13px;
   line-height: 1.5;
 }
+.profile-balance-stack {
+  display: grid;
+  gap: 14px;
+}
+.profile-balance-card {
+  border: 1px solid var(--section-border);
+  background: var(--surface-soft);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--soft-shadow);
+}
+.profile-balance-card.current {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.18), var(--soft-shadow);
+}
+.profile-balance-heading-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.profile-balance-value {
+  flex: 0 0 auto;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 900;
+}
+.profile-balance-topup-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.profile-balance-topup-row input {
+  width: min(260px, 100%);
+}
+.profile-topup-input-wrap {
+  position: relative;
+  width: min(260px, 100%);
+}
+.profile-topup-input-wrap input {
+  width: 100%;
+  padding-right: 62px;
+  box-sizing: border-box;
+}
+#profileTopUpAmount {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+#profileTopUpAmount::-webkit-inner-spin-button,
+#profileTopUpAmount::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+.profile-topup-bonus {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 12px;
+  font-weight: 900;
+}
+.profile-topup-bonus--zero {
+  color: #94a3b8;
+}
+.profile-topup-bonus--ten {
+  color: #22c55e;
+}
+.profile-topup-bonus--twenty {
+  color: #ec4899;
+}
+.profile-topup-help {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--section-border);
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  cursor: help;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: var(--button-shadow);
+}
+.profile-topup-help:hover {
+  border-color: var(--accent-color);
+  filter: brightness(1.06);
+}
+.profile-balance-action {
+  min-width: 220px;
+  min-height: 42px;
+  margin: 14px 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-balance-topup-row .profile-balance-action {
+  margin: 0;
+}
+.profile-tariff-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px 18px;
+  margin: 14px 0 4px;
+}
+.profile-tariff-wrap {
+  position: relative;
+  display: inline-flex;
+  margin-right: 34px;
+}
+.profile-tariff-button {
+  min-width: 126px;
+  min-height: 42px;
+  margin: 0;
+  white-space: nowrap;
+}
+.profile-benefit-badge {
+  position: absolute;
+  right: -8px;
+  top: -13px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 3px 7px;
+  border: 1px solid #f8dc72;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f8d354 0%, #d49a0a 100%);
+  color: #2d2100;
+  box-shadow: 0 5px 12px rgba(212, 154, 10, 0.35);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  transform: translateX(42%);
+}
+@media (max-width: 620px) {
+  .profile-balance-heading-row,
+  .profile-balance-topup-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .profile-balance-topup-row input,
+  .profile-topup-input-wrap,
+  .profile-balance-action {
+    width: 100%;
+    min-width: 0;
+  }
+  .profile-topup-help {
+    align-self: center;
+  }
+  .profile-tariff-list {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .profile-tariff-wrap {
+    margin-right: 42px;
+  }
+  .profile-tariff-button {
+    width: 100%;
+  }
+}
 .profile-current-chip {
   display:inline-flex;
   align-items:center;
@@ -1586,6 +3122,44 @@ color: #eff6ff;
   font-size:13px;
   color: var(--text-primary);
 }
+.profile-community-metrics {
+  margin-top: 12px;
+  display: grid;
+  gap: 7px;
+}
+.profile-community-metric-btn {
+  width: 100%;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--section-border);
+  background: var(--surface-muted);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: left;
+}
+.profile-community-metric-btn:hover {
+  border-color: var(--accent-color);
+  box-shadow: inset 0 0 0 1px var(--accent-color);
+}
+.profile-community-metric-value {
+  flex: 0 0 auto;
+  color: var(--accent-strong);
+}
+.profile-card.profile-card--active-community .profile-community-metric-btn {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.18);
+  color: white;
+}
+.profile-card.profile-card--active-community .profile-community-metric-value {
+  color: white;
+}
 .profile-card-label {
   color: var(--text-secondary);
   font-weight:700;
@@ -1596,6 +3170,178 @@ color: #eff6ff;
   gap:8px;
   margin-top: 14px;
 }
+.profile-ai-action-btn,
+.profile-payment-action-btn {
+  min-width: 120px;
+  min-height: 48px;
+  padding: 12px 16px;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-payment-operations-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.profile-payment-operations-toolbar .btn {
+  min-height: 42px;
+  min-width: 190px;
+  margin: 0;
+}
+.profile-payment-operations-table-wrap {
+  max-height: 430px;
+  overflow: auto;
+  border: 1px solid var(--table-border);
+  border-radius: 12px;
+}
+.profile-payment-operations-table-wrap thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+.admin-financial-operations-table-wrap {
+    max-height: 430px;
+    overflow: auto;
+    border: 1px solid var(--table-border);
+    border-radius: 12px;
+}
+.admin-financial-operations-table-wrap thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--table-head-default);
+}
+.admin-back-to-top-btn {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translate(-50%, -12px);
+  z-index: 10095;
+  display: none;
+  min-width: 112px;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid var(--section-border);
+  background: var(--accent-color);
+  color: #fff;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.22);
+  font-weight: 900;
+  cursor: pointer;
+}
+.admin-back-to-top-btn.is-visible {
+  display: inline-flex;
+  transform: translateX(-50%);
+}
+.admin-back-to-top-btn--right {
+  top: auto;
+  left: auto;
+  right: 18px;
+  bottom: 18px;
+  min-width: 48px;
+  min-height: 56px;
+  padding: 7px 14px;
+  line-height: 0.72;
+  transform: none;
+}
+.admin-back-to-top-btn--right.is-visible {
+  transform: none;
+}
+.profile-ai-test-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  cursor: pointer;
+}
+.profile-ai-test-notice-body {
+  flex: 1;
+  min-width: 0;
+}
+.profile-ai-test-notice-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 800;
+}
+.profile-ai-test-notice-countdown strong {
+  min-width: 44px;
+  text-align: right;
+}
+.profile-ai-test-notice-close {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--section-border);
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.profile-ai-test-notice.is-paused {
+  cursor: default;
+}
+.profile-ai-test-notice.is-paused .profile-ai-test-notice-countdown {
+  display: none;
+}
+.profile-ai-test-notice.is-paused .profile-ai-test-notice-close {
+  display: inline-flex;
+}
+.user-step-history-buttons {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 180px;
+}
+.user-step-history-btn {
+  min-width: 42px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid var(--section-border);
+  border-radius: 8px;
+  background: var(--surface-strong);
+  color: var(--text-primary);
+  font-weight: 800;
+  cursor: pointer;
+}
+.user-step-history-btn:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.user-step-history-arrow,
+.user-step-history-empty {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+}
+.user-step-history-log {
+  white-space: pre-wrap;
+  text-align: left;
+  max-height: 68vh;
+  overflow: auto;
+  margin: 0;
+  padding: 18px;
+  border: 1px solid var(--section-border);
+  border-radius: 12px;
+  background: var(--surface-strong);
+  color: var(--text-primary);
+  font-family: Consolas, Menlo, Monaco, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+}
 .group-action-btn {
   min-height: 34px;
   padding: 8px 12px;
@@ -1604,6 +3350,26 @@ color: #eff6ff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+.miniapp-button-setting-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px;
+  gap: 8px;
+  align-items: stretch;
+}
+.miniapp-button-color-picker {
+  width: 58px;
+  min-width: 58px;
+  min-height: 36px;
+  padding: 3px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.miniapp-redirect-url {
+  margin-top: 8px;
+}
+.miniapp-redirect-url[hidden] {
+  display: none;
 }
 .profile-form {
   border: 1px solid var(--section-border);
@@ -1824,7 +3590,59 @@ color: #eff6ff;
 }
 .structured-trigger-field textarea {
   min-height:76px;
-  resize:vertical;
+  resize:both;
+  overflow:auto;
+}
+.structured-trigger-list-picker {
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) auto auto;
+  gap:8px;
+  align-items:stretch;
+}
+.structured-trigger-list-picker .btn {
+  min-width:44px;
+  padding-inline:12px;
+}
+.comment-text-list-overlay {
+  position:fixed;
+  inset:0;
+  z-index:1000004;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:var(--modal-overlay);
+  backdrop-filter:blur(12px);
+}
+.comment-text-list-dialog {
+  width:min(680px, 100%);
+  max-height:min(760px, calc(100vh - 48px));
+  overflow:auto;
+  border:1px solid var(--section-border);
+  border-radius:20px;
+  padding:20px;
+  background:var(--surface);
+  box-shadow:0 24px 80px rgba(0,0,0,.42);
+}
+.comment-text-list-dialog h3 {
+  margin:0 0 16px;
+}
+.comment-text-list-dialog textarea {
+  min-height:280px;
+}
+.comment-text-list-dialog-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:16px;
+}
+@media (max-width:620px) {
+  .structured-trigger-list-picker {
+    grid-template-columns:1fr auto;
+  }
+  .structured-trigger-list-picker .btn-info {
+    grid-column:1 / -1;
+  }
 }
 .structured-trigger-hint {
   font-size:12px;
@@ -1884,21 +3702,39 @@ color: #eff6ff;
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  padding:6px 10px;
+  padding:8px 14px;
   border-radius:999px;
   font-size:11px;
   font-weight:800;
-  border:none;
+  border:1px solid rgba(255,255,255,0.28);
   cursor:pointer;
   min-width:92px;
+  line-height:1;
+  text-shadow:0 1px 1px rgba(0,0,0,0.26);
+  box-shadow:0 7px 0 rgba(0,0,0,0.24), 0 14px 24px rgba(0,0,0,0.22);
+  transform:translateY(0);
+  transition:transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
 }
 .structured-trigger-card-status.is-active {
-  background:#15803d;
+  background:linear-gradient(180deg, #22c55e 0%, #15803d 100%);
   color:#f0fdf4;
 }
 .structured-trigger-card-status.is-inactive {
-  background:#b91c1c;
+  background:linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
   color:#fef2f2;
+}
+.structured-trigger-card-status:hover {
+  filter:brightness(1.08);
+  transform:translateY(-2px);
+  box-shadow:0 9px 0 rgba(0,0,0,0.26), 0 18px 28px rgba(0,0,0,0.24);
+}
+.structured-trigger-card-status:active {
+  transform:translateY(3px);
+  box-shadow:0 3px 0 rgba(0,0,0,0.25), 0 8px 16px rgba(0,0,0,0.20);
+}
+.structured-trigger-card-status:focus-visible {
+  outline:3px solid rgba(255,255,255,0.62);
+  outline-offset:2px;
 }
 .structured-trigger-cards-grid {
   display:grid;
@@ -2038,6 +3874,22 @@ color: #eff6ff;
 .app-log-grid {
   display:grid;
   gap:8px;
+}
+.profile-history-scroll,
+.admin-history-scroll {
+  overflow-y:auto;
+  padding-right:6px;
+  scrollbar-gutter:stable;
+}
+.profile-history-scroll--3 {
+  max-height:336px;
+}
+.admin-history-scroll--5 {
+  max-height:560px;
+}
+.profile-history-scroll .app-log-card:first-child,
+.admin-history-scroll .app-log-card:first-child {
+  margin-top:0;
 }
 .app-log-card {
   border:1px solid var(--section-border);
@@ -2209,9 +4061,12 @@ color: #eff6ff;
   border-radius: 12px !important;
 }
 
-::-webkit-scrollbar { width: 12px; height: 12px; }
-::-webkit-scrollbar-track { background: var(--scroll-track); border-radius: 999px; }
-::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+* { scrollbar-width: auto; scrollbar-color: var(--scroll-thumb) var(--scroll-track); }
+::-webkit-scrollbar { width: 18px; height: 18px; }
+::-webkit-scrollbar-track { background: var(--scroll-track); border-radius: 999px; box-shadow: inset 0 0 0 1px var(--section-border); }
+::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 999px; border: 4px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-color); background-clip: padding-box; }
+::-webkit-scrollbar-corner { background: var(--scroll-track); }
 
 @media (max-width: 900px) {
   body { padding: 12px; }
@@ -2235,6 +4090,9 @@ color: #eff6ff;
 <body>
 
 
+<button id="adminBackToTopButton" class="admin-back-to-top-btn" type="button" onclick="scrollToAdminTabTop()">Вверх</button>
+<button id="adminBackToTopButtonRight" class="admin-back-to-top-btn admin-back-to-top-btn--right" type="button" onclick="scrollToAdminTabTop()" aria-label="Вверх">^<br>^<br>^</button>
+
 <!-- ? ИСПРАВЛЕНО: tooltip перемещён НАЧАЛО body для доступности -->
 <div id="tooltip" class="tooltip"></div>
 
@@ -2254,6 +4112,38 @@ color: #eff6ff;
 <!-- &#x1F6E1;&#xFE0F; ПОЛНОЭКРАННОЕ УВЕДОМЛЕНИЕ СОХРАНЕНИЯ -->
 <div id="saveOverlay">
   <div class="save-text">СОХРАНЕНИЕ<span class="save-dots" id="saveDots">.....</span></div>
+</div>
+
+<div id="botJsonImportOverlay" class="bot-json-import-overlay" style="display:none;">
+  <div id="botJsonImportModal" class="bot-json-import-modal">
+    <div class="bot-json-import-header">
+      <div>
+        <strong id="botJsonImportTitle">Импорт JSON</strong>
+        <div id="botJsonImportSubtitle" class="bot-json-import-subtitle">Вставьте JSON-код сценария и импортируйте его в текущую вкладку.</div>
+      </div>
+      <button id="botJsonImportClose" type="button" class="bot-json-import-close">&times;</button>
+    </div>
+    <div class="bot-json-import-toolbar">
+      <label class="bot-json-import-field">
+        <span>Режим импорта</span>
+        <select id="botJsonImportMode">
+          <option value="append">Добавить к текущим</option>
+          <option value="replace_bot">Заменить текущего бота</option>
+          <option value="replace_tab">Заменить все в текущей вкладке</option>
+        </select>
+      </label>
+      <button id="botJsonImportExampleBtn" type="button" class="btn btn-neutral">Вставить пример</button>
+    </div>
+    <div class="bot-json-import-help">
+      JSON должен содержать <code>version</code>, <code>sheet</code>, <code>bots</code>, внутри каждого бота - <code>name</code> и <code>steps</code>. В шаге можно задавать <code>step</code>, <code>trigger</code>, <code>answer</code>, <code>attachments</code>, <code>buttons</code>, <code>actions</code>, условия групп и режим точности.
+    </div>
+    <textarea id="botJsonImportText" class="bot-json-import-textarea" spellcheck="false"></textarea>
+    <div id="botJsonImportNotice" class="bot-json-import-notice"></div>
+    <div class="bot-json-import-actions">
+      <button id="botJsonImportCancel" type="button" class="btn btn-neutral">Отмена</button>
+      <button id="botJsonImportSubmit" type="button" class="btn btn-save">Импорт</button>
+    </div>
+  </div>
 </div>
 
 <!-- &#x2328;&#xFE0F; МОДАЛЬНОЕ ОКНО КОНСТРУКТОРА КЛАВИАТУРЫ -->
@@ -2284,6 +4174,20 @@ color: #eff6ff;
     <!-- Сетка конструктора -->
     <div id="kbGrid" style="display:grid;gap:5px;margin-bottom:15px;padding:10px;background:#fafafa;border-radius:8px;border:1px solid #e0e0e0;"></div>
 
+    <div id="kbButtonEditorOverlay" class="kb-button-editor-overlay" style="display:none;">
+      <div id="kbButtonEditor" class="kb-button-editor-modal">
+        <div class="kb-button-editor-header">
+          <strong id="kbButtonEditorTitle">Редактор кнопки</strong>
+          <button id="kbButtonEditorClose" type="button" class="kb-button-editor-close">&times;</button>
+        </div>
+        <div id="kbButtonEditorBody"></div>
+        <div class="kb-button-editor-actions">
+          <button id="kbButtonEditorDelete" type="button" class="btn btn-delete">Удалить</button>
+          <button id="kbButtonEditorCancel" type="button" class="btn btn-neutral">Отмена</button>
+          <button id="kbButtonEditorSave" type="button" class="btn btn-save">Сохранить</button>
+        </div>
+      </div>
+    </div>
     <!-- Кнопки управления -->
     <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:10px;border-top:1px solid #e0e0e0;">
       <button id="kbClearBtn" style="background:#f44336;color:white;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:bold;">&#x1F5D1;&#xFE0F; Очистить</button>
@@ -2294,27 +4198,83 @@ color: #eff6ff;
 </div>
 
 <style>
-.kb-cell { display:flex;flex-direction:column;gap:2px; }
-.kb-cell input[type="text"] { width:100%;padding:5px 6px;border:1px solid #ccc;border-radius:4px;font-size:12px;background:#fff;color:#333;box-sizing:border-box; }
+.kb-cell { display:flex;flex-direction:column;gap:2px;min-width:0; }
+.kb-cell input[type="text"], .kb-cell input[type="number"] { width:100%;padding:5px 6px;border:1px solid #ccc;border-radius:4px;font-size:12px;background:#fff;color:#333;box-sizing:border-box; }
 .kb-cell select { width:100%;padding:4px;font-size:11px;border:1px solid #ccc;border-radius:4px;background:#fff;color:#333; }
 .kb-cell .kb-link-input { width:100%;padding:5px 6px;border:1px solid #ccc;border-radius:4px;font-size:11px;background:#fff;color:#333;display:none;box-sizing:border-box; }
 .kb-cell .kb-link-input.show { display:block; }
-.kb-placeholder { width:100%;height:65px;border:2px dashed #bbb;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#999;cursor:pointer;background:#f9f9f9;transition:all 0.2s; }
+.kb-cell .kb-payment-fields { display:none;flex-direction:column;gap:3px; }
+.kb-cell .kb-payment-fields.show { display:flex; }
+.kb-placeholder { width:100%;height:65px;box-sizing:border-box;border:2px dashed #bbb;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#999;cursor:pointer;background:#f9f9f9;transition:all 0.2s; }
 .kb-placeholder:hover { border-color:#2196F3;color:#2196F3;background:#e3f2fd; }
 .kb-btn { position:relative;background:#e8f5e9;border:1px solid #4CAF50;border-radius:6px;padding:4px; }
+.kb-btn-preview { width:100%;height:65px;box-sizing:border-box;cursor:pointer;display:flex;align-items:stretch;border:1px solid rgba(15,23,42,0.18);box-shadow:inset 0 1px 0 rgba(255,255,255,0.35),0 8px 18px rgba(15,23,42,0.15); }
+.kb-btn-preview--primary { background:linear-gradient(180deg,#3b82f6 0%,#2563eb 100%); }
+.kb-btn-preview--secondary { background:linear-gradient(180deg,#ffffff 0%,#e5e7eb 100%); }
+.kb-btn-preview--positive { background:linear-gradient(180deg,#22c55e 0%,#16a34a 100%); }
+.kb-btn-preview--negative { background:linear-gradient(180deg,#ef4444 0%,#dc2626 100%); }
+.kb-btn-preview--link { background:linear-gradient(180deg,#ffffff 0%,#f1f5f9 100%); }
+.kb-btn-preview--payment { background:linear-gradient(180deg,#fb923c 0%,#f97316 100%); }
+.kb-btn.kb-btn-preview--primary { background:linear-gradient(180deg,#3b82f6 0%,#2563eb 100%) !important; }
+.kb-btn.kb-btn-preview--secondary { background:linear-gradient(180deg,#ffffff 0%,#e5e7eb 100%) !important; }
+.kb-btn.kb-btn-preview--positive { background:linear-gradient(180deg,#22c55e 0%,#16a34a 100%) !important; }
+.kb-btn.kb-btn-preview--negative { background:linear-gradient(180deg,#ef4444 0%,#dc2626 100%) !important; }
+.kb-btn.kb-btn-preview--link { background:linear-gradient(180deg,#ffffff 0%,#f1f5f9 100%) !important; }
+.kb-btn.kb-btn-preview--payment { background:linear-gradient(180deg,#fb923c 0%,#f97316 100%) !important; }
+.kb-btn-preview-inner { width:100%;display:flex;flex-direction:column;justify-content:center;gap:3px;min-width:0; }
+.kb-button-preview-title { font-size:12px;font-weight:800;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.kb-button-preview-type { font-size:11px;font-weight:800;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.kb-button-preview-detail { font-size:11px;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 .kb-btn .kb-del { position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:#f44336;color:white;border:2px solid #fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 3px rgba(0,0,0,0.3); }
+.kb-button-editor-overlay { position:fixed;inset:0;z-index:10060;background:rgba(2,6,23,0.58);align-items:center;justify-content:center;padding:20px; }
+.kb-button-editor-modal { width:min(720px,calc(100vw - 40px));max-height:calc(100vh - 40px);overflow:auto;background:var(--modal-bg);color:var(--text-color);border:1px solid var(--section-border);border-radius:12px;box-shadow:0 24px 70px rgba(0,0,0,0.38);padding:16px; }
+.kb-button-editor-header { display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;color:var(--heading-color); }
+.kb-button-editor-header strong { font-size:17px; }
+.kb-button-editor-close { background:none;border:none;font-size:24px;line-height:1;cursor:pointer;color:var(--text-color);opacity:0.75; }
+.kb-button-editor-actions { display:flex;gap:10px;justify-content:flex-end;margin-top:14px; }
+.kb-button-editor-actions .btn { min-width:100px;height:48px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center; }
+.kb-button-editor-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px; }
+.kb-button-editor-field { display:flex;flex-direction:column;gap:5px; }
+.kb-button-editor-field label { font-size:12px;font-weight:800;color:var(--text-color); }
+.kb-button-editor-field input,
+.kb-button-editor-field select { width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--input-border);border-radius:8px;font-size:13px;background:var(--input-bg);color:var(--input-text); }
+.kb-button-editor-wide { grid-column:1 / -1; }
+.bot-json-import-overlay { position:fixed;inset:0;z-index:10070;background:rgba(2,6,23,0.62);align-items:center;justify-content:center;padding:20px; }
+.bot-json-import-modal { width:min(980px,calc(100vw - 40px));max-height:calc(100vh - 40px);overflow:auto;background:var(--modal-bg);color:var(--text-color);border:1px solid var(--section-border);border-radius:12px;box-shadow:0 24px 70px rgba(0,0,0,0.42);padding:16px; }
+.bot-json-import-header { display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:12px;color:var(--heading-color); }
+.bot-json-import-header strong { font-size:18px; }
+.bot-json-import-subtitle { color:var(--text-secondary);font-size:13px;margin-top:4px;font-weight:500; }
+.bot-json-import-close { background:none;border:none;font-size:28px;line-height:1;cursor:pointer;color:var(--text-color);opacity:0.75; }
+.bot-json-import-toolbar { display:grid;grid-template-columns:minmax(240px,360px) auto;gap:12px;align-items:end;margin-bottom:12px; }
+.bot-json-import-field { display:flex;flex-direction:column;gap:6px;font-weight:800;color:var(--text-color);font-size:12px; }
+.bot-json-import-field select { height:42px;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--input-text);padding:0 12px;font-weight:700; }
+.bot-json-import-help { border:1px solid var(--section-border);background:rgba(59,130,246,0.10);border-radius:10px;padding:10px 12px;color:var(--text-secondary);font-size:13px;line-height:1.45;margin-bottom:12px; }
+.bot-json-import-help code { color:var(--text-color);font-weight:800; }
+.bot-json-import-textarea { width:100%;height:420px;min-height:280px;resize:both;overflow:auto;border-radius:10px;border:1px solid var(--input-border);background:var(--input-bg);color:var(--input-text);padding:14px;font-family:Consolas,Menlo,Monaco,monospace;font-size:13px;line-height:1.45;box-sizing:border-box; }
+.bot-json-import-notice { margin-top:10px; }
+.bot-json-import-actions { display:flex;justify-content:flex-end;gap:10px;margin-top:14px; }
+.bot-json-import-actions .btn { min-width:120px;height:48px;display:inline-flex;align-items:center;justify-content:center;padding:0 18px; }
+@media (max-width: 720px) { .bot-json-import-toolbar { grid-template-columns:1fr; } .bot-json-import-actions { justify-content:stretch; } .bot-json-import-actions .btn { flex:1; } }
 </style>
 
 
 <div class="container">
 <div class="page-header">
 <div class="page-title">
-<div class="page-eyebrow">VK Bot Control Center</div>
+<div class="page-eyebrow-row">
+<div id="platformControlCenterTitle" class="page-eyebrow">VK Bot Control Center</div>
+<div class="platform-switch" role="group" aria-label="Выбор платформы">
+<button id="platformVkBtn" class="platform-switch-btn platform-switch-btn--vk active" type="button" aria-pressed="true" onclick="switchAdminPlatform('vk')">ВК</button>
+<button id="platformTelegramBtn" class="platform-switch-btn platform-switch-btn--telegram" type="button" aria-pressed="false" onclick="switchAdminPlatform('telegram')">Telegram</button>
+</div>
+</div>
 <div class="page-title-row"><h1>Админ-панель PAPA BOT &#x1F916;</h1><button class="capabilities-btn" type="button" onclick="openCapabilitiesModal()">&#x1F449; Что умеет</button></div>
-<div class="page-subtitle">Чистый интерфейс для управления сценариями, пользователями, рассылками и настройками VK-сообществ без визуального шума.</div>
+<div class="page-subtitle">Чистый интерфейс для управления сценариями, пользователями, рассылками и настройками VK-сообществ и Telegram-ботов без визуального шума.</div>
 </div>
 <div class="page-header-side">
 <div class="version-chip-row">
+<button id="deliveryIncidentAlertBtn" class="delivery-incident-alert-btn is-collapsed has-tooltip" type="button" data-tooltip="Ошибки доставки сообщений и комментариев" aria-label="Открыть ошибки доставки" onclick="openDeliveryIncidentsModal()"><span class="delivery-incident-alert-label">‼️</span><span id="deliveryIncidentAlertCount" class="delivery-incident-alert-count"></span><span class="delivery-incident-alert-collapsed-mark">‼️</span></button>
+<button id="botVersionNotificationsBtn" class="version-notification-btn" type="button" title="Уведомления об обновлениях сервиса" onclick="openBotVersionNotifications()"><span class="version-notification-icon">&#x1F514;</span><span id="botVersionNotificationsCount" class="version-notification-count"></span></button>
 <button id="botVersionChip" class="version-chip" type="button" onclick="openBotVersionModal()">version ...</button>
 <button class="version-info-btn" type="button" title="Расшифровка версии" onclick="openBotVersionModal()">i</button>
 </div>
@@ -2322,6 +4282,22 @@ color: #eff6ff;
 </div>
 </div>
 <div id="themeDockSlot" class="theme-dock-slot"></div>
+<div id="deliveryIncidentsOverlay" class="version-modal-overlay" style="display:none;" onclick="closeDeliveryIncidentsModal(event)">
+<div class="version-modal version-notifications-modal" onclick="event.stopPropagation()">
+<div class="version-modal-header">
+<div>
+<div class="version-modal-title">Ошибки доставки</div>
+<div id="deliveryIncidentsSubtitle" class="version-modal-subtitle">Проверяю сообщения и комментарии, которые не удалось доставить...</div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+<button class="btn btn-neutral" type="button" onclick="hideDeliveryIncidentIndicator()">Скрыть индикатор</button>
+<button class="btn btn-neutral version-close-btn" type="button" onclick="closeDeliveryIncidentsModal()">Закрыть</button>
+</div>
+</div>
+<div id="deliveryIncidentsStatus" class="status" style="margin:0 0 12px;"></div>
+<div id="deliveryIncidentsList" class="delivery-incident-list"></div>
+</div>
+</div>
 <div id="botVersionModalOverlay" class="version-modal-overlay" style="display:none;" onclick="closeBotVersionModal(event)">
 <div class="version-modal" onclick="event.stopPropagation()">
 <div class="version-modal-header">
@@ -2333,6 +4309,23 @@ color: #eff6ff;
 </div>
 <div id="botVersionSummary" class="version-summary-card">Загрузка...</div>
 <div id="botVersionParts" class="version-parts-grid"></div>
+</div>
+</div>
+<div id="botVersionNotificationsOverlay" class="version-modal-overlay" style="display:none;" onclick="closeBotVersionNotifications(event)">
+<div class="version-modal version-notifications-modal" onclick="event.stopPropagation()">
+<div class="version-modal-header">
+<div>
+<div class="version-modal-title">Уведомления об обновлениях</div>
+<div id="botVersionNotificationsSubtitle" class="version-modal-subtitle">Уведомления загрузятся...</div>
+</div>
+<button class="btn btn-neutral version-close-btn" type="button" onclick="closeBotVersionNotifications()">Закрыть</button>
+</div>
+<div id="botVersionNotificationsSummary" class="version-summary-card version-notifications-summary">Загрузка...</div>
+<div class="version-notification-tabs" role="tablist" aria-label="Разделы уведомлений об обновлениях">
+<button id="botVersionNotificationsNewTab" class="version-notification-tab is-active" type="button" role="tab" aria-selected="true" onclick="setBotVersionNotificationSection('new')">Новые уведомления <span id="botVersionNotificationsNewCount" class="version-notification-tab-count">0</span></button>
+<button id="botVersionNotificationsOldTab" class="version-notification-tab" type="button" role="tab" aria-selected="false" onclick="setBotVersionNotificationSection('old')">Старые уведомления <span id="botVersionNotificationsOldCount" class="version-notification-tab-count">0</span></button>
+</div>
+<div id="botVersionNotificationsList" class="version-notification-list"></div>
 </div>
 </div>
 <div id="capabilitiesModalOverlay" class="version-modal-overlay" style="display:none;" onclick="closeCapabilitiesModal(event)">
@@ -2349,19 +4342,22 @@ color: #eff6ff;
 </div>
 </div>
 <!-- ?? ВРЕМЕННО ОТКЛЮЧЕНО: <button class="btn btn-refresh" ...> -->
-<div class="info-box">&#x2139;&#xFE0F; Изменения применяются после нажатия "&#x1F4BE; Сохранить", поэтому перед переключением разделов лучше фиксировать правки сразу.</div>
+<div class="info-box info-box--with-action"><div class="info-box-message">&#x2139;&#xFE0F; Изменения применяются после нажатия "&#x1F4BE; Сохранить", поэтому перед переключением разделов лучше фиксировать правки сразу.</div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;"><button class="btn btn-suggestion-report" type="button" onclick="openSuggestionReportModal()">Предложения</button><button class="btn btn-bug-report" type="button" onclick="openBugReportModal()">Сообщить об Ошибке</button></div></div>
 <div id="status" class="status"></div>
 <div class="tab">
-<button class="tablinks tablinks--messages active" onclick="openTab(event,'Messages')">&#x1F4AC; СООБЩЕНИЯ</button>
-<button class="tablinks" onclick="openTab(event,'Comments')">&#x1F4DD; КОММЕНТАРИИ В ПОСТАХ</button>
-<button class="tablinks" onclick="openTab(event,'Users')">&#x1F464; ПОЛЬЗОВАТЕЛИ</button>
-<button class="tablinks" onclick="openTab(event,'Groups')">&#x1F465; ГРУППЫ</button>
-<button class="tablinks" onclick="openTab(event,'Variables')">&#x1F9EE; ПЕРЕМЕННЫЕ</button>
-<button class="tablinks" onclick="openTab(event,'Mailing')">&#x1F4E8; РАССЫЛКА</button>
-<button class="tablinks" onclick="openTab(event,'Delayed')">&#x23F3; ОТЛОЖЕННЫЕ</button>
-<button class="tablinks" onclick="openTab(event,'Triggers')">&#x1F3AF; ТРИГГЕРЫ</button>
-<button class="tablinks" onclick="openTab(event,'Profile')">&#x1F4C7; ПРОФИЛЬ</button>
-<button class="tablinks" onclick="openTab(event,'Settings')">&#x2699;&#xFE0F; НАСТРОЙКА</button>
+<button class="tablinks tablinks--messages active" data-platforms="vk" onclick="openTab(event,'Messages')">&#x1F4AC; СООБЩЕНИЯ</button>
+<button class="tablinks" data-platforms="telegram" onclick="openTab(event,'TelegramBots')">&#x2708;&#xFE0F; TELEGRAM-БОТЫ</button>
+<button class="tablinks" data-platforms="telegram" onclick="openTab(event,'TelegramChannels')">&#x1F4E2; КАНАЛЫ</button>
+<button class="tablinks" data-platforms="telegram" onclick="openTab(event,'TelegramGroups')">&#x1F465; ГРУППЫ</button>
+<button class="tablinks" data-platforms="vk" onclick="openTab(event,'Comments')">&#x1F4DD; КОММЕНТАРИИ В ПОСТАХ</button>
+<button class="tablinks" data-platforms="vk,telegram" onclick="openTab(event,'Users')">&#x1F464; ПОЛЬЗОВАТЕЛИ</button>
+<button class="tablinks" data-platforms="vk" onclick="openTab(event,'Groups')">&#x1F465; ГРУППЫ</button>
+<button class="tablinks" data-platforms="vk,telegram" onclick="openTab(event,'Variables')">&#x1F9EE; ПЕРЕМЕННЫЕ</button>
+<button class="tablinks" data-platforms="vk" onclick="openTab(event,'Mailing')">&#x1F4E8; РАССЫЛКА</button>
+<button class="tablinks" data-platforms="vk" onclick="openTab(event,'Delayed')">&#x23F3; ОТЛОЖЕННЫЕ</button>
+<button class="tablinks" data-platforms="vk" onclick="openTab(event,'Triggers')">&#x1F3AF; ТРИГГЕРЫ</button>
+<button class="tablinks" data-platforms="vk,telegram" onclick="openTab(event,'Profile')">&#x1F4C7; ПРОФИЛЬ</button>
+<button class="tablinks" data-platforms="vk" onclick="openTab(event,'Settings')">&#x2699;&#xFE0F; НАСТРОЙКА</button>
 <button class="tablinks" id="adminTabButton" onclick="openTab(event,'Admin')" style="display:none;">&#x1F6E1;&#xFE0F; АДМИН</button>
 </div>
 
@@ -2369,14 +4365,27 @@ color: #eff6ff;
 
 <!-- Блок СООБЩЕНИЯ -->
 <div id="Messages" class="tabcontent">
+<div id="telegramScenarioContextBar" class="settings-surface telegram-scenario-context" style="display:none;"></div>
 <div class="tab-panel-header tab-panel-header--messages"><div class="tab-panel-copy"><div class="tab-panel-kicker">Сценарии диалогов</div><h2 class="tab-panel-title">Сообщения и шаги бота</h2><p class="tab-panel-description">Настраивайте триггеры, ответы, действия, переменные, клавиатуры и вложения для каждого шага. Здесь собирается основной сценарий общения с пользователем.</p></div><div class="tab-panel-side"><div class="tab-panel-badge">Триггеры • Ответы • Действия</div></div></div>
 <!-- <h3>&#x1F4AC; СООБЩЕНИЯ</h3> -->
 <div id="loading-Messages">Загрузка...</div>
 <div id="activeCommunityLabel-Messages" style="background:#e8f5e9;padding:6px 12px;margin:8px 0;border-radius:4px;font-size:12px;display:none;"></div>
 <!-- Панель переключения ботов -->
 <div id="botSwitcher-Messages" style="background:#f3e5f5;padding:6px 12px;margin:8px 0;border-radius:4px;font-size:12px;display:none;">
-    <div id="botButtons-Messages" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;"></div>
-    <button class="btn btn-add" onclick="showAddBotModal('Messages')" style="margin-left:8px;background:#9C27B0;font-size:11px;padding:4px 10px;">+ Добавить Бот</button>
+    <div class="bot-switcher-layout">
+        <div>
+            <div class="bot-switcher-title">Боты</div>
+            <div class="bot-switcher-row">
+                <div id="botButtons-Messages" class="bot-switcher-row"></div>
+                <button class="bot-add-3d-btn" onclick="showAddBotModal('Messages')">+ Добавить Бот</button>
+            </div>
+        </div>
+        <div class="bot-template-panel">
+            <div class="bot-switcher-title">Шаблоны</div>
+            <div id="botTemplatePicker-Messages"></div>
+            <div id="botTemplateStatus-Messages" class="bot-template-notice"></div>
+        </div>
+    </div>
 </div>
 <div class="scroll">
 <table id="table-Messages"><tbody></tbody></table>
@@ -2384,6 +4393,7 @@ color: #eff6ff;
 <div style="margin-top:15px;">
 <div id="status-Messages" class="status" style="margin:10px 0;"></div>
 <button class="btn btn-add" onclick="addStep('Messages')" style="display:block; margin-bottom:10px;">+ Добавить Шаг</button>
+<button class="btn btn-info" onclick="openBotJsonImport('Messages')" style="display:block; margin-bottom:10px;">Импорт JSON</button>
 <button class="btn btn-save" onclick="saveData(this, 'Messages')" style="display:block;">&#x1F4BE; Сохранить</button>
 </div>
 </div>
@@ -2394,10 +4404,29 @@ color: #eff6ff;
 <!-- <h3>&#x1F4DD; КОММЕНТАРИИ В ПОСТАХ</h3> -->
 <div id="loading-Comments">Загрузка...</div>
 <div id="activeCommunityLabel-Comments" style="background:#e8f5e9;padding:6px 12px;margin:8px 0;border-radius:4px;font-size:12px;display:none;"></div>
+<div id="commentActivitiesSwitcher" class="comment-activities-switcher" style="display:none;">
+    <div class="bot-switcher-title">АКТИВНОСТИ</div>
+    <div class="bot-switcher-row">
+        <div id="commentActivityButtons" class="bot-switcher-row"></div>
+        <button class="bot-add-3d-btn" onclick="showCommentActivityModal()">+ Добавить активность</button>
+    </div>
+</div>
 <!-- Панель переключения ботов -->
 <div id="botSwitcher-Comments" style="background:#f3e5f5;padding:6px 12px;margin:8px 0;border-radius:4px;font-size:12px;display:none;">
-    <div id="botButtons-Comments" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;"></div>
-    <button class="btn btn-add" onclick="showAddBotModal('Comments')" style="margin-left:8px;background:#9C27B0;font-size:11px;padding:4px 10px;">+ Добавить Бот</button>
+    <div class="bot-switcher-layout">
+        <div>
+            <div class="bot-switcher-title">Боты</div>
+            <div class="bot-switcher-row">
+                <div id="botButtons-Comments" class="bot-switcher-row"></div>
+                <button class="bot-add-3d-btn" onclick="showAddBotModal('Comments')">+ Добавить Бот</button>
+            </div>
+        </div>
+        <div class="bot-template-panel">
+            <div class="bot-switcher-title">Шаблоны</div>
+            <div id="botTemplatePicker-Comments"></div>
+            <div id="botTemplateStatus-Comments" class="bot-template-notice"></div>
+        </div>
+    </div>
 </div>
 <div class="scroll">
 <table id="table-Comments"><tbody></tbody></table>
@@ -2405,6 +4434,7 @@ color: #eff6ff;
 <div style="margin-top:15px;">
 <div id="status-Comments" class="status" style="margin:10px 0;"></div>
 <button class="btn btn-add" onclick="addStep('Comments')" style="display:block; margin-bottom:10px;">+ Добавить Шаг</button>
+<button class="btn btn-info" onclick="openBotJsonImport('Comments')" style="display:block; margin-bottom:10px;">Импорт JSON</button>
 <button class="btn btn-save" onclick="saveData(this, 'Comments')" style="display:block;">&#x1F4BE; Сохранить</button>
 </div>
 </div>
@@ -2474,10 +4504,16 @@ color: #eff6ff;
 <button class="btn btn-add" onclick="addRow('Shared_Variables')" style="display:block; margin-bottom:10px;">+ Добавить ПВС</button>
 <button class="btn btn-save" onclick="saveData(this, 'Shared_Variables')" style="display:block;">&#x1F4BE; Сохранить ПВС</button>
 </div>
+    <div id="vkVariablesReference">
     <h4 style="margin:15px 0 5px;color:var(--text-primary);">&#x1F517; Переменные ВК</h4>
     <div class="info-box">Этот блок информационный. Здесь можно только смотреть доступные переменные ВК и их описание.</div>
     <div class="scroll">
         <table id="table-VK_Variables"><tbody></tbody></table>
+    </div>
+    </div>
+    <div id="telegramVariablesReference" style="display:none;">
+        <h4 style="margin:15px 0 5px;color:var(--text-primary);">&#x2708;&#xFE0F; Переменные Telegram</h4>
+        <div class="info-box"><code>%telegram_user%</code> — имя пользователя; <code>%telegram_user_id%</code> и <code>%telegram_chat_id%</code> — ID пользователя и личного чата; <code>%telegram_bot_id%</code> — ID подключённого бота. Общие <code>%username%</code>, <code>%fullname%</code> и <code>%userid%</code> также работают.</div>
     </div>
 </div>
 
@@ -2493,6 +4529,7 @@ color: #eff6ff;
 <div style="margin-top:15px;">
 <div id="status-Mailing" class="status" style="margin:10px 0;"></div>
 <button class="btn btn-add" onclick="addRow('Mailing')" style="display:block; margin-bottom:10px;">+ Добавить строку</button>
+<button class="btn btn-info" onclick="openBotJsonImport('Mailing')" style="display:block; margin-bottom:10px;">Импорт JSON</button>
 <button class="btn btn-save" onclick="saveData(this, 'Mailing')" style="display:block;">&#x1F4BE; Сохранить</button>
 </div>
 </div>
@@ -2503,6 +4540,14 @@ color: #eff6ff;
 <div id="Delayed" class="tabcontent">
     <div class="tab-panel-header tab-panel-header--delayed"><div class="tab-panel-copy"><div class="tab-panel-kicker">Очередь задач</div><h2 class="tab-panel-title">Отложенные сообщения и проверки</h2><p class="tab-panel-description">Контролируйте сообщения, запланированные на потом: кому и когда они уйдут, какой у них статус и какие ошибки возникли.</p></div><div class="tab-panel-side"><div class="tab-panel-badge">План • Статус • История</div></div></div>
     <!-- <h3>&#x23F3; ОТЛОЖЕННЫЕ</h3> -->
+    <section class="delivery-incident-panel">
+        <div class="delivery-incident-panel-header">
+            <div><div class="delivery-incident-panel-title">Не доставлено — восстановление</div><div class="delivery-incident-panel-copy">Здесь сохраняются точные тексты, выбранные ответы и вложения, которые не удалось отправить. После устранения причины их можно повторить без нового розыгрыша либо отметить «Не повторять», если администратор уже ответил вручную.</div></div>
+            <button class="btn btn-neutral" type="button" onclick="loadDeliveryIncidents({showStatus:true})">Обновить</button>
+        </div>
+        <div id="deliveryRecoverySummary" class="delivery-incident-panel-copy">Загрузка журнала недоставок...</div>
+        <div id="deliveryRecoveryList" class="delivery-incident-list" style="margin-top:12px;"></div>
+    </section>
     <div id="loading-Delayed">Загрузка...</div>
 <div id="activeCommunityLabel-Delayed" style="background:#e8f5e9;padding:6px 12px;margin:8px 0;border-radius:4px;font-size:12px;display:none;"></div>
     <div class="scroll">
@@ -2678,6 +4723,14 @@ color: #eff6ff;
                 <label><strong>Лимит запросов в сутки</strong></label>
                 <input type="number" id="profileFormRequestsLimit" min="1" placeholder="Например: 1000">
             </div>
+            <div>
+                <label><strong>Баланс</strong></label>
+                <input type="number" id="profileFormBalance" min="0" placeholder="Например: 1500">
+            </div>
+            <div>
+                <label><strong>Вне суточный лимит</strong></label>
+                <input type="number" id="profileFormExtraRequestLimit" min="0" placeholder="Например: 250">
+            </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn btn-save" type="button" onclick="saveAdminProfile()">💾 Сохранить профиль</button>
@@ -2718,12 +4771,22 @@ color: #eff6ff;
                 <input type="number" id="promoFormDuration" min="1" placeholder="Пусто = бесконечно">
             </div>
             <div>
+                <label><strong>Количество активаций</strong></label>
+                <input type="number" id="promoFormMaxUses" min="1" value="1">
+            </div>
+        </div>
+        <div class="profile-form-grid promo-form-credits-row">
+            <div>
                 <label><strong>Лимит запросов в сутки</strong></label>
                 <input type="number" id="promoFormRequestsLimit" min="1" placeholder="Например: 1000">
             </div>
             <div>
-                <label><strong>Количество активаций</strong></label>
-                <input type="number" id="promoFormMaxUses" min="1" value="1">
+                <label><strong>Баланс</strong></label>
+                <input type="number" id="promoFormBalanceCredit" min="1" placeholder="Например: 250">
+            </div>
+            <div>
+                <label><strong>Пакет вне суточного лимита</strong></label>
+                <input type="number" id="promoFormExtraRequestLimitCredit" min="1" placeholder="Например: 700">
             </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -2763,18 +4826,50 @@ color: #eff6ff;
             </div>
         </div>
     </div>
+    <div class="settings-surface" style="margin-bottom:14px;">
+        <div class="profile-manager-header" style="cursor:pointer;" onclick="togglePromoHistory()">
+            <div id="promoHistoryToggle" style="font-size:16px;">▶ История Промокодов</div>
+        </div>
+        <div id="promoHistoryBlock" class="profile-form" style="display:none;">
+            <div id="promoHistoryTable" class="scroll"></div>
+        </div>
+    </div>
     <div id="promoCodesList" class="profile-grid" style="margin-top:14px;"></div>
 </div>
 
 <div class="settings-surface profile-manager">
     <div class="profile-manager-header">
         <div>
-            <h3 class="profile-manager-title">Увеличение лимитов</h3>
-            <div class="profile-manager-subtitle">Запросы профилей на увеличение суточного лимита PAPA BOT. Блок виден постоянно и доступен только главному админу.</div>
+            <h3 class="profile-manager-title">Финансовые операции</h3>
+            <div class="profile-manager-subtitle">Общий журнал денежных операций, покупок и начислений всех профилей.</div>
         </div>
     </div>
-    <div id="adminLimitRequestsPanel" class="app-log-grid">
-        <div class="community-empty-note">Запросы на увеличение лимита загрузятся после открытия вкладки.</div>
+    <div id="adminFinancialOperationsPanel">
+        <div class="community-empty-note">Финансовые операции загрузятся после открытия вкладки.</div>
+    </div>
+</div>
+
+<div class="settings-surface profile-manager">
+    <div class="profile-manager-header">
+        <div>
+            <h3 class="profile-manager-title">ОШИБКИ</h3>
+            <div class="profile-manager-subtitle">Сообщения администраторов об обнаруженных ошибках со скриншотами и контекстом страницы.</div>
+        </div>
+    </div>
+    <div id="adminErrorReportsPanel" class="app-log-grid admin-history-scroll admin-history-scroll--5">
+        <div class="community-empty-note">Ошибки загрузятся после открытия вкладки.</div>
+    </div>
+</div>
+
+<div class="settings-surface profile-manager">
+    <div class="profile-manager-header">
+        <div>
+            <h3 class="profile-manager-title">ПРЕДЛОЖЕНИЯ</h3>
+            <div class="profile-manager-subtitle">Идеи администраторов по развитию PAPA BOT со скриншотами и контекстом страницы.</div>
+        </div>
+    </div>
+    <div id="adminSuggestionReportsPanel" class="app-log-grid admin-history-scroll admin-history-scroll--5">
+        <div class="community-empty-note">Предложения загрузятся после открытия вкладки.</div>
     </div>
 </div>
 
@@ -2808,7 +4903,7 @@ color: #eff6ff;
     </div>
     <div id="appLogsFileLabel" class="app-log-file-label"></div>
     <div id="appLogsStatus"></div>
-    <div id="appLogsList" class="app-log-grid">
+    <div id="appLogsList" class="app-log-grid admin-history-scroll admin-history-scroll--5">
         <div class="community-empty-note">Журнал загрузится после открытия вкладки.</div>
     </div>
 </div>
@@ -2863,6 +4958,96 @@ color: #eff6ff;
 </div>
 </div>
 
+<div id="TelegramChannels" class="tabcontent">
+<div class="tab-panel-header tab-panel-header--messages"><div class="tab-panel-copy"><div class="tab-panel-kicker">Telegram-каналы</div><h2 class="tab-panel-title">Каналы и сценарии</h2><p class="tab-panel-description">Добавьте канал, выберите его кнопкой, привяжите одного или нескольких подключённых TG-ботов и настройте для каждого независимые мини-боты.</p></div><div class="tab-panel-side"><div class="tab-panel-badge">Канал • TG-боты • Сценарии</div></div></div>
+<div class="info-box">В канале нет личного диалога с подписчиками. Сценарий получает новые публикации канала и может автоматически создать ответную публикацию от имени бота. Для обработки комментариев подключите связанную с каналом группу обсуждений в разделе ГРУППЫ. Бот канала должен быть администратором с правом публикации.</div>
+<div id="loading-TelegramChannels" style="display:none;">Загрузка...</div>
+<div class="settings-surface">
+<div class="telegram-chat-toolbar"><div id="telegramChatButtons-channel" class="telegram-chat-buttons"></div><button class="btn btn-add telegram-chat-button" type="button" onclick="showTelegramChatEditor('channel')">+ Добавить канал</button></div>
+<div id="telegramChatEditor-channel" class="telegram-chat-editor" style="display:none;">
+<div class="telegram-form-grid"><div class="telegram-form-field"><label>Название канала</label><input id="telegramChatTitle-channel" type="text" placeholder="Например: Новости магазина"></div><div class="telegram-form-field"><label>Telegram Chat ID</label><input id="telegramChatId-channel" type="text" inputmode="numeric" placeholder="Например: -1001234567890"></div><div class="telegram-form-field"><label>Username, если есть</label><input id="telegramChatUsername-channel" type="text" placeholder="@my_channel"></div><div class="telegram-form-field"><label>Описание</label><input id="telegramChatDescription-channel" type="text" placeholder="Для чего используется канал"></div></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;"><button class="btn btn-save telegram-action-btn" type="button" onclick="saveTelegramChatFromEditor('channel')">Добавить канал</button><button class="btn btn-neutral telegram-action-btn" type="button" onclick="hideTelegramChatEditor('channel')">Отмена</button></div>
+</div>
+<div id="telegramChatStatus-channel"></div>
+</div>
+<div id="telegramChatWorkspace-channel" class="settings-surface"><div class="community-empty-note">Добавьте или выберите канал.</div></div>
+</div>
+
+<div id="TelegramGroups" class="tabcontent">
+<div class="tab-panel-header tab-panel-header--users"><div class="tab-panel-copy"><div class="tab-panel-kicker">Telegram-группы</div><h2 class="tab-panel-title">Группы и сценарии</h2><p class="tab-panel-description">Добавьте группу, выберите её кнопкой, привяжите одного или нескольких подключённых TG-ботов и настройте для каждого независимые мини-боты.</p></div><div class="tab-panel-side"><div class="tab-panel-badge">Группа • TG-боты • Сценарии</div></div></div>
+<div class="info-box">Чтобы сценарии реагировали на обычный текст участников, назначьте бота администратором группы либо отключите Privacy Mode командой /setprivacy в BotFather. После изменения нажмите «Проверить права». При включённом Privacy Mode обычный бот получает только команды, ответы и обращения к нему.</div>
+<div id="loading-TelegramGroups" style="display:none;">Загрузка...</div>
+<div class="settings-surface">
+<div class="telegram-chat-toolbar"><div id="telegramChatButtons-group" class="telegram-chat-buttons"></div><button class="btn btn-add telegram-chat-button" type="button" onclick="showTelegramChatEditor('group')">+ Добавить группу</button></div>
+<div id="telegramChatEditor-group" class="telegram-chat-editor" style="display:none;">
+<div class="telegram-form-grid"><div class="telegram-form-field"><label>Название группы</label><input id="telegramChatTitle-group" type="text" placeholder="Например: Чат клиентов"></div><div class="telegram-form-field"><label>Telegram Chat ID</label><input id="telegramChatId-group" type="text" inputmode="numeric" placeholder="Например: -1001234567890"></div><div class="telegram-form-field"><label>Username, если есть</label><input id="telegramChatUsername-group" type="text" placeholder="@my_group"></div><div class="telegram-form-field"><label>Описание</label><input id="telegramChatDescription-group" type="text" placeholder="Для чего используется группа"></div></div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;"><button class="btn btn-save telegram-action-btn" type="button" onclick="saveTelegramChatFromEditor('group')">Добавить группу</button><button class="btn btn-neutral telegram-action-btn" type="button" onclick="hideTelegramChatEditor('group')">Отмена</button></div>
+</div>
+<div id="telegramChatStatus-group"></div>
+</div>
+<div id="telegramChatWorkspace-group" class="settings-surface"><div class="community-empty-note">Добавьте или выберите группу.</div></div>
+</div>
+
+<div id="TelegramBots" class="tabcontent">
+<div class="tab-panel-header tab-panel-header--settings"><div class="tab-panel-copy"><div class="tab-panel-kicker">Подключение Telegram</div><h2 class="tab-panel-title">Telegram-боты профиля</h2><p class="tab-panel-description">Подключайте ботов из BotFather, проверяйте защищённый webhook и выбирайте бота, чьи сценарии, пользователи и переменные нужно редактировать.</p></div><div class="tab-panel-side"><div class="tab-panel-badge">BotFather • Webhook • Личные сообщения</div></div></div>
+<div id="loading-TelegramBots" style="display:none;">Загрузка...</div>
+<div class="info-box">Для личных сообщений пользователь должен сначала открыть бота и нажать Start. Для каналов и групп сначала подключите бота здесь, затем привяжите его в разделе КАНАЛЫ или ГРУППЫ. В канале бот должен быть администратором с правом публикации.</div>
+
+<div class="settings-surface">
+    <div class="telegram-chat-toolbar"><div id="telegramBotButtons" class="telegram-chat-buttons"></div><button class="btn btn-add telegram-chat-button" type="button" onclick="showTelegramBotEditor()">+ Добавить TG-бота</button></div>
+    <div id="telegramBotEditor" class="telegram-chat-editor" style="display:none;">
+    <div class="profile-manager-header">
+        <div>
+            <h3 class="profile-manager-title">Подключить Telegram-бота</h3>
+            <div class="profile-manager-subtitle">Создайте бота через BotFather и вставьте выданный HTTP API token. PAPA BOT проверит токен и автоматически установит webhook с секретным заголовком.</div>
+        </div>
+    </div>
+    <div class="telegram-form-grid">
+        <div class="telegram-form-field">
+            <label for="telegramBotToken">Bot token</label>
+            <input id="telegramBotToken" type="password" autocomplete="new-password" placeholder="123456789:AA...">
+        </div>
+        <div class="telegram-form-field">
+            <label for="telegramBotDisplayName">Название в PAPA BOT</label>
+            <input id="telegramBotDisplayName" type="text" placeholder="Например: Бот магазина">
+        </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+        <button class="btn btn-save" type="button" onclick="connectTelegramBot()">Подключить Telegram-бота</button>
+        <button class="btn btn-neutral" type="button" onclick="hideTelegramBotEditor()">Отмена</button>
+    </div>
+    </div>
+    <div id="telegramConnectStatus" style="margin-top:12px;"></div>
+</div>
+
+<div id="telegramBotsList" class="settings-surface">
+    <div class="community-empty-note">Подключённые Telegram-боты загрузятся после открытия вкладки.</div>
+</div>
+
+<div class="settings-surface">
+    <div class="profile-manager-header">
+        <div>
+            <h3 class="profile-manager-title">Тестовая отправка</h3>
+            <div class="profile-manager-subtitle">Отправляет одно диагностическое сообщение от выбранного бота только в указанный Chat ID — это не рассылка и не запуск сценария. Команда /start регистрирует пользователя, но бот ответит на неё только при наличии строки с триггером /start во вкладке СООБЩЕНИЯ. В личном диалоге Telegram User ID одновременно является Chat ID.</div>
+        </div>
+    </div>
+    <div class="telegram-form-grid">
+        <div class="telegram-form-field">
+            <label for="telegramTestChatId">Telegram Chat ID</label>
+            <input id="telegramTestChatId" type="text" inputmode="numeric" placeholder="Например: 123456789">
+        </div>
+        <div class="telegram-form-field">
+            <label for="telegramTestText">Текст</label>
+            <input id="telegramTestText" type="text" value="Тестовое сообщение PAPA BOT">
+        </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;">
+        <button class="btn btn-info" type="button" onclick="testTelegramBot()">Отправить тест</button>
+    </div>
+    <div id="telegramTestStatus" style="margin-top:12px;"></div>
+</div>
+</div>
+
 <div id="Settings" class="tabcontent">
 <div class="tab-panel-header tab-panel-header--settings-danger"><div class="tab-panel-copy"><div class="tab-panel-kicker">Подключение и инфраструктура</div><h2 class="tab-panel-title">Настройка сообществ и VK API</h2><p class="tab-panel-description">Подключайте новые сообщества, проверяйте токены, настраивайте Callback API и храните служебные данные для работы бота в каждом сообществе отдельно.</p></div><div class="tab-panel-side"><div class="tab-panel-badge">Сообщества • Токены • Callback API</div></div></div>
 <div id="loading-Settings">Загрузка...</div>
@@ -2888,13 +5073,15 @@ color: #eff6ff;
 
 <!-- ===== 📋 ИНСТРУКЦИЯ ПО НАСТРОЙКЕ ===== -->
 <div class="settings-hero">
-    <strong style="font-size: 16px;">🚀 Быстрый старт — 5 шагов для запуска бота</strong>
+    <strong style="font-size: 16px;">🚀 Быстрый старт — 7 шагов для запуска бота</strong>
     <div style="margin-top: 12px; line-height: 1.8; font-size: 13px;">
         <button class="settings-hero-step" type="button" onclick="runQuickStartStep('community')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>1️⃣ Добавьте сообщество</strong> — нажмите «+ Добавить Сообщество» или выберите существующее</button>
-        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('vkGroupId')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>2️⃣ Введите VK Group ID</strong> — числовой ID вашего сообщества (без минуса, например: 219331507)</button>
-        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('vkTokens')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>3️⃣ Введите VK Token</strong> — токен сообщества (выберите Все права при создании)</button>
-        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('userToken')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>4️⃣ Введите User Token</strong> — нужен для отправки вложений (фото, документы, видео). Получите через кнопку «ПОЛУЧИТЬ ТОКЕН» внизу страницы</button>
-        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('callback')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>5️⃣ Нажмите «Автонастройка сервера ВК»</strong> — бот сам подключится к вашему сообществу</button>
+        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('communityName')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>2️⃣ Введите <a href="#communityName" onclick="runQuickStartStep('communityName'); return false;">Название сообщества</a></strong> — оно будет отображаться в списке</button>
+        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('vkGroupId')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>3️⃣ Введите VK Group ID</strong> — числовой ID вашего сообщества (без минуса, например: 219331507)</button>
+        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('vkTokens')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>4️⃣ Введите VK Token</strong> — токен сообщества (выберите Все права при создании)</button>
+        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('userToken')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>5️⃣ Введите User Token</strong> — нужен для отправки вложений (фото, документы, видео). Получите через кнопку «ПОЛУЧИТЬ ТОКЕН» внизу страницы</button>
+        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('saveAll')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>6️⃣ Нажмите <a href="#saveAllSettingsBtn" onclick="runQuickStartStep('saveAll'); return false;">«Сохранить все настройки»</a></strong></button>
+        <button class="settings-hero-step" type="button" onclick="runQuickStartStep('callback')" style="width:100%;text-align:left;cursor:pointer;background:rgba(255,255,255,0.6);border:1px solid var(--section-border);border-radius:12px;padding:10px 12px;"><strong>7️⃣ Нажмите <a href="#autoSetupCallbackBtn" onclick="runQuickStartStep('callback'); return false;">«Автонастройка сервера ВК»</a></strong> — бот сам подключится к вашему сообществу</button>
     </div>
     <div class="settings-hero-footnote">
         ✅ После этого перейдите на вкладку <strong>«СООБЩЕНИЯ»</strong> и настройте триггеры и ответы бота.
@@ -2939,7 +5126,11 @@ color: #eff6ff;
             <a href="#" class="instruction-img-link settings-helper-link" onclick="return showInstructionImage('Подверждение создания VK TOKEN - 3 этап.png');">&#x1F5BC;&#xFE0F; 3 этап</a> |
             <a href="#" class="instruction-img-link settings-helper-link" onclick="return showInstructionImage('Копирование VK TOKEN - 4 этап.png');">&#x1F5BC;&#xFE0F; 4 этап</a>
         </div>
-        <textarea id="vkTokens" placeholder="токен_1&#10;токен_2&#10;токен_3" style="margin: 10px 0; padding: 8px; width: 100%; min-height: 100px; font-family: monospace;"></textarea>
+        <div id="vkTokensSavedList" style="margin:10px 0;"></div>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <input type="password" id="vkTokens" autocomplete="new-password" placeholder="Токен НЕ указан, укажите токен" style="margin:10px 0;padding:8px;flex:1;">
+            <button type="button" class="btn btn-save" onclick="saveStoredVkToken('community')">Сохранить токен</button>
+        </div>
         <div class="settings-subnote">
             &#x1F504; Бот будет перебирать токены по порядку при ошибках.
         </div>
@@ -2983,14 +5174,18 @@ color: #eff6ff;
         <hr class="settings-divider">
 
         <!-- Блок User Token -->
-        <div class="settings-helper-box settings-helper-box--green">
+        <div id="userTokenSettingsBlock" class="settings-helper-box settings-helper-box--green">
             <strong class="settings-helper-title">&#x1F511; User Token (для вложений)</strong>
             <div style="font-size: 13px; margin: 10px 0; line-height: 1.6;">
                 &#x2753; <strong>Зачем:</strong> Для отправки файлов, фото, видео в сообщения и комментарии, а также одобрения заявок на вступление в сообщество пользователями / удаление пользователей с сообщества и их данных(переписки)...<br>
+                <strong>ВАЖНО:</strong><br>
+                - Пользователь должен быть Администратором в сообществе или сообществах (если их несколько).<br>
+                - Желательно завести Второй аккаунт в ВК, который не Основной Ваш аккаунт, и вставлять Токен этого Второго и НЕ основного аккаунта.<br>
+                <br>
                 &#x1F4D6; <strong>Как получить:</strong><br>
                 1. Нажмите «ПОЛУЧИТЬ ТОКЕН» &#x2192; откроется malyshrush.github.io/vk-token-generator<br>
-                2. Нажмите «Выбрать все» &#x2192; "Сгенерировать ссылку" &#x2192; "Открыть ссылку"<br>
-                3. Авторизуйтесь нажав на " Продолжить как ...."<br>
+                2. Нажмите «Выбрать все» &#x2192; «Сгенерировать ссылку», затем скопируйте её и вставьте вручную в адресную строку браузера<br>
+                3. Авторизуйтесь нажав на «Продолжить как …» (желательно выбрать свой НЕ основной аккаунт)<br>
                 4. Скопируйте ВСЮ ссылку из адресной строки<br>
                 5. Вставьте ссылку в поле ниже &#x2014; бот сам извлечёт токен<br>
                 <a href="#" class="instruction-img-link settings-helper-link" onclick="return showInstructionImage('USER TOKEN - 1 этап.png');">&#x1F5BC;&#xFE0F; 1 этап</a> |
@@ -3004,15 +5199,20 @@ color: #eff6ff;
                 </a>
             </div>
             <label><strong>&#x1F517; Вставьте ссылку или чистый токен:</strong></label>
-            <input type="text" id="userToken" placeholder="Загрузка..." style="margin: 10px 0; padding: 8px; width: 100%;">
+            <div style="display:flex;gap:10px;align-items:center;">
+                <input type="password" id="userToken" autocomplete="new-password" placeholder="Токен НЕ указан, укажите токен" style="margin:10px 0;padding:8px;flex:1;">
+                <button type="button" class="btn btn-save" onclick="saveStoredVkToken('user')">Сохранить токен</button>
+                <button type="button" id="deleteUserTokenBtn" class="btn btn-delete" onclick="deleteStoredVkToken('user')" style="display:none;">Удалить</button>
+            </div>
+            <div id="userTokenSavedState"></div>
         </div>
 
         <div class="debug" id="settings-debug">Загрузка настроек...</div>
     </div>
 
     <!-- Кнопки сохранения -->
-    <button class="btn btn-save" onclick="saveCommunitySettings()" style="margin: 15px 0; font-size: 14px; padding: 10px 20px;">
-        &#x1F4BE; Сохранить настройки сообщества
+    <button id="saveAllSettingsBtn" class="btn btn-save" onclick="saveCommunitySettings()" style="margin: 15px 0; font-size: 14px; padding: 10px 20px;">
+        &#x1F4BE; Сохранить все настройки
     </button>
     <button class="btn btn-delete" onclick="deleteCurrentCommunity()" style="margin: 15px 0;">
         &#x1F5D1;&#xFE0F; Удалить текущее сообщество
@@ -3243,21 +5443,34 @@ if (answerEl) answerEl.value = '';
 }
 }
 
-function performForcedLogout(message) {
+function getForcedLogoutMessage(errorCode) {
+if (errorCode === 'suspicious_session_reauth_required' || errorCode === 'session_reauth_required') {
+return 'Сессия завершена из-за подозрительной активности. Войдите снова.';
+}
+return 'Сессия завершена. Войдите снова.';
+}
+
+function performForcedLogout(message, errorCode) {
 window.authUiState.sessionCaptchaRequired = false;
 window.authUiState.loginCaptchaRequired = false;
 setSessionCaptchaLock(false);
-forceLogoutToLogin(message || 'Сессия завершена. Войдите снова.');
+forceLogoutToLogin(getForcedLogoutMessage(errorCode));
 toggleLoginCaptcha(false);
 }
 
-function buildAdminRequestHeaders(headers) {
+function buildAdminRequestHeaders(headers, sessionTokenOverride) {
 var nextHeaders = Object.assign({}, headers || {});
-var sessionToken = getAdminSessionToken();
+var sessionToken = sessionTokenOverride !== undefined ? String(sessionTokenOverride || '').trim() : getAdminSessionToken();
 if (sessionToken && !nextHeaders['X-Admin-Session'] && !nextHeaders['x-admin-session']) {
 nextHeaders['X-Admin-Session'] = sessionToken;
 }
 return nextHeaders;
+}
+
+function isStaleAdminSessionResponse(requestSessionToken) {
+var requestToken = String(requestSessionToken || '').trim();
+var currentToken = getAdminSessionToken();
+return !!(requestToken && currentToken && requestToken !== currentToken);
 }
 
 function isAdminRequestUrl(url) {
@@ -3289,13 +5502,14 @@ button.textContent = pending ? 'Обновляем...' : 'Обновить ка�
 }
 
 async function fetchAdminJson(url, options) {
+var requestSessionToken = getAdminSessionToken();
 var response = await fetch(url, {
 credentials: 'include',
 ...(options || {}),
 headers: buildAdminRequestHeaders({
 'Content-Type': 'application/json',
 ...((options && options.headers) ? options.headers : {})
-})
+}, requestSessionToken)
 });
 var text = await response.text();
 var data = {};
@@ -3305,13 +5519,19 @@ data = text ? JSON.parse(text) : {};
 throw new Error(text || 'Некорректный ответ сервера');
 }
 if (data && data.captchaRequired && !isSessionCaptchaChallengeResponse(url, data)) {
+if (isStaleAdminSessionResponse(requestSessionToken)) {
+throw new Error('STALE_SESSION_RESPONSE');
+}
 window.authUiState.sessionCaptchaRequired = true;
 setSessionCaptchaLock(true);
 await refreshSessionCaptcha();
 throw new Error('CAPTCHA_REQUIRED');
 }
 if (data && data.sessionInvalid) {
-performForcedLogout(data.error || 'Сессия недействительна');
+if (isStaleAdminSessionResponse(requestSessionToken)) {
+throw new Error('STALE_SESSION_RESPONSE');
+}
+performForcedLogout(data.error || 'Сессия недействительна', data.errorCode);
 throw new Error('SESSION_INVALID');
 }
 return data;
@@ -3381,26 +5601,205 @@ return (match && match[1]) ? match[1] : 'Messages';
 }
 
 function restoreCurrentCommunityIdFromStorage() {
-if (window.currentCommunityId) return window.currentCommunityId;
+if (window.currentAdminPlatform === 'telegram') {
+if (isTelegramBindingId(window.currentTelegramScopeId)) {
+window.currentCommunityId = String(window.currentTelegramScopeId).trim();
+return window.currentCommunityId;
+}
+var telegramConnectorId = isTelegramConnectorId(window.currentTelegramConnectorId)
+    ? String(window.currentTelegramConnectorId).trim()
+    : '';
+window.currentCommunityId = telegramConnectorId;
+return telegramConnectorId;
+}
+if (window.currentCommunityId && !isTelegramConnectorId(window.currentCommunityId)) return window.currentCommunityId;
 try {
 var communityId = localStorage.getItem('vkBotLastCommunity') || '';
+if (isTelegramConnectorId(communityId)) communityId = '';
 if (communityId) window.currentCommunityId = communityId;
 return communityId;
 } catch(e) {
-return window.currentCommunityId || '';
+return isTelegramConnectorId(window.currentCommunityId) ? '' : (window.currentCommunityId || '');
 }
 }
 
-function reloadActiveTabAfterSessionCaptcha() {
-var tabName = getActiveAdminTabName();
-restoreCurrentCommunityIdFromStorage();
-setTimeout(function() {
-if (typeof window.refreshTabContent === 'function') {
-window.refreshTabContent(tabName);
-} else if (typeof loadData === 'function') {
-loadData(tabName);
+function isTelegramConnectorId(value) {
+return /^tg_[1-9][0-9]*$/.test(String(value || '').trim());
 }
-}, 0);
+
+function isTelegramBindingId(value) {
+return /^tg_[1-9][0-9]*_(channel|group)_[np][1-9][0-9]*$/.test(String(value || '').trim());
+}
+
+function getAdminDataContextId() {
+if (window.currentAdminPlatform === 'telegram') {
+if (isTelegramBindingId(window.currentTelegramScopeId)) return String(window.currentTelegramScopeId).trim();
+return isTelegramConnectorId(window.currentTelegramConnectorId)
+    ? String(window.currentTelegramConnectorId).trim()
+    : '';
+}
+var communityId = String(window.currentCommunityId || '').trim();
+return isTelegramConnectorId(communityId) ? '' : communityId;
+}
+
+function getAdminDataContextKey() {
+return String(window.currentAdminPlatform || 'vk') + ':' + getAdminDataContextId();
+}
+
+function isAdminDataContextCurrent(contextKey) {
+return contextKey === getAdminDataContextKey();
+}
+
+function resolveAdminStorageCommunityId(settingsData, contextId) {
+if (isTelegramConnectorId(contextId) || isTelegramBindingId(contextId)) return contextId;
+var communities = settingsData && settingsData.communities ? settingsData.communities : {};
+var communityConfig = communities[contextId] || {};
+return communityConfig.vk_group_id || contextId;
+}
+
+function canLoadDataTabForCurrentPlatform(tab) {
+if (window.currentAdminPlatform !== 'telegram') return true;
+return ['Messages', 'Users', 'Variables'].indexOf(tab) !== -1;
+}
+
+function scrollToSettingsElement(elementId) {
+setTimeout(function() {
+var target = document.getElementById(elementId);
+if (!target) return;
+target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+target.style.boxShadow = '0 0 0 4px rgba(245, 158, 11, 0.35)';
+setTimeout(function() { target.style.boxShadow = ''; }, 2500);
+var input = elementId === 'userTokenSettingsBlock' ? document.getElementById('userToken') : target.querySelector('input, textarea, select');
+if (input && typeof input.focus === 'function') input.focus();
+}, 150);
+}
+
+function navigateToUserTokenSettings() {
+openTab(null, 'Settings');
+scrollToSettingsElement('userTokenSettingsBlock');
+}
+
+function navigateToCommunitySettings() {
+openTab(null, 'Settings');
+scrollToSettingsElement('communitySwitcher');
+}
+
+function showUserTokenRequiredNotice(statusEl) {
+var message = 'Нужно указать User Token для загрузки вложений. <a href="#" onclick="navigateToUserTokenSettings(); return false;">Перейти к User Token в настройках</a>.';
+if (statusEl) {
+statusEl.innerHTML = makeInlineNotice('error', message);
+return;
+}
+showPanelActionNotice(message, 'error');
+}
+
+function showPanelActionNotice(messageHtml, type) {
+var el = document.getElementById('status');
+var toast = document.getElementById('panelActionToast');
+if (toast) toast.remove();
+toast = document.createElement('div');
+toast.id = 'panelActionToast';
+toast.style.cssText = 'position:fixed; top:18px; left:50%; transform:translateX(-50%); width:min(920px, calc(100% - 32px)); z-index:10050; box-shadow:0 16px 38px rgba(0,0,0,0.32); pointer-events:auto;';
+toast.innerHTML = makeInlineNotice(type || 'info', messageHtml);
+document.body.appendChild(toast);
+if (!el) {
+setTimeout(function() { if (toast && toast.parentNode) toast.remove(); }, 5000);
+return;
+}
+el.innerHTML = messageHtml;
+el.className = 'status ' + (type || 'info');
+el.style.display = 'block';
+setTimeout(function() {
+el.style.display = 'none';
+if (toast && toast.parentNode) toast.remove();
+}, 5000);
+}
+
+function setInlineNoticeWithTimeout(target, type, messageHtml, timeoutMs) {
+if (!target) return;
+var delay = Number(timeoutMs || 5000);
+target.innerHTML = makeInlineNotice(type || 'info', messageHtml);
+if (target.__inlineNoticeTimer) clearTimeout(target.__inlineNoticeTimer);
+target.__inlineNoticeTimer = setTimeout(function() {
+if (target) target.innerHTML = '';
+target.__inlineNoticeTimer = null;
+}, delay);
+}
+
+function rememberBotSettings(data) {
+if (!data || typeof data !== 'object') return data;
+window.cachedBotSettings = data;
+window.lastBotSettings = data;
+return data;
+}
+
+function normalizeCommunityIdForCompare(value) {
+return String(value || '').trim();
+}
+
+function communityConfigMatchesId(config, communityId) {
+var id = normalizeCommunityIdForCompare(communityId);
+if (!config || !id) return false;
+return [
+config.community_id,
+config.communityId,
+config.vk_group_id,
+config.vkGroupId,
+config.group_id,
+config.groupId
+].some(function(candidate) {
+return normalizeCommunityIdForCompare(candidate) === id;
+});
+}
+
+function hasVisibleConfiguredCommunitySelection(communityId) {
+if (typeof document === 'undefined') return false;
+var activeButton = document.querySelector('#communityButtons .community-btn.active[data-community-id]');
+if (activeButton && !activeButton.classList.contains('community-btn--temp')) {
+var buttonId = activeButton.getAttribute('data-community-id') || '';
+if (!communityId || buttonId === communityId) return true;
+}
+var activeLabel = document.getElementById('activeCommunityLabel-Messages');
+if (activeLabel && activeLabel.style.display !== 'none' && String(activeLabel.textContent || '').trim()) return true;
+return false;
+}
+
+function hasConfiguredCommunityForEditing() {
+var communityId = restoreCurrentCommunityIdFromStorage();
+if (!communityId || communityId === 'default') return false;
+var settings = window.cachedBotSettings || window.lastBotSettings || {};
+var communities = settings.communities || {};
+var communityIds = Object.keys(communities);
+if (communities[communityId]) return true;
+if (communityIds.some(function(id) { return communityConfigMatchesId(communities[id], communityId); })) return true;
+if (communityIds.length > 0) return false;
+return hasVisibleConfiguredCommunitySelection(communityId);
+}
+
+function ensureCommunityReadyForBotEditing(tab) {
+if (tab !== 'Messages' && tab !== 'Comments') return true;
+if (window.currentAdminPlatform === 'telegram') {
+if (tab === 'Messages' && (
+isTelegramBindingId(window.currentTelegramScopeId) ||
+isTelegramConnectorId(window.currentTelegramConnectorId)
+)) {
+window.currentCommunityId = isTelegramBindingId(window.currentTelegramScopeId)
+    ? window.currentTelegramScopeId
+    : window.currentTelegramConnectorId;
+return true;
+}
+showPanelActionNotice('Сначала выберите TG-бота, канал или группу и откройте его сценарии.', 'error');
+var telegramTab = findPlatformTabButton('TelegramBots');
+if (telegramTab) telegramTab.click();
+return false;
+}
+if (hasConfiguredCommunityForEditing()) return true;
+showPanelActionNotice('Сначала нужно добавить и автонастроить сообщество. <a href="#" onclick="navigateToCommunitySettings(); return false;">Перейти к настройке сообщества</a>.', 'error');
+return false;
+}
+
+function reloadAdminPanelAfterSessionCaptcha() {
+window.location.reload();
 }
 
 async function submitSessionCaptcha() {
@@ -3423,7 +5822,7 @@ localStorage.setItem('adminSessionToken', data.sessionToken);
 }
 window.authUiState.sessionCaptchaRequired = false;
 setSessionCaptchaLock(false);
-reloadActiveTabAfterSessionCaptcha();
+reloadAdminPanelAfterSessionCaptcha();
 }
 } catch (e) {
 if (e && e.message === 'CAPTCHA_REQUIRED' || e && e.message === 'SESSION_INVALID') return;
@@ -3451,16 +5850,20 @@ if (window.fetch && !window.__adminProfileFetchWrapped) {
 var originalFetch = window.fetch.bind(window);
 window.fetch = function(input, init) {
 var nextInit = init ? Object.assign({}, init) : {};
+var requestSessionToken = getAdminSessionToken();
 if (!nextInit.credentials) nextInit.credentials = 'include';
 if (typeof input === 'string') {
 if (isAdminRequestUrl(input)) {
-nextInit.headers = buildAdminRequestHeaders(nextInit.headers);
+nextInit.headers = buildAdminRequestHeaders(nextInit.headers, requestSessionToken);
 }
 return originalFetch(appendProfileIdToUrl(input), nextInit).then(async function(response) {
 try {
 if (response && (response.status === 401 || response.status === 403)) {
 var cloned = response.clone();
 var data = await cloned.json().catch(function() { return null; });
+if (data && (data.captchaRequired || data.sessionInvalid) && isStaleAdminSessionResponse(requestSessionToken)) {
+return response;
+}
 if (data && data.captchaRequired) {
 window.authUiState.sessionCaptchaRequired = true;
 setSessionCaptchaLock(true);
@@ -3470,7 +5873,7 @@ refreshSessionCaptcha();
 }
 if (data && data.sessionInvalid) {
 setTimeout(function() {
-performForcedLogout(data.error || 'Сессия завершена. Войдите снова.');
+performForcedLogout(data.error || 'Сессия завершена. Войдите снова.', data.errorCode);
 }, 0);
 }
 }
@@ -3509,25 +5912,82 @@ var safeType = type || 'info';
 return '<span class="inline-text--' + safeType + '">' + message + '</span>';
 }
 
-function showLoginModal() {
+function showPasswordResetModal(prefillUsername) {
+var username = String(prefillUsername || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+return '<div id="passwordResetModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:var(--modal-overlay);z-index:1000003;display:flex;align-items:center;justify-content:center;">' +
+'<div class="auth-content" style="max-width:520px;">' +
+'<h2 style="color:var(--text-primary);margin-bottom:10px;">&#x1F510; Восстановление пароля</h2>' +
+'<p style="color:var(--text-secondary);margin-bottom:16px;font-size:14px;">После трёх неудачных попыток входа подтвердите email кодом из письма и задайте новый пароль.</p>' +
+'<div id="passwordResetStatus" style="margin-bottom:12px;"></div>' +
+'<input type="text" id="passwordResetUsername" value="' + username + '" placeholder="Логин" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
+'<input type="email" id="passwordResetEmail" placeholder="Email аккаунта" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
+'<button type="button" onclick="sendPasswordResetCode()" style="width:100%;padding:10px;background:#0ea5e9;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;">&#x1F4E7; Отправить код на email</button>' +
+'<input type="text" id="passwordResetCode" placeholder="Код из письма" inputmode="numeric" maxlength="6" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
+'<input type="password" id="passwordResetNewPassword" placeholder="Новый пароль" autocomplete="new-password" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
+'<button type="button" onclick="submitPasswordReset()" style="width:100%;padding:12px;background:#16a34a;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold;">&#x1F513; Сохранить новый пароль</button>' +
+'<button type="button" onclick="closePasswordResetModal()" style="width:100%;padding:11px;background:#64748b;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold;margin-top:12px;">Назад ко входу</button>' +
+'</div></div>';
+}
+
+function openPasswordResetModal(username) {
+var authModal = document.getElementById('authModal');
+if (authModal) authModal.style.display = 'none';
+var existing = document.getElementById('passwordResetModal');
+if (existing) existing.remove();
+document.body.insertAdjacentHTML('beforeend', showPasswordResetModal(username));
+}
+
+window.closePasswordResetModal = function() {
+var modal = document.getElementById('passwordResetModal');
+if (modal) modal.remove();
+try { localStorage.setItem('loginAttempts', String(AUTH_CONFIG.maxAttempts)); localStorage.removeItem('lockoutUntil'); } catch (e) {}
+var authModal = document.getElementById('authModal');
+if (authModal) authModal.remove();
+document.body.insertAdjacentHTML('beforeend', showLoginModal(true));
+};
+
+window.sendPasswordResetCode = async function() {
+var username = document.getElementById('passwordResetUsername').value.trim();
+var email = document.getElementById('passwordResetEmail').value.trim();
+var statusEl = document.getElementById('passwordResetStatus');
+if (!username || !email) { statusEl.innerText = 'Укажите логин и email'; statusEl.style.color = '#f44336'; return; }
+statusEl.innerText = 'Отправляем код на email...'; statusEl.style.color = '#64748b';
+try {
+var baseUrl = window.location.href.split('?')[0];
+var res = await fetch(baseUrl + '?sendPasswordResetCode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username, recoveryEmail: email }) });
+var data = await res.json();
+statusEl.innerText = data.success ? 'Код отправлен на email. Проверьте почту.' : 'Не удалось отправить код. Проверьте логин и email.';
+statusEl.style.color = data.success ? '#16a34a' : '#f44336';
+} catch (e) { statusEl.innerText = 'Ошибка: ' + e.message; statusEl.style.color = '#f44336'; }
+};
+
+window.submitPasswordReset = async function() {
+var username = document.getElementById('passwordResetUsername').value.trim();
+var email = document.getElementById('passwordResetEmail').value.trim();
+var emailCode = document.getElementById('passwordResetCode').value.trim();
+var newPassword = document.getElementById('passwordResetNewPassword').value.trim();
+var statusEl = document.getElementById('passwordResetStatus');
+if (!username || !email || !emailCode || !newPassword) { statusEl.innerText = 'Заполните все поля'; statusEl.style.color = '#f44336'; return; }
+try {
+var baseUrl = window.location.href.split('?')[0];
+var res = await fetch(baseUrl + '?resetPasswordWithCode', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: username, recoveryEmail: email, emailCode: emailCode, newPassword: newPassword }) });
+var data = await res.json();
+if (!data.success) { statusEl.innerText = 'Не удалось изменить пароль. Проверьте код из письма и повторите попытку.'; statusEl.style.color = '#f44336'; return; }
+localStorage.removeItem('loginAttempts');
+localStorage.removeItem('lockoutUntil');
+statusEl.innerText = 'Пароль изменён. Откройте форму входа и войдите с новым паролем.';
+statusEl.style.color = '#16a34a';
+setTimeout(function() { var modal = document.getElementById('passwordResetModal'); if (modal) modal.remove(); var oldAuth = document.getElementById('authModal'); if (oldAuth) oldAuth.remove(); document.body.insertAdjacentHTML('beforeend', showLoginModal()); }, 700);
+} catch (e) { statusEl.innerText = 'Ошибка: ' + e.message; statusEl.style.color = '#f44336'; }
+};
+
+function showLoginModal(forceLoginForm) {
 var info = getAttemptInfo();
 var now = Date.now();
 document.body.classList.add('auth-required');
-if (info.lockoutUntil > now) {
-var minutesLeft = Math.ceil((info.lockoutUntil - now) / 60000);
-return '<div id="authModal">' +
-'<div class="auth-content">' +
-'<h2 style="color:#f44336;margin-bottom:20px;">&#x1F6E1;&#xFE0F; Доступ заблокирован</h2>' +
-'<p style="color:var(--text-secondary);margin-bottom:20px;">Превышено количество попыток входа.</p>' +
-'<p style="color:#f44336;font-weight:bold;margin-bottom:30px;">Повторите через <span style="font-size:18px;">' + minutesLeft + ' мин.</span></p>' +
-'<hr style="margin:20px 0;border:none;border-top:1px solid var(--section-border);">' +
-'<h3 style="margin-bottom:15px;">&#x1F511; Восстановление доступа</h3>' +
-'<input type="text" id="recoveryUsername" placeholder="Ваш логин" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
-'<input type="email" id="recoveryEmail" placeholder="Ваша почта" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
-'<button onclick="requestRecovery()" style="width:100%;padding:12px;background:#2196F3;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold;">?? Запросить восстановление</button>' +
-'<div id="recoveryStatus" style="margin-top:15px;"></div>' +
-'</div>' +
-'</div>';
+if (!forceLoginForm && info.attempts >= AUTH_CONFIG.maxAttempts) return showPasswordResetModal('');
+if (!forceLoginForm && info.lockoutUntil > now) {
+return showPasswordResetModal('');
 }
 
 
@@ -3560,17 +6020,16 @@ function showRegisterModal() {
 return '<div id="registerModal" style="position:fixed;top:0;left:0;width:100%;height:100%;background:var(--modal-overlay);z-index:1000001;display:flex;align-items:center;justify-content:center;">' +
 '<div class="auth-content" style="max-width:520px;">' +
 '<h2 style="color:var(--text-primary);margin-bottom:10px;">&#x2728; Создание аккаунта</h2>' +
-'<p style="color:var(--text-secondary);margin-bottom:16px;font-size:14px;">Сначала введите промокод. Если он существует, появится форма регистрации нового аккаунта.</p>' +
+'<p style="color:var(--text-secondary);margin-bottom:16px;font-size:14px;">Заполните данные нового аккаунта и подтвердите email. Промокод необязателен: если он указан, к аккаунту применятся его условия.</p>' +
 '<div id="registerStatus" style="margin-bottom:12px;"></div>' +
-'<div id="promoStep">' +
-'<input type="text" id="registerPromoCode" placeholder="Промокод" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
-'<button onclick="verifyPromoCode()" style="width:100%;padding:12px;background:#7c3aed;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold;">&#x1F3AB; Проверить промокод</button>' +
-'</div>' +
-'<div id="registerForm" style="display:none;">' +
+'<div id="registerForm" style="display:block;">' +
+'<input type="text" id="registerPromoCode" placeholder="Промокод (необязательно)" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px; font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
 '<input type="text" id="registerName" placeholder="Название профиля" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
 '<input type="text" id="registerUsername" placeholder="Логин" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
 '<input type="password" id="registerPassword" placeholder="Пароль" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
 '<input type="email" id="registerEmail" placeholder="Email для восстановления" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
+'<button onclick="sendRegistrationCode()" style="width:100%;padding:10px;background:#0ea5e9;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;">📧 Отправить код на email</button>' +
+'<input type="text" id="registerEmailCode" placeholder="Код из письма" inputmode="numeric" maxlength="6" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
 '<div id="registerPromoInfo" class="hint" style="margin-bottom:10px;"></div>' +
 '<button onclick="submitRegisterAccount()" style="width:100%;padding:12px;background:#16a34a;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold;">&#x1F680; Создать аккаунт</button>' +
 '</div>' +
@@ -3610,18 +6069,10 @@ const getValue = (id) => {
     return el ? el.value.trim() : '';
 };
 
-// &#x2728; НОВОЕ: Получаем токены из textarea (каждый с новой строки)
-const vkTokensText = getValue('vkTokens');
-const vkTokensArray = vkTokensText.split('\\n').map(t => t.trim()).filter(t => t);
-const firstToken = vkTokensArray[0] || '';
-
 const settings = {
-        vk_tokens: vkTokensArray,  // ?? МАССИВ ТОКЕНОВ
-        vk_token: firstToken,       // ?? Первый токен для совместимости
         confirmation_token: getValue('confirmationCode'),
         secret_key: getValue('secretKey'),
-        vk_group_id: getValue('vkGroupId') ? parseInt(getValue('vkGroupId'), 10) : null,
-        user_token: getValue('userToken')
+        vk_group_id: getValue('vkGroupId') ? parseInt(getValue('vkGroupId'), 10) : null
     };
 
     const statusDiv = document.getElementById('save-status');
@@ -3650,8 +6101,11 @@ const settings = {
     }
 };
 
-
-
+function normalizeAuthMessage(message) {
+var value = String(message || '');
+if (!/[РС][\u0080-\uFFFF]/.test(value)) return value;
+try { return decodeURIComponent(escape(value)); } catch (e) { return value; }
+}
 
 window.performLogin = async function() {
 var username = document.getElementById('loginUsername').value.trim();
@@ -3659,7 +6113,7 @@ var password = document.getElementById('loginPassword').value.trim();
 var captchaAnswerEl = document.getElementById('loginCaptchaAnswer');
 var statusEl = document.getElementById('loginStatus');
 if (!username || !password) {
-statusEl.innerText = '? Введите логин и пароль';
+statusEl.innerText = 'Введите логин и пароль';
 return;
 }
 try {
@@ -3676,6 +6130,7 @@ captchaAnswer: window.authUiState.loginCaptchaRequired && captchaAnswerEl ? capt
 if (data.success) {
 debug('&#x1F916; Auth successful for ' + username);
 window.completeAuthSession(data);
+try { localStorage.setItem('vkBotLastTab', 'Settings'); } catch (e) {}
 toggleLoginCaptcha(false);
 setSessionCaptchaLock(false);
 var modal = document.getElementById('authModal');
@@ -3689,7 +6144,7 @@ password: password,
 profileId: data.profileId || '',
 profileName: data.profileName || username
 };
-statusEl.innerText = '? Срок действия профиля истёк. Нужен промокод для повторной активации.';
+statusEl.innerText = 'Срок действия профиля истёк. Нужен промокод для повторной активации.';
 var existingReactivationModal = document.getElementById('reactivateModal');
 if (existingReactivationModal) existingReactivationModal.remove();
 var authModal = document.getElementById('authModal');
@@ -3697,6 +6152,11 @@ if (authModal) authModal.style.display = 'none';
 document.body.insertAdjacentHTML('beforeend', showReactivationModal(window.pendingExpiredLogin.profileName));
 } else {
 debug('&#x1F916; Auth failed: ' + (data.error || 'Unknown error'));
+if (data.recoveryRequired) {
+try { localStorage.setItem('loginAttempts', String(AUTH_CONFIG.maxAttempts)); localStorage.removeItem('lockoutUntil'); } catch (e) {}
+openPasswordResetModal(data.recoveryUsername || username);
+return;
+}
 if (data.loginCaptchaRequired) {
 await refreshLoginCaptcha();
 }
@@ -3709,7 +6169,12 @@ localStorage.setItem('lockoutUntil', data.lockUntil.toString());
 } else {
 incrementAttempt();
 }
-statusEl.innerText = '? ' + (data.error || 'Неверный логин или пароль');
+var loginErrorText = data.errorCode === 'login_captcha_required'
+    ? 'Введите символы с картинки и повторите вход.'
+    : (data.errorCode === 'captcha_invalid'
+        ? 'Капча введена неверно. Обновите картинку и повторите ввод.'
+        : 'Неверный логин или пароль');
+statusEl.innerText = 'Ошибка входа: ' + loginErrorText;
 if (data.locked && data.lockUntil) {
 localStorage.setItem('lockoutUntil', data.lockUntil.toString());
 }
@@ -3724,11 +6189,11 @@ attemptsEl.style.color = attemptColor;
 if (remainingAttempts === 1) {
 var warningEl = document.getElementById('loginStatus');
 if (warningEl && !warningEl.innerHTML.includes('ВНИМАНИЕ')) {
-warningEl.innerHTML += '<br><strong style="color:#f44336;">?? ВНИМАНИЕ: При следующей ошибке доступ будет заблокирован на 30 минут!</strong>';
+warningEl.innerHTML += '<br><strong style="color:#f44336;">ВНИМАНИЕ: следующая ошибка откроет восстановление пароля по email.</strong>';
 }
 }
 if (info.attempts >= AUTH_CONFIG.maxAttempts) {
-setTimeout(function() { location.reload(); }, 2000);
+openPasswordResetModal(username);
 }
 }
 } catch (e) {
@@ -3808,10 +6273,10 @@ body: JSON.stringify({ email: email, username: username })
 });
 var data = await res.json();
 if (data.success) {
-statusEl.innerText = '? Запрос на восстановление отправлен главному админу';
+statusEl.innerText = 'Запрос на восстановление отправлен главному администратору';
 statusEl.style.color = '#4CAF50';
 } else {
-statusEl.innerText = '? ' + (data.error || 'Ошибка отправки');
+statusEl.innerText = 'Ошибка: ' + (data.error || 'Ошибка отправки');
 statusEl.style.color = '#f44336';
 }
 } catch (e) {
@@ -3928,10 +6393,11 @@ name: document.getElementById('registerName').value.trim(),
 username: document.getElementById('registerUsername').value.trim(),
 password: document.getElementById('registerPassword').value.trim(),
 recoveryEmail: document.getElementById('registerEmail').value.trim(),
+emailCode: document.getElementById('registerEmailCode').value.trim(),
 clientId: getPromoClientId()
 };
-if (!payload.code || !payload.name || !payload.username || !payload.password) {
-statusEl.innerHTML = makeInlineNotice('error', 'Заполните название профиля, логин, пароль и подтверждённый промокод.');
+if (!payload.name || !payload.username || !payload.password || !payload.recoveryEmail || !payload.emailCode) {
+statusEl.innerHTML = makeInlineNotice('error', 'Заполните данные профиля, email и код подтверждения.');
 return;
 }
 try {
@@ -3948,12 +6414,27 @@ return;
 }
 statusEl.innerHTML = makeInlineNotice('success', '✅ Аккаунт создан. Теперь войдите под новым логином и паролем.');
 window.verifiedPromoCode = null;
+try { localStorage.setItem('vkBotLastTab', 'Settings'); } catch (e) {}
 setTimeout(function() {
 closeRegisterModal();
 }, 1200);
 } catch (e) {
 statusEl.innerHTML = makeInlineNotice('error', '❌ Ошибка: ' + e.message);
 }
+};
+
+window.sendRegistrationCode = async function() {
+var email = document.getElementById('registerEmail').value.trim();
+var statusEl = document.getElementById('registerStatus');
+if (!email) { statusEl.innerHTML = makeInlineNotice('error', 'Укажите email'); return; }
+try {
+var baseUrl = window.location.href.split('?')[0];
+var promoCode = window.verifiedPromoCode || document.getElementById('registerPromoCode').value.trim();
+var res = await fetch(baseUrl + (promoCode ? '?sendRegistrationCode' : '?sendOpenRegistrationCode'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ recoveryEmail: email, code: promoCode }) });
+var data = await res.json();
+if (!data.success) { statusEl.innerHTML = makeInlineNotice('error', data.error || 'Не удалось отправить код'); return; }
+statusEl.innerHTML = makeInlineNotice('success', '✅ Код отправлен на email. Проверьте входящие и папку «Спам».');
+} catch (e) { statusEl.innerHTML = makeInlineNotice('error', '❌ Ошибка отправки кода: ' + e.message); }
 };
 // &#x1F6E1;&#xFE0F; ПРОВЕРКА ПРИ ЗАГРУЗКЕ СТРАНИЦЫ
 window.checkAuthOnLoad = async function() {
@@ -3967,9 +6448,10 @@ return false;
 var baseUrl = window.location.href.split('?')[0];
 var data = await fetchAdminJson(baseUrl + '?validateSession', { method: 'GET' });
 if (!data || !data.success) {
-forceLogoutToLogin(data && data.error ? data.error : 'Сессия больше не действует. Войдите снова.');
+performForcedLogout(data && data.error ? data.error : '', data && data.errorCode);
 return false;
 }
+window.dispatchEvent(new Event('papa-bot-session-validated'));
 } catch(e) {
 if (e && (e.message === 'CAPTCHA_REQUIRED' || e.message === 'SESSION_INVALID')) {
 return false;
@@ -4006,6 +6488,7 @@ window.debug = function(msg) {
 const sheetMap = {
 'Messages': 'СООБЩЕНИЯ',
 'Comments': 'КОММЕНТАРИИ В ПОСТАХ',
+'CommentActivities': 'АКТИВНОСТИ В КОММЕНТАРИЯХ',
 'Users': 'ПОЛЬЗОВАТЕЛИ',
 'Groups': 'ГРУППЫ',
 'Variables': 'ПЕРЕМЕННЫЕ',
@@ -4014,7 +6497,8 @@ const sheetMap = {
 'Shared_Variables': 'ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ',
 'Mailing': 'РАССЫЛКА',
 'Delayed': 'ОТЛОЖЕННЫЕ',
-'Triggers': 'ТРИГГЕРЫ'
+'Triggers': 'ТРИГГЕРЫ',
+'CommentTextLists': 'СПИСКИ ТЕКСТА КОММЕНТАРИЕВ'
 };
 const buttonColors = ['th-blue-1','th-blue-2','th-blue-3','th-purple-1','th-purple-2','th-teal-1','th-teal-2','th-red-1','th-red-2','th-cyan'];
 const fallbackButtonColors = ['th-indigo','th-purple-1','th-purple-2','th-teal-1','th-teal-2','th-red-1','th-red-2','th-cyan','th-blue-1','th-blue-2'];
@@ -4044,13 +6528,50 @@ function generateMailingButtonColumns(startIdx, endIdx) {
     return cols;
 };
 
-
+const BOT_ENABLED_COLUMN = 'Бот Включен';
+const COMMENT_REPLY_PLACEMENT_COLUMN = 'Место ответа';
+function defaultBotEnabledValue() {
+    return 'ДА';
+}
+function normalizeBotEnabledValue(value) {
+    var normalized = String(value || '').trim().toUpperCase();
+    if (!normalized) return defaultBotEnabledValue();
+    return ['НЕТ', 'NO', 'OFF', 'FALSE', '0', 'ВЫКЛ', 'ВЫКЛЮЧЕН'].indexOf(normalized) !== -1 ? 'НЕТ' : 'ДА';
+}
+function normalizeImportedBotEnabled(value) {
+    if (value === false) return 'НЕТ';
+    if (value === true) return 'ДА';
+    return normalizeBotEnabledValue(value);
+}
+function getBotEnabledValueFromRow(row) {
+    return normalizeBotEnabledValue(row && row[BOT_ENABLED_COLUMN]);
+}
+function isBotEnabledInAdminRow(row) {
+    return getBotEnabledValueFromRow(row) !== 'НЕТ';
+}
+function normalizeCommentReplyPlacement(value, fallbackValue) {
+    var normalized = String(value || '').trim().replace(/\s+/g, ' ').toUpperCase();
+    if (normalized === 'В КОММЕНТАРИИ' || normalized === 'COMMENT' || normalized === 'REPLY') return 'В КОММЕНТАРИИ';
+    if (normalized === 'В ПОСТЕ' || normalized === 'POST') return 'В ПОСТЕ';
+    return fallbackValue === 'В КОММЕНТАРИИ' ? 'В КОММЕНТАРИИ' : 'В ПОСТЕ';
+}
+function getCommentReplyPlacementLabel(value) {
+    return normalizeCommentReplyPlacement(value, 'В ПОСТЕ') === 'В КОММЕНТАРИИ' ? 'В комментарии' : 'В посте';
+}
+function getCommentReplyPlacementTooltip(value) {
+    return normalizeCommentReplyPlacement(value, 'В ПОСТЕ') === 'В КОММЕНТАРИИ'
+        ? 'Ответ будет опубликован под комментарием пользователя. Нажмите, чтобы отвечать отдельным комментарием в посте.'
+        : 'Ответ будет опубликован отдельным комментарием в посте. Нажмите, чтобы отвечать под комментарием пользователя.';
+}
 
 const messagesColumns = [
     { name: 'Бот', class: 'th-green', hint: 'Название бота, к которому относится эта строка. Один бот может содержать много шагов. Если в таблице несколько ботов, сначала выберите нужного бота сверху, затем редактируйте его шаги.', section: 'ОСНОВНОЕ' },
+    { name: BOT_ENABLED_COLUMN, class: 'th-gray', hidden: true, hint: 'Служебный статус бота. ДА = бот включен и его шаги могут срабатывать. НЕТ = бот выключен, runtime пропускает все строки этого бота. Меняйте статус зеленой галочкой или красным крестиком сверху в переключателе ботов.', section: 'СИСТЕМНОЕ' },
     { name: 'Шаг', class: 'th-green', hint: 'Точка сценария внутри выбранного бота. Пользователь попадает на шаг, а затем бот проверяет триггер, отправляет ответ и может перевести пользователя дальше.', section: 'ОСНОВНОЕ' },
     { name: 'Триггер', class: 'th-red-1', hint: 'Что должен написать пользователь, чтобы строка сработала. Здесь можно указать слово, фразу, несколько вариантов через новую строку или оставить пусто для специальных файловых сценариев.', section: 'ОСНОВНОЕ' },
     { name: 'Ответ', class: 'th-blue-1', hint: 'Текст, который бот отправит пользователю при срабатывании строки. Можно использовать переносы строк и переменные.', section: 'ОСНОВНОЕ' },
+    { name: 'Ответ с ИИ', class: 'th-blue-1', type: 'select', options: ['', 'ДА', 'НЕТ'], hint: 'ДА: перед отправкой бот попробует получить ответ от выбранной AI-интеграции. Если AI недоступен или вернул пусто, будет отправлен обычный Ответ.', section: 'ОСНОВНОЕ' },
+    { name: 'ИИ', class: 'th-blue-1', hint: 'Название AI-интеграции из профиля, которую нужно использовать для этой строки.', section: 'ОСНОВНОЕ' },
     { name: 'Вложения к ответу', class: 'th-blue-1', hint: 'Вложения, которые будут отправлены вместе с ответом. Указывайте attachment ID через запятую или с новой строки: фото, документы, видео, аудио и другие вложения VK.', section: 'ОСНОВНОЕ' },
     { name: 'Точно/Не точно', class: 'th-brown', type: 'select', options: ['ТОЧНО', 'НЕ ТОЧНО'], hint: 'ТОЧНО: сообщение должно полностью совпасть с триггером. НЕ ТОЧНО: достаточно, чтобы триггер содержался внутри сообщения.', section: 'УСЛОВИЯ ПРОВЕРКИ' },
     { name: 'Регистр', class: 'th-brown', type: 'select', options: ['важно', 'не важно'], hint: 'Определяет, учитывать ли заглавные и строчные буквы. Если выбрано «не важно», Привет и привет будут считаться одинаковыми.', section: 'УСЛОВИЯ ПРОВЕРКИ' },
@@ -4175,7 +6696,8 @@ window.showAutoSetupOverlay = function() {
 };
 
 // ✅ ПОЛНОЭКРАННОЕ УВЕДОМЛЕНИЕ ОБ УСПЕХЕ (5 секунд)
-window.showSuccessOverlay = function(message) {
+window.showSuccessOverlay = function(message, options) {
+  options = options || {};
   const existing = document.getElementById('successOverlay');
   if (existing) existing.remove();
 
@@ -4186,14 +6708,42 @@ window.showSuccessOverlay = function(message) {
   const content = document.createElement('div');
   content.style.cssText = 'background:var(--modal-bg);color:var(--text-primary);padding:40px;border-radius:20px;border:1px solid var(--section-border);box-shadow:var(--container-shadow);max-width:600px;width:90%;text-align:center;';
   content.innerHTML = message;
+  const reloadAfterMs = Number(options.reloadAfterMs || 0);
+  if (reloadAfterMs > 0) {
+    const countdownWrap = document.createElement('div');
+    countdownWrap.id = 'successOverlayReloadCountdown';
+    countdownWrap.style.cssText = 'margin-top:22px;font-size:16px;font-weight:800;color:var(--text-primary);';
+    const countdownText = options.reloadText || 'Админ-панель перезагрузится через';
+    let secondsLeft = Math.max(0, Math.ceil(reloadAfterMs / 1000));
+    countdownWrap.innerHTML = countdownText + ' <strong>' + secondsLeft + '</strong> сек.';
+    content.appendChild(countdownWrap);
+    const countdownTimer = setInterval(function() {
+      secondsLeft = Math.max(0, secondsLeft - 1);
+      countdownWrap.innerHTML = countdownText + ' <strong>' + secondsLeft + '</strong> сек.';
+      if (secondsLeft <= 0) {
+        clearInterval(countdownTimer);
+      }
+    }, 1000);
+    setTimeout(function() {
+      window.location.reload();
+    }, reloadAfterMs);
+  }
+  content.addEventListener('click', function(event) {
+    event.stopPropagation();
+  });
 
   overlay.appendChild(content);
+  overlay.addEventListener('click', function() {
+    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+  });
   document.body.appendChild(overlay);
 
-  // ✅ Скрываем через 5 секунд
-  setTimeout(function() {
-    if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-  }, 5000);
+  const autoCloseMs = options.autoCloseMs === undefined ? 5000 : Number(options.autoCloseMs || 0);
+  if (autoCloseMs > 0) {
+    setTimeout(function() {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, autoCloseMs);
+  }
 };
 
 
@@ -4279,9 +6829,12 @@ const columns = {
 
 'Comments': [
 { name: 'Бот', class: 'th-green', hint: 'Название бота, которому принадлежит эта строка комментариев. Используйте, когда в комментариях работает несколько разных сценариев.', section: 'ОСНОВНОЕ' },
+{ name: BOT_ENABLED_COLUMN, class: 'th-gray', hidden: true, hint: 'Служебный статус бота комментариев. ДА = бот включен и может отвечать на комментарии. НЕТ = бот выключен, runtime пропускает все строки этого бота. Меняйте статус зеленой галочкой или красным крестиком сверху.', section: 'СИСТЕМНОЕ' },
 { name: 'Шаг', class: 'th-green', hint: 'Шаг сценария внутри выбранного бота. Помогает строить цепочки ответов и переводить пользователя между состояниями.', section: 'ОСНОВНОЕ' },
 { name: 'Триггер', class: 'th-red-1', hint: 'Текст комментария, на который бот должен отреагировать. Можно использовать слово, фразу или несколько вариантов.', section: 'ОСНОВНОЕ' },
 { name: 'Ответ', class: 'th-blue-1', hint: 'Сообщение, которое бот отправит в ответ на комментарий. Можно вставлять переменные и переносы строк.', section: 'ОСНОВНОЕ' },
+{ name: 'Ответ с ИИ', class: 'th-blue-1', type: 'select', options: ['', 'ДА', 'НЕТ'], hint: 'ДА: перед отправкой комментария бот попробует получить ответ от выбранной AI-интеграции. Если AI недоступен или вернул пусто, будет отправлен обычный Ответ.', section: 'ОСНОВНОЕ' },
+{ name: 'ИИ', class: 'th-blue-1', hint: 'Название AI-интеграции из профиля, которую нужно использовать для этой строки комментариев.', section: 'ОСНОВНОЕ' },
 { name: 'Вложения к ответу', class: 'th-blue-1', hint: 'Вложения, которые будут приложены к ответу под постом: фото, документы, видео и другие attachment ID.', section: 'ОСНОВНОЕ' },
 { name: 'Пост', class: 'th-brown', hint: 'Ограничение по посту. Можно указать один пост, несколько постов через новую строку или значение «ВСЕ», если правило должно работать под любым постом.', section: 'УСЛОВИЯ ПРОВЕРКИ' },
 { name: 'Отметили', class: 'th-brown', type: 'select', options: ['', 'ДА', 'НЕТ'], hint: 'Проверка на упоминание сообщества в комментарии. Помогает разделять обычные комментарии и комментарии с обращением к сообществу.', section: 'УСЛОВИЯ ПРОВЕРКИ' },
@@ -4332,6 +6885,7 @@ const columns = {
 'Users': [
 { name: 'ID', class: 'th-yellow', hint: 'VK ID пользователя. По нему бот понимает, кому принадлежит запись, и использует его для отправки сообщений и поиска данных.', section: 'ОСНОВНОЕ' },
 { name: 'ИМЯ', class: 'th-green', hint: 'Имя пользователя для удобного просмотра базы. Это отображаемое значение, чтобы быстрее находить человека без ручной проверки по ID.', section: 'ОСНОВНОЕ' },
+{ name: 'СОГЛАСИЯ', class: 'th-blue-1', hint: 'Краткая сводка документов, на которые пользователь дал согласие.', section: 'ОСНОВНОЕ' },
 { name: 'ГРУППА', class: 'th-orange', hint: 'Список групп, в которых сейчас состоит пользователь. Можно указывать несколько групп через запятую или новую строку.', section: 'ОСНОВНОЕ' },
 { name: 'Пользовательская', class: 'th-orange', hint: 'Имена пользовательских переменных, которые есть у этого пользователя. Используется как краткая сводка по доступным ПП.', section: 'ПЕРЕМЕННЫЕ' },
 { name: 'Значения ПП', class: 'th-orange', hint: 'Значения пользовательских переменных. Обычно хранятся парами вида name=value, чтобы было понятно текущее состояние пользователя.', section: 'ПЕРЕМЕННЫЕ' },
@@ -4339,6 +6893,7 @@ const columns = {
 { name: 'Значение ПВС', class: 'th-orange', hint: 'Значение ПВС пользователя. Оно общее для этого пользователя во всех сообществах текущего профиля.', section: 'ПЕРЕМЕННЫЕ' },
 { name: 'Текущий Бот', class: 'th-green', hint: 'Какой бот сейчас считается активным для пользователя. Полезно, когда в одном сообществе работает несколько независимых сценариев.', section: 'СЦЕНАРИЙ' },
 { name: 'Текущий Шаг', class: 'th-green', hint: 'На каком шаге пользователь находится сейчас. Именно от этого шага зависит дальнейшая логика ответов.', section: 'СЦЕНАРИЙ' },
+{ name: '_Согласия', class: 'th-gray', hidden: true, hint: 'Служебное машинно-читаемое поле. Здесь PAPA BOT хранит полный JSON согласий пользователя: какие документы приняты, версии документов, даты принятия и статус удаления.\\n\\nОбычно вручную это поле не редактируют: оно обновляется автоматически, когда пользователь нажимает кнопку согласия или кнопку удаления согласия.\\n\\nПоле нужно для точной проверки: если версия документа изменилась, бот сравнит сохраненную версию в этом JSON с текущей версией документа и сможет запросить новое согласие.\\n\\nПример:\\n{ \"personal_data_consent\": { \"version\": \"v10\", \"acceptedAt\": \"2026-05-19T10:00:00.000Z\", \"documents\": [\"Согласие с ОПД\", \"Политика ОПД\"] }, \"public_offer\": { \"version\": \"v3\", \"acceptedAt\": \"2026-05-19T10:05:00.000Z\" } }', section: 'СИСТЕМНОЕ' },
 { name: 'Отправленные Шаги', class: 'th-blue-1', hint: 'Служебная история шагов, которые уже были отправлены пользователю. Помогает не дублировать шаги и понимать, что уже выполнялось.', section: 'СИСТЕМНОЕ' }
 ],
 
@@ -4375,6 +6930,8 @@ const columns = {
         { name: 'ID Получателей', class: 'th-orange', hint: 'Список конкретных VK ID получателей. Если поле заполнено, рассылка уйдёт именно этим пользователям. Можно указывать через запятую или с новой строки.', section: 'ОСНОВНОЕ' },
         { name: 'ГРУППА Получателей', class: 'th-orange', hint: 'Список групп, участникам которых должна уйти рассылка. Удобно для сегментированных рассылок по базе.', section: 'ОСНОВНОЕ' },
         { name: 'Сообщение Рассылки', class: 'th-green', hint: 'Текст, который будет отправлен получателям рассылки. Можно использовать переменные и переносы строк.', section: 'ОСНОВНОЕ' },
+        { name: 'Ответ с ИИ', class: 'th-green', type: 'select', options: ['', 'ДА', 'НЕТ'], hint: 'ДА: для рассылки будет использована выбранная AI-интеграция. Если AI недоступен, отправится обычное Сообщение Рассылки.', section: 'ОСНОВНОЕ' },
+        { name: 'ИИ', class: 'th-green', hint: 'Название AI-интеграции из профиля для этой рассылки.', section: 'ОСНОВНОЕ' },
         { name: 'Вложение к рассылке', class: 'th-blue-1', hint: 'Вложения, которые будут приложены к рассылке. Указывайте attachment ID через запятую или с новой строки.', section: 'ОСНОВНОЕ' }
     ];
     var rest = [
@@ -4401,6 +6958,700 @@ const columns = {
 ]
 };
 
+const SUPPORTED_VK_VARIABLES = [
+{ 'Переменная ВК': '{user_id}', 'Описание': 'VK ID пользователя. Работает в сообщениях, комментариях, условиях и действиях, где PAPA BOT знает текущего пользователя.' },
+{ 'Переменная ВК': '{first_name}', 'Описание': 'Имя пользователя из данных вкладки ПОЛЬЗОВАТЕЛИ, если оно уже сохранено.' },
+{ 'Переменная ВК': '{last_name}', 'Описание': 'Фамилия пользователя из данных вкладки ПОЛЬЗОВАТЕЛИ, если она уже сохранена.' },
+{ 'Переменная ВК': '{message_text}', 'Описание': 'Текст входящего сообщения или комментария, который обрабатывает PAPA BOT.' },
+{ 'Переменная ВК': '{community_id}', 'Описание': 'ID текущего сообщества VK, в котором сработал сценарий.' },
+{ 'Переменная ВК': '{date_msk}', 'Описание': 'Текущая дата по московскому времени на момент обработки события.' }
+];
+
+function renderSupportedVkVariablesTable() {
+dataStore['VK_Variables'] = SUPPORTED_VK_VARIABLES.map(function(item) {
+return {
+'Переменная ВК': item['Переменная ВК'],
+'Описание': item['Описание']
+};
+});
+renderTable('VK_Variables', dataStore['VK_Variables']);
+}
+
+function parseBotJsonWithLocation(text) {
+    try {
+        return { payload: JSON.parse(String(text || '')), error: null, line: 0, column: 0 };
+    } catch (e) {
+        var raw = String(text || '');
+        var positionMatch = String(e.message || '').match(/position\s+(\d+)/i);
+        var position = positionMatch ? Number(positionMatch[1]) : 0;
+        var before = raw.slice(0, Math.max(0, position));
+        var lines = before.split(/\\r\\n|\\r|\\n/);
+        var line = lines.length;
+        var column = (lines[lines.length - 1] || '').length + 1;
+        return {
+            payload: null,
+            error: 'Некорректный JSON: строка ' + line + ', колонка ' + column + '. ' + (e.message || ''),
+            line: line,
+            column: column
+        };
+    }
+}
+
+function normalizeBotImportText(value) {
+    return String(value == null ? '' : value).trim();
+}
+
+function normalizeBotImportList(value) {
+    if (Array.isArray(value)) {
+        return value.map(function(item) { return normalizeBotImportText(item); }).filter(Boolean).join('\\n');
+    }
+    return normalizeBotImportText(value);
+}
+
+function normalizeBotImportButtonColor(value) {
+    var color = normalizeBotImportText(value).toLowerCase();
+    var map = {
+        blue: 'primary',
+        primary: 'primary',
+        'синий': 'primary',
+        white: 'secondary',
+        secondary: 'secondary',
+        'белый': 'secondary',
+        green: 'positive',
+        positive: 'positive',
+        'зеленый': 'positive',
+        'зелёный': 'positive',
+        red: 'negative',
+        negative: 'negative',
+        'красный': 'negative'
+    };
+    return map[color] || 'primary';
+}
+
+function buildBotImportKeyboardButton(button, path) {
+    var source = typeof button === 'string' ? { label: button, type: 'text' } : (button || {});
+    if (!source || typeof source !== 'object' || Array.isArray(source)) {
+        throw new Error('Кнопка ' + path + ' должна быть строкой или объектом.');
+    }
+    var label = normalizeBotImportText(source.label || source.text || source.title).substring(0, 40);
+    if (!label) {
+        throw new Error('У кнопки ' + path + ' нет label/text.');
+    }
+    var type = normalizeBotImportText(source.type || source.kind || 'text').toLowerCase();
+    if (type === 'color') type = 'text';
+    if (type === 'link') type = 'open_link';
+
+    if (type === 'open_link') {
+        var link = normalizeBotImportText(source.url || source.link || source.href);
+        if (!link) throw new Error('У кнопки ' + path + ' типа Ссылка нет url/link.');
+        return {
+            action: { type: 'open_link', label: label, link: link }
+        };
+    }
+
+    if (type === 'payment') {
+        var amount = Number(source.amountRub || source.amount || source.price || 0);
+        if (!Number.isFinite(amount) || amount <= 0) {
+            throw new Error('У кнопки ' + path + ' типа Оплата сумма amountRub должна быть больше 0.');
+        }
+        return {
+            action: {
+                type: 'payment',
+                label: label,
+                payload: JSON.stringify({
+                    action: 'payment',
+                    payment: true,
+                    paymentIntegrationId: normalizeBotImportText(source.paymentIntegrationId || source.integrationId || source.integration || ''),
+                    paymentIntegrationName: normalizeBotImportText(source.paymentIntegrationName || source.integrationName || ''),
+                    amountRub: amount,
+                    description: normalizeBotImportText(source.description || source.paymentDescription || ''),
+                    prodamusOrderIdPrefix: normalizeBotImportText(source.prodamusOrderIdPrefix || source.prodamusOrderId || source.orderIdPrefix || source.orderPrefix || ''),
+                    successBot: normalizeBotImportText(source.successBot || ''),
+                    successStep: normalizeBotImportText(source.successStep || ''),
+                    failBot: normalizeBotImportText(source.failBot || ''),
+                    failStep: normalizeBotImportText(source.failStep || '')
+                })
+            },
+            color: 'secondary'
+        };
+    }
+
+    if (type !== 'text') {
+        throw new Error('У кнопки ' + path + ' неизвестный type: ' + type + '. Допустимо: text/color, link/open_link, payment.');
+    }
+    return {
+        action: {
+            type: 'text',
+            label: label,
+            payload: source.payload && typeof source.payload === 'object' ? source.payload : {}
+        },
+        color: normalizeBotImportButtonColor(source.color || source.vkColor)
+    };
+}
+
+function normalizeBotImportButtonRows(buttons) {
+    if (!Array.isArray(buttons) || buttons.length === 0) return [];
+    var first = buttons[0];
+    if (Array.isArray(first)) return buttons;
+    return [buttons];
+}
+
+function buildBotImportKeyboard(buttons) {
+    var sourceRows = normalizeBotImportButtonRows(buttons);
+    if (!sourceRows.length) return '';
+    var rows = sourceRows.map(function(row, rowIndex) {
+        if (!Array.isArray(row)) {
+            throw new Error('buttons[' + rowIndex + '] должен быть массивом кнопок.');
+        }
+        return row.map(function(button, buttonIndex) {
+            return buildBotImportKeyboardButton(button, 'buttons[' + rowIndex + '][' + buttonIndex + ']');
+        }).filter(Boolean);
+    }).filter(function(row) {
+        return row.length > 0;
+    });
+    if (!rows.length) return '';
+    return JSON.stringify({ one_time: false, inline: true, buttons: rows });
+}
+
+function buildBotJsonExportList(value) {
+    if (Array.isArray(value)) {
+        return value.map(function(item) { return normalizeBotImportText(item); }).filter(Boolean);
+    }
+    return normalizeBotImportText(value).split(/\\r\\n|\\r|\\n/).map(function(item) {
+        return normalizeBotImportText(item);
+    }).filter(Boolean);
+}
+
+function parseBotJsonExportPayload(payload) {
+    if (!payload) return {};
+    if (typeof payload === 'object') return payload;
+    try {
+        var parsed = JSON.parse(String(payload || ''));
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function buildBotJsonExportButtons(row) {
+    var keyboard = row ? row._keyboard : null;
+    if (!keyboard) return [];
+    if (typeof keyboard === 'string') {
+        try {
+            keyboard = JSON.parse(keyboard);
+        } catch (e) {
+            return [];
+        }
+    }
+    var sourceRows = keyboard && Array.isArray(keyboard.buttons) ? keyboard.buttons : [];
+    return sourceRows.map(function(buttonRow) {
+        return (Array.isArray(buttonRow) ? buttonRow : []).map(function(button) {
+            var action = button && button.action ? button.action : {};
+            var type = normalizeBotImportText(action.type || 'text');
+            var label = normalizeBotImportText(action.label || button.label || 'Кнопка');
+            if (type === 'open_link') {
+                return {
+                    type: 'link',
+                    label: label,
+                    url: normalizeBotImportText(action.link || action.url || '')
+                };
+            }
+            if (type === 'payment') {
+                var payload = parseBotJsonExportPayload(action.payload);
+                return {
+                    type: 'payment',
+                    label: label,
+                    paymentIntegrationId: normalizeBotImportText(payload.paymentIntegrationId || ''),
+                    paymentIntegrationName: normalizeBotImportText(payload.paymentIntegrationName || ''),
+                    amountRub: Number(payload.amountRub || payload.amount || 0) || 0,
+                    description: normalizeBotImportText(payload.description || ''),
+                    successBot: normalizeBotImportText(payload.successBot || ''),
+                    successStep: normalizeBotImportText(payload.successStep || ''),
+                    failBot: normalizeBotImportText(payload.failBot || ''),
+                    failStep: normalizeBotImportText(payload.failStep || '')
+                };
+            }
+            return {
+                type: 'color',
+                label: label,
+                color: normalizeBotImportButtonColor(button && button.color)
+            };
+        }).filter(function(button) {
+            return button && button.label;
+        });
+    }).filter(function(buttonRow) {
+        return buttonRow.length > 0;
+    });
+}
+
+function buildBotJsonExportStepFromRow(tab, row) {
+    row = row || {};
+    var buttons = buildBotJsonExportButtons(row);
+    if (tab === 'Mailing') {
+        return {
+            recipientIds: buildBotJsonExportList(row['ID Получателей']),
+            recipientGroups: buildBotJsonExportList(row['ГРУППА Получателей']),
+            answer: normalizeBotImportText(row['Сообщение Рассылки']),
+            attachments: buildBotJsonExportList(row['Вложение к рассылке']),
+            sendAt: normalizeBotImportText(row['Дата и время отправки (по мск.)']),
+            buttons: buildBotJsonExportButtons(row)
+        };
+    }
+    var step = {
+        enabled: getBotEnabledValueFromRow(row),
+        step: normalizeBotImportText(row['Шаг']),
+        trigger: buildBotJsonExportList(row['Триггер']),
+        exact: normalizeBotImportText(row['Точно/Не точно']),
+        caseMode: normalizeBotImportText(row['Регистр']),
+        answer: normalizeBotImportText(row['Ответ']),
+        attachments: buildBotJsonExportList(row['Вложения к ответу']),
+        requiredGroups: buildBotJsonExportList(row['Ответить если в Группе']),
+        afterStep: normalizeBotImportText(row['Ответил на Шаг']),
+        actions: {
+            delayStep: normalizeBotImportText(row['Задержка отправки на Шаг']),
+            sendToStep: normalizeBotImportText(row['Отправить на Шаг']),
+            addGroups: buildBotJsonExportList(row['ДОБАВИТЬ ГРУППУ']),
+            removeGroups: buildBotJsonExportList(row['УДАЛИТЬ ГРУППУ']),
+            userVars: buildBotJsonExportList(row['Действия с ПП']),
+            globalVars: buildBotJsonExportList(row['Действия с ГП']),
+            sharedVars: buildBotJsonExportList(row['Действия с ПВС'])
+        },
+        buttons: buttons
+    };
+    if (tab === 'Comments') {
+        step.posts = buildBotJsonExportList(row['Пост']);
+        step.mentioned = normalizeBotImportText(row['Отметили']);
+        step.replyPlacement = normalizeCommentReplyPlacement(row[COMMENT_REPLY_PLACEMENT_COLUMN], 'В ПОСТЕ');
+    }
+    return step;
+}
+
+function buildBotJsonExportForRow(tab, row) {
+    var sheetMap = { Messages: 'messages', Comments: 'comments', Mailing: 'mailing' };
+    var sheet = sheetMap[tab];
+    if (!sheet) {
+        return {
+            version: 1,
+            sheet: normalizeBotImportText(tab),
+            row: JSON.parse(JSON.stringify(row || {}))
+        };
+    }
+    var botName = tab === 'Mailing'
+        ? (normalizeBotImportText(row && row['Бот']) || 'JSON Рассылка')
+        : (normalizeBotImportText(row && row['Бот']) || 'Импортированный бот');
+    return {
+        version: 1,
+        sheet: sheet,
+        bots: [{
+            name: botName,
+            steps: [buildBotJsonExportStepFromRow(tab, row)]
+        }]
+    };
+}
+
+function copyTextToClipboard(text) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        return navigator.clipboard.writeText(text).then(function() { return true; });
+    }
+    return new Promise(function(resolve, reject) {
+        try {
+            var textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', 'readonly');
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            textarea.style.top = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            var ok = document.execCommand('copy');
+            document.body.removeChild(textarea);
+            ok ? resolve(true) : reject(new Error('Браузер не разрешил копирование в буфер обмена.'));
+        } catch (e) {
+            reject(e);
+        }
+    });
+}
+
+async function copyRowJsonToClipboard(tab, idx) {
+    try {
+        if (!dataStore[tab] || !dataStore[tab][idx]) return '';
+        var payload = buildBotJsonExportForRow(tab, dataStore[tab][idx]);
+        var json = JSON.stringify(payload, null, 2);
+        await copyTextToClipboard(json);
+        var statusEl = document.getElementById('status-' + tab);
+        if (statusEl) {
+            statusEl.innerHTML = makeInlineNotice('success', 'JSON строки скопирован в буфер обмена.');
+        }
+        debug('Copied row JSON ' + idx + ' in ' + tab);
+        return json;
+    } catch (e) {
+        var errorStatusEl = document.getElementById('status-' + tab);
+        if (errorStatusEl) {
+            errorStatusEl.innerHTML = makeInlineNotice('error', 'Не удалось скопировать JSON строки: ' + escapeHtml(e.message || e));
+        }
+        debug('Failed to copy row JSON ' + idx + ' in ' + tab + ': ' + (e.message || e));
+        return '';
+    }
+}
+
+function buildBotJsonImportRow(tab, botName, step, index) {
+    var answer = normalizeBotImportText(step.answer || step.message || step.text);
+    var row = {};
+    (columns[tab] || []).forEach(function(col) { row[col.name] = ''; });
+    if (tab === 'Mailing') {
+        row['№'] = String(index + 1);
+        row['ID Получателей'] = normalizeBotImportList(step.recipientIds || step.userIds || step.ids);
+        row['ГРУППА Получателей'] = normalizeBotImportList(step.groups || step.recipientGroups || step.targetGroups);
+        row['Сообщение Рассылки'] = answer;
+        row['Вложение к рассылке'] = normalizeBotImportList(step.attachments || step.attachment);
+        row['Дата и время отправки (по мск.)'] = normalizeBotImportText(step.sendAt || step.dateTime || step.datetime);
+        row['Статус'] = 'Ожидает';
+        var mailingKeyboard = buildBotImportKeyboard(step.buttons);
+        if (mailingKeyboard) row._keyboard = mailingKeyboard;
+        return row;
+    }
+
+    row['Бот'] = botName;
+    row[BOT_ENABLED_COLUMN] = normalizeImportedBotEnabled(step.enabled);
+    row['Шаг'] = normalizeBotImportText(step.step || step.name || ('Шаг ' + (index + 1)));
+    row['Триггер'] = normalizeBotImportList(step.trigger || step.triggers);
+    row['Ответ'] = answer;
+    row['Вложения к ответу'] = normalizeBotImportList(step.attachments || step.attachment);
+    row['Точно/Не точно'] = normalizeBotImportText(step.exact || step.matchMode) || 'НЕ ТОЧНО';
+    row['Регистр'] = normalizeBotImportText(step.caseMode || step.caseSensitive) || 'не важно';
+    row['Ответить если в Группе'] = normalizeBotImportList(step.requiredGroups || step.onlyGroups);
+    row['Ответил на Шаг'] = normalizeBotImportText(step.afterStep || step.previousStep);
+    var actions = step.actions || {};
+    row['Задержка отправки на Шаг'] = normalizeBotImportText(actions.delayStep || actions.delay || step.delayStep);
+    row['Отправить на Шаг'] = normalizeBotImportText(actions.sendToStep || actions.nextStep || step.sendToStep);
+    row['ДОБАВИТЬ ГРУППУ'] = normalizeBotImportList(actions.addGroups || step.addGroups);
+    row['УДАЛИТЬ ГРУППУ'] = normalizeBotImportList(actions.removeGroups || step.removeGroups);
+    row['Действия с ПП'] = normalizeBotImportList(actions.userVars || actions.pp || step.userVarActions);
+    row['Действия с ГП'] = normalizeBotImportList(actions.globalVars || actions.gp || step.globalVarActions);
+    row['Действия с ПВС'] = normalizeBotImportList(actions.sharedVars || actions.pvs || step.sharedVarActions);
+    if (tab === 'Comments') {
+        row['Пост'] = normalizeBotImportList(step.posts || step.post || step.postLinks) || 'ВСЕ';
+        row['Отметили'] = normalizeBotImportText(step.mentioned || step.marked);
+        row[COMMENT_REPLY_PLACEMENT_COLUMN] = normalizeCommentReplyPlacement(step.replyPlacement || step.replyLocation, 'В ПОСТЕ');
+    }
+    var keyboard = buildBotImportKeyboard(step.buttons);
+    if (keyboard) row._keyboard = keyboard;
+    return row;
+}
+
+function getBotJsonImportConflictNames(tab, importedNames, mode) {
+    if (tab !== 'Messages' && tab !== 'Comments') return [];
+    var activeBot = mode === 'replace_bot' ? getActiveBot(tab) : '';
+    var conflictNames = [];
+    var botTabs = ['Messages', 'Comments'];
+    botTabs.forEach(function(candidateTab) {
+        var rows = dataStore[candidateTab] || [];
+        rows.forEach(function(row) {
+            var existingName = normalizeBotImportText(row['Бот']);
+            if (!existingName) return;
+            if (candidateTab === tab && mode === 'replace_tab') return;
+            if (candidateTab === tab && mode === 'replace_bot' && existingName === activeBot) return;
+            var existingKey = existingName.toLowerCase();
+            importedNames.forEach(function(importedName) {
+                if (existingKey === importedName.toLowerCase() && conflictNames.indexOf(importedName) === -1) {
+                    conflictNames.push(importedName);
+                }
+            });
+        });
+    });
+    return conflictNames;
+}
+
+function normalizeBotJsonImportPayload(payload, targetTab, existingRows, mode) {
+    var sheetAliasMap = { messages: 'Messages', comments: 'Comments', mailing: 'Mailing' };
+    if (!sheetAliasMap[String(payload && payload.sheet || '').toLowerCase()]) {
+        throw new Error('JSON должен содержать sheet: messages, comments или mailing.');
+    }
+    if (payload.version !== 1) {
+        throw new Error('Неизвестная версия JSON: ' + String(payload.version || 'пусто') + '. Поддерживается только version=1.');
+    }
+    var resolvedTab = sheetAliasMap[String(payload.sheet).toLowerCase()];
+    if (resolvedTab !== targetTab) {
+        throw new Error('Файл предназначен для вкладки ' + resolvedTab + ', а выбран импорт во вкладку ' + targetTab + '.');
+    }
+    var bots = Array.isArray(payload.bots) ? payload.bots : [];
+    if (!bots.length) {
+        throw new Error('В JSON нет массива bots.');
+    }
+
+    var rows = [];
+    var importedNames = [];
+    var stepsCount = 0;
+    bots.forEach(function(bot) {
+        var botName = normalizeBotImportText(bot.name);
+        if (targetTab !== 'Mailing' && !botName) {
+            throw new Error('У каждого импортируемого бота должно быть поле name.');
+        }
+        if (botName && importedNames.indexOf(botName) === -1) importedNames.push(botName);
+        var steps = Array.isArray(bot.steps) ? bot.steps : [];
+        if (!steps.length) {
+            throw new Error('У бота "' + (botName || 'без имени') + '" нет массива steps.');
+        }
+        steps.forEach(function(step) {
+            rows.push(buildBotJsonImportRow(targetTab, botName, step || {}, rows.length));
+            stepsCount++;
+        });
+    });
+
+    var preview = {
+        botsCount: importedNames.length || bots.length,
+        stepsCount: stepsCount,
+        rowsCount: rows.length,
+        conflicts: getBotJsonImportConflictNames(targetTab, importedNames, mode)
+    };
+    return { tab: targetTab, rows: rows, preview: preview };
+}
+
+function buildBotJsonImportPreviewText(normalized, mode) {
+    var preview = normalized.preview;
+    var modeLabels = {
+        append: 'Добавить к текущим',
+        replace_bot: 'Заменить текущего бота',
+        replace_tab: 'Заменить все в текущей вкладке'
+    };
+    var lines = [
+        'Предпросмотр импорта JSON',
+        '',
+        'Режим: ' + (modeLabels[mode] || mode),
+        'Ботов: ' + preview.botsCount,
+        'Шагов: ' + preview.stepsCount,
+        'Строк: ' + preview.rowsCount,
+        'Конфликты имен: ' + (preview.conflicts.length ? preview.conflicts.join(', ') : 'нет'),
+        '',
+        'Данные сохранены через общий валидатор вкладки.'
+    ];
+    return lines.join('\\n');
+}
+
+function getBotJsonImportExample(tab) {
+    var sheet = tab === 'Comments' ? 'comments' : (tab === 'Mailing' ? 'mailing' : 'messages');
+    var baseStep = {
+        step: 'START',
+        trigger: 'тест json',
+        exact: 'ТОЧНО',
+        caseMode: 'не важно',
+        answer: 'Это ответ из JSON-импорта. Проверьте цветные, ссылочные и платежные кнопки.',
+        attachments: ['photo123_456', 'doc123_456'],
+        requiredGroups: ['VIP'],
+        afterStep: '',
+        actions: {
+            sendToStep: '',
+            delayStep: '',
+            addGroups: ['JSON_TESTED'],
+            removeGroups: [],
+            userVars: ['json_import=ok'],
+            globalVars: ['last_json_import={date_msk}'],
+            sharedVars: ['profile_json_import=ok']
+        },
+        buttons: [
+            [
+                { type: 'color', label: 'Синяя', color: 'primary' },
+                { type: 'color', label: 'Зеленая', color: 'positive' },
+                { type: 'color', label: 'Красная', color: 'negative' },
+                { type: 'color', label: 'Белая', color: 'secondary' }
+            ],
+            [
+                { type: 'link', label: 'Ссылка', url: 'https://functions.yandexcloud.net/d4eg37ikm3vl5tm1mjld' },
+                {
+                    type: 'payment',
+                    label: 'Оплатить 10',
+                    paymentIntegrationId: 'REPLACE_WITH_PAYMENT_INTEGRATION_ID',
+                    paymentIntegrationName: 'ЮKassa',
+                    amountRub: 10,
+                    description: 'Тестовая оплата из JSON',
+                    successBot: 'JSON Бот',
+                    successStep: 'Оплата успешна',
+                    failBot: 'JSON Бот',
+                    failStep: 'Оплата не успешна'
+                }
+            ]
+        ]
+    };
+    var payload;
+    if (tab === 'Mailing') {
+        payload = {
+            version: 1,
+            sheet: sheet,
+            bots: [{
+                name: 'JSON Рассылка',
+                steps: [{
+                    recipientIds: ['123456789'],
+                    recipientGroups: ['JSON_TESTED'],
+                    answer: 'Рассылка из JSON-импорта.',
+                    attachments: ['photo123_456'],
+                    sendAt: '',
+                    buttons: baseStep.buttons
+                }]
+            }]
+        };
+    } else {
+        payload = {
+            version: 1,
+            sheet: sheet,
+            bots: [{
+                name: tab === 'Comments' ? 'JSON Комментарии' : 'JSON Бот',
+                steps: [
+                    Object.assign({}, baseStep, tab === 'Comments' ? {
+                        posts: 'ВСЕ',
+                        mentioned: ''
+                    } : {}),
+                    {
+                        step: 'Оплата успешна',
+                        trigger: 'оплата успешна',
+                        answer: 'Оплата прошла успешно. Это success-шаг из JSON.',
+                        buttons: [{ type: 'color', label: 'Продолжить', color: 'positive' }]
+                    },
+                    {
+                        step: 'Оплата не успешна',
+                        trigger: 'оплата не успешна',
+                        answer: 'Оплата не прошла. Это fail-шаг из JSON.',
+                        buttons: [{ type: 'color', label: 'Попробовать снова', color: 'negative' }]
+                    }
+                ]
+            }]
+        };
+    }
+    return JSON.stringify(payload, null, 2);
+}
+
+function applyBotJsonImportRows(tab, rows, mode) {
+    if (!dataStore[tab]) dataStore[tab] = [];
+    if (tab === 'Messages' || tab === 'Comments') {
+        var activeBot = getActiveBot(tab);
+        if (mode === 'replace_tab') {
+            dataStore[tab] = rows.slice();
+        } else if (mode === 'replace_bot') {
+            dataStore[tab] = dataStore[tab].filter(function(row) {
+                return String(row['Бот'] || '') !== activeBot;
+            }).concat(rows);
+        } else {
+            dataStore[tab] = dataStore[tab].concat(rows);
+        }
+        var bots = [];
+        dataStore[tab].forEach(function(row) {
+            var name = normalizeBotImportText(row['Бот']);
+            if (name && bots.indexOf(name) === -1) bots.push(name);
+        });
+        setBotsForTab(tab, bots);
+        if (rows[0] && rows[0]['Бот']) setActiveBot(tab, rows[0]['Бот']);
+        renderBotButtons(tab);
+        return;
+    }
+    dataStore[tab] = mode === 'replace_tab' ? rows.slice() : dataStore[tab].concat(rows);
+}
+
+window.openBotJsonImport = function(tab) {
+    var overlay = document.getElementById('botJsonImportOverlay');
+    var textarea = document.getElementById('botJsonImportText');
+    var modeSelect = document.getElementById('botJsonImportMode');
+    var title = document.getElementById('botJsonImportTitle');
+    var subtitle = document.getElementById('botJsonImportSubtitle');
+    if (!overlay || !textarea || !modeSelect) return;
+    overlay.dataset.tab = tab;
+    if (title) title.textContent = 'Импорт JSON - ' + (tab === 'Messages' ? 'СООБЩЕНИЯ' : (tab === 'Comments' ? 'КОММЕНТАРИИ' : 'РАССЫЛКА'));
+    if (subtitle) subtitle.textContent = 'Вставьте JSON-код. После импорта строка появится в текущей вкладке и сохранится через общий механизм.';
+    modeSelect.querySelector('option[value="replace_bot"]').style.display = tab === 'Mailing' ? 'none' : '';
+    if (tab === 'Mailing' && modeSelect.value === 'replace_bot') modeSelect.value = 'append';
+    textarea.value = getBotJsonImportExample(tab);
+    setBotJsonImportNotice('', '');
+    overlay.style.display = 'flex';
+    setTimeout(function() { textarea.focus(); textarea.select(); }, 0);
+};
+
+window.closeBotJsonImport = function() {
+    var overlay = document.getElementById('botJsonImportOverlay');
+    if (overlay) overlay.style.display = 'none';
+};
+
+function setBotJsonImportNotice(type, message) {
+    var notice = document.getElementById('botJsonImportNotice');
+    if (!notice) return;
+    notice.innerHTML = message ? makeInlineNotice(type || 'info', message) : '';
+}
+
+async function performBotJsonImport(tab, text, mode) {
+    var statusEl = document.getElementById('status-' + tab);
+    var parsed = parseBotJsonWithLocation(text);
+    if (parsed.error) throw new Error(parsed.error);
+    syncTableData(tab);
+    var normalized = normalizeBotJsonImportPayload(parsed.payload, tab, dataStore[tab] || [], mode || 'append');
+    if (normalized.preview.conflicts.length) {
+        throw new Error('Конфликт имен ботов: ' + normalized.preview.conflicts.join(', ') + '. Переименуй бота в JSON или выбери режим замены.');
+    }
+    applyBotJsonImportRows(tab, normalized.rows, mode || 'append');
+    renderTable(tab, dataStore[tab] || []);
+    var saved = await saveDataDirectly(tab);
+    if (!saved) throw new Error('Импорт добавлен локально, но сервер не сохранил данные.');
+    var previewText = buildBotJsonImportPreviewText(normalized, mode || 'append').replace(/\\n/g, '<br>');
+    if (statusEl) statusEl.innerHTML = makeInlineNotice('success', 'JSON импортирован: ' + normalized.preview.rowsCount + ' строк.');
+    return previewText;
+}
+
+window.handleBotJsonImportSubmit = async function() {
+    var overlay = document.getElementById('botJsonImportOverlay');
+    var tab = overlay && overlay.dataset ? overlay.dataset.tab : '';
+    var textarea = document.getElementById('botJsonImportText');
+    var modeSelect = document.getElementById('botJsonImportMode');
+    var text = textarea ? textarea.value : '';
+    var mode = modeSelect ? modeSelect.value : 'append';
+    try {
+        if (!tab) throw new Error('Не выбрана вкладка импорта.');
+        if (!normalizeBotImportText(text)) throw new Error('Вставьте JSON-код для импорта.');
+        var preview = await performBotJsonImport(tab, text, mode);
+        setBotJsonImportNotice('success', 'JSON импортирован успешно.<br><br>' + preview);
+        setTimeout(function() { window.closeBotJsonImport(); }, 900);
+    } catch (e) {
+        setBotJsonImportNotice('error', e.message || 'Ошибка импорта JSON');
+    }
+};
+
+window.insertBotJsonImportExample = function() {
+    var overlay = document.getElementById('botJsonImportOverlay');
+    var tab = overlay && overlay.dataset ? overlay.dataset.tab : 'Messages';
+    var textarea = document.getElementById('botJsonImportText');
+    if (textarea) {
+        textarea.value = getBotJsonImportExample(tab);
+        textarea.focus();
+    }
+    setBotJsonImportNotice('', '');
+};
+
+window.handleBotJsonImportFile = async function(event, tab) {
+    var input = event && event.target ? event.target : null;
+    var file = input && input.files && input.files[0] ? input.files[0] : null;
+    try {
+        if (!file) return;
+        await performBotJsonImport(tab, await file.text(), 'append');
+    } catch (e) {
+        var statusEl = document.getElementById('status-' + tab);
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', e.message || 'Ошибка импорта JSON');
+    } finally {
+        if (input) input.value = '';
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    var jsonImportClose = document.getElementById('botJsonImportClose');
+    var jsonImportCancel = document.getElementById('botJsonImportCancel');
+    var jsonImportSubmit = document.getElementById('botJsonImportSubmit');
+    var jsonImportExample = document.getElementById('botJsonImportExampleBtn');
+    var jsonImportOverlay = document.getElementById('botJsonImportOverlay');
+    if (jsonImportClose) jsonImportClose.onclick = window.closeBotJsonImport;
+    if (jsonImportCancel) jsonImportCancel.onclick = window.closeBotJsonImport;
+    if (jsonImportSubmit) jsonImportSubmit.onclick = window.handleBotJsonImportSubmit;
+    if (jsonImportExample) jsonImportExample.onclick = window.insertBotJsonImportExample;
+    if (jsonImportOverlay) {
+        jsonImportOverlay.addEventListener('click', function(event) {
+            if (event.target === jsonImportOverlay) window.closeBotJsonImport();
+        });
+    }
+});
+
 
 
 
@@ -4408,24 +7659,37 @@ const columns = {
 
 const tooltip = document.getElementById('tooltip');
 if (tooltip) {
+    function positionTooltipAbovePointer(event) {
+        var tooltipRect = tooltip.getBoundingClientRect();
+        var tooltipLeft = event.clientX + 10;
+        var tooltipTop = event.clientY - tooltipRect.height - 12;
+        if (tooltipTop < 8) tooltipTop = event.clientY + 12;
+        if (tooltipLeft + tooltipRect.width > window.innerWidth - 8) {
+            tooltipLeft = Math.max(8, window.innerWidth - tooltipRect.width - 8);
+        }
+        tooltip.style.left = tooltipLeft + 'px';
+        tooltip.style.top = tooltipTop + 'px';
+    }
     document.addEventListener('mouseover', function(e) {
-        if (e.target.classList.contains('help-icon')) {
-            const text = e.target.getAttribute('data-hint');
+        const hintTarget = e.target.closest('[data-hint]');
+        if (hintTarget) {
+            const text = hintTarget.getAttribute('data-hint');
             if (text) {
-                tooltip.innerHTML = text.replace(/\\n/g, '<br>');
+                tooltip.innerHTML = escapeHtml(text).replace(/\\n/g, '<br>');
                 tooltip.classList.add('show');
+                positionTooltipAbovePointer(e);
             }
         }
     });
     document.addEventListener('mouseout', function(e) {
-        if (e.target.classList.contains('help-icon')) {
+        const hintTarget = e.target.closest('[data-hint]');
+        if (hintTarget && (!e.relatedTarget || !hintTarget.contains(e.relatedTarget))) {
             tooltip.classList.remove('show');
         }
     });
     document.addEventListener('mousemove', function(e) {
         if (tooltip.classList.contains('show')) {
-            tooltip.style.left = (e.clientX + 10) + 'px';
-            tooltip.style.top = (e.clientY + 10) + 'px';
+            positionTooltipAbovePointer(e);
         }
     });
   }
@@ -4437,21 +7701,40 @@ async function loadData(tab) {
 const sheet = sheetMap[tab];
 const loadingEl = document.getElementById('loading-'+tab);
 if (loadingEl) loadingEl.style.display = 'block';
-const internalCommunityId = window.currentCommunityId || '';
+const internalCommunityId = getAdminDataContextId();
+const requestContextKey = getAdminDataContextKey();
 debug('📥 loadData: tab=' + tab + ', internalCommunityId=' + internalCommunityId + ', sheet=' + sheet);
+if (!sheet || !canLoadDataTabForCurrentPlatform(tab)) {
+dataStore[tab] = [];
+if (loadingEl) loadingEl.style.display = 'none';
+return;
+}
+if (!internalCommunityId) {
+dataStore[tab] = [];
+renderTable(tab, []);
+if (loadingEl) loadingEl.style.display = 'none';
+return;
+}
 try {
 const baseUrl = window.location.href.split('?')[0];
 
-// ✅ Получаем vk_group_id из настроек для загрузки правильных данных
-const settingsRes = await fetch(baseUrl + '?getBotSettings');
-const settingsData = await settingsRes.json();
-const communityConfig = settingsData.communities?.[internalCommunityId] || {};
-const vkGroupId = communityConfig.vk_group_id || internalCommunityId;
+// VK использует внешний vk_group_id, Telegram всегда использует выбранный tg_<bot_id>.
+let settingsData = {};
+let communityConfig = {};
+if (window.currentAdminPlatform === 'vk') {
+    const settingsRes = await fetch(baseUrl + '?getBotSettings');
+    settingsData = await settingsRes.json();
+    if (!isAdminDataContextCurrent(requestContextKey)) return;
+    communityConfig = settingsData.communities?.[internalCommunityId] || {};
+} else {
+    communityConfig = window.telegramBotsCache?.[internalCommunityId] || {};
+}
+const storageCommunityId = resolveAdminStorageCommunityId(settingsData, internalCommunityId);
 
-debug('📥 Using vk_group_id=' + vkGroupId + ' for data loading');
+debug('📥 Using storage communityId=' + storageCommunityId + ' for data loading');
 
 const url = baseUrl + '?sheet=' + encodeURIComponent(sheet) +
-           (vkGroupId ? '&communityId=' + encodeURIComponent(vkGroupId) : '') +
+           (storageCommunityId ? '&communityId=' + encodeURIComponent(storageCommunityId) : '') +
            '&t=' + Date.now();
 
 // Таймаут 15 секунд
@@ -4460,6 +7743,7 @@ const timeoutId = setTimeout(() => controller.abort(), 15000);
 
 const res = await fetch(url, { signal: controller.signal });
 clearTimeout(timeoutId);
+if (!isAdminDataContextCurrent(requestContextKey)) return;
 
 if (!res.ok) {
 throw new Error('HTTP ' + res.status + ': ' + res.statusText);
@@ -4480,12 +7764,52 @@ normalizedRow[key.trim()] = value;
 return normalizedRow;
 });
 }
+if (!isAdminDataContextCurrent(requestContextKey)) return;
 dataStore[tab] = data || [];
+
+if (tab === 'Triggers') {
+    const listsUrl = baseUrl + '?sheet=' + encodeURIComponent('СПИСКИ ТЕКСТА КОММЕНТАРИЕВ') +
+           (storageCommunityId ? '&communityId=' + encodeURIComponent(storageCommunityId) : '') +
+           '&t=' + Date.now();
+    try {
+        const listsRes = await fetch(listsUrl);
+        const listsText = await listsRes.text();
+        const listsData = JSON.parse(listsText);
+        if (!isAdminDataContextCurrent(requestContextKey)) return;
+        dataStore['CommentTextLists'] = Array.isArray(listsData) ? listsData : [];
+    } catch (listsError) {
+        console.warn('[Admin] comment text lists were not loaded:', listsError.message);
+        dataStore['CommentTextLists'] = [];
+    }
+}
+
+if (tab === 'Comments') {
+    const activitiesUrl = baseUrl + '?sheet=' + encodeURIComponent('АКТИВНОСТИ В КОММЕНТАРИЯХ') +
+           (storageCommunityId ? '&communityId=' + encodeURIComponent(storageCommunityId) : '') +
+           '&t=' + Date.now();
+    try {
+        const activitiesRes = await fetch(activitiesUrl);
+        const activitiesText = await activitiesRes.text();
+        const activitiesData = JSON.parse(activitiesText);
+        if (!isAdminDataContextCurrent(requestContextKey)) return;
+        dataStore['CommentActivities'] = Array.isArray(activitiesData) ? activitiesData : [];
+    } catch (activityError) {
+        console.warn('[Admin] comment activities were not loaded:', activityError.message);
+        dataStore['CommentActivities'] = dataStore['CommentActivities'] || [];
+    }
+    renderCommentActivitiesBlock();
+}
+
+if (['Messages', 'Comments', 'Mailing'].includes(tab)) {
+    await ensureProfileAiIntegrationsForTables();
+}
+if (!isAdminDataContextCurrent(requestContextKey)) return;
 
 if (tab === 'Variables') {
     const sharedUrl = baseUrl + '?sheet=' + encodeURIComponent('ПЕРЕМЕННЫЕ ВСЕХ СООБЩЕСТВ') + '&t=' + Date.now();
     const sharedRes = await fetch(sharedUrl);
     const sharedText = await sharedRes.text();
+    if (!isAdminDataContextCurrent(requestContextKey)) return;
     let sharedData = [];
     try {
         sharedData = JSON.parse(sharedText);
@@ -4504,6 +7828,7 @@ if (tab === 'Users') {
     const sharedUrl = baseUrl + '?sheet=' + encodeURIComponent('ПВС ПОЛЬЗОВАТЕЛЕЙ ПРОФИЛЯ') + '&t=' + Date.now();
     const sharedRes = await fetch(sharedUrl);
     const sharedText = await sharedRes.text();
+    if (!isAdminDataContextCurrent(requestContextKey)) return;
     let sharedData = [];
     try {
         sharedData = JSON.parse(sharedText);
@@ -4583,10 +7908,12 @@ if (tab === 'Users') {
     setTimeout(function() { renderUserFilters(); }, 200);
 }
 
-// ✅ Обновляем метки с правильным VK_GROUP_ID из настроек (используем уже полученные данные)
-const communityName = communityConfig.group_name || internalCommunityId;
-debug('🏷️ loadData: обновляем метки: name=' + communityName + ', vkGroupId=' + vkGroupId);
-updateCommunityLabels(internalCommunityId, communityName, vkGroupId);
+// Обновляем метки только если ответ всё ещё относится к активной платформе.
+if (!isAdminDataContextCurrent(requestContextKey)) return;
+const communityName = communityConfig.display_name || communityConfig.first_name || communityConfig.group_name || communityConfig.username || internalCommunityId;
+const displayCommunityId = communityConfig.bot_id || communityConfig.vk_group_id || internalCommunityId;
+debug('🏷️ loadData: обновляем метки: name=' + communityName + ', displayId=' + displayCommunityId);
+updateCommunityLabels(internalCommunityId, communityName, displayCommunityId);
 debug('\uD83E\uDD16 Loaded ' + (data?.length || 0) + ' rows');
 // Авто-заполнение VK переменных при первом запуске
 if (tab === 'Variables' && data.length === 0) {
@@ -4594,23 +7921,7 @@ dataStore['Variables_User'] = [];
 dataStore['Variables'] = [];
 renderTable('Variables_User', []);
 renderTable('Variables', []);
-dataStore['VK_Variables'] = [
-{ 'Переменная ВК': '%username%', 'Описание': 'Имя пользователя' },
-{ 'Переменная ВК': '%fullname%', 'Описание': 'Имя и фамилия пользователя' },
-{ 'Переменная ВК': '%userid%', 'Описание': 'ID пользователя ВКонтакте' },
-{ 'Переменная ВК': '%group%', 'Описание': 'Ссылка на сообщество' },
-{ 'Переменная ВК': '%vk_date%', 'Описание': 'Текущая дата' },
-{ 'Переменная ВК': '%vk_time%', 'Описание': 'Текущее время' },
-{ 'Переменная ВК': '%unsubscribe%', 'Описание': 'Ссылка на отписку' },
-{ 'Переменная ВК': '%city%', 'Описание': 'Город пользователя' },
-{ 'Переменная ВК': '%country%', 'Описание': 'Страна пользователя' },
-{ 'Переменная ВК': '%gender%', 'Описание': 'Пол пользователя' },
-{ 'Переменная ВК': '%ref%', 'Описание': 'UTM метка перехода' },
-{ 'Переменная ВК': '%utm_source%', 'Описание': 'UTM source' },
-{ 'Переменная ВК': '%utm_medium%', 'Описание': 'UTM medium' },
-{ 'Переменная ВК': '%utm_campaign%', 'Описание': 'UTM campaign' }
-];
-renderTable('VK_Variables', dataStore['VK_Variables']);
+renderSupportedVkVariablesTable();
 renderTable('Shared_Variables', dataStore['Shared_Variables'] || []);
 }
 
@@ -4641,16 +7952,17 @@ vkVars.push({
 });
 dataStore['Variables_User'] = userVars;
 dataStore['Variables'] = mainVars;
-dataStore['VK_Variables'] = vkVars;
+dataStore['VK_Variables'] = vkVars.length ? vkVars : SUPPORTED_VK_VARIABLES;
 renderTable('Variables_User', userVars);
 renderTable('Variables', mainVars);
-renderTable('VK_Variables', vkVars);
+renderSupportedVkVariablesTable();
 renderTable('Shared_Variables', dataStore['Shared_Variables'] || []);
 // Обновляем метки но НЕ рендерим таблицу Variables снова
-const communityName2 = communityConfig.group_name || internalCommunityId;
-updateCommunityLabels(internalCommunityId, communityName2, vkGroupId);
+const communityName2 = communityName;
+updateCommunityLabels(internalCommunityId, communityName2, displayCommunityId);
 }
 } catch (e) {
+if (!isAdminDataContextCurrent(requestContextKey)) return;
 debug('? Error: ' + e.message);
 showStatus('Ошибка загрузки: ' + e.message, 'error');
 dataStore[tab] = [];
@@ -4678,6 +7990,928 @@ return str
 .replace(/"/g, '&quot;')
 .replace(/'/g, '&#39;');
 }
+
+const ADMIN_TAB_HELP = {
+Messages: {
+    kicker: 'Сценарии диалогов',
+    title: 'Справка: Сообщения и шаги бота',
+    subtitle: 'Главная вкладка сценариев: здесь бот понимает входящие сообщения, отвечает пользователю, показывает кнопки, отправляет вложения и переводит пользователя на следующие шаги.',
+    purpose: [
+        'Бот - отдельный сценарий внутри выбранного сообщества. Один бот может обслуживать воронку, обучение, оплату, выдачу материалов или поддержку.',
+        'Шаг - конкретная точка сценария. На шаге задаются условия входа, ответ бота, кнопки, вложения и действия, которые нужно выполнить.',
+        'Триггер определяет, какое сообщение или нажатие кнопки подходит для этой строки. Условия помогают ограничить срабатывание по группам, переменным и предыдущему шагу.',
+        'Ответ бота фиксирует текст, вложения и клавиатуру, которые увидит пользователь. Действия после ответа меняют группы, переменные, шаг пользователя и отложенные переходы.'
+    ],
+    howToUse: [
+        'Сначала выберите нужное сообщество и бота, затем создайте понятные шаги: например MENU, PAY, CHECK, RESULT.',
+        'Для каждого шага заполните триггер, режим точности, ответ, кнопки и действия. После правок нажмите "Сохранить".',
+        'Используйте группы для сегментации: например VIP, paid, archive. Это позволяет показывать разные ветки сценария разным пользователям.',
+        'Если логика зависит от данных, используйте пользовательские, глобальные и ПВС-переменные. История прохождения шага покажет, какие условия и действия были актуальны в момент прохода.'
+    ],
+    examples: [
+        { title: 'Меню по команде', text: 'Шаг MENU реагирует на текст "меню", отвечает списком разделов и показывает кнопки "Оплата", "Материалы", "Поддержка".' },
+        { title: 'Выдача после оплаты', text: 'Платежная кнопка ведет на оплату, после успешного платежа пользователь переводится на шаг RESULT и получает документ или ссылку.' },
+        { title: 'Сегмент VIP', text: 'Если у пользователя есть группа VIP, на том же шаге можно дать другой ответ, добавить бонус и отправить на отдельный сценарий.' }
+    ],
+    tips: [
+        'Называйте шаги осмысленно: через месяц MENU_PAY понятнее, чем просто 1.',
+        'Не смешивайте в одной строке слишком много несвязанных действий. Проще отлаживать несколько коротких шагов.',
+        'Перед большим изменением сценария проверьте его на тестовом пользователе и откройте историю прохождения шага.'
+    ]
+},
+Comments: {
+    kicker: 'Реакции на посты',
+    title: 'Справка: Комментарии и ответы в постах',
+    subtitle: 'Раздел управляет реакциями бота на комментарии под постами VK: фильтрует нужные комментарии, отвечает в ветке и запускает действия.',
+    purpose: [
+        'Строка комментариев описывает условие: под каким постом, с каким текстом, упоминанием или группой должен сработать бот.',
+        'Ответ может быть публичным комментарием, сообщением пользователю или действием без видимого ответа.',
+        'В отличие от личных сообщений, комментарии не используют режим кнопки как входящий триггер, потому что VK-комментарии не поддерживают такие клавиатуры.',
+        'Раздел полезен для лид-магнитов, конкурсов, выдачи инструкции по ключевому слову и модерации заявок из постов.'
+    ],
+    howToUse: [
+        'Укажите ссылку или ID поста, если реакция должна работать только под конкретной публикацией.',
+        'Заполните текстовый триггер и точность сравнения: точное совпадение для промокодов, неточное - для живых фраз.',
+        'Добавьте ответ и действия: записать группу, отправить пользователя на шаг бота, изменить переменную или выдать вложение.',
+        'После публикации проверьте тестовым комментарием и убедитесь, что бот отвечает именно в нужном месте.'
+    ],
+    examples: [
+        { title: 'Лид-магнит', text: 'Пользователь пишет "хочу чек-лист" под постом. Бот отвечает в комментарии и отправляет материал в личные сообщения.' },
+        { title: 'Фильтр по посту', text: 'Для поста с вебинаром работает слово "участвую", а под другими постами это слово игнорируется.' },
+        { title: 'Сегментация', text: 'После комментария бот добавляет группу webinar-interest и переводит пользователя на шаг с прогревом.' }
+    ],
+    tips: [
+        'Для публичных комментариев пишите короткие ответы, а детали переносите в личные сообщения.',
+        'Если реакция не срабатывает, проверьте доступы сообщества и Callback API по комментариям.',
+        'Не используйте слишком широкие неточные триггеры под активными постами, чтобы не отвечать лишним людям.'
+    ]
+},
+Users: {
+    kicker: 'Сегменты и данные',
+    title: 'Справка: Пользователи и их состояние',
+    subtitle: 'Вкладка показывает пользователей выбранного сообщества: группы, текущие шаги, переменные, историю прохождения и инструменты массового управления.',
+    purpose: [
+        'Каждая строка - пользователь VK, с которым взаимодействовал бот или которого добавили действия сценария.',
+        'Группы показывают сегменты пользователя: подписка, покупка, статус, интерес, архив и другие признаки.',
+        'Текущий шаг и история шагов помогают понять, где пользователь находится в сценарии и что с ним уже происходило.',
+        'Пользовательские переменные хранят индивидуальные значения: баланс, выбранный тариф, номер заказа, ответы на вопросы.'
+    ],
+    howToUse: [
+        'Используйте поиск и фильтры, чтобы найти конкретного пользователя, группу или состояние.',
+        'Открывайте историю шага, когда нужно проверить, какое сообщение пришло, какой ответ ушел и какие условия сработали.',
+        'Массовые действия применяйте только после проверки фильтра, чтобы не изменить лишних пользователей.',
+        'Для ручной поддержки можно добавить или удалить группу, поправить переменную и отправить пользователя на нужный шаг.'
+    ],
+    examples: [
+        { title: 'Проверка оплаты', text: 'Администратор находит пользователя, видит группу paid и историю шага оплаты, затем понимает, был ли выдан материал.' },
+        { title: 'Ручная разблокировка', text: 'Если пользователь застрял на старом шаге, его можно перевести на MENU или RESULT без переписывания сценария.' },
+        { title: 'Аудит изменений', text: 'История шага показывает старый текст ответа и старые действия, даже если администратор уже изменил текущую строку сценария.' }
+    ],
+    tips: [
+        'Перед массовыми правками всегда проверяйте несколько пользователей из выборки.',
+        'Не удаляйте группы, если они используются как условия в активных сценариях.',
+        'ПВС-переменные профиля удобны для данных, общих для всех сообществ одного профиля.'
+    ]
+},
+Groups: {
+    kicker: 'Сегменты и история',
+    title: 'Справка: Группы пользователей',
+    subtitle: 'Раздел для управления сегментами пользователей: здесь создаются группы, хранится их описание, состав и дополнительные настройки Mini App.',
+    purpose: [
+        'Группа - метка пользователя. По ней сценарии понимают, кому можно отвечать, что выдавать и куда переводить дальше.',
+        'Группы можно добавлять и удалять действиями в сценариях, вручную в пользователях или массовыми операциями.',
+        'Описание группы помогает администраторам помнить назначение сегмента и не путать технические метки с пользовательскими.',
+        'Mini App-поля позволяют оформить группу как пользовательскую карточку подписки или раздела внутри VK Mini App.'
+    ],
+    howToUse: [
+        'Создайте короткий технический код группы: paid, vip, webinar_2026, archive.',
+        'Заполните описание, если группа используется в нескольких сценариях или несколькими администраторами.',
+        'Проверяйте состав группы перед удалением или переименованием, потому что сценарии могут зависеть от старого имени.',
+        'Для Mini App включите отображение, задайте заголовок, описание, иконку, баннер и текст кнопок подписки.'
+    ],
+    examples: [
+        { title: 'Закрытый доступ', text: 'После оплаты пользователь получает группу paid_course. Все шаги курса проверяют наличие этой группы.' },
+        { title: 'Отписка от цепочки', text: 'Кнопка "Не напоминать" удаляет группу reminder_active и добавляет archive.' },
+        { title: 'Mini App-раздел', text: 'Группа vip отображается в Mini App как карточка "Клуб", куда пользователь может подписаться или отписаться.' }
+    ],
+    tips: [
+        'Не используйте пробелы и длинные фразы в технических названиях групп.',
+        'Перед переименованием найдите это имя во вкладках сообщений, комментариев и рассылок.',
+        'Разделяйте статусные группы и временные группы, чтобы сценарии было проще читать.'
+    ]
+},
+Variables: {
+    kicker: 'Данные и логика',
+    title: 'Справка: Переменные и системные значения',
+    subtitle: 'Здесь хранятся значения, которые сценарии используют в условиях, подстановках текста и действиях.',
+    purpose: [
+        'Глобальные переменные относятся к выбранному сообществу и подходят для общих значений: цена, ссылка, дата вебинара.',
+        'Пользовательские переменные относятся к конкретному пользователю: имя, баланс, выбранный вариант, номер заказа.',
+        'ПВС-переменные профиля доступны всем сообществам профиля и полезны для общих настроек между несколькими проектами.',
+        'VK-переменные - справочник системных подстановок, которые PAPA BOT может брать из события или профиля пользователя.'
+    ],
+    howToUse: [
+        'Создайте переменную с понятным именем и используйте ее в тексте ответа или условиях шага.',
+        'Для числовых значений используйте действия с переменными: присвоить, увеличить, уменьшить или очистить.',
+        'В условиях проверки сравнивайте переменную с нужным значением, чтобы строить ветвления без дублирования шагов.',
+        'Если значение должно быть одинаковым во всех сообществах профиля, храните его как ПВС, а не копируйте в каждое сообщество.'
+    ],
+    examples: [
+        { title: 'Цена в одном месте', text: 'Глобальная переменная course_price подставляется в ответы и платежные кнопки. При изменении цены правится одно значение.' },
+        { title: 'Баланс пользователя', text: 'Пользовательская переменная balance увеличивается после пополнения и уменьшается после покупки услуги.' },
+        { title: 'Единая ссылка профиля', text: 'ПВС-переменная support_url используется во всех сообществах одного профиля.' }
+    ],
+    tips: [
+        'Не храните секретные токены в пользовательских переменных.',
+        'Для денег и счетчиков используйте предсказуемые числовые значения без лишнего текста.',
+        'Если переменная участвует в условиях, документируйте ее назначение в названии или описании сценария.'
+    ]
+},
+Mailing: {
+    kicker: 'Массовые отправки',
+    title: 'Справка: Рассылки по базе и группам',
+    subtitle: 'Раздел для подготовки и запуска массовых сообщений по пользователям, группам и выбранным сегментам.',
+    purpose: [
+        'Рассылка отправляет одно сообщение многим пользователям выбранного сообщества.',
+        'Получателей можно ограничить группами, исключениями и дополнительными условиями, чтобы не отправлять лишним.',
+        'Сообщение может содержать текст, вложения, кнопки, платежные ссылки и действия после отправки.',
+        'Статус рассылки показывает, что запланировано, отправлено, отменено или завершилось с ошибками.'
+    ],
+    howToUse: [
+        'Сначала выберите аудиторию: вся база, конкретная группа или пересечение условий.',
+        'Подготовьте текст и вложения, затем проверьте тестовую отправку на себе.',
+        'Укажите время отправки, если сообщение должно уйти позже, и сохраните изменения.',
+        'После запуска следите за статусом и журналом, чтобы понять, сколько сообщений ушло и были ли ошибки VK.'
+    ],
+    examples: [
+        { title: 'Анонс по группе', text: 'Рассылка уходит только группе webinar-interest с кнопкой регистрации и ссылкой на оплату.' },
+        { title: 'Догрев после заявки', text: 'Через сутки пользователям из группы lead отправляется сообщение с кейсом и кнопкой "Задать вопрос".' },
+        { title: 'Сервисное уведомление', text: 'Покупателям из paid_course отправляется обновление материалов с вложенным документом.' }
+    ],
+    tips: [
+        'Перед массовым запуском всегда делайте тест на одном пользователе.',
+        'Не отправляйте слишком частые сообщения одной и той же группе.',
+        'Проверяйте, что вложения уже загружены и доступны выбранному сообществу.'
+    ]
+},
+Delayed: {
+    kicker: 'Очередь задач',
+    title: 'Справка: Отложенные сообщения и проверки',
+    subtitle: 'Очередь показывает задачи, которые бот должен выполнить позже: отправить сообщение, проверить условие или перевести пользователя на шаг.',
+    purpose: [
+        'Отложенная задача создается действием сценария, когда ответ или переход нужно выполнить не сразу.',
+        'Статус задачи помогает понять, ожидает ли она выполнения, уже выполнена, отменена или завершилась ошибкой.',
+        'Очередь полезна для напоминаний, прогревов, дедлайнов, автопроверок и мягких возвратов пользователя в сценарий.',
+        'Администратор видит пользователя, время выполнения и контекст, чтобы быстро разобрать проблему.'
+    ],
+    howToUse: [
+        'Создавайте отложенные переходы в действиях шага: например отправить на STEP_REMINDER через 24 часа.',
+        'Проверяйте очередь после настройки сценария, чтобы убедиться, что задачи реально создаются.',
+        'Если пользователь отменил действие, сценарий может удалить группу или переменную, из-за чего отложенный шаг больше не пройдет условия.',
+        'При ошибке смотрите время, пользователя и связанный шаг, затем проверяйте права VK и текущие условия сценария.'
+    ],
+    examples: [
+        { title: 'Напоминание', text: 'После заявки бот ставит задачу: через 2 часа отправить шаг REMIND, если пользователь еще не оплатил.' },
+        { title: 'Дедлайн', text: 'За день до вебинара всем участникам из группы webinar_registered создается отложенное сообщение.' },
+        { title: 'Проверка статуса', text: 'Через 10 минут после оплаты бот проверяет переменную order_status и при успехе переводит на выдачу материала.' }
+    ],
+    tips: [
+        'Используйте понятные имена шагов для отложенных действий: REMIND_24H, CHECK_PAYMENT.',
+        'Не создавайте несколько одинаковых напоминаний без условий отмены.',
+        'Если задача не выполнилась, проверьте не только очередь, но и условия конечного шага.'
+    ]
+},
+Triggers: {
+    kicker: 'Senler-like сценарии',
+    title: 'Справка: Триггеры событий',
+    subtitle: 'Вкладка собирает отдельные автоматические реакции на события: сообщения, заявки, комментарии, товары, переменные и другие входные сигналы.',
+    purpose: [
+        'Структурный триггер описывает событие, условие и действие в карточке, без длинной табличной строки.',
+        'Он подходит для быстрых автоматизаций, которые не требуют полноценной ветки сообщений.',
+        'Действие может отправить ответ, добавить или удалить группу, изменить переменную, обработать заявку или направить пользователя в бота.',
+        'Активность триггера можно включать и выключать без удаления настройки.'
+    ],
+    howToUse: [
+        'Выберите тип события: сообщение, заявка, комментарий, товар или другое доступное событие.',
+        'Укажите точное условие: текст, начало/конец сообщения, наличие товара, группу или переменную.',
+        'Выберите действие и заполните дополнительные поля, которые нужны именно этому действию.',
+        'Проверьте человеческое описание карточки: оно должно читаться как понятное правило "если..., то...".'
+    ],
+    examples: [
+        { title: 'Заявка в сообщество', text: 'Если пришла заявка и пользователь содержит нужный признак, PAPA BOT одобряет заявку и добавляет группу approved.' },
+        { title: 'Сообщение содержит товар', text: 'Если входящее сообщение содержит товар или услугу, бот записывает интерес и отправляет ответ менеджера.' },
+        { title: 'Удаление переписки', text: 'По служебному условию можно удалить переписку или очистить техническое состояние пользователя.' }
+    ],
+    tips: [
+        'Для сложных диалогов используйте вкладку сообщений, а триггеры оставляйте для коротких автоматизаций.',
+        'Отключайте триггер перед редактированием критичных правил.',
+        'После настройки проверьте событие на тестовом пользователе и посмотрите журнал.'
+    ]
+},
+Profile: {
+    kicker: 'Профиль и лимиты',
+    title: 'Справка: Профиль, сообщества и лимиты PAPA BOT',
+    subtitle: 'Профиль показывает подключенные сообщества, файлы, лимиты, операции баланса, пополнения, начисления, ошибки и предложения этого аккаунта.',
+    purpose: [
+        'Здесь администратор видит срок действия профиля, дневной лимит запросов, купленные пакеты и историю начислений.',
+        'Блок файлов хранит загруженные документы и вложения, которые потом можно выбирать в ответах бота.',
+        'Отправленные ошибки и предложения показывают статус обработки главным администратором и возможное начисление бонуса.',
+        'Статистика по сообществам помогает понять, где активен бот и какие лимиты расходуются.'
+    ],
+    howToUse: [
+        'Проверяйте дневной лимит перед массовыми рассылками и активными запусками.',
+        'Загружайте повторно используемые документы во вкладке "Файлы", чтобы потом вставлять их в ответы без новой загрузки.',
+        'Если нашли проблему, отправьте ошибку с описанием и скриншотами. Если есть идея по улучшению, отправьте предложение.',
+        'Следите за статусами отправленных ошибок и предложений: начисление происходит один раз при итоговом положительном статусе.'
+    ],
+    examples: [
+        { title: 'Документы для ответов', text: 'Оферта, политика и согласие загружены в профиль, а затем выбираются как вложения в платежных шагах.' },
+        { title: 'Контроль лимитов', text: 'Перед рассылкой администратор проверяет, хватит ли дневного лимита и не нужен ли пакет увеличения.' },
+        { title: 'Обратная связь', text: 'Профиль отправляет предложение по интерфейсу, главный админ переводит его в "Реализовано", профиль получает бонус.' }
+    ],
+    tips: [
+        'Удаляйте устаревшие файлы только после проверки, что они не используются в текущих сценариях.',
+        'Скриншоты ошибки должны показывать место проблемы и ожидаемый результат.',
+        'Операции баланса и пополнения прокручиваются, чтобы последние записи оставались на виду.'
+    ]
+},
+Settings: {
+    kicker: 'Подключение и инфраструктура',
+    title: 'Справка: Настройка сообществ и VK API',
+    subtitle: 'Раздел отвечает за подключение сообществ, токены VK, Callback API, платежные интеграции и технические параметры работы бота.',
+    purpose: [
+        'Сообщество должно иметь корректный токен VK и включенные события Callback API, иначе бот не получит входящие сообщения.',
+        'Настройки хранят служебные данные отдельно для каждого сообщества, чтобы один профиль мог вести несколько проектов.',
+        'Платежные интеграции подключают YooKassa, Prodamus, Robokassa и другие провайдеры к кнопкам оплаты в сценариях.',
+        'Технические проверки помогают понять, правильно ли подключен токен, callback-ссылка и права доступа.'
+    ],
+    howToUse: [
+        'Добавьте сообщество, укажите ID и токен, затем проверьте соединение.',
+        'В VK настройте Callback API на URL PAPA BOT и включите нужные события: сообщения, комментарии, заявки и другие используемые типы.',
+        'Для платежей заполните параметры интеграции и используйте выданные URL уведомлений в кабинете платежного провайдера, если это требуется провайдером.',
+        'После изменения технических настроек сделайте тестовое сообщение, тестовый комментарий или тестовую оплату.'
+    ],
+    examples: [
+        { title: 'Новое сообщество', text: 'Администратор добавляет ID сообщества, токен, сохраняет настройки и отправляет тестовое сообщение боту.' },
+        { title: 'Robokassa', text: 'В интеграции указываются идентификатор магазина, пароль #1 и пароль #2, а Result URL используется для подтверждения платежа.' },
+        { title: 'Callback API', text: 'Если комментарии не обрабатываются, проверьте, включены ли события комментариев в настройках VK.' }
+    ],
+    tips: [
+        'Не публикуйте токены и пароли платежных систем в переписках или скриншотах.',
+        'После смены токена обязательно сохраните настройки и выполните тест.',
+        'Если один раздел работает, а другой нет, проверьте именно события этого раздела в Callback API.'
+    ]
+},
+Admin: {
+    kicker: 'Управление доступом',
+    title: 'Справка: Администрирование профилей и доступа',
+    subtitle: 'Вкладка главного администратора: профили, доступы, промокоды, баланс, лимиты, логи, ошибки пользователей и предложения.',
+    purpose: [
+        'Главный администратор создает и редактирует профили, задает роль, срок действия, логин, пароль и параметры доступа.',
+        'Промокоды позволяют выдавать регистрацию, бонусы, лимиты или пополнение баланса по заранее заданным правилам.',
+        'Блоки ошибок и предложений собирают обратную связь от администраторов с описанием, скриншотами, статусом и возможным бонусом.',
+        'Журналы и блоки пополнений помогают контролировать работу сервиса, входы, изменения баланса и запросы на увеличение лимитов.'
+    ],
+    howToUse: [
+        'Создавайте отдельный профиль на каждого администратора или проект, чтобы видеть лимиты и историю отдельно.',
+        'Меняйте статус ошибки или предложения только после проверки: итоговый статус "Исправлено" или "Реализовано" начисляет бонус один раз.',
+        'Используйте промокоды для управляемой выдачи доступа, а ручные операции баланса - для точечных корректировок.',
+        'Проверяйте последние записи журналов, если пользователь сообщает о проблеме входа, лимита или пополнения.'
+    ],
+    examples: [
+        { title: 'Новый клиент', text: 'Главный админ создает профиль, задает срок действия, выдает промокод и подключает нужные сообщества.' },
+        { title: 'Обработка ошибки', text: 'В блоке ОШИБКИ админ открывает скриншоты, проверяет проблему и переводит статус в "В процессе исправления" или "Исправлено".' },
+        { title: 'Предложение', text: 'В блоке ПРЕДЛОЖЕНИЯ идея получает статус "В Разработке", а после внедрения - "Реализовано" с бонусом профилю.' }
+    ],
+    tips: [
+        'Не выдавайте роль главного администратора обычным профилям.',
+        'Перед крупной правкой баланса оставляйте понятный комментарий в операции.',
+        'Статусы ошибок и предложений видны отправителю во вкладке ПРОФИЛЬ, поэтому формулируйте решения аккуратно.'
+    ]
+}
+};
+
+const ADMIN_TAB_HELP_DETAILS = {
+Messages: {
+    whatsNew: [
+        { title: 'Платформы VK и Telegram', text: 'Перед настройкой сценария проверьте выбранную платформу и подключение. Данные и ответы не смешиваются между сообществом VK и Telegram-ботом.' },
+        { title: 'Надёжная доставка', text: 'Если выбранный ответ не удалось доставить, PAPA BOT сохраняет его без повторного выбора варианта. Инцидент можно просмотреть и повторить в разделе «ОТЛОЖЕННЫЕ».' },
+        { title: 'Согласия важнее обычного ответа', text: 'Проверка согласий при отсутствии обязательного согласия отправляет пользователя в сценарий согласия и останавливает остальные ответы на это событие.' }
+    ],
+    controls: [
+        { title: 'Триггер: ТЕКСТ', text: 'Строка срабатывает, когда пользователь пишет текст. Используйте точное совпадение для команд и промокодов, неточное - для фраз вроде "хочу курс".' },
+        { title: 'Триггер: КНОПКА', text: 'Строка срабатывает после нажатия пользователем кнопки из сообщения. Текст в колонке "Триггер" должен совпадать с названием кнопки.' },
+        { title: 'Триггер: ФАЙЛ', text: 'Строка срабатывает, когда пользователь отправляет вложение. Подходит для сбора чеков, фото, документов и заявок с файлами.' },
+        { title: 'Test в колонке "Ответ"', text: 'Открывает выбор тестового пользователя и отправляет ему текст, вложения и клавиатуру текущей строки без ожидания реального входящего сообщения.' },
+        { title: 'Test в колонке "Шаг"', text: 'Находит строку этого же бота с указанным шагом, отправляет её ответ тестовому пользователю и показывает действия, которые должны выполниться для этого шага.' },
+        { title: 'Кнопка: фиолетовая', text: 'Фиолетовая кнопка "Кнопка" означает, что клавиатура у ответа ещё не настроена или пуста. Нажмите её, чтобы открыть конструктор клавиатуры.' },
+        { title: 'Кнопка: зелёная', text: 'Зелёная кнопка "Кнопка" означает, что в ответе уже есть сохранённые кнопки. Нажатие открывает текущую клавиатуру для просмотра и редактирования.' },
+        { title: 'Конструктор кнопок', text: 'Тип "В сообщении" делает inline-кнопки внутри сообщения, тип "Под сообщением" - обычную клавиатуру под полем ввода. В одной клавиатуре можно задавать текстовые, ссылочные и платежные кнопки.' },
+        { title: 'Типы кнопок ответа', text: 'Цветная кнопка отправляет текст кнопки обратно боту. Ссылка открывает URL. Оплата создаёт платёж через выбранную платёжную интеграцию и может вести на success/fail шаги.' },
+        { title: '+ Добавить Бот', text: 'Создаёт новый сценарий с отдельным названием. Боты внутри одной вкладки независимы, поэтому имя бота должно быть уникальным.' },
+        { title: '+ Добавить Шаг', text: 'Добавляет новую строку в активный бот. Шаг появится в текущем сценарии и начнёт работать после сохранения.' },
+        { title: 'Сохранить', text: 'Отправляет текущие строки вкладки на сервер и фиксирует изменения для выбранного сообщества. До сохранения правки остаются локальными в админ-панели.' },
+        { title: 'Copy', text: 'Дублирует строку в таблице и одновременно копирует JSON-код этого шага в буфер обмена. Этот код можно сохранить в файл, вставить через "Импорт JSON" в любого бота или дать ИИ как пример формата для генерации готовой воронки.' },
+        { title: 'Импорт JSON', text: 'Вставляет сценарий из JSON. Режим "Добавить" дописывает шаги, "Заменить текущего бота" меняет только активного бота, "Заменить всё" очищает текущую вкладку перед импортом.' }
+    ],
+    actions: [
+        'Ответ с ИИ = ДА включает выбранную AI-интеграцию: бот отправит в AI контекст и использует AI-ответ, а обычный "Ответ" останется запасным вариантом.',
+        'ДОБАВИТЬ ГРУППУ записывает пользователя в сегмент после срабатывания шага. Это удобно для покупок, интересов, статусов и исключений из повторных цепочек.',
+        'УДАЛИТЬ ГРУППУ убирает пользователя из сегмента. Так завершают цепочки, снимают временные метки и переводят пользователя в новый статус.',
+        'Отправить на Шаг меняет текущий шаг пользователя. Если задана задержка, переход создаёт отложенную задачу и выполнится позже.',
+        'Действия с ПП, ГП и ПВС меняют переменные: можно присваивать значения, считать числа, объединять текст и хранить данные пользователя или сообщества.',
+        'Ответить если в Группе, Ответил на Шаг и проверки переменных ограничивают строку: если условие не выполнено, бот ищет другую подходящую строку.'
+    ],
+    detailedExamples: [
+        { title: 'Квиз с ветвлением', text: 'START: триггер "начать", ответ с вопросом и кнопками. A1/B1: триггер по кнопке, действие с ПП score = score + 1, переход на следующий вопрос. RESULT: ответ показывает итог через переменную и добавляет группу quiz_done.' },
+        { title: 'Оплата и выдача', text: 'MENU: кнопка "Купить". PAY: платежная кнопка с successStep = PAID и failStep = PAY_FAIL. PAID: добавляет paid_course, отправляет документ и переводит на LESSON_1.' },
+        { title: 'AI-поддержка', text: 'SUPPORT: триггер "вопрос", Ответ с ИИ = ДА, ИИ = выбранная интеграция, обычный Ответ = "Передам менеджеру". Если AI ответит, пользователь получит AI-текст; если нет - запасной ответ.' },
+        { title: 'Воронка через ИИ и JSON', text: 'Скопируйте любой рабочий шаг кнопкой Copy, попросите ИИ написать в таком же JSON целую воронку из 10-20 шагов, затем вставьте результат через "Импорт JSON". PAPA BOT нормализует шаги, кнопки, вложения и действия.' }
+    ]
+},
+Comments: {
+    whatsNew: [
+        { title: 'Куда публиковать ответ', text: 'Внизу поля «Ответ» есть переключатель. «В посте» (по умолчанию) публикует обычный комментарий к записи, «В комментарии» отвечает непосредственно под комментарием автора.' },
+        { title: 'Имя вместо числового ID', text: 'В «Ответе» и «Ответе с ИИ» упоминание пользователя формируется как его имя со ссылкой на VK ID, а не как технический числовой идентификатор.' },
+        { title: 'Точные действия с комментарием', text: 'Удаление и лайк применяются к тому комментарию, который вызвал правило. Для удалённого комментария PAPA BOT использует сохранённый текст и создаёт новый комментарий к исходному посту.' }
+    ],
+    controls: [
+        { title: 'Триггер: ТЕКСТ', text: 'Проверяет текст комментария. Подходит для слов "хочу", "участвую", промокодов и ключевых фраз под постом.' },
+        { title: 'Триггер: ФАЙЛ', text: 'Используйте, когда реакция должна быть на комментарий с вложением. Режим КНОПКА здесь недоступен, потому что VK-комментарии не поддерживают клавиатуры сообщений.' },
+        { title: 'Test в "Ответ"', text: 'Отправляет тестовый ответ выбранному пользователю через единый тестовый механизм, чтобы проверить текст, переменные и вложения до публикации сценария.' },
+        { title: 'Test в "Шаг"', text: 'Проверяет, какой ответ и действия будут у найденного шага комментарного бота.' },
+        { title: '+ Добавить Бот и + Добавить Шаг', text: 'Создают отдельный комментарный сценарий и новую строку в активном боте. После добавления нажмите "Сохранить".' },
+        { title: 'Copy и Импорт JSON', text: 'Copy копирует строку комментарного сценария как JSON и дублирует её. Импорт JSON может перенести сценарий в другой проект или восстановить его из файла.' }
+    ],
+    actions: [
+        'Поле поста ограничивает работу конкретной записью VK: так один и тот же текст может иметь разные реакции под разными постами.',
+        'Ответ может добавить или удалить группу, изменить переменные и перевести пользователя на следующий шаг, как и в сообщениях.',
+        'Ответ с ИИ = ДА позволяет отвечать на комментарии через выбранную AI-интеграцию, а обычный ответ остаётся fallback.'
+    ],
+    detailedExamples: [
+        { title: 'Лид-магнит из поста', text: 'Пост = ссылка на запись, триггер = "чек-лист", ответ = "Отправил в личные сообщения", действие = добавить группу lead_checklist и отправить на шаг DELIVERY.' },
+        { title: 'Конкурс', text: 'Триггер = "участвую", Ответить если в Группе пусто, действие = добавить group contest_2026. Повторные реакции можно отфильтровать по группе.' }
+    ]
+},
+Users: {
+    whatsNew: [
+        { title: 'История без потери контекста', text: 'История шага и доставки сохраняет фактический ответ, вложения и действия на момент обработки — даже если сценарий затем изменён.' },
+        { title: 'Согласия пользователя', text: 'В профиле пользователя виден служебный статус согласий. Обычно его не редактируют вручную: используйте сценарий «Согласия» и правила триггеров.' },
+        { title: 'Безопасная массовая работа', text: 'Фильтрованный или отсортированный список сохраняет привязку действий к исходному пользователю, поэтому перед массовым изменением всё равно проверяйте выборку.' }
+    ],
+    controls: [
+        { title: 'Фильтры и поиск', text: 'Помогают найти пользователя по ID, имени, группе, текущему боту, шагу и переменным перед ручной или массовой правкой.' },
+        { title: 'Текущий Шаг', text: 'В этой колонке история прохождения открывается отдельными кнопками шагов. Внутри видны входящее сообщение, ответ, кнопки, вложения, условия и выполненные действия на момент прохода.' },
+        { title: '+ Добавить строку', text: 'Добавляет пользователя вручную. Обычно пользователи появляются автоматически после взаимодействия с ботом, но ручное добавление полезно для тестов.' },
+        { title: 'Сохранить', text: 'Фиксирует ручные изменения пользователя, групп, текущего шага и переменных.' }
+    ],
+    actions: [
+        'ГРУППА определяет сегменты пользователя. Изменение группы сразу влияет на сценарии, где эта группа используется как условие.',
+        'Пользовательская и Значения ПП хранят индивидуальные переменные только этого пользователя.',
+        'Переменная ПВС и Значение ПВС общие для этого пользователя во всех сообществах профиля.',
+        '_Согласия - служебный JSON согласий. Его обычно не редактируют вручную: он обновляется кнопками согласия и удаления согласия.'
+    ]
+},
+Groups: {
+    whatsNew: [
+        { title: 'Карточка подписного сообщества', text: 'Mini App-группа поддерживает slug, сохранение переносов в описании, иконку и баннер через URL или загрузку файла, а также отдельные тексты и цвета кнопок подписки и отписки.' },
+        { title: 'Переход после подписки и отписки', text: 'Для каждого состояния выберите: остаться в приложении, открыть сообщения сообщества, сообщество или свою ссылку. Сначала сохраняется новый статус подписки, затем выполняется переход.' },
+        { title: 'Данные пользователя в Mini App', text: 'После возврата в приложение карточка должна показывать актуальное действие. Если статус не изменился, проверьте запуск внутри VK и доступность API, а не создавайте группу повторно.' }
+    ],
+    controls: [
+        { title: '+ Новая группа', text: 'Открывает форму создания группы. После сохранения группа становится доступна в условиях, действиях, рассылках и Mini App.' },
+        { title: 'Редактировать', text: 'Меняет название, описание и Mini App-поля группы. При переименовании состав пользователей синхронизируется с новым названием.' },
+        { title: 'Добавить пользователей', text: 'Просит список VK ID и добавляет этих пользователей в группу. В истории пользователя фиксируется вступление в группу.' },
+        { title: 'Удалить пользователей', text: 'Просит список VK ID и удаляет этих пользователей из группы. В истории фиксируется выход из группы.' },
+        { title: 'Удалить группу', text: 'Удаляет группу из справочника и исключает из неё пользователей. Перед удалением проверьте, не используется ли группа в сценариях.' },
+        { title: 'Mini App-настройки', text: 'Включают карточку группы в Mini App: slug, заголовок, описание, иконку, баннер и тексты подписки/отписки.' }
+    ],
+    actions: [
+        'Добавление в группу из вкладки ГРУППЫ - ручная операция администратора; добавление через сценарий выполняется автоматически после ответа бота.',
+        'Удаление из группы может изменить доступ пользователя к шагам, рассылкам и Mini App-разделам.',
+        'История вступления и выхода помогает понять, когда пользователь попал в сегмент и когда был исключён.'
+    ]
+},
+Variables: {
+    whatsNew: [
+        { title: 'Именованные списки для триггеров', text: 'Текстовые списки создаются в области выбранного профиля или сообщества и привязываются к триггерам стабильным ID. Переименование не ломает правила.' },
+        { title: 'Защита используемых списков', text: 'Список нельзя удалить, пока на него ссылается хотя бы один триггер. Пустые строки и дубликаты без учёта регистра при сохранении очищаются.' },
+        { title: 'Правильная область значения', text: 'ПП — у одного пользователя, ГП — у выбранного сообщества, ПВС — у профиля. Выбирайте область до создания сценария, чтобы не дублировать данные.' }
+    ],
+    controls: [
+        { title: '+ Добавить пользовательскую', text: 'Создаёт имя ПП, которое затем можно использовать у пользователей и в действиях сценариев.' },
+        { title: '+ Добавить ГП', text: 'Создаёт глобальную переменную текущего сообщества с общим значением для всех пользователей.' },
+        { title: '+ Добавить ПВС', text: 'Создаёт переменную профиля, доступную пользователю во всех сообществах текущего профиля.' },
+        { title: 'Сохранить пользовательские / ГП / ПВС', text: 'Сохраняет соответствующий блок. Перед сохранением проверяются дубликаты имён.' },
+        { title: 'Переменные ВК', text: 'Информационный справочник: эти значения доступны для подстановок, но сам блок вручную не редактируется.' }
+    ],
+    actions: [
+        'ПП используется для персонального состояния: выбранный тариф, счётчик ответов, номер заказа, результат квиза.',
+        'ГП используется для общих настроек сообщества: цена, ссылка, дата, лимит мест.',
+        'ПВС используется, когда один профиль ведёт несколько сообществ и значение должно быть единым для пользователя между ними.',
+        'В действиях сценария переменные можно присваивать, складывать, вычитать, умножать, делить и объединять текст.'
+    ]
+},
+Mailing: {
+    whatsNew: [
+        { title: 'Отложенный запуск и контроль статуса', text: 'Рассылка может ожидать заданного времени. После обработки фактическое время, статус и текст ошибки помогают отличить отправленные сообщения от задач, ожидающих повторной попытки.' },
+        { title: 'Тест перед массовой отправкой', text: 'Test отправляет ровно текущий текст, вложения и клавиатуру выбранному тестовому пользователю. Проверяйте его до запуска по сегменту.' },
+        { title: 'Сбой не меняет выбранный вариант', text: 'При ошибке доставки сохраняется точный подготовленный результат. Повтор не генерирует новый AI-текст и не выбирает другой вариант ответа.' }
+    ],
+    controls: [
+        { title: '+ Добавить строку', text: 'Добавляет новую рассылку. Заполните получателей, текст, вложение, кнопки и время отправки.' },
+        { title: 'Test в "Сообщение Рассылки"', text: 'Отправляет текст рассылки одному выбранному пользователю через testSend, чтобы проверить сообщение до массового запуска.' },
+        { title: 'Кнопка: фиолетовая/зелёная', text: 'Фиолетовая кнопка открывает пустой конструктор клавиатуры рассылки, зелёная показывает, что кнопки уже настроены.' },
+        { title: 'Импорт JSON', text: 'Позволяет импортировать одну или несколько рассылок из JSON. Поддерживает кнопки, вложения, получателей, группы и время отправки.' },
+        { title: 'Сохранить', text: 'Фиксирует рассылки и их статусы. Планировщик обработает строки со статусом ожидания и наступившим временем.' }
+    ],
+    actions: [
+        'ID Получателей отправляет рассылку конкретным VK ID.',
+        'ГРУППА Получателей отправляет рассылку пользователям из указанных групп.',
+        'Ответ с ИИ = ДА может подготовить текст через выбранную AI-интеграцию, а обычный текст останется fallback.',
+        'Статус, фактическое время и ошибка заполняются после обработки и помогают контролировать результат.'
+    ],
+    detailedExamples: [
+        { title: 'Рассылка по сегменту', text: 'ГРУППА Получателей = webinar_interest, Сообщение = приглашение, кнопка = "Зарегистрироваться", дата = нужное время по Москве.' },
+        { title: 'Персональная проверка', text: 'Сначала нажмите Test и отправьте себе. После проверки оставьте нужную дату и статус "Ожидает".' }
+    ]
+},
+Delayed: {
+    whatsNew: [
+        { title: 'Очередь и восстановление доставок', text: 'Здесь видны как запланированные действия, так и сохранённые инциденты недоставленных сообщений или комментариев с их точным содержимым.' },
+        { title: 'Повторить или не повторять', text: 'Администратор может запустить повторную доставку исходного результата либо пометить инцидент «Не повторять», если вопрос уже решён вручную.' },
+        { title: 'Без дублирования ответа', text: 'Повтор использует сохранённый текст и вложения; бот не запускает сценарий заново и не отправляет пользователю другой вариант.' }
+    ],
+    controls: [
+        { title: '+ Добавить строку', text: 'Создаёт ручную отложенную задачу. Обычно очередь наполняется автоматически действиями "Задержка отправки на Шаг".' },
+        { title: 'Сохранить', text: 'Сохраняет ручные изменения очереди: время, статус, пользователя, тип и ошибку.' }
+    ],
+    actions: [
+        'Тип message означает отложенное личное сообщение или переход по шагу сообщений.',
+        'Тип comment относится к отложенным действиям комментарных сценариев.',
+        'Статус "Ожидает" позволяет планировщику выполнить задачу, "Отправлено" и "Ошибка" показывают результат.',
+        'Если отложенный шаг не прошёл условия к моменту выполнения, проверьте группы, переменные и текущий шаг пользователя.'
+    ]
+},
+Triggers: {
+    whatsNew: [
+        { title: 'Списки текста', text: 'Для условий с несколькими фразами выбирайте именованный список из «ПЕРЕМЕННЫЕ». Триггер хранит его ID, поэтому изменение названия безопасно.' },
+        { title: 'Редактирование комментария — новое событие', text: 'Изменённый комментарий обрабатывается отдельно от исходного. Повторная доставка одного и того же редактирования не создаёт лишних действий.' },
+        { title: 'Изоляция ошибок правил', text: 'Ошибка одного совпавшего триггера записывается в журнал, но не мешает выполнению следующих независимых совпавших карточек.' }
+    ],
+    controls: [
+        { title: '+ Новый триггер', text: 'Открывает конструктор карточки. Новая карточка после сохранения создаётся выключенной, чтобы её можно было проверить перед включением.' },
+        { title: 'Фильтры карточек', text: 'Поиск и фильтр события помогают быстро найти нужный триггер среди большого набора правил.' },
+        { title: 'Переключатель активности', text: 'Включает или выключает карточку без удаления. Для критичных правил сначала отключите, отредактируйте, затем включите.' },
+        { title: 'Не применять остальные правила', text: 'Останавливает дальнейшую обработку триггеров после срабатывания этой карточки.' }
+    ],
+    actions: [
+        'Добавить в группу / Исключить из группы меняет сегмент пользователя.',
+        'Добавить в бота переводит пользователя в выбранный бот и шаг, сохраняя исходный текст события для AI-шагов.',
+        'Отправить ответ с бота отправляет ответ выбранного шага без полноценного перевода пользователя по всей воронке.',
+        'Исключить из бота очищает привязку пользователя к выбранному сценарию.',
+        'Проверка Согласий отправляет пользователя в бот согласий, если нужное согласие отсутствует или устарело.',
+        'Удаление Согласий удаляет сохранённое согласие пользователя по выбранному типу документа.',
+        'Одобрить заявку в Сообщество и Удалить пользователя из сообщества выполняют действия VK при наличии нужного User Token.',
+        'Удалить данные пользователя, переписку или оба типа данных очищает состояние пользователя по служебному правилу.',
+        'ПП/ГП/ПВС: Добавить, Изменить, Удалить управляют переменными прямо из событийного триггера.'
+    ],
+    detailedExamples: [
+        { title: 'Автоодобрение заявки', text: 'Событие = заявка в сообщество, условие = ПВС invite_status равна approved, действие = Одобрить заявку и добавить группу joined.' },
+        { title: 'Кнопка из сообщения', text: 'Событие = нажал кнопку сообщения, условие = название кнопки "Не интересно", действие = удалить группу lead и добавить archive.' },
+        { title: 'Передача в AI-шаг', text: 'Событие = входящее сообщение содержит товар, действие = Отправить ответ с бота SUPPORT/AI. Исходный текст события попадёт в AI-контекст шага.' }
+    ]
+},
+Profile: {
+    whatsNew: [
+        { title: 'Тарифы и лимиты', text: 'Текущие тарифы, пакеты, бонусы и суточные лимиты задаёт главный администратор через Центр управления сервисом. В профиле отображается фактическое доступное состояние.' },
+        { title: 'Безопасные интеграции', text: 'Токены и секреты интеграций не должны попадать в ответы, переменные, скриншоты и экспорт. Используйте только защищённые поля настроек.' },
+        { title: 'Обратная связь и доставка', text: 'Ошибки, предложения и непрочитанные инциденты доставки помогают отслеживать реальную работу проекта без потери исходных сообщений.' }
+    ],
+    controls: [
+        { title: 'Карточки сообществ', text: 'Показывают подключённые сообщества, активное сообщество, статистику и лимиты. Переключение сообщества влияет на данные рабочих вкладок.' },
+        { title: 'Баланс и пакеты лимитов', text: 'Пополнение создаёт платёж YooKassa. Пакет суточного лимита применяется к выбранному сообществу, пакет вне суточного лимита расходуется после дневного лимита профиля.' },
+        { title: 'AI-интеграции: Добавить, Сохранить, Тест', text: 'Добавляют провайдера, сохраняют настройки профиля и проверяют реальный ответ AI. Результат теста можно закрыть или остановить таймер автоскрытия кликом.' },
+        { title: 'Платёжные интеграции: TEST', text: 'Проверяет заполненность и базовую корректность реквизитов платежного провайдера перед использованием в кнопках оплаты.' },
+        { title: 'Файлы и документы согласий', text: 'Загруженные вложения можно выбирать в ответах бота. Документы согласий используются ботом "Согласия" и проверками consent.' },
+        { title: 'Ошибки и предложения', text: 'Профиль отправляет описание и скриншоты главному админу; статусы видны отправителю, а итоговый положительный статус может начислить бонус.' }
+    ]
+},
+Settings: {
+    whatsNew: [
+        { title: 'Токены больше не показываются', text: 'После сохранения User Token и токен сообщества не выводятся в интерфейсе. Поле показывает статус «Токен указан и сохранен в базе» и кнопку удаления.' },
+        { title: 'Подключение нового сообщества', text: 'Укажите название и ID сообщества, сохраните настройки, затем выполните «Автонастройку сервера ВК». После этого проверьте тестовым сообщением или комментарием.' },
+        { title: 'Порядок из памятки', text: 'Встроенная инструкция ведёт от добавления сообщества и токенов к «Сохранить все настройки», а затем к автонастройке Callback API. Ссылки в инструкции открывают нужные элементы формы.' }
+    ],
+    controls: [
+        { title: '+ Добавить сообщество', text: 'Создаёт черновик нового сообщества. После ввода ID, токенов и сохранения у сообщества появятся отдельные настройки и данные.' },
+        { title: 'Проверить токены', text: 'Проверяет VK-токены и права доступа, чтобы понять, сможет ли бот читать события, отправлять сообщения и работать с вложениями.' },
+        { title: 'Автонастройка сервера ВК', text: 'Автоматически настраивает Callback API выбранного сообщества, включает нужные события и после успешной настройки вставляет примеры ботов и бот "Согласия".' },
+        { title: 'Бот "Согласия"', text: 'Шаблонный бот запрашивает согласие на документы, записывает факт принятия в служебный JSON пользователя и позволяет проверкам consent понимать, актуальна ли версия документа.' },
+        { title: 'Примеры ботов после автонастройки', text: 'Служат стартовыми шаблонами: по ним можно увидеть структуру шагов, триггеров, ответов, кнопок и действий, затем адаптировать под свой проект.' },
+        { title: 'Сохранить настройки', text: 'Фиксирует токены, ID, название сообщества, User Token и технические параметры. После сохранения сделайте тестовое сообщение или комментарий.' },
+        { title: 'Удалить сообщество', text: 'Удаляет выбранное сообщество из конфигурации профиля. Перед удалением убедитесь, что его данные больше не нужны.' },
+        { title: 'User Token', text: 'Нужен для операций, недоступных group token: часть загрузок вложений, одобрение заявок и удаление пользователей из сообщества.' }
+    ],
+    actions: [
+        'Callback API должен получать message_new, wall_reply_new и другие события, которые реально используются во вкладках.',
+        'Платёжные интеграции профиля подключаются здесь и затем выбираются в платёжных кнопках конструктора клавиатуры.',
+        'Секретные поля можно скрывать и показывать, но токены нельзя публиковать в скриншотах и переписках.'
+    ]
+},
+Admin: {
+    whatsNew: [
+        { title: 'Учётные данные профиля', text: 'Главный администратор может изменить для выбранного профиля новый логин, email или пароль: пустое поле не меняет существующее значение. Email обязателен и уникален для одного аккаунта.' },
+        { title: 'Регистрация и восстановление', text: 'Регистрация подтверждается кодом из письма. После трёх неудачных входов пользователь подтверждает email кодом, задаёт новый пароль и затем входит заново без временной блокировки.' },
+        { title: 'Центр управления сервисом', text: 'Локальный Центр управления содержит безопасный реестр команд, публикацию, проверки, настройку лимитов и описание последовательности деплоя PAPA BOT и VK Mini App.' }
+    ],
+    controls: [
+        { title: '+ Создать Профиль', text: 'Открывает форму профиля: название, логин, пароль, email, срок действия, суточный лимит, баланс и вне суточный лимит.' },
+        { title: 'Фильтры профилей', text: 'Позволяют найти профиль по ID, названию, логину, почте, роли, статусу, сроку, лимиту и промокоду.' },
+        { title: 'Открыть профиль', text: 'Переключает главного админа в выбранный профиль для диагностики его настроек и данных. Баннер позволяет вернуться в свой профиль.' },
+        { title: '+ Добавить Промокод', text: 'Создаёт промокод для регистрации или начислений: срок жизни, лимиты, баланс и пакет вне суточного лимита.' },
+        { title: 'Сгенерировать промокод', text: 'Заполняет код автоматически, чтобы не придумывать его вручную.' },
+        { title: 'Журнал', text: 'Показывает системные события. Кнопки обновления, очистки и удаления файла логов нужны для диагностики и обслуживания.' },
+        { title: 'Версия PAPA BOT', text: 'Редактор версии фиксирует блоки возможностей и историю изменений, которые видны в окне "Что умеет".' },
+        { title: 'Ошибки и предложения', text: 'Главный админ меняет статусы заявок. Первый перевод ошибки в "Исправлено" или предложения в "Реализовано" начисляет бонус отправителю один раз.' }
+    ],
+    actions: [
+        'Роль main_admin даёт полный доступ; обычным профилям её не выдают.',
+        'Срок действия пустой означает бессрочный профиль, число минут задаёт новый срок от текущего момента.',
+        'Ручные правки баланса и лимитов должны быть понятны по контексту, потому что они влияют на доступность сервиса для профиля.',
+        'История пополнений и лимитных заявок помогает разбирать спорные ситуации до публичного запуска.'
+    ]
+}
+};
+
+function renderTabHelpList(title, items) {
+    var list = Array.isArray(items) ? items : [];
+    return '<section class="tab-help-section">' +
+        '<h3 class="tab-help-section-title">' + escapeHtml(title) + '</h3>' +
+        '<ul class="tab-help-list">' + list.map(function(item) {
+            return '<li>' + escapeHtml(item) + '</li>';
+        }).join('') + '</ul>' +
+    '</section>';
+}
+
+function renderTabHelpCards(title, items) {
+    var cards = Array.isArray(items) ? items : [];
+    return '<section class="tab-help-section">' +
+        '<h3 class="tab-help-section-title">' + escapeHtml(title) + '</h3>' +
+        '<div class="tab-help-grid">' + cards.map(function(item) {
+            return '<div class="tab-help-card">' +
+                '<div class="tab-help-card-title">' + escapeHtml(item.title || '') + '</div>' +
+                '<div class="tab-help-card-text">' + escapeHtml(item.text || '') + '</div>' +
+            '</div>';
+        }).join('') + '</div>' +
+    '</section>';
+}
+
+function stripHelpHtml(value) {
+    return String(value || '')
+        .replace(/<br\\s*\\/?>/gi, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\\s+/g, ' ')
+        .trim();
+}
+
+function getTabHelpColumnSources(tabId) {
+    var map = {
+        Messages: [{ key: 'Messages', title: 'СООБЩЕНИЯ' }],
+        Comments: [{ key: 'Comments', title: 'КОММЕНТАРИИ В ПОСТАХ' }],
+        Users: [{ key: 'Users', title: 'ПОЛЬЗОВАТЕЛИ' }],
+        Groups: [{ key: 'Groups', title: 'ГРУППЫ' }],
+        Variables: [
+            { key: 'Variables_User', title: 'Пользовательские переменные' },
+            { key: 'Variables', title: 'Глобальные переменные' },
+            { key: 'Shared_Variables', title: 'Переменные всех сообществ' },
+            { key: 'VK_Variables', title: 'Переменные ВК' }
+        ],
+        Mailing: [{ key: 'Mailing', title: 'РАССЫЛКА' }],
+        Delayed: [{ key: 'Delayed', title: 'ОТЛОЖЕННЫЕ' }],
+        Triggers: [{ key: 'Triggers', title: 'Табличное хранение карточек триггеров' }]
+    };
+    return map[tabId] || [];
+}
+
+function renderTabHelpColumns(tabId) {
+    var sources = getTabHelpColumnSources(tabId);
+    var items = [];
+    sources.forEach(function(source) {
+        var sourceColumns = columns[source.key] || [];
+        sourceColumns.forEach(function(col) {
+            if (!col || typeof col !== 'object') return;
+            var name = String(col.name || '').trim();
+            if (!name) return;
+            var hint = stripHelpHtml(col.hint || 'Служебная колонка этой вкладки.');
+            var prefix = sources.length > 1 ? source.title + ' - ' : '';
+            var hidden = col.hidden ? ' (служебная)' : '';
+            var section = col.section ? ' [' + col.section + ']' : '';
+            items.push(prefix + name + hidden + section + ': ' + hint);
+        });
+    });
+    return items.length ? renderTabHelpList('Колонки и поля', items) : '';
+}
+
+function renderOptionalHelpCards(title, items) {
+    return Array.isArray(items) && items.length ? renderTabHelpCards(title, items) : '';
+}
+
+function renderOptionalHelpList(title, items) {
+    return Array.isArray(items) && items.length ? renderTabHelpList(title, items) : '';
+}
+
+function getTabHelpOverlay() {
+    var overlay = document.getElementById('tabHelpOverlay');
+    if (overlay) return overlay;
+    overlay = document.createElement('div');
+    overlay.id = 'tabHelpOverlay';
+    overlay.className = 'tab-help-overlay';
+    overlay.onclick = function(event) {
+        if (event.target === overlay) window.closeTabHelp();
+    };
+    document.body.appendChild(overlay);
+    return overlay;
+}
+
+function handleTabHelpKeydown(event) {
+    if (event && event.key === 'Escape') window.closeTabHelp();
+}
+
+window.openTabHelp = function(tabId) {
+    var data = ADMIN_TAB_HELP[tabId];
+    if (!data) return;
+    var details = ADMIN_TAB_HELP_DETAILS[tabId] || {};
+    var overlay = getTabHelpOverlay();
+    overlay.innerHTML =
+        '<div class="tab-help-modal" onclick="event.stopPropagation()">' +
+            '<div class="tab-help-header">' +
+                '<div>' +
+                    '<div class="tab-help-kicker">' + escapeHtml(data.kicker || 'Справка') + '</div>' +
+                    '<div class="tab-help-title">' + escapeHtml(data.title || 'Справка') + '</div>' +
+                    '<div class="tab-help-subtitle">' + escapeHtml(data.subtitle || '') + '</div>' +
+                '</div>' +
+                '<button type="button" class="tab-help-close" onclick="window.closeTabHelp()" aria-label="Закрыть справку">&times;</button>' +
+            '</div>' +
+            '<div class="tab-help-body">' +
+                renderTabHelpList('Для чего эта вкладка', data.purpose) +
+                renderTabHelpColumns(tabId) +
+                renderTabHelpList('Как применять', data.howToUse) +
+                renderOptionalHelpCards('Новые и важные возможности', details.whatsNew) +
+                renderOptionalHelpCards('Кнопки и элементы управления', details.controls) +
+                renderOptionalHelpList('Что происходит при действиях', details.actions) +
+                renderTabHelpCards('Примеры применения', data.examples) +
+                renderOptionalHelpCards('Развернутые примеры настройки', details.detailedExamples) +
+                renderTabHelpList('Практические подсказки', data.tips) +
+            '</div>' +
+        '</div>';
+    overlay.style.display = 'flex';
+    document.addEventListener('keydown', handleTabHelpKeydown);
+};
+
+window.closeTabHelp = function() {
+    var overlay = document.getElementById('tabHelpOverlay');
+    if (overlay) overlay.style.display = 'none';
+    document.removeEventListener('keydown', handleTabHelpKeydown);
+};
+
+function installTabHelpButtons() {
+    Object.keys(ADMIN_TAB_HELP).forEach(function(tabId) {
+        var tab = document.getElementById(tabId);
+        var copy = tab ? tab.querySelector('.tab-panel-copy') : null;
+        var kicker = copy ? copy.querySelector('.tab-panel-kicker') : null;
+        if (!kicker || copy.querySelector('.tab-help-btn')) return;
+        var row = kicker.closest('.tab-panel-kicker-row');
+        if (!row) {
+            row = document.createElement('div');
+            row.className = 'tab-panel-kicker-row';
+            kicker.parentNode.insertBefore(row, kicker);
+            row.appendChild(kicker);
+        }
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'tab-help-btn';
+        button.textContent = 'СПРАВКА';
+        button.setAttribute('aria-label', 'Открыть справку по вкладке ' + tabId);
+        button.onclick = function() { window.openTabHelp(tabId); };
+        row.appendChild(button);
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', installTabHelpButtons);
+} else {
+    installTabHelpButtons();
+}
+
+window.userStepHistorySnapshots = window.userStepHistorySnapshots || {};
+
+function parseUserStepHistoryForAdmin(value) {
+    var raw = String(value || '').trim();
+    if (!raw || raw.charAt(0) !== '[') return [];
+    try {
+        var parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter(function(item) {
+            return item && typeof item === 'object' && String(item.step || '').trim();
+        });
+    } catch (e) {
+        return [];
+    }
+}
+
+function renderSnapshotObjectRows(object) {
+    if (!object || typeof object !== 'object') {
+        return '<div style="color:var(--text-secondary);">Нет данных</div>';
+    }
+    var keys = Object.keys(object).filter(function(key) {
+        var value = object[key];
+        return value !== undefined && value !== null && String(typeof value === 'object' ? JSON.stringify(value) : value).trim() !== '';
+    });
+    if (!keys.length) return '<div style="color:var(--text-secondary);">Нет данных</div>';
+    return keys.map(function(key) {
+        var value = object[key];
+        var rendered = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
+        return '<div style="display:grid;grid-template-columns:180px minmax(0,1fr);gap:10px;margin:7px 0;text-align:left;">' +
+            '<strong>' + escapeHtml(key) + '</strong>' +
+            '<pre style="white-space:pre-wrap;margin:0;font-family:inherit;">' + escapeHtml(rendered) + '</pre>' +
+        '</div>';
+    }).join('');
+}
+
+function renderUserStepHistoryButtons(value, rowIndex, userId) {
+    var history = parseUserStepHistoryForAdmin(value);
+    var key = String(rowIndex);
+    window.userStepHistorySnapshots[key] = history;
+    if (!history.length) {
+        return '<div class="user-step-history-empty">История шагов пуста</div>';
+    }
+    return '<div class="user-step-history-buttons">' + history.map(function(item, index) {
+        var label = String(item.step || ('Шаг ' + (index + 1))).trim();
+        var title = [
+            item.bot ? 'Бот: ' + item.bot : '',
+            item.enteredAt ? 'Дата: ' + item.enteredAt : '',
+            userId ? 'Пользователь: ' + userId : ''
+        ].filter(Boolean).join('\\n');
+        return '<button class="user-step-history-btn" type="button" data-step-history-index="' + index + '" onclick="openUserStepHistorySnapshot(&quot;' + escapeHtml(key) + '&quot;,' + index + ')" title="' + escapeHtml(title) + '">' + escapeHtml(label) + '</button>';
+    }).join('<span class="user-step-history-arrow">↩</span>') + '</div>';
+}
+
+function formatStepHistoryDate(value) {
+    if (!value) return '-';
+    try {
+        var date = new Date(value);
+        if (!Number.isNaN(date.getTime())) {
+            return date.toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' }) + ' msk';
+        }
+    } catch (e) {}
+    var rendered = formatRuDateTime(value);
+    return rendered ? rendered + ' msk' : '-';
+}
+
+function renderStepHistoryValue(value) {
+    if (value === undefined || value === null || value === '') return '-';
+    if (Array.isArray(value)) {
+        var list = value.map(function(item) { return String(item || '').trim(); }).filter(Boolean);
+        return list.length ? list.join('\\n') : '-';
+    }
+    if (typeof value === 'object') return JSON.stringify(value, null, 2);
+    return String(value);
+}
+
+function parseStepHistoryButtonPayload(payload) {
+    if (!payload) return {};
+    if (typeof payload === 'string') {
+        try {
+            var parsed = JSON.parse(payload);
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (e) {
+            return {};
+        }
+    }
+    return payload && typeof payload === 'object' ? payload : {};
+}
+
+function getStepHistoryButtonColorLabel(color) {
+    var normalized = String(color || '').trim().toLowerCase();
+    if (normalized === 'primary') return 'Синий';
+    if (normalized === 'negative') return 'Красный';
+    if (normalized === 'secondary') return 'Белый';
+    if (normalized === 'positive') return 'Зелёный';
+    return normalized || '-';
+}
+
+function getStepHistoryButtonRows(keyboard) {
+    if (!keyboard || !Array.isArray(keyboard.buttons)) return [];
+    var buttons = [];
+    keyboard.buttons.forEach(function(row) {
+        (Array.isArray(row) ? row : [row]).forEach(function(button) {
+            if (button && typeof button === 'object') buttons.push(button);
+        });
+    });
+    return buttons;
+}
+
+function renderStepHistoryKeyboardLines(keyboard) {
+    var buttons = getStepHistoryButtonRows(keyboard);
+    if (!buttons.length) return ['-'];
+    var lines = [];
+    buttons.forEach(function(button, index) {
+        var action = button.action || {};
+        var payload = parseStepHistoryButtonPayload(action.payload);
+        var label = String(action.label || payload.buttonLabel || payload.label || '').trim() || '-';
+        var actionType = String(action.type || payload.type || payload.action || 'text').trim();
+        var typeLabel = 'обычный';
+        if (actionType === 'open_link' || action.link) {
+            typeLabel = 'ссылка - "' + String(action.link || '').trim() + '"';
+        } else if (actionType === 'payment' || payload.payment === true || payload.action === 'payment') {
+            typeLabel = 'Оплата';
+            var amount = payload.amountRub ? ' · ' + payload.amountRub + ' ₽' : '';
+            var integration = payload.paymentIntegrationName || payload.paymentIntegrationId || '';
+            if (integration || amount) typeLabel += ' - "' + [integration, amount].filter(Boolean).join('').trim() + '"';
+        } else if (actionType && actionType !== 'text') {
+            typeLabel = actionType;
+        }
+        lines.push(String(index + 1));
+        lines.push('Название - ' + label);
+        lines.push('Тип - ' + typeLabel + (button.color ? ' - Цвет "' + getStepHistoryButtonColorLabel(button.color) + '"' : ''));
+    });
+    return lines;
+}
+
+function renderStepHistoryFieldLines(fields, source) {
+    var lines = [];
+    fields.forEach(function(field) {
+        lines.push(field.label + ' - ' + renderStepHistoryValue(source && source[field.key]));
+    });
+    return lines;
+}
+
+function renderUserStepHistoryLog(item) {
+    var userMessage = item.userMessage || {};
+    var botResponse = item.botResponse || {};
+    var lines = [];
+    lines.push('История прохождения шага');
+    lines.push('Бот: ' + renderStepHistoryValue(item.bot) + ' · Шаг: ' + renderStepHistoryValue(item.step) + ' · ' + formatStepHistoryDate(item.enteredAt || botResponse.sentAt));
+    lines.push('');
+    lines.push('=================================');
+    lines.push('===Сообщение - ' + formatStepHistoryDate(userMessage.receivedAt || userMessage.vkDate) + ' ===');
+    lines.push('=================================');
+    lines.push('Тип - ТЕКСТ');
+    lines.push(renderStepHistoryValue(userMessage.text));
+    lines.push('__________________________________________');
+    lines.push('Ответ бота - ' + formatStepHistoryDate(botResponse.sentAt || item.enteredAt));
+    lines.push('\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/');
+    lines.push('Тип - ТЕКСТ');
+    lines.push(renderStepHistoryValue(botResponse.text));
+    lines.push('___________________');
+    lines.push('Кнопки в ответе:');
+    lines.push('\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/');
+    Array.prototype.push.apply(lines, renderStepHistoryKeyboardLines(botResponse.keyboard));
+    lines.push('______________________');
+    lines.push('Вложения в ответе:');
+    lines.push('\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/');
+    lines.push(renderStepHistoryValue(botResponse.attachments));
+    lines.push('');
+    lines.push('====================');
+    lines.push('=== Условия проверки ===');
+    lines.push('====================');
+    Array.prototype.push.apply(lines, renderStepHistoryFieldLines([
+        { key: 'trigger', label: 'Триггер' },
+        { key: 'matchType', label: 'Точно/Не точно' },
+        { key: 'caseSensitive', label: 'Регистр' },
+        { key: 'requiredGroups', label: 'Ответить если в Группе' },
+        { key: 'afterStep', label: 'Ответил на Шаг' },
+        { key: 'userVariable', label: 'Пользовательская' },
+        { key: 'globalVariable', label: 'Глобальная' },
+        { key: 'sharedVariable', label: 'Переменная ПВС' }
+    ], item.conditions || {}));
+    lines.push('');
+    lines.push('=======================');
+    lines.push('=== Выполненные действия ===');
+    lines.push('=======================');
+    Array.prototype.push.apply(lines, renderStepHistoryFieldLines([
+        { key: 'delay', label: 'Задержка отправки на Шаг' },
+        { key: 'sendToStep', label: 'Отправить на Шаг' },
+        { key: 'addGroups', label: 'ДОБАВИТЬ ГРУППУ' },
+        { key: 'removeGroups', label: 'УДАЛИТЬ ГРУППУ' },
+        { key: 'userVariables', label: 'Действия с ПП' },
+        { key: 'globalVariables', label: 'Действия с ГП' },
+        { key: 'sharedVariables', label: 'Действия с ПВС' },
+        { key: 'legacyVariables', label: 'Действия с ПП/ГП/ПВК' }
+    ], item.actions || {}));
+    return '<pre class="user-step-history-log">' + escapeHtml(lines.join('\\n')) + '</pre>';
+}
+
+window.openUserStepHistorySnapshot = function(rowKey, index) {
+    var history = window.userStepHistorySnapshots && window.userStepHistorySnapshots[String(rowKey)] || [];
+    var item = history[Number(index)];
+    if (!item) {
+        showSuccessOverlay('<div style="font-size:24px;font-weight:bold;margin-bottom:12px;">История прохождения шага</div><div>Снимок шага не найден.</div>', { autoCloseMs: 0 });
+        return;
+    }
+    showSuccessOverlay(renderUserStepHistoryLog(item), { autoCloseMs: 0 });
+};
 
 
 
@@ -4760,6 +8994,8 @@ const STRUCTURED_TRIGGER_MESSAGE_CONDITIONS = [
     { value: 'text_not_equals', label: 'Сообщение не равно', needsValue: true },
     { value: 'text_contains', label: 'Сообщение содержит', needsValue: true },
     { value: 'text_not_contains', label: 'Сообщение не содержит', needsValue: true },
+    { value: 'text_starts_with', label: 'Сообщение начинается с', needsValue: true },
+    { value: 'text_ends_with', label: 'Сообщение заканчивается на', needsValue: true },
     { value: 'text_contains_user_var', label: 'Сообщение содержит Пользовательскую ПП', needsParam: true, paramLabel: 'Имя Пользовательской ПП', paramPlaceholder: 'Например: promo_text' },
     { value: 'text_contains_global_var', label: 'Сообщение содержит Глобальную ГП', needsParam: true, paramLabel: 'Имя Глобальной ГП', paramPlaceholder: 'Например: banner_text' },
     { value: 'text_contains_shared_var', label: 'Сообщение содержит Переменную ПВС', needsParam: true, paramLabel: 'Имя Переменной ПВС', paramPlaceholder: 'Например: profile_offer' },
@@ -4774,7 +9010,7 @@ const STRUCTURED_TRIGGER_MESSAGE_CONDITIONS = [
     { value: 'message_has_audio', label: 'Сообщение содержит аудиозапись' },
     { value: 'message_has_document', label: 'Сообщение содержит документ' },
     { value: 'message_has_voice', label: 'Сообщение содержит голосовое сообщение' },
-    { value: 'message_has_product', label: 'Сообщение содержит товар/услугу' }
+    { value: 'message_has_product', label: 'Сообщение содержит товар/услугу', needsProduct: true }
 ];
 
 const STRUCTURED_TRIGGER_BUTTON_CONDITIONS = [
@@ -4789,7 +9025,8 @@ const STRUCTURED_TRIGGER_POST_CONDITIONS = [
 
 const STRUCTURED_TRIGGER_COMMENT_TEXT_CONDITIONS = [
     { value: 'any_comment_text', label: 'Любой' },
-    { value: 'comment_text_contains', label: 'Текст содержит', needsValue: true }
+    { value: 'comment_text_contains', label: 'Текст содержит', needsValue: true },
+    { value: 'comment_text_from_list', label: 'Из списка', needsList: true }
 ];
 
 const STRUCTURED_TRIGGER_JOIN_REQUEST_CONDITIONS = [
@@ -4799,11 +9036,15 @@ const STRUCTURED_TRIGGER_JOIN_REQUEST_CONDITIONS = [
 ];
 
 const STRUCTURED_TRIGGER_ACTIONS = [
+    { value: 'delete_comment', label: 'Удалить комментарий' },
+    { value: 'like_comment', label: 'Поставить лайк' },
     { value: 'add_group', label: 'Добавить в группу' },
     { value: 'remove_group', label: 'Исключить из группы' },
     { value: 'add_to_bot', label: 'Добавить в бота' },
     { value: 'send_bot_answer', label: 'Отправить ответ с бота' },
     { value: 'remove_from_bot', label: 'Исключить из бота' },
+    { value: 'check_consent', label: 'Проверка Согласий' },
+    { value: 'delete_consent', label: 'Удаление Согласий' },
     { value: 'approve_group_request', label: 'Одобрить заявку в Сообщество' },
     { value: 'remove_from_community', label: 'Удалить пользователя из сообщества' },
     { value: 'delete_user_data', label: 'Удалить данные пользователя' },
@@ -4820,6 +9061,12 @@ const STRUCTURED_TRIGGER_ACTIONS = [
     { value: 'shared_var_delete', label: 'ПВС: Удалить' }
 ];
 
+const STRUCTURED_TRIGGER_DOCUMENT_TYPES = [
+    { value: 'personal_data_consent', label: 'Согласие на Обработку Персональных Данных' },
+    { value: 'personal_data_policy', label: 'Политика обработки персональных данных' },
+    { value: 'public_offer', label: 'Публичная оферта' }
+];
+
 window.structuredTriggerEditIndex = -1;
 window.structuredTriggerBuilderVisible = false;
 window.structuredTriggerDraftState = null;
@@ -4830,6 +9077,7 @@ function getDefaultStructuredTriggerAction() {
         actionGroup: '',
         actionBot: '',
         actionStep: '',
+        actionDocument: '',
         actionCommunityId: '',
         actionVarName: '',
         actionVarValue: ''
@@ -4844,6 +9092,7 @@ function normalizeStructuredTriggerActions(rawActions, rawState) {
             actionGroup: rawState?.actionGroup || '',
             actionBot: rawState?.actionBot || '',
             actionStep: rawState?.actionStep || '',
+            actionDocument: rawState?.actionDocument || '',
             actionCommunityId: rawState?.actionCommunityId || '',
             actionVarName: rawState?.actionVarName || '',
             actionVarValue: rawState?.actionVarValue || ''
@@ -4858,6 +9107,7 @@ function normalizeStructuredTriggerActions(rawActions, rawState) {
         normalized.actionGroup = String(normalized.actionGroup || '');
         normalized.actionBot = String(normalized.actionBot || '');
         normalized.actionStep = String(normalized.actionStep || '');
+        normalized.actionDocument = String(normalized.actionDocument || '');
         normalized.actionCommunityId = String(normalized.actionCommunityId || '');
         normalized.actionVarName = String(normalized.actionVarName || '');
         normalized.actionVarValue = String(normalized.actionVarValue || '');
@@ -4874,11 +9124,15 @@ function shouldStructuredTriggerActionShowGroup(actionCode) {
 }
 
 function shouldStructuredTriggerActionShowBot(actionCode) {
-    return actionCode === 'add_to_bot' || actionCode === 'send_bot_answer' || actionCode === 'remove_from_bot';
+    return actionCode === 'add_to_bot' || actionCode === 'send_bot_answer' || actionCode === 'remove_from_bot' || actionCode === 'check_consent' || actionCode === 'delete_consent';
 }
 
 function shouldStructuredTriggerActionShowStep(actionCode) {
-    return actionCode === 'add_to_bot' || actionCode === 'send_bot_answer';
+    return actionCode === 'add_to_bot' || actionCode === 'send_bot_answer' || actionCode === 'check_consent' || actionCode === 'delete_consent';
+}
+
+function shouldStructuredTriggerActionShowDocument(actionCode) {
+    return actionCode === 'check_consent' || actionCode === 'delete_consent';
 }
 
 function shouldStructuredTriggerActionShowCommunity(actionCode) {
@@ -5058,6 +9312,9 @@ function getStructuredTriggerFormState() {
         if (el) state[key] = el.value;
     });
 
+    var productEl = document.getElementById('structuredTriggerProduct');
+    if (productEl) state.value = productEl.value;
+
     var activeEl = document.getElementById('structuredTriggerActive');
     if (activeEl) state.active = !!activeEl.checked;
     var stopEl = document.getElementById('structuredTriggerStop');
@@ -5070,6 +9327,7 @@ function getStructuredTriggerFormState() {
             actionGroup: document.getElementById('structuredTriggerActionGroup_' + idx)?.value || '',
             actionBot: document.getElementById('structuredTriggerActionBot_' + idx)?.value || '',
             actionStep: document.getElementById('structuredTriggerActionStep_' + idx)?.value || '',
+            actionDocument: document.getElementById('structuredTriggerActionDocument_' + idx)?.value || '',
             actionCommunityId: document.getElementById('structuredTriggerActionCommunity_' + idx)?.value || '',
             actionVarName: document.getElementById('structuredTriggerActionVarName_' + idx)?.value || '',
             actionVarValue: document.getElementById('structuredTriggerActionVarValue_' + idx)?.value || ''
@@ -5176,6 +9434,296 @@ function getStructuredTriggerActionLabel(value) {
     return item ? item.label : '';
 }
 
+function getStructuredTriggerHumanValue(value, fallback) {
+    var text = String(value || '').trim();
+    return text ? '"' + text + '"' : (fallback || 'без значения');
+}
+
+function normalizeCommentTextListLines(value) {
+    var seen = {};
+    return String(value || '').split(/\\r?\\n/).map(function(line) {
+        return line.trim();
+    }).filter(function(line) {
+        var key = line.toLowerCase();
+        if (!key || seen[key]) return false;
+        seen[key] = true;
+        return true;
+    });
+}
+
+function getCommentTextLists() {
+    return (dataStore['CommentTextLists'] || []).map(function(row) {
+        return {
+            id: String(row.ID || '').trim(),
+            name: String(row['Название'] || '').trim(),
+            values: normalizeCommentTextListLines(row['Значения'] || '').join('\\n')
+        };
+    }).filter(function(item) {
+        return item.id && item.name;
+    });
+}
+
+function getCommentTextListName(listId) {
+    var targetId = String(listId || '').trim();
+    var item = getCommentTextLists().find(function(list) { return list.id === targetId; });
+    return item ? item.name : '';
+}
+
+function buildCommentTextListOptions(selectedId) {
+    var options = getCommentTextLists().map(function(item) {
+        return { value: item.id, label: item.name };
+    });
+    return buildStructuredTriggerOptionTags(options, selectedId, options.length ? 'Выберите сохранённый список' : 'Списков пока нет');
+}
+
+function createCommentTextListId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return 'ctl_' + window.crypto.randomUUID();
+    }
+    return 'ctl_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+}
+
+window.openCommentTextListEditor = function(listId) {
+    window.structuredTriggerDraftState = getStructuredTriggerFormState();
+    var targetId = String(listId || '').trim();
+    var item = getCommentTextLists().find(function(list) { return list.id === targetId; }) || null;
+    var overlay = document.getElementById('commentTextListOverlay');
+    if (overlay) overlay.remove();
+
+    overlay = document.createElement('div');
+    overlay.id = 'commentTextListOverlay';
+    overlay.className = 'comment-text-list-overlay';
+    overlay.onclick = function(event) {
+        if (event.target === overlay) closeCommentTextListEditor();
+    };
+    overlay.innerHTML =
+        '<div class="comment-text-list-dialog" role="dialog" aria-modal="true" aria-labelledby="commentTextListTitle">' +
+            '<h3 id="commentTextListTitle">' + (item ? 'Редактировать список' : 'Новый список') + '</h3>' +
+            '<div class="structured-trigger-field">' +
+                '<label for="commentTextListName">Название списка</label>' +
+                '<input id="commentTextListName" type="text" maxlength="120" placeholder="Например: Оскорбления">' +
+            '</div>' +
+            '<div class="structured-trigger-field" style="margin-top:14px;">' +
+                '<label for="commentTextListValues">Искомые слова и словосочетания</label>' +
+                '<textarea id="commentTextListValues" placeholder="Каждое слово или словосочетание — с новой строки.&#10;дурак&#10;негодяй эдакий&#10;придурок"></textarea>' +
+                '<div class="structured-trigger-footnote">Пустые строки и повторения будут удалены. Регистр букв при проверке не учитывается.</div>' +
+            '</div>' +
+            '<div id="commentTextListStatus"></div>' +
+            '<div class="comment-text-list-dialog-actions">' +
+                '<button class="btn btn-save" type="button" onclick="saveCommentTextListEditor(\\'' + escapeHtml(item ? item.id : '') + '\\')">Сохранить список</button>' +
+                (item ? '<button class="btn btn-delete" type="button" onclick="deleteCommentTextList(\\'' + escapeHtml(item.id) + '\\')">Удалить список</button>' : '') +
+                '<button class="btn btn-neutral" type="button" onclick="closeCommentTextListEditor()">Закрыть</button>' +
+            '</div>' +
+        '</div>';
+    document.body.appendChild(overlay);
+    document.getElementById('commentTextListName').value = item ? item.name : '';
+    document.getElementById('commentTextListValues').value = item ? item.values : '';
+    document.getElementById('commentTextListName').focus();
+};
+
+window.closeCommentTextListEditor = function() {
+    var overlay = document.getElementById('commentTextListOverlay');
+    if (overlay) overlay.remove();
+};
+
+window.saveCommentTextListEditor = async function(listId) {
+    var nameEl = document.getElementById('commentTextListName');
+    var valuesEl = document.getElementById('commentTextListValues');
+    var statusEl = document.getElementById('commentTextListStatus');
+    var name = String(nameEl?.value || '').trim();
+    var lines = normalizeCommentTextListLines(valuesEl?.value || '');
+    var targetId = String(listId || '').trim() || createCommentTextListId();
+
+    if (!name) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Укажите название списка.');
+        return;
+    }
+    if (!lines.length) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Добавьте хотя бы одно искомое слово или словосочетание.');
+        return;
+    }
+    var duplicate = getCommentTextLists().some(function(item) {
+        return item.id !== targetId && item.name.toLowerCase() === name.toLowerCase();
+    });
+    if (duplicate) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Список с таким названием уже существует.');
+        return;
+    }
+
+    var previousRows = (dataStore['CommentTextLists'] || []).slice();
+    var rows = previousRows.slice();
+    var row = { ID: targetId, 'Название': name, 'Значения': lines.join('\\n') };
+    var index = rows.findIndex(function(item) { return String(item.ID || '').trim() === targetId; });
+    if (index >= 0) rows[index] = row;
+    else rows.push(row);
+    dataStore['CommentTextLists'] = rows;
+
+    if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Сохраняю список...');
+    var success = await saveDataDirectly('CommentTextLists');
+    if (!success) {
+        dataStore['CommentTextLists'] = previousRows;
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Не удалось сохранить список.');
+        return;
+    }
+
+    var draft = normalizeStructuredTriggerState(window.structuredTriggerDraftState || getStructuredTriggerDefaultState());
+    draft.extraCondition = 'comment_text_from_list';
+    draft.extraValue = targetId;
+    window.structuredTriggerDraftState = draft;
+    closeCommentTextListEditor();
+    renderStructuredTriggerBuilder(draft);
+    updateStructuredTriggerStatus('✅ Список «' + escapeHtml(name) + '» сохранён.', 'success', true);
+};
+
+window.editSelectedCommentTextList = function() {
+    var selectEl = document.getElementById('structuredTriggerExtraValue');
+    var listId = String(selectEl?.value || '').trim();
+    if (!listId) {
+        updateStructuredTriggerStatus('Сначала выберите список для редактирования.', 'warn', true);
+        return;
+    }
+    openCommentTextListEditor(listId);
+};
+
+window.deleteCommentTextList = async function(listId) {
+    var targetId = String(listId || '').trim();
+    var item = getCommentTextLists().find(function(list) { return list.id === targetId; });
+    if (!item) return;
+    var usedBy = (dataStore['Triggers'] || []).filter(function(row) {
+        return String(row['Код доп. условия'] || '').trim() === 'comment_text_from_list' &&
+            String(row['Доп. значение'] || '').trim() === targetId;
+    });
+    var statusEl = document.getElementById('commentTextListStatus');
+    if (usedBy.length) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Этот список используется в триггерах: ' + usedBy.map(function(row) { return escapeHtml(row['Название'] || 'Без названия'); }).join(', ') + '.');
+        return;
+    }
+    if (!confirm('Удалить список «' + item.name + '»?')) return;
+    var previousRows = (dataStore['CommentTextLists'] || []).slice();
+    dataStore['CommentTextLists'] = previousRows.filter(function(row) {
+        return String(row.ID || '').trim() !== targetId;
+    });
+    var success = await saveDataDirectly('CommentTextLists');
+    if (!success) {
+        dataStore['CommentTextLists'] = previousRows;
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Не удалось удалить список из хранилища.');
+        return;
+    }
+    closeCommentTextListEditor();
+    renderStructuredTriggerBuilder(window.structuredTriggerDraftState || getStructuredTriggerDefaultState());
+    updateStructuredTriggerStatus('✅ Список удалён.', 'success', true);
+};
+
+function getStructuredTriggerConditionHumanText(state, definition) {
+    var value = getStructuredTriggerHumanValue(state.value);
+    var param = getStructuredTriggerHumanValue(state.conditionParam, 'без имени переменной');
+    var conditionMap = {
+        any_message: 'с любым текстом',
+        text_equals: 'с текстом, равным ' + value,
+        text_not_equals: 'с текстом, не равным ' + value,
+        text_contains: 'с текстом, содержащим ' + value,
+        text_not_contains: 'с текстом, не содержащим ' + value,
+        text_starts_with: 'с текстом, начинающимся с ' + value,
+        text_ends_with: 'с текстом, заканчивающимся на ' + value,
+        text_contains_user_var: 'с текстом, содержащим Пользовательскую ПП ' + param,
+        text_contains_global_var: 'с текстом, содержащим Глобальную ГП ' + param,
+        text_contains_shared_var: 'с текстом, содержащим Переменную ПВС ' + param,
+        text_regex: 'с текстом по регулярному выражению ' + value,
+        phone_ru: 'с российским номером телефона',
+        email: 'с e-mail',
+        number: 'с числом',
+        number_less_than: 'с числом меньше ' + value,
+        number_greater_than: 'с числом больше ' + value,
+        message_has_photo: 'с фотографией',
+        message_has_video: 'с видеозаписью',
+        message_has_audio: 'с аудиозаписью',
+        message_has_document: 'с документом',
+        message_has_voice: 'с голосовым сообщением',
+        message_has_product: state.value ? 'с товаром или услугой ' + value : 'с любым товаром или услугой',
+        any_button: 'с любым названием',
+        button_label_equals: 'с названием ' + value,
+        any_post: 'для любой записи',
+        post_links_match: 'для записи из списка ' + value,
+        any_comment_text: 'с любым текстом комментария',
+        comment_text_contains: 'с комментарием, содержащим ' + getStructuredTriggerHumanValue(state.extraValue || state.value),
+        comment_text_from_list: 'с комментарием, содержащим слово или фразу из списка ' + getStructuredTriggerHumanValue(getCommentTextListName(state.extraValue), 'список не выбран'),
+        any_request_condition: 'без дополнительного условия',
+        shared_var_equals: 'если переменная ПВС ' + param + ' равна ' + value,
+        shared_var_not_equals: 'если переменная ПВС ' + param + ' не равна ' + value
+    };
+
+    var baseMap = {
+        incoming_message: 'Если пользователь напишет сообщение',
+        outgoing_message: 'Если PAPA BOT отправит сообщение',
+        message_button_click: 'Если пользователь нажмет кнопку',
+        wall_repost: 'Если пользователь сделает репост записи',
+        wall_like: 'Если пользователь поставит лайк записи',
+        wall_comment_add: 'Если пользователь добавит комментарий к записи',
+        wall_comment_delete: 'Если пользователь удалит комментарий к записи',
+        user_group_join: 'Если пользователь вступит в сообщество',
+        user_group_request: 'Если пользователь отправит заявку на вступление в сообщество',
+        user_group_leave: 'Если пользователь выйдет из сообщества'
+    };
+
+    var baseText = baseMap[state.event] || ('Если произойдет событие "' + (definition.eventLabel || state.event || 'без названия') + '"');
+    var conditionText = conditionMap[state.condition] || '';
+    var extraText = definition.mode === 'wall_comment' ? conditionMap[state.extraCondition] : '';
+    return [baseText, conditionText, extraText].filter(function(part) {
+        return String(part || '').trim();
+    }).join(', ');
+}
+
+function getStructuredTriggerActionHumanText(actionItem) {
+    var action = actionItem || getDefaultStructuredTriggerAction();
+    var group = getStructuredTriggerHumanValue(action.actionGroup, 'без группы');
+    var bot = getStructuredTriggerHumanValue(action.actionBot, 'без бота');
+    var step = getStructuredTriggerHumanValue(action.actionStep, 'без шага');
+    var documentType = getStructuredTriggerHumanValue(action.actionDocument, 'без документа');
+    var community = getStructuredTriggerHumanValue(action.actionCommunityId, 'текущее сообщество');
+    var varName = getStructuredTriggerHumanValue(action.actionVarName, 'без имени переменной');
+    var varValue = getStructuredTriggerHumanValue(action.actionVarValue, 'без значения');
+    var actionMap = {
+        delete_comment: 'PAPA BOT удалит комментарий, который вызвал этот триггер',
+        like_comment: 'PAPA BOT поставит лайк комментарию, который вызвал этот триггер',
+        add_group: 'PAPA BOT добавит этому пользователю группу ' + group,
+        remove_group: 'PAPA BOT исключит этого пользователя из группы ' + group,
+        add_to_bot: 'PAPA BOT добавит этого пользователя в бота ' + bot + ', шаг ' + step,
+        send_bot_answer: 'PAPA BOT отправит этому пользователю ответ из бота ' + bot + ', шаг ' + step,
+        remove_from_bot: 'PAPA BOT исключит этого пользователя из бота ' + bot,
+        check_consent: 'PAPA BOT проверит согласие ' + documentType + ' и при необходимости отправит бота ' + bot + ', шаг ' + step,
+        delete_consent: 'PAPA BOT удалит согласие ' + documentType + ' и отправит бота ' + bot + ', шаг ' + step,
+        approve_group_request: 'PAPA BOT одобрит заявку в сообщество ' + community,
+        remove_from_community: 'PAPA BOT удалит пользователя из сообщества ' + community,
+        delete_user_data: 'PAPA BOT удалит данные пользователя',
+        delete_user_conversation: 'PAPA BOT удалит переписку с пользователем',
+        delete_user_data_and_conversation: 'PAPA BOT удалит данные пользователя и переписку с пользователем',
+        user_var_add: 'PAPA BOT запишет Пользовательскую ПП ' + varName + ' = ' + varValue,
+        user_var_update: 'PAPA BOT обновит Пользовательскую ПП ' + varName + ' = ' + varValue,
+        user_var_delete: 'PAPA BOT удалит Пользовательскую ПП ' + varName,
+        global_var_add: 'PAPA BOT запишет Глобальную ГП ' + varName + ' = ' + varValue,
+        global_var_update: 'PAPA BOT обновит Глобальную ГП ' + varName + ' = ' + varValue,
+        global_var_delete: 'PAPA BOT удалит Глобальную ГП ' + varName,
+        shared_var_add: 'PAPA BOT запишет переменную ПВС ' + varName + ' = ' + varValue,
+        shared_var_update: 'PAPA BOT обновит переменную ПВС ' + varName + ' = ' + varValue,
+        shared_var_delete: 'PAPA BOT удалит переменную ПВС ' + varName
+    };
+    return actionMap[action.action] || ('PAPA BOT выполнит действие "' + (getStructuredTriggerActionLabel(action.action) || action.action || 'без названия') + '"');
+}
+
+function buildStructuredTriggerHumanSummary(trigger) {
+    var state = normalizeStructuredTriggerState(
+        trigger && (trigger.event || trigger.actions) ? trigger : getStructuredTriggerStateFromRow(trigger || {})
+    );
+    var definition = getStructuredTriggerDefinition(state.category, state.section, state.event);
+    var actions = (Array.isArray(state.actions) && state.actions.length) ? state.actions : [getDefaultStructuredTriggerAction()];
+    var conditionText = getStructuredTriggerConditionHumanText(state, definition);
+    var actionText = actions.map(getStructuredTriggerActionHumanText).join('; ');
+    var behaviorText = state.stopFurther
+        ? 'После срабатывания остальные правила не проверяются.'
+        : 'После срабатывания остальные правила продолжают проверяться.';
+    return conditionText + ', то ' + actionText + '. ' + behaviorText;
+}
+
 function buildStructuredTriggerOptionTags(options, selectedValue, placeholder) {
     var html = '';
     if (placeholder) {
@@ -5222,6 +9770,53 @@ function collectStructuredTriggerGroups(currentValue) {
     return names.sort().map(function(name) {
         return { value: name, label: name };
     });
+}
+
+function getStructuredTriggerProductsCacheKey() {
+    return String(window.currentCommunityId || 'default');
+}
+
+function collectStructuredTriggerProducts(currentValue) {
+    var cacheKey = getStructuredTriggerProductsCacheKey();
+    var products = (window.structuredTriggerProductsByCommunity && window.structuredTriggerProductsByCommunity[cacheKey]) || [];
+    var options = products.map(function(item) {
+        return {
+            value: String(item.value || '').trim(),
+            label: String(item.label || item.title || item.value || '').trim()
+        };
+    }).filter(function(item) {
+        return item.value;
+    });
+
+    var current = String(currentValue || '').trim();
+    if (current && !options.some(function(item) { return item.value === current; })) {
+        options.push({ value: current, label: current });
+    }
+
+    return options;
+}
+
+async function ensureStructuredTriggerProductsLoaded() {
+    var cacheKey = getStructuredTriggerProductsCacheKey();
+    window.structuredTriggerProductsByCommunity = window.structuredTriggerProductsByCommunity || {};
+    window.structuredTriggerProductsLoading = window.structuredTriggerProductsLoading || {};
+    if (window.structuredTriggerProductsByCommunity[cacheKey] || window.structuredTriggerProductsLoading[cacheKey]) return;
+
+    window.structuredTriggerProductsLoading[cacheKey] = true;
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var url = baseUrl + '?getCommunityProducts=1&communityId=' + encodeURIComponent(window.currentCommunityId || '');
+        var data = await fetchAdminJson(url, { method: 'GET' });
+        window.structuredTriggerProductsByCommunity[cacheKey] = Array.isArray(data.products) ? data.products : [];
+    } catch (e) {
+        console.warn('[Admin] Не удалось загрузить товары сообщества:', e.message);
+        window.structuredTriggerProductsByCommunity[cacheKey] = [];
+    } finally {
+        delete window.structuredTriggerProductsLoading[cacheKey];
+        if (window.structuredTriggerBuilderVisible) {
+            renderStructuredTriggerBuilder(window.structuredTriggerDraftState || getStructuredTriggerFormState());
+        }
+    }
 }
 
 function collectStructuredTriggerSteps(botName, currentValue, includeCurrentValue) {
@@ -5362,11 +9957,14 @@ function renderStructuredTriggerBuilder(customState) {
     var events = getStructuredTriggerEvents(currentState.category, currentState.section);
     var conditionOptions = getStructuredTriggerConditionOptions(definition.mode);
     var currentCondition = conditionOptions.find(function(option) { return option.value === currentState.condition; }) || null;
-    var showConditionValue = !!(currentCondition && currentCondition.needsValue);
+    var showProductSelect = !!(currentCondition && currentCondition.needsProduct);
+    var showConditionValue = !!(currentCondition && currentCondition.needsValue && !currentCondition.needsProduct);
     var showExtra = definition.mode === 'wall_comment';
     var extraCondition = STRUCTURED_TRIGGER_COMMENT_TEXT_CONDITIONS.find(function(option) { return option.value === currentState.extraCondition; }) || STRUCTURED_TRIGGER_COMMENT_TEXT_CONDITIONS[0];
     var showExtraValue = !!(showExtra && extraCondition && extraCondition.needsValue);
+    var showExtraList = !!(showExtra && extraCondition && extraCondition.needsList);
     var groupOptions = collectStructuredTriggerGroups(currentState.actionGroup);
+    var productOptions = collectStructuredTriggerProducts(currentState.value);
     var botOptions = collectStructuredTriggerBots(currentState.actionBot);
     var stepOptions = collectStructuredTriggerSteps(currentState.actionBot, currentState.actionStep, true);
     var modeHint = '';
@@ -5377,12 +9975,14 @@ function renderStructuredTriggerBuilder(customState) {
     if (definition.mode === 'wall_comment') modeHint = 'Сначала фильтр по записи, затем при необходимости по тексту комментария.';
     if (definition.mode === 'none') modeHint = 'Для событий вступления и выхода дополнительные условия не нужны.';
     if (definition.mode === 'join_request') modeHint = 'Для заявки на вступление можно проверить значение Переменной ПВС и после этого одобрить заявку или выполнить другие действия.';
+    if (showProductSelect) ensureStructuredTriggerProductsLoaded();
 
     var actionsHtml = currentState.actions.map(function(actionItem, idx) {
         var localAction = Object.assign({}, getDefaultStructuredTriggerAction(), actionItem || {});
         var localShowGroup = shouldStructuredTriggerActionShowGroup(localAction.action);
         var localShowBot = shouldStructuredTriggerActionShowBot(localAction.action);
         var localShowStep = shouldStructuredTriggerActionShowStep(localAction.action);
+        var localShowDocument = shouldStructuredTriggerActionShowDocument(localAction.action);
         var localShowCommunity = shouldStructuredTriggerActionShowCommunity(localAction.action);
         var localShowVarName = shouldStructuredTriggerActionShowVarName(localAction.action);
         var localShowVarValue = shouldStructuredTriggerActionShowVarValue(localAction.action);
@@ -5395,6 +9995,7 @@ function renderStructuredTriggerBuilder(customState) {
                 (localShowGroup ? '<div class="structured-trigger-field"><label>Группа</label><input id="structuredTriggerActionGroup_' + idx + '" type="text" list="structuredTriggerGroupsList" value="' + escapeHtml(localAction.actionGroup) + '" placeholder="Выбери или впиши новую группу" oninput="handleStructuredTriggerInputChange()"></div>' : '') +
                 (localShowBot ? '<div class="structured-trigger-field"><label>Бот</label><select id="structuredTriggerActionBot_' + idx + '" onchange="handleStructuredTriggerFormChange()">' + buildStructuredTriggerOptionTags(botOptions, localAction.actionBot, 'Выбери бота') + '</select></div>' : '') +
                 (localShowStep ? '<div class="structured-trigger-field"><label>Шаг</label><select id="structuredTriggerActionStep_' + idx + '" onchange="handleStructuredTriggerFormChange()">' + buildStructuredTriggerOptionTags(localStepOptions, localAction.actionStep, 'Выбери шаг') + '</select></div>' : '') +
+                (localShowDocument ? '<div class="structured-trigger-field"><label>Документ</label><select id="structuredTriggerActionDocument_' + idx + '" onchange="handleStructuredTriggerFormChange()">' + buildStructuredTriggerOptionTags(STRUCTURED_TRIGGER_DOCUMENT_TYPES, localAction.actionDocument || 'personal_data_consent') + '</select></div>' : '') +
                 (localShowCommunity ? '<div class="structured-trigger-field"><label>ID сообщества</label><input id="structuredTriggerActionCommunity_' + idx + '" type="text" value="' + escapeHtml(localAction.actionCommunityId) + '" placeholder="Например: 229445618" oninput="handleStructuredTriggerInputChange()"></div>' : '') +
                 (localShowVarName ? '<div class="structured-trigger-field"><label>Название переменной</label><input id="structuredTriggerActionVarName_' + idx + '" type="text" value="' + escapeHtml(localAction.actionVarName) + '" placeholder="Например: pvs_banner" oninput="handleStructuredTriggerInputChange()"></div>' : '') +
                 (localShowVarValue ? '<div class="structured-trigger-field structured-trigger-field--full"><label>Значение переменной</label><textarea id="structuredTriggerActionVarValue_' + idx + '" placeholder="Введите значение переменной" oninput="handleStructuredTriggerInputChange()">' + escapeHtml(localAction.actionVarValue) + '</textarea></div>' : '') +
@@ -5419,10 +10020,12 @@ function renderStructuredTriggerBuilder(customState) {
         '<div class="structured-trigger-field"><label>Раздел</label><select id="structuredTriggerSection" onchange="handleStructuredTriggerFormChange()">' + buildStructuredTriggerOptionTags(sections, currentState.section) + '</select></div>' +
         '<div class="structured-trigger-field"><label>Событие</label><select id="structuredTriggerEvent" onchange="handleStructuredTriggerFormChange()">' + buildStructuredTriggerOptionTags(events, currentState.event) + '</select></div>' +
         (conditionOptions.length ? '<div class="structured-trigger-field"><label>Условие</label><select id="structuredTriggerCondition" onchange="handleStructuredTriggerFormChange()">' + buildStructuredTriggerOptionTags(conditionOptions, currentState.condition) + '</select></div>' : '') +
+        (showProductSelect ? '<div class="structured-trigger-field"><label>Товар</label><select id="structuredTriggerProduct" onchange="handleStructuredTriggerInputChange()">' + buildStructuredTriggerOptionTags(productOptions, currentState.value, productOptions.length ? 'Любой товар/услуга' : 'Нет товаров/услуг') + '</select></div>' : '') +
         (showConditionParam ? '<div class="structured-trigger-field"><label>' + escapeHtml(conditionParamLabel) + '</label><input id="structuredTriggerConditionParam" type="text" value="' + escapeHtml(currentState.conditionParam) + '" placeholder="' + escapeHtml(conditionParamPlaceholder) + '" oninput="handleStructuredTriggerInputChange()"></div>' : '') +
         (showConditionValue ? '<div class="structured-trigger-field structured-trigger-field--full"><label>Значение условия</label><textarea id="structuredTriggerValue" placeholder="' + escapeHtml((currentCondition && currentCondition.placeholder) || 'Введите значение') + '" oninput="handleStructuredTriggerInputChange()">' + escapeHtml(currentState.value) + '</textarea></div>' : '') +
         (showExtra ? '<div class="structured-trigger-field"><label>Текст комментария</label><select id="structuredTriggerExtraCondition" onchange="handleStructuredTriggerFormChange()">' + buildStructuredTriggerOptionTags(STRUCTURED_TRIGGER_COMMENT_TEXT_CONDITIONS, currentState.extraCondition) + '</select></div>' : '') +
         (showExtraValue ? '<div class="structured-trigger-field structured-trigger-field--full"><label>Значение дополнительного условия</label><input id="structuredTriggerExtraValue" type="text" value="' + escapeHtml(currentState.extraValue) + '" placeholder="Впишите искомый текст" oninput="handleStructuredTriggerInputChange()"></div>' : '') +
+        (showExtraList ? '<div class="structured-trigger-field structured-trigger-field--full"><label>Сохранённый список</label><div class="structured-trigger-list-picker"><select id="structuredTriggerExtraValue" onchange="handleStructuredTriggerInputChange()">' + buildCommentTextListOptions(currentState.extraValue) + '</select><button class="btn btn-add" type="button" data-tooltip="Создать и сохранить новый список" onclick="openCommentTextListEditor()">+</button><button class="btn btn-info" type="button" onclick="editSelectedCommentTextList()">Редактировать</button></div><div class="structured-trigger-footnote">Каждая строка списка — отдельное искомое слово или словосочетание.</div></div>' : '') +
         '<div class="structured-trigger-field structured-trigger-field--full"><label>Список действий</label><datalist id="structuredTriggerGroupsList">' + buildStructuredTriggerOptionTags(groupOptions, '', '') + '</datalist>' + actionsHtml + '<button class="btn btn-add" type="button" onclick="addStructuredTriggerAction()">+ Добавить действие</button></div>' +
         '<div class="structured-trigger-field structured-trigger-field--full"><label class="structured-trigger-toggle"><input id="structuredTriggerStop" type="checkbox" ' + (currentState.stopFurther ? 'checked' : '') + ' onchange="handleStructuredTriggerCheckboxChange()">Не применять остальные правила</label><div class="structured-trigger-footnote">Если включить, после срабатывания этого триггера остальные карточки больше не будут проверяться на это же событие.</div></div>' +
     '</div>' +
@@ -5442,7 +10045,7 @@ window.handleStructuredTriggerFormChange = function() {
     if (!shouldStructuredTriggerConditionShowParam(currentCondition)) {
         nextState.conditionParam = '';
     }
-    if (!(currentCondition && currentCondition.needsValue)) {
+    if (!(currentCondition && (currentCondition.needsValue || currentCondition.needsProduct))) {
         nextState.value = '';
     }
 
@@ -5452,6 +10055,9 @@ window.handleStructuredTriggerFormChange = function() {
 
         if (!shouldStructuredTriggerActionShowStep(nextAction.action)) {
             nextAction.actionStep = '';
+        }
+        if (!shouldStructuredTriggerActionShowDocument(nextAction.action)) {
+            nextAction.actionDocument = '';
         }
         if (!shouldStructuredTriggerActionShowCommunity(nextAction.action)) {
             nextAction.actionCommunityId = '';
@@ -5568,6 +10174,7 @@ function renderStructuredTriggerCards() {
                 { label: 'Группа', value: actionItem.actionGroup },
                 { label: 'Бот', value: actionItem.actionBot },
                 { label: 'Шаг', value: actionItem.actionStep },
+                { label: 'Документ', value: actionItem.actionDocument },
                 { label: 'ID сообщества', value: actionItem.actionCommunityId },
                 { label: 'Перем.', value: actionItem.actionVarName },
                 { label: 'Значение', value: actionItem.actionVarValue }
@@ -5576,7 +10183,8 @@ function renderStructuredTriggerCards() {
         var behaviorHtml = buildStructuredTriggerDetailList([
             { label: 'Режим', value: state.stopFurther ? 'После срабатывания остановить остальные правила' : 'После срабатывания продолжать проверку остальных правил' }
         ], '');
-        return '<div class="trigger-card structured-trigger-card ' + (state.active ? 'is-active' : 'is-inactive') + '">' +
+        var humanSummary = buildStructuredTriggerHumanSummary(row);
+        return '<div class="trigger-card structured-trigger-card ' + (state.active ? 'is-active' : 'is-inactive') + '" data-hint="' + escapeHtml(humanSummary) + '">' +
             '<div class="trigger-card-header">' +
                 '<div>' +
                     '<div class="trigger-card-title">' + escapeHtml(String(row['Название'] || definition.eventLabel || ('Триггер ' + (idx + 1)))) + '</div>' +
@@ -5623,6 +10231,19 @@ window.saveStructuredTriggerForm = async function() {
         if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Укажи значение для выбранного условия триггера.');
         return;
     }
+    if (state.extraCondition === 'comment_text_contains' && !state.extraValue.trim()) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Укажи искомый текст комментария.');
+        return;
+    }
+    if (state.extraCondition === 'comment_text_from_list') {
+        var selectedListExists = getCommentTextLists().some(function(item) {
+            return item.id === state.extraValue.trim();
+        });
+        if (!selectedListExists) {
+            if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Выбери сохранённый список или создай новый кнопкой «+».');
+            return;
+        }
+    }
 
     for (var i = 0; i < state.actions.length; i++) {
         var action = state.actions[i];
@@ -5631,12 +10252,16 @@ window.saveStructuredTriggerForm = async function() {
             if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Укажи группу для действия «' + escapeHtml(actionLabel) + '».');
             return;
         }
-        if ((action.action === 'add_to_bot' || action.action === 'remove_from_bot') && !action.actionBot.trim()) {
+        if ((action.action === 'add_to_bot' || action.action === 'remove_from_bot' || action.action === 'check_consent' || action.action === 'delete_consent') && !action.actionBot.trim()) {
             if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Выбери бота для действия «' + escapeHtml(actionLabel) + '».');
             return;
         }
-        if (action.action === 'add_to_bot' && !action.actionStep.trim()) {
-            if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Выбери шаг для добавления в бота.');
+        if (shouldStructuredTriggerActionShowStep(action.action) && !action.actionStep.trim()) {
+            if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Выбери шаг для действия «' + escapeHtml(actionLabel) + '».');
+            return;
+        }
+        if (shouldStructuredTriggerActionShowDocument(action.action) && !action.actionDocument.trim()) {
+            if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Выбери документ для действия «' + escapeHtml(actionLabel) + '».');
             return;
         }
         if (shouldStructuredTriggerActionShowCommunity(action.action) && !action.actionCommunityId.trim()) {
@@ -5790,14 +10415,228 @@ function normalizeTriggerMode(mode) {
     return ['TEXT', 'BUTTON', 'FILE'].includes(normalized) ? normalized : 'TEXT';
 }
 
+function normalizeTriggerModeForTab(tab, mode) {
+    var normalized = normalizeTriggerMode(mode);
+    if (tab === 'Comments' && normalized === 'BUTTON') return 'TEXT';
+    return normalized;
+}
 
+function getProfileAiIntegrationOptions(currentValue) {
+  var names = [];
+  var integrations = window.profileDashboardData && Array.isArray(window.profileDashboardData.aiIntegrations)
+    ? window.profileDashboardData.aiIntegrations
+    : [];
+  integrations.forEach(function(item) {
+    var name = String(item && item.name || '').trim();
+    if (name && !names.includes(name)) names.push(name);
+  });
+  var current = String(currentValue || '').trim();
+  if (current && !names.includes(current)) names.unshift(current);
+  return [''].concat(names);
+}
+
+async function ensureProfileAiIntegrationsForTables() {
+  if (window.profileDashboardData && Array.isArray(window.profileDashboardData.aiIntegrations)) return;
+  try {
+    var baseUrl = window.location.href.split('?')[0];
+    var profileId = encodeURIComponent(getCurrentProfileId() || getPrincipalProfileId() || '1');
+    var principalProfileId = encodeURIComponent(getPrincipalProfileId() || '1');
+    var res = await fetch(baseUrl + '?getProfileDashboard=1&profileId=' + profileId + '&principalProfileId=' + principalProfileId + '&_ts=' + Date.now(), { cache: 'no-store' });
+    var data = await res.json();
+    if (data && data.success && data.dashboard) {
+      window.profileDashboardData = Object.assign({}, window.profileDashboardData || {}, data.dashboard);
+    }
+  } catch (e) {
+    console.warn('[Admin] AI integrations were not loaded for table select:', e.message);
+  }
+}
+
+
+function isProtectedConsentTemplateRow(row) {
+  var botName = String((row && row['Бот']) || '').trim().toLowerCase();
+  var stepName = String((row && row['Шаг']) || '').trim().toLowerCase();
+  var protectedSteps = [
+    'согласие с опд и политикой опд',
+    'согласие с публичной офертой',
+    'согласен с согласие с опд',
+    'согласен с офертой',
+    'удаление согласие с опд и политикой опд'
+  ];
+  return row && row._templateProtected === 'consents_default_v2' && botName === 'согласия' && protectedSteps.indexOf(stepName) !== -1;
+}
+
+function getStickyTableConfig(tab) {
+  if (tab === 'Messages' || tab === 'Comments') {
+    return { className: 'sticky-table-bot-flow', count: 3 };
+  }
+  if (tab === 'Mailing') {
+    return { className: 'sticky-table-mailing-flow', count: 3 };
+  }
+  if (tab === 'Users') {
+    return { className: 'sticky-table-users-flow', count: 3 };
+  }
+  return null;
+}
+
+function getStickyColumnClass(tab, colIndex) {
+  const config = getStickyTableConfig(tab);
+  if (!config || colIndex >= config.count) return '';
+  return 'sticky-col sticky-col-' + (colIndex + 1);
+}
+
+function getTabFromTableElement(table) {
+  return String((table && table.id) || '').replace(/^table-/, '');
+}
+
+function getColumnWidthStorage() {
+  if (!window.adminTableColumnWidths || typeof window.adminTableColumnWidths !== 'object') {
+    window.adminTableColumnWidths = {};
+  }
+  return window.adminTableColumnWidths;
+}
+
+function getColumnWidthKey(tab, colIndex) {
+  return String(tab || '') + ':' + String(colIndex);
+}
+
+function getTableColumnCells(table, colIndex) {
+  return Array.from(table.querySelectorAll('tr')).map(function(row) {
+    return row.children[colIndex] || null;
+  }).filter(function(cell) {
+    return cell && Number(cell.colSpan || 1) === 1;
+  });
+}
+
+function setTableColumnWidth(table, colIndex, widthPx) {
+  const tab = getTabFromTableElement(table);
+  const width = Math.max(120, Math.ceil(Number(widthPx) || 0));
+  getColumnWidthStorage()[getColumnWidthKey(tab, colIndex)] = width;
+  getTableColumnCells(table, colIndex).forEach(function(cell) {
+    cell.style.width = width + 'px';
+    cell.style.minWidth = width + 'px';
+    cell.style.maxWidth = width + 'px';
+  });
+  updateStickyColumnOffsets(table);
+}
+
+function applyStoredTableColumnWidths(table, tab) {
+  const storage = getColumnWidthStorage();
+  Object.keys(storage).forEach(function(key) {
+    const parts = key.split(':');
+    if (parts[0] !== tab) return;
+    setTableColumnWidth(table, Number(parts[1]), storage[key]);
+  });
+  updateStickyColumnOffsets(table);
+}
+
+function getRenderedColumnWidth(table, colIndex) {
+  const cell = getTableColumnCells(table, colIndex)[0];
+  if (!cell) return 0;
+  return Math.ceil(cell.getBoundingClientRect().width);
+}
+
+function updateStickyColumnOffsets(table) {
+  const tab = getTabFromTableElement(table);
+  const config = getStickyTableConfig(tab);
+  if (!config) return;
+  let left = 0;
+  for (let colIndex = 0; colIndex < config.count; colIndex++) {
+    const cells = getTableColumnCells(table, colIndex);
+    cells.forEach(function(cell) {
+      cell.style.left = left + 'px';
+    });
+    left += getRenderedColumnWidth(table, colIndex);
+  }
+}
+
+function getRenderableColumns(tab) {
+  return (columns[tab] || []).filter(function(col) {
+    return !(col && typeof col === 'object' && col.hidden);
+  });
+}
+
+let activeTextareaColumnResize = null;
+let textareaColumnResizeFrame = null;
+
+function rememberTextareaColumnResizeStart(e) {
+  const textarea = e.currentTarget;
+  const cell = textarea.closest('td');
+  const table = textarea.closest('table');
+  if (!cell || !table || typeof cell.cellIndex !== 'number') return;
+  const textAreaRect = textarea.getBoundingClientRect();
+  const cellRect = cell.getBoundingClientRect();
+  activeTextareaColumnResize = {
+    textarea: textarea,
+    table: table,
+    colIndex: cell.cellIndex,
+    width: textAreaRect.width,
+    height: textAreaRect.height,
+    columnInset: Math.max(16, cellRect.width - textAreaRect.width),
+    lastAppliedWidth: 0
+  };
+  scheduleTextareaColumnResizeSync();
+}
+
+function syncTextareaColumnResizeFrame() {
+  const state = activeTextareaColumnResize;
+  if (!state || !state.textarea || !document.body.contains(state.textarea)) {
+    textareaColumnResizeFrame = null;
+    return;
+  }
+  const rect = state.textarea.getBoundingClientRect();
+  const nextColumnWidth = rect.width + state.columnInset;
+  if (Math.abs(rect.width - state.width) >= 1 || Math.abs(rect.height - state.height) >= 1) {
+    if (Math.abs(nextColumnWidth - state.lastAppliedWidth) >= 1) {
+      setTableColumnWidth(state.table, state.colIndex, nextColumnWidth);
+      state.lastAppliedWidth = nextColumnWidth;
+    }
+    state.width = rect.width;
+    state.height = rect.height;
+  }
+  textareaColumnResizeFrame = window.requestAnimationFrame(syncTextareaColumnResizeFrame);
+}
+
+function scheduleTextareaColumnResizeSync() {
+  if (textareaColumnResizeFrame) return;
+  textareaColumnResizeFrame = window.requestAnimationFrame(syncTextareaColumnResizeFrame);
+}
+
+function applyTextareaColumnResize() {
+  const state = activeTextareaColumnResize;
+  activeTextareaColumnResize = null;
+  if (textareaColumnResizeFrame) {
+    window.cancelAnimationFrame(textareaColumnResizeFrame);
+    textareaColumnResizeFrame = null;
+  }
+  if (!state || !state.textarea || !document.body.contains(state.textarea)) return;
+  const width = state.textarea.getBoundingClientRect().width;
+  const height = state.textarea.getBoundingClientRect().height;
+  if (Math.abs(width - state.width) < 3 && Math.abs(height - state.height) < 3) return;
+  setTableColumnWidth(state.table, state.colIndex, width + state.columnInset);
+}
+
+function ensureTextareaColumnResizeListeners() {
+  if (window.adminTextareaColumnResizeListenersAttached) return;
+  window.adminTextareaColumnResizeListenersAttached = true;
+  document.addEventListener('mouseup', applyTextareaColumnResize);
+  document.addEventListener('touchend', applyTextareaColumnResize);
+  document.addEventListener('pointerup', applyTextareaColumnResize);
+}
 
 function renderTable(tab, data) {
   const table = document.getElementById('table-'+tab);
   const cols = columns[tab] || [];
+  const renderableCols = getRenderableColumns(tab);
   const duplicableTabs = ['Messages', 'Comments', 'Users', 'Variables', 'Mailing', 'Delayed'];
   const canDuplicateRows = duplicableTabs.includes(tab);
   const isReadOnly = tab === 'VK_Variables';
+  const stickyTableConfig = getStickyTableConfig(tab);
+  if (table) {
+    table.classList.remove('table-has-sticky-columns', 'sticky-table-bot-flow', 'sticky-table-mailing-flow', 'sticky-table-users-flow');
+    if (stickyTableConfig) {
+      table.classList.add('table-has-sticky-columns', stickyTableConfig.className);
+    }
+  }
 
   // &#x1F916; ФИЛЬТРАЦИЯ ПО АКТИВНОМУ БОТУ для Messages и Comments
   let displayData = data;
@@ -5820,20 +10659,20 @@ function renderTable(tab, data) {
     // Обновляем текст в empty state
     if (!displayData || !displayData.length) {
       const botInfo = activeBot ? ' для бота "' + activeBot + '"' : '';
-      table.innerHTML = '<tr><td colspan="'+(cols.length+1)+'">Нет данных' + botInfo + '. Нажмите "+ Добавить Шаг"</td></tr>';
+      table.innerHTML = '<tr><td colspan="'+(renderableCols.length+1)+'">Нет данных' + botInfo + '. Нажмите "+ Добавить Шаг"</td></tr>';
       return;
     }
   } else {
     // Для остальных вкладок старая проверка
     if (!data || !data.length) {
-      table.innerHTML = '<tr><td colspan="'+(cols.length+1)+'">Нет данных. Нажмите "+ Добавить строку"</td></tr>';
+      table.innerHTML = '<tr><td colspan="'+(renderableCols.length+1)+'">Нет данных. Нажмите "+ Добавить строку"</td></tr>';
       return;
     }
   }
 
   // Группировка колонок по секциям
   const sections = {};
-  cols.forEach((col, idx) => {
+  renderableCols.forEach((col, idx) => {
     const section = (typeof col === 'object' && col.section) ? col.section : 'ОСНОВНОЕ';
     if (!sections[section]) sections[section] = [];
     sections[section].push({ col, idx });
@@ -5860,19 +10699,23 @@ function renderTable(tab, data) {
   html += '</tr><tr>';
 
   // Заголовки колонок (отдельные ячейки)
-  cols.forEach(col => {
+  renderableCols.forEach((col, colIdx) => {
     const name = typeof col === 'string' ? col : col.name;
     const colClass = typeof col === 'object' && col.class ? col.class : 'th-green';
     const hint = typeof col === 'object' && col.hint ? col.hint : '';
-    html += '<th class="'+colClass+'">';
+    const stickyClass = getStickyColumnClass(tab, colIdx);
+    html += '<th class="'+[colClass, stickyClass].filter(Boolean).join(' ')+'">';
     html += '<span class="col-name">'+escapeHtml(name)+'</span>';
     if (hint) {
       html += '<span class="help-icon" data-hint="'+escapeHtml(hint)+'">?</span>';
     }
+    if ((tab === 'Messages' || tab === 'Comments') && name === 'Бот') {
+      html += '<button class="bot-template-save-star" type="button" title="Сохранить активного бота в мои шаблоны" onclick="saveActiveBotAsTemplate(&quot;' + escapeHtml(tab) + '&quot;, event)">★</button>';
+    }
     html += '</th>';
   });
   if (!isReadOnly) {
-    html += '<th style="background:#FFCDD2"><button class="btn btn-delete-all" data-tab="' + escapeHtml(tab) + '" onclick="deleteAllRows(this)">УДАЛИТЬ ВСЕ</button></th>';
+    html += '<th style="background:#FFCDD2"><button class="btn btn-delete-all" data-tab="' + escapeHtml(tab) + '" onclick="deleteAllRows(this)">УДАЛИТЬ</button></th>';
   }
   html += '</tr></thead><tbody>';
 
@@ -5881,23 +10724,38 @@ function renderTable(tab, data) {
     // ВАЖНО: используем оригинальный индекс для правильной привязки к dataStore
     const originalIdx = displayToOriginalIndex ? displayToOriginalIndex[displayIdx] : displayIdx;
     html += '<tr>';
-    cols.forEach(col => {
+    renderableCols.forEach((col, colIdx) => {
       const name = typeof col === 'string' ? col : col.name;
-      const colType = typeof col === 'object' && col.type ? col.type : 'text';
-      const options = typeof col === 'object' && col.options ? col.options : null;
-      const hint = typeof col === 'object' && col.hint ? col.hint : '';
       const val = row[name] || '';
+      const stickyCellClass = getStickyColumnClass(tab, colIdx);
+      const getTdClassAttr = function(extraClass) {
+        const classList = [extraClass, stickyCellClass].filter(Boolean).join(' ');
+        return classList ? ' class="'+classList+'"' : '';
+      };
+      const isAiIntegrationColumn = name === 'ИИ' && (tab === 'Messages' || tab === 'Comments' || tab === 'Mailing');
+      const colType = isAiIntegrationColumn ? 'select' : (typeof col === 'object' && col.type ? col.type : 'text');
+      const options = isAiIntegrationColumn ? getProfileAiIntegrationOptions(val) : (typeof col === 'object' && col.options ? col.options : null);
+      const hint = typeof col === 'object' && col.hint ? col.hint : '';
       const placeholder = escapeHtml(getCellPlaceholder(tab, name, hint));
 
       if (isReadOnly) {
-        html += '<td><div class="trigger-card-value">' + escapeHtml(String(val || '')) + '</div></td>';
+        html += '<td'+getTdClassAttr('')+'><div class="trigger-card-value">' + escapeHtml(String(val || '')) + '</div></td>';
+      } else if (isAiIntegrationColumn && options) {
+        html += '<td'+getTdClassAttr('ai-integration-cell')+'>';
+        html += '<select class="ai-integration-select color-select" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" data-tab="'+escapeHtml(tab)+'" title="'+placeholder+'">';
+        options.forEach(opt => {
+          const selected = String(val || '').trim() === String(opt || '').trim() ? 'selected' : '';
+          html += '<option value="'+escapeHtml(opt)+'" '+selected+'>'+escapeHtml(opt || 'Без AI')+'</option>';
+        });
+        html += '</select>';
+        html += '</td>';
       } else if (colType === 'select' && options) {
         // Обработка выпадающего списка, в том числе для цвета/ссылки
         const isLinkField = name.includes('Цвет/Ссылка');
         const [currentColor, currentLink] = (val || '').split('||');
         const normalizedCurrentColor = (currentColor || '').trim().toLowerCase().replace(/ё/g, 'е');
-        html += '<td class="color-link-cell">';
-        html += '<select class="color-select" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" data-tab="'+escapeHtml(tab)+'" title="'+placeholder+'">';
+        html += '<td'+getTdClassAttr('color-link-cell')+'>';
+        html += '<select class="' + (isAiIntegrationColumn ? 'ai-integration-select ' : '') + 'color-select" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" data-tab="'+escapeHtml(tab)+'" title="'+placeholder+'">';
         options.forEach(opt => {
           const normalizedOpt = opt.trim().toLowerCase().replace(/ё/g, 'е');
           const selected = normalizedCurrentColor === normalizedOpt ? 'selected' : '';
@@ -5915,8 +10773,9 @@ function renderTable(tab, data) {
         const rows = Math.max(lineCount, 2);
 
         // Колонки для которых нужна кнопка "Test"
-        const testColumns = ['Ответ', 'Шаг'];
+        const testColumns = ['Ответ', 'Шаг', 'Сообщение Рассылки'];
         const isTestColumn = testColumns.includes(name);
+        const hasTestButton = isTestColumn && (tab === 'Messages' || tab === 'Comments' || tab === 'Mailing');
 
         // Колонки для которых нужна кнопка "Кнопки" (конструктор клавиатуры)
         const keyboardColumns = ['Ответ', 'Сообщение Рассылки'];
@@ -5926,55 +10785,81 @@ function renderTable(tab, data) {
         // &#x1F6E0;&#xFE0F; Кнопка "+" ТОЛЬКО для "Вложения к ответу"
         if (name === 'Вложения к ответу' || name === 'Вложения' || name === 'Вложение к рассылке') {
           // Кнопка "+" для поля Вложения
-          html += '<td class="cell-editor-wrap cell-with-tool">';
+          html += '<td'+getTdClassAttr('cell-editor-wrap cell-with-tool')+'>';
           html += '<textarea class="editable-cell" placeholder="'+placeholder+'" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" rows="'+rows+'">'+escapeHtml(val)+'</textarea>';
           html += '<button class="attach-btn" data-tab="'+tab+'" data-idx="'+originalIdx+'" data-col="'+name+'">+</button>';
+          html += '</td>';
+        } else if (name === 'Ответ' && tab === 'Comments') {
+          const replyPlacement = normalizeCommentReplyPlacement(row[COMMENT_REPLY_PLACEMENT_COLUMN], 'В ПОСТЕ');
+          const placementClass = replyPlacement === 'В КОММЕНТАРИИ' ? ' is-comment' : '';
+          html += '<td'+getTdClassAttr('cell-editor-wrap cell-with-tool cell-with-reply-placement')+'>';
+          html += '<textarea class="editable-cell" placeholder="'+placeholder+'" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" rows="'+rows+'">'+escapeHtml(val)+'</textarea>';
+          html += '<button class="comment-reply-placement-toggle'+placementClass+'" type="button" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-tooltip="'+escapeHtml(getCommentReplyPlacementTooltip(replyPlacement))+'">'+escapeHtml(getCommentReplyPlacementLabel(replyPlacement))+'</button>';
+          html += '<button class="test-btn" data-tab="'+tab+'" data-idx="'+originalIdx+'" data-col="'+name+'">Test</button>';
           html += '</td>';
         } else if (isKeyboardColumn && tabForKeyboard) {
           // &#x2328;&#xFE0F; Кнопка "Кнопки" для конструктора клавиатуры
           console.log('[Admin] 🎹 renderTable kb-btn: tab=' + tab + ', displayIdx=' + displayIdx + ', originalIdx=' + originalIdx + ', bot=' + (row['Бот'] || 'unknown') + ', hasKb=' + (row._keyboard ? 'yes' : 'no'));
-          const hasKb = row._keyboard ? 'background:#4CAF50;' : 'background:#9E9E9E;';
-          html += '<td class="cell-editor-wrap cell-with-tool">';
+          const hasKb = keyboardHasButtons(row._keyboard);
+          const kbButtonClass = 'kb-btn-cell' + (hasKb ? ' kb-btn-cell--has-buttons' : '');
+          const keyboardButtonOffset = hasTestButton ? 'right:58px !important;' : '';
+          html += '<td'+getTdClassAttr('cell-editor-wrap cell-with-tool')+'>';
           html += '<textarea class="editable-cell" placeholder="'+placeholder+'" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" rows="'+rows+'">'+escapeHtml(val)+'</textarea>';
-          html += '<button class="kb-btn-cell" data-tab="'+tab+'" data-idx="'+originalIdx+'" style="'+hasKb+' color:white;">&#x2328;&#xFE0F; Кнопки</button>';
+          html += '<button class="'+kbButtonClass+'" data-tab="'+tab+'" data-idx="'+originalIdx+'" style="color:white;'+keyboardButtonOffset+'">&#x2328;&#xFE0F; Кнопки</button>';
+          if (hasTestButton) {
+            html += '<button class="test-btn" data-tab="'+tab+'" data-idx="'+originalIdx+'" data-col="'+name+'">Test</button>';
+          }
           html += '</td>';
-        } else if (isTestColumn && (tab === 'Messages' || tab === 'Comments')) {
+        } else if (hasTestButton) {
           // &#x1F9EA; Кнопка "Test" для нужного поля
-          html += '<td class="cell-editor-wrap cell-with-tool">';
+          html += '<td'+getTdClassAttr('cell-editor-wrap cell-with-tool')+'>';
           html += '<textarea class="editable-cell" placeholder="'+placeholder+'" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" rows="'+rows+'">'+escapeHtml(val)+'</textarea>';
           html += '<button class="test-btn" data-tab="'+tab+'" data-idx="'+originalIdx+'" data-col="'+name+'">Test</button>';
           html += '</td>';
         } else if (name === 'Триггер' && (tab === 'Messages' || tab === 'Comments')) {
-          const triggerMode = normalizeTriggerMode(row._triggerMode);
-          html += '<td class="cell-editor-wrap cell-with-tool cell-with-trigger-mode">';
+          const triggerMode = normalizeTriggerModeForTab(tab, row._triggerMode);
+          html += '<td'+getTdClassAttr('cell-editor-wrap cell-with-tool cell-with-trigger-mode')+'>';
           html += '<textarea class="editable-cell" placeholder="'+placeholder+'" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" rows="'+rows+'">'+escapeHtml(val)+'</textarea>';
           html += '<div class="trigger-mode-wrap">';
           html += '<button class="trigger-mode-btn' + (triggerMode === 'TEXT' ? ' active' : '') + '" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-mode="TEXT">ТЕКСТ</button>';
-          html += '<button class="trigger-mode-btn' + (triggerMode === 'BUTTON' ? ' active' : '') + '" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-mode="BUTTON">КНОПКА</button>';
+          if (tab === 'Messages') {
+            html += '<button class="trigger-mode-btn' + (triggerMode === 'BUTTON' ? ' active' : '') + '" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-mode="BUTTON">КНОПКА</button>';
+          }
           html += '<button class="trigger-mode-btn' + (triggerMode === 'FILE' ? ' active' : '') + '" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-mode="FILE">ФАЙЛ</button>';
           html += '</div>';
           html += '</td>';
+        } else if (tab === 'Users' && name === 'Текущий Шаг') {
+          const userId = String(row['ID'] || '').trim();
+          html += '<td'+getTdClassAttr('cell-editor-wrap cell-with-tool')+'>';
+          html += '<textarea class="editable-cell" placeholder="'+placeholder+'" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" rows="'+rows+'" style="display:none;">'+escapeHtml(val)+'</textarea>';
+          html += renderUserStepHistoryButtons(val, originalIdx, userId);
+          html += '</td>';
         } else if ((name === 'Бот' && canDuplicateRows) || (name === '№' && (tab === 'Mailing' || tab === 'Delayed')) || (name === 'ID' && tab === 'Users')) {
-          html += '<td class="cell-editor-wrap cell-with-tool cell-with-copy">';
+          html += '<td'+getTdClassAttr('cell-editor-wrap cell-with-tool cell-with-copy')+'>';
           html += '<textarea class="editable-cell" placeholder="'+placeholder+'" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" rows="'+rows+'">'+escapeHtml(val)+'</textarea>';
           html += '<button class="copy-btn-cell" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'">Copy</button>';
           html += '</td>';
         } else {
           // ✅ Обычное поле textarea (расширяемое)
-          html += '<td><textarea class="editable-cell" placeholder="'+placeholder+'" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" rows="'+rows+'">'+escapeHtml(val)+'</textarea></td>';
+          html += '<td'+getTdClassAttr('')+'><textarea class="editable-cell" placeholder="'+placeholder+'" data-tab="'+escapeHtml(tab)+'" data-idx="'+originalIdx+'" data-name="'+escapeHtml(name)+'" rows="'+rows+'">'+escapeHtml(val)+'</textarea></td>';
         }
       }
     });
     // Кнопки действий по строке — используем ОРИГИНАЛЬНЫЙ индекс
     if (!isReadOnly) {
       html += '<td class="th-delete row-actions-cell"><div class="row-actions-wrap">';
-      html += '<button class="btn btn-delete" data-tab="' + escapeHtml(tab) + '" data-idx="' + originalIdx + '">УДАЛИТЬ</button>';
+      if (isProtectedConsentTemplateRow(row) && !isMainAdminSession()) {
+        html += '<button class="btn btn-delete" type="button" disabled title="Шаблонный шаг бота Согласия нельзя удалить">ШАБЛОН</button>';
+      } else {
+        html += '<button class="btn btn-delete" data-tab="' + escapeHtml(tab) + '" data-idx="' + originalIdx + '">УДАЛИТЬ</button>';
+      }
       html += '</div></td>';
     }
     html += '</tr>';
   });
   html += '</tbody>';
   table.innerHTML = html;
+  applyStoredTableColumnWidths(table, tab);
   attachTableHandlers(tab);
 
   // &#x1F6E0;&#xFE0F; Навешиваем обработчики на кнопки "+" (для Вложения к ответу)
@@ -6014,6 +10899,7 @@ async function getBotSettings() {
     throw new Error('HTTP ' + res.status + ': ' + text.substring(0, 200));
   }
   const data = await res.json();
+  rememberBotSettings(data);
   console.log('? Bot settings loaded:', data);
   return data;
 }
@@ -6023,31 +10909,304 @@ async function getBotSettings() {
 
 
 
-function showAttachmentDialog(tab, idx, col) {
+function getActiveCommunityDocuments() {
+  var profileDashboardData = window.profileDashboardData || {};
+  var communityDocuments = profileDashboardData.communityDocuments || {};
+  var keys = getSelectedProfileDashboardCommunityKeys();
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    if (communityDocuments[key]) return communityDocuments[key];
+  }
+  return {};
+}
 
+function getActiveCommunityFiles() {
+  var profileDashboardData = window.profileDashboardData || {};
+  var communityFiles = profileDashboardData.communityFiles || {};
+  var keys = getSelectedProfileDashboardCommunityKeys();
+  for (var i = 0; i < keys.length; i++) {
+    var key = keys[i];
+    if (Array.isArray(communityFiles[key])) return communityFiles[key];
+  }
+  return [];
+}
+
+function renderConsentDocumentAttachmentPicker(tab, idx, col) {
+  if (col !== 'Вложения к ответу') return null;
+
+  var wrapper = document.createElement('div');
+  wrapper.style.cssText = 'margin:0 0 15px 0; padding:12px; border:1px solid var(--section-border); border-radius:8px; background:var(--surface-muted);';
+
+  var label = document.createElement('label');
+  label.textContent = 'Добавить документ из ПРОФИЛЯ';
+  label.style.cssText = 'display:block; font-weight:700; margin-bottom:8px;';
+  wrapper.appendChild(label);
+
+  var select = document.createElement('select');
+  select.style.cssText = 'width:100%; margin-bottom:8px;';
+  var communityDocuments = getActiveCommunityDocuments();
+  var options = [];
+  Object.keys(communityDocuments).forEach(function(type) {
+    var versions = Array.isArray(communityDocuments[type]) ? communityDocuments[type] : [];
+    if (!versions.length) return;
+    var latest = versions[0] || {};
+    var attachment = String(latest.attachment || '').trim();
+    if (!attachment) return;
+    options.push({
+      attachment: attachment,
+      label: String(latest.shortName || latest.label || type) + ' ' + String(latest.version || '')
+    });
+  });
+
+  if (!options.length) {
+    var emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = 'Нет загруженных документов для текущего сообщества';
+    select.appendChild(emptyOption);
+  } else {
+    options.forEach(function(item) {
+      var option = document.createElement('option');
+      option.value = item.attachment;
+      option.textContent = item.label + ' - ' + item.attachment;
+      select.appendChild(option);
+    });
+  }
+  wrapper.appendChild(select);
+
+  var button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'btn btn-save';
+  button.textContent = 'Добавить';
+  button.disabled = !options.length;
+  button.onclick = function() {
+    if (!select.value) return;
+    window.insertConsentDocumentAttachment(tab, idx, col, select.value);
+    var existing = document.getElementById('attachmentModal');
+    if (existing) existing.remove();
+  };
+  wrapper.appendChild(button);
+
+  return wrapper;
+}
+
+function insertAttachmentIntoEditableRow(tab, idx, col, attachment) {
+  if (typeof window.attachmentDialogCallback === 'function') {
+    window.attachmentDialogCallback(attachment);
+    window.attachmentDialogCallback = null;
+    return;
+  }
+  var rows = dataStore[tab] || [];
+  var row = rows[idx];
+  if (!row) return;
+  var current = String(row[col] || '').split(/[,\\n]+/).map(function(value) {
+    return value.trim();
+  }).filter(Boolean);
+  if (current.indexOf(attachment) === -1) current.push(attachment);
+  row[col] = current.join('\\n');
+  renderTable(tab, rows);
+}
+
+window.insertConsentDocumentAttachment = function(tab, idx, col, attachment) {
+  insertAttachmentIntoEditableRow(tab, idx, col, attachment);
+};
+
+window.insertProfileFileAttachment = function(tab, idx, col, attachment) {
+  insertAttachmentIntoEditableRow(tab, idx, col, attachment);
+};
+
+function renderProfileFileAttachmentPicker(tab, idx, col) {
+  if (col !== 'Вложения к ответу' && col !== 'Вложение к рассылке') return null;
+
+  var wrapper = document.createElement('div');
+  wrapper.style.cssText = 'margin:0 0 15px 0; padding:12px; border:1px solid var(--section-border); border-radius:8px; background:var(--surface-muted);';
+
+  var label = document.createElement('label');
+  label.textContent = 'Добавить файл из ПРОФИЛЯ';
+  label.style.cssText = 'display:block; font-weight:700; margin-bottom:8px;';
+  wrapper.appendChild(label);
+
+  var select = document.createElement('select');
+  select.style.cssText = 'width:100%; margin-bottom:8px;';
+  var files = getActiveCommunityFiles().filter(function(item) {
+    return item && String(item.attachment || '').trim();
+  });
+
+  if (!files.length) {
+    var emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = 'Нет загруженных файлов для текущего сообщества';
+    select.appendChild(emptyOption);
+  } else {
+    files.forEach(function(item) {
+      var option = document.createElement('option');
+      var attachment = String(item.attachment || '').trim();
+      var fileName = String(item.fileName || 'Файл').trim();
+      var fileSize = window.formatProfileFileSize ? window.formatProfileFileSize(item.fileSize) : '';
+      option.value = attachment;
+      option.textContent = fileName + (fileSize ? ' · ' + fileSize : '') + ' - ' + attachment;
+      select.appendChild(option);
+    });
+  }
+  wrapper.appendChild(select);
+
+  var button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'btn btn-save';
+  button.textContent = 'Добавить';
+  button.disabled = !files.length;
+  button.onclick = function() {
+    if (!select.value) return;
+    window.insertProfileFileAttachment(tab, idx, col, select.value);
+    var existing = document.getElementById('attachmentModal');
+    if (existing) existing.remove();
+  };
+  wrapper.appendChild(button);
+
+  return wrapper;
+}
+
+function showTelegramAttachmentDialog(tab, idx, col, onAttachmentAdded) {
+  var existing = document.getElementById('attachmentModal');
+  if (existing) existing.remove();
+  window.attachmentDialogCallback = typeof onAttachmentAdded === 'function' ? onAttachmentAdded : null;
+  var scopeId = String(window.currentTelegramScopeId || '');
+  var bindingId = isTelegramBindingId(scopeId) ? scopeId : '';
+  var connectorId = String(window.currentTelegramConnectorId || '');
+  if (!isTelegramConnectorId(connectorId)) {
+    showPanelActionNotice('Сначала откройте сценарии выбранного TG-бота.', 'error');
+    return;
+  }
+
+  var modal = document.createElement('div');
+  modal.id = 'attachmentModal';
+  modal.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--modal-bg); color:var(--text-primary); padding:20px; border-radius:16px; border:1px solid var(--section-border); z-index:10080; min-width:320px; width:min(720px, calc(100% - 32px)); max-height:calc(100vh - 48px); overflow:auto; box-shadow:var(--container-shadow);';
+  var catalog = window.telegramFileCatalog[connectorId] || [];
+  var options = catalog.map(function(item) {
+    var value = item.kind === 'photo' ? 'tg:photo:' + item.file_id : (item.kind === 'video' ? 'tg:video:' + item.file_id : 'tg:file:' + item.file_id);
+    return '<option value="' + escapeHtml(value) + '">' + escapeHtml(item.name || item.kind || 'Вложение') + '</option>';
+  }).join('');
+  var directUploadTarget = bindingId ? '' : '<div class="telegram-form-field" style="margin-top:10px;"><label for="telegramAttachmentUploadChatId">Ваш Chat ID для служебной загрузки</label><input id="telegramAttachmentUploadChatId" type="text" inputmode="numeric" placeholder="Например: 797271200" value="' + escapeHtml(String(document.getElementById('telegramTestChatId')?.value || localStorage.getItem('papaBotTelegramUploadChatId') || '')) + '"><div class="profile-manager-subtitle" style="margin-top:6px;">Бот отправит вложение в этот личный чат, сохранит file_id и постарается удалить служебное сообщение.</div></div>';
+  modal.innerHTML = '<h4 style="margin:0 0 15px 0;">Вложения Telegram</h4>' +
+    '<div class="telegram-chat-editor"><label style="display:block;font-weight:800;margin-bottom:8px;">Использовать ранее загруженное</label><select id="telegramAttachmentCatalogSelect" style="width:100%;margin-bottom:10px;"><option value="">-- Выберите вложение --</option>' + options + '</select><button id="telegramUseCatalogAttachment" class="btn btn-info telegram-action-btn" type="button"' + (!catalog.length ? ' disabled' : '') + '>Добавить</button></div>' +
+    '<div class="telegram-chat-editor"><label style="display:block;font-weight:800;margin-bottom:8px;">Загрузить новое через выбранного TG-бота</label><input id="telegramAttachmentFile" type="file" style="width:100%;">' + directUploadTarget + '<div class="profile-manager-subtitle" style="margin-top:8px;">Telegram получит файл от этого бота, PAPA BOT сохранит возвращённый file_id и попробует удалить служебное сообщение. Максимум 3 МБ.</div><button id="telegramUploadAttachment" class="btn btn-save telegram-action-btn" type="button" style="margin-top:10px;">Загрузить</button></div>' +
+    '<div id="telegramAttachmentStatus"></div><button id="telegramAttachmentCancel" class="btn btn-neutral telegram-action-btn" type="button" style="margin-top:12px;">Отмена</button>';
+  document.body.appendChild(modal);
+
+  function insertTelegramAttachment(value) {
+    insertAttachmentIntoEditableRow(tab, idx, col, value);
+    modal.remove();
+  }
+  document.getElementById('telegramUseCatalogAttachment').onclick = function() {
+    var value = String(document.getElementById('telegramAttachmentCatalogSelect')?.value || '');
+    if (value) insertTelegramAttachment(value);
+  };
+  document.getElementById('telegramAttachmentCancel').onclick = function() {
+    window.attachmentDialogCallback = null;
+    modal.remove();
+  };
+  document.getElementById('telegramUploadAttachment').onclick = function() {
+    var input = document.getElementById('telegramAttachmentFile');
+    var file = input?.files?.[0];
+    var statusEl = document.getElementById('telegramAttachmentStatus');
+    var uploadChatId = bindingId ? '' : String(document.getElementById('telegramAttachmentUploadChatId')?.value || '').trim();
+    if (!file) {
+      statusEl.innerHTML = makeInlineNotice('error', 'Выберите файл.');
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      statusEl.innerHTML = makeInlineNotice('error', 'Размер файла превышает 3 МБ.');
+      return;
+    }
+    if (!bindingId && !uploadChatId) {
+      statusEl.innerHTML = makeInlineNotice('error', 'Укажите Chat ID личного диалога с выбранным ботом.');
+      return;
+    }
+    if (uploadChatId) localStorage.setItem('papaBotTelegramUploadChatId', uploadChatId);
+    statusEl.innerHTML = makeInlineNotice('warn', 'Загружаем файл через выбранного TG-бота...');
+    var reader = new FileReader();
+    reader.onload = async function() {
+      try {
+        var raw = String(reader.result || '');
+        var base64 = raw.indexOf(',') >= 0 ? raw.split(',')[1] : raw;
+        var baseUrl = window.location.href.split('?')[0].split('#')[0];
+        var response = await fetch(baseUrl + '?uploadTelegramAttachment=1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            binding_id: bindingId,
+            connector_id: connectorId,
+            chat_id: uploadChatId,
+            filename: file.name,
+            name: file.name,
+            mime_type: file.type || 'application/octet-stream',
+            base64: base64
+          })
+        });
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Не удалось загрузить вложение');
+        if (!window.telegramFileCatalog[connectorId]) window.telegramFileCatalog[connectorId] = [];
+        window.telegramFileCatalog[connectorId].push(data.attachment);
+        if (data.warning) showPanelActionNotice(escapeHtml(data.warning), 'warn');
+        insertTelegramAttachment(data.attachment.value);
+      } catch (e) {
+        statusEl.innerHTML = makeInlineNotice('error', 'Ошибка: ' + escapeHtml(e.message));
+      }
+    };
+    reader.onerror = function() {
+      statusEl.innerHTML = makeInlineNotice('error', 'Не удалось прочитать файл.');
+    };
+    reader.readAsDataURL(file);
+  };
+}
+
+async function showAttachmentDialog(tab, idx, col, onAttachmentAdded) {
+
+        if (window.currentAdminPlatform === 'telegram') {
+          showTelegramAttachmentDialog(tab, idx, col, onAttachmentAdded);
+          return;
+        }
 
         console.log('showAttachmentDialog called', {tab, idx, col});
         var existing = document.getElementById('attachmentModal');
         if (existing) existing.remove();
+        window.attachmentDialogCallback = typeof onAttachmentAdded === 'function' ? onAttachmentAdded : null;
+
+        if (!window.profileDashboardData && typeof window.loadProfileDashboard === 'function') {
+          try {
+            await window.loadProfileDashboard();
+          } catch (e) {
+            console.warn('[Admin] Failed to preload profile dashboard for attachment picker:', e);
+          }
+        }
 
         var modal = document.createElement('div');
         modal.id = 'attachmentModal';
-        modal.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--modal-bg); color:var(--text-primary); padding:20px; border-radius:16px; border:1px solid var(--section-border); z-index:10000; min-width:320px; box-shadow:var(--container-shadow);';
+        modal.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--modal-bg); color:var(--text-primary); padding:20px; border-radius:16px; border:1px solid var(--section-border); z-index:10080; min-width:320px; max-width:min(720px, calc(100% - 32px)); max-height:calc(100vh - 48px); overflow:auto; box-shadow:var(--container-shadow);';
 
   var title = document.createElement('h4');
   title.style.margin = '0 0 15px 0';
   title.textContent = 'Добавить вложение к ' + col;
   modal.appendChild(title);
 
+  var consentDocumentPicker = renderConsentDocumentAttachmentPicker(tab, idx, col);
+  if (consentDocumentPicker) {
+    modal.appendChild(consentDocumentPicker);
+  }
+  var profileFilePicker = renderProfileFileAttachmentPicker(tab, idx, col);
+  if (profileFilePicker) {
+    modal.appendChild(profileFilePicker);
+  }
+
   var fileLabel = document.createElement('label');
   fileLabel.textContent = 'Выберите файл:';
+  fileLabel.style.cssText = 'display:block; font-weight:700; margin-bottom:8px;';
   var fileInput = document.createElement('input');
   fileInput.type = 'file';
   fileInput.id = 'attachFile';
   fileInput.accept = '*/*';
-  fileInput.style.cssText = 'width:100%; margin-top:5px;';
+  fileInput.style.cssText = 'width:100%;';
   var fileDiv = document.createElement('div');
-  fileDiv.style.marginBottom = '15px';
+  fileDiv.style.cssText = 'margin:0 0 15px 0; padding:12px; border:1px solid var(--section-border); border-radius:8px; background:var(--surface-muted);';
   fileDiv.appendChild(fileLabel);
   fileDiv.appendChild(fileInput);
   modal.appendChild(fileDiv);
@@ -6055,8 +11214,8 @@ function showAttachmentDialog(tab, idx, col) {
   var buttonsDiv = document.createElement('div');
   buttonsDiv.style.cssText = 'display:flex; justify-content:flex-end; gap:10px;';
   var saveBtn = document.createElement('button');
-  saveBtn.id = 'attachSave';
-  saveBtn.textContent = 'Сохранить';
+  saveBtn.id = 'attachUploadSelectedFile';
+  saveBtn.textContent = 'Загрузить';
   saveBtn.style.cssText = 'background:#4CAF50; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;';
   var cancelBtn = document.createElement('button');
   cancelBtn.id = 'attachCancel';
@@ -6071,7 +11230,31 @@ function showAttachmentDialog(tab, idx, col) {
   statusDiv.style.cssText = 'margin-top:10px; font-size:12px; color:#999;';
   modal.appendChild(statusDiv);
 
-  document.body.appendChild(modal);
+document.body.appendChild(modal);
+
+async function requestRenderRelayGrant(baseUrl, context) {
+  var response = await fetch(baseUrl, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'create_render_upload_grant',
+      profileId: getCurrentProfileId(),
+      communityId: context.communityId,
+      groupId: context.groupId,
+      target: context.target,
+      upload_id: context.uploadId
+    }),
+    signal: AbortSignal.timeout(15000)
+  });
+  var text = await response.text();
+  var payload = null;
+  try { payload = JSON.parse(text); } catch (_error) {}
+  if (!response.ok || !payload || !payload.success || !payload.grant) {
+    throw new Error((payload && payload.error) || 'Не удалось подготовить защищённую загрузку Render');
+  }
+  return payload.grant;
+}
 
 saveBtn.onclick = function() {
   if (fileInput.files.length === 0) {
@@ -6088,30 +11271,32 @@ saveBtn.onclick = function() {
 
   // Проверяем размер файла
   var fileSizeMB = file.size / (1024 * 1024);
-  var useRenderService = fileSizeMB > 3; // Файлы больше 3MB загружаем через Render
+  // Токены никогда не покидают PAPA BOT: загрузка выполняется внутренним upload_attachment.
+  // Yandex Cloud Functions ограничивает размер тела запроса примерно 3,5 МБ.
+  // Крупные вложения отправляем напрямую в Render, где уже реализованы
+  // повторная попытка и восстановление результата загрузки.
+  var useRenderService = fileSizeMB > 3.5;
   var communityId = window.currentCommunityId || '';
   if (!communityId) {
     communityId = restoreCurrentCommunityIdFromStorage();
   }
   var groupId = '';
   var target = (tab === 'Messages') ? 'message' : 'comment';
-  var baseUrl = window.location.href.split('?')[0];
+  var baseUrl = window.location.href.split('?')[0].split('#')[0];
+  var uploadId = 'upload_' + Date.now() + '_' + Math.random().toString(36).slice(2, 12);
 
   getBotSettings().then(async function(settings) {
     // ✅ Берём VK Token (Community Token), User Token и vk_group_id из конфига активного сообщества
-    var communityToken = '';
-    var userToken = '';
-
     const communityConfig = settings.communities?.[communityId] || {};
-    
-    // Community Token — первый из массива vk_tokens
-    communityToken = communityConfig.vk_tokens?.[0] || communityConfig.vk_token || '';
-    userToken = communityConfig.user_token || '';
     groupId = communityConfig.vk_group_id || '';
 
     if (!communityId) throw new Error('Сообщество не выбрано. Обновите страницу и выберите сообщество.');
-    if (!communityToken) throw new Error('VK Token (Community Token) не настроен. Проверьте НАСТРОЙКА сообщества.');
-    if (!userToken) throw new Error('User Token не настроен. Проверьте НАСТРОЙКА сообщества.');
+    if (!(communityConfig.community_tokens_count > 0)) throw new Error('VK Token (Community Token) не настроен. Проверьте НАСТРОЙКА сообщества.');
+    if (!communityConfig.user_token_set) {
+      var userTokenError = new Error('USER_TOKEN_REQUIRED');
+      userTokenError.needsUserToken = true;
+      throw userTokenError;
+    }
     if (!groupId) throw new Error('VK Group ID не настроен');
 
     statusEl.innerText = '🌕 Загрузка в VK через сервис ' + (useRenderService ? 'Render' : 'PAPA BOT');
@@ -6124,7 +11309,7 @@ saveBtn.onclick = function() {
 
     var reader = new FileReader();
     return new Promise(function(resolve, reject) {
-      reader.onload = function() {
+      reader.onload = async function() {
         var result = String(reader.result || '');
         var base64 = result.includes(',') ? result.split(',')[1] : result;
 
@@ -6132,7 +11317,14 @@ saveBtn.onclick = function() {
           // Загружаем через Render для больших файлов
           var RENDER_SERVICE_URL = 'https://vk-uploader.onrender.com';
           var RENDER_UPLOADER_URL = 'https://vk-uploader.onrender.com/upload';
-          var uploadId = 'upload_' + Date.now() + '_' + Math.random().toString(36).slice(2, 12);
+          var renderGrant;
+          try {
+            renderGrant = await requestRenderRelayGrant(baseUrl, { communityId: communityId, groupId: groupId, target: target, uploadId: uploadId });
+          } catch (grantError) {
+            clearInterval(uploadAnimInterval);
+            reject(grantError);
+            return;
+          }
           
           var formData = new FormData();
           var byteString = atob(base64);
@@ -6141,11 +11333,12 @@ saveBtn.onclick = function() {
           for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
           var blob = new Blob([ab], { type: file.type || 'application/octet-stream' });
           formData.append('file', blob, file.name);
-          formData.append('user_token', userToken);
-          formData.append('community_token', communityToken);
+          formData.append('profile_id', getCurrentProfileId());
+          formData.append('community_id', communityId);
           formData.append('group_id', groupId);
           formData.append('target', target);
           formData.append('upload_id', uploadId);
+          formData.append('render_grant', renderGrant);
 
           var RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
           var RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
@@ -6318,6 +11511,13 @@ saveBtn.onclick = function() {
   .then(function(response) { 
     if (!response.ok) {
       return response.text().then(function(text) {
+        var payload = null;
+        try { payload = JSON.parse(text); } catch (e) {}
+        if (payload && payload.needsUserToken) {
+          var userTokenError = new Error(payload.error || 'USER_TOKEN_REQUIRED');
+          userTokenError.needsUserToken = true;
+          throw userTokenError;
+        }
         throw new Error('HTTP ' + response.status + ': ' + text.substring(0, 200));
       });
     }
@@ -6336,14 +11536,21 @@ saveBtn.onclick = function() {
       }).catch(function(error) {
         console.warn('[Admin] Failed to persist uploaded file record:', error);
       }).then(function() {
+      if (typeof window.attachmentDialogCallback === 'function') {
+        window.attachmentDialogCallback(attachment);
+        window.attachmentDialogCallback = null;
+        statusEl.innerText = '? Вложение добавлено: ' + attachment;
+        setTimeout(function() { modal.remove(); }, 1200);
+        return;
+      }
       // &#x1F6E0;&#xFE0F; ИСПРАВЛЕНИЕ: используем имя поля из параметра col
       var attachmentsField = col;
       if (!dataStore[tab][idx]) dataStore[tab][idx] = {};
       var currentAttachments = dataStore[tab][idx][attachmentsField] || '';
-      var attachmentsList = currentAttachments ? currentAttachments.split(',').map(function(a) { return a.trim(); }).filter(function(a) { return a; }) : [];
+      var attachmentsList = currentAttachments ? currentAttachments.split(/[,\\n]+/).map(function(a) { return a.trim(); }).filter(function(a) { return a; }) : [];
       if (attachmentsList.indexOf(attachment) === -1) {
         attachmentsList.push(attachment);
-        dataStore[tab][idx][attachmentsField] = attachmentsList.join(',');
+        dataStore[tab][idx][attachmentsField] = attachmentsList.join('\\n');
         console.log('?? Attachment saved:', attachment);
         console.log('[Admin] 📎 Attachment stored in dataStore:', {
           tab: tab,
@@ -6356,6 +11563,8 @@ saveBtn.onclick = function() {
       statusEl.innerText = '? Вложение добавлено: ' + attachment;
       setTimeout(function() { modal.remove(); }, 1500);
       });
+    } else if (result.needsUserToken) {
+      showUserTokenRequiredNotice(statusEl);
     } else {
       throw new Error(result.error || 'Ошибка загрузки');
     }
@@ -6363,12 +11572,17 @@ saveBtn.onclick = function() {
         .catch(function(err) {
             clearInterval(uploadAnimInterval);
             console.error('Upload error:', err);
+            if (err && err.needsUserToken) {
+                showUserTokenRequiredNotice(statusEl);
+                return;
+            }
             statusEl.innerText = '❌ Ошибка: ' + err.message;
         });
     }; // ? Закрывает saveBtn.onclick
 
     // ? cancelBtn.onclick (на том же уровне что и saveBtn.onclick)
     cancelBtn.onclick = function() {
+        window.attachmentDialogCallback = null;
         modal.remove();
     };
 
@@ -6388,6 +11602,9 @@ function showTestDialog(tab, idx, col) {
     if (col === 'Ответ') {
         modalTitle = '🧪 Тест: Отправить ответ';
         actionButtonText = 'Отправить ответ';
+    } else if (col === 'Сообщение Рассылки') {
+        modalTitle = '🧪 Тест: Отправить рассылку одному пользователю';
+        actionButtonText = 'Отправить тест';
     } else if (col === 'Шаг') {
         modalTitle = '🧪 Тест: Отправить на Шаг';
         actionButtonText = 'Отправить на Шаг';
@@ -6455,13 +11672,17 @@ async function loadUsersForTest(tab) {
     try {
         const baseUrl = window.location.href.split('?')[0];
         const sheet = sheetMap['Users'] || 'ПОЛЬЗОВАТЕЛИ';
-        const settingsRes = await fetch(baseUrl + '?getBotSettings');
-        const settingsData = await settingsRes.json();
-        const communityConfig = settingsData.communities?.[window.currentCommunityId] || {};
-        const vkGroupId = communityConfig.vk_group_id || window.currentCommunityId || '';
+        const contextId = getAdminDataContextId();
+        if (!contextId) throw new Error('Сначала выберите бота или сообщество.');
+        let settingsData = {};
+        if (window.currentAdminPlatform === 'vk') {
+            const settingsRes = await fetch(baseUrl + '?getBotSettings');
+            settingsData = await settingsRes.json();
+        }
+        const storageCommunityId = resolveAdminStorageCommunityId(settingsData, contextId);
 
         const url = baseUrl + '?sheet=' + encodeURIComponent(sheet) +
-                   (vkGroupId ? '&communityId=' + encodeURIComponent(vkGroupId) : '') +
+                   (storageCommunityId ? '&communityId=' + encodeURIComponent(storageCommunityId) : '') +
                    '&t=' + Date.now();
 
         const res = await fetch(url);
@@ -6560,6 +11781,10 @@ async function executeTestSend(tab, idx, col, userId) {
 
             // Собираем клавиатуру из кнопок ответа
             keyboard = buildKeyboardFromRow(row);
+        } else if (col === 'Сообщение Рассылки') {
+            text = row['Сообщение Рассылки'] || 'Тестовая рассылка';
+            attachments = row['Вложение к рассылке'] || '';
+            keyboard = buildKeyboardFromRow(row);
         } else if (col === 'Шаг') {
             // Для шага — находим строку с ЭТИМ шагом и берём её ответ + выполняем все действия
             const stepName = row['Шаг'] || '';
@@ -6638,9 +11863,10 @@ async function executeTestSend(tab, idx, col, userId) {
                 text: text,
                 attachments: attachments,
                 keyboard: keyboard,
-                communityId: window.currentCommunityId,
+                communityId: getAdminDataContextId(),
                 vkGroupId: vkGroupId,
-                stepActions: stepActions
+                stepActions: stepActions,
+                sourceBot: row['Бот'] || ''
             })
         });
 
@@ -6733,12 +11959,330 @@ function buildKeyboardFromRow(row) {
     return JSON.stringify({ one_time: false, inline: true, buttons: buttons });
 }
 
+function keyboardHasButtons(keyboardValue) {
+    if (!keyboardValue) return false;
+    try {
+        var kb = typeof keyboardValue === 'string' ? JSON.parse(keyboardValue) : keyboardValue;
+        if (!kb || !Array.isArray(kb.buttons)) return false;
+        return kb.buttons.some(function(row) {
+            return Array.isArray(row) && row.some(function(button) {
+                return button && button.action && String(button.action.label || '').trim();
+            });
+        });
+    } catch(e) {
+        return false;
+    }
+}
+
 // ===== КОНСТРУКТОР КЛАВИАТУРЫ =====
 // kbCtx.grid = 2D массив [row][col] — каждая ячейка содержит кнопку или null
-var kbCtx = { tab: null, rowIdx: null, type: 'inline', grid: [], maxCols: 6, maxRows: 5, maxButtons: 10 };
+var kbCtx = { tab: null, rowIdx: null, type: 'inline', grid: [], maxCols: 5, maxRows: 6, maxButtons: 10 };
+var kbEditorCtx = { row: null, col: null, draft: null };
 var KB_COLORS = [
     {v:'primary',l:'Синий'},{v:'secondary',l:'Белый'},{v:'positive',l:'Зелёный'},{v:'negative',l:'Красный'}
 ];
+
+function parseKbActionPayload(payload) {
+    if (!payload) return {};
+    if (typeof payload === 'string') {
+        try {
+            var parsed = JSON.parse(payload);
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch(e) {
+            return {};
+        }
+    }
+    return typeof payload === 'object' ? Object.assign({}, payload) : {};
+}
+
+function getKbPaymentPayload(btn) {
+    if (!btn || !btn.action) return {};
+    var payload = parseKbActionPayload(btn.action.payload);
+    return {
+        paymentIntegrationId: String(payload.paymentIntegrationId || btn.action.paymentIntegrationId || '').trim(),
+        paymentIntegrationName: String(payload.paymentIntegrationName || btn.action.paymentIntegrationName || '').trim(),
+        amountRub: String(payload.amountRub || btn.action.amountRub || '').trim(),
+        description: String(payload.description || btn.action.description || '').trim(),
+        prodamusOrderIdPrefix: String(payload.prodamusOrderIdPrefix || btn.action.prodamusOrderIdPrefix || '').trim(),
+        successBot: String(payload.successBot || btn.action.successBot || '').trim(),
+        successStep: String(payload.successStep || btn.action.successStep || '').trim(),
+        failBot: String(payload.failBot || btn.action.failBot || '').trim(),
+        failStep: String(payload.failStep || btn.action.failStep || '').trim()
+    };
+}
+
+function setKbPaymentPayloadValue(btn, key, value) {
+    if (!btn || !btn.action) return;
+    var payload = getKbPaymentPayload(btn);
+    payload[key] = value;
+    btn.action.payload = payload;
+}
+
+function getProfilePaymentIntegrationOptions() {
+    var integrations = window.profileDashboardData && Array.isArray(window.profileDashboardData.paymentIntegrations)
+        ? window.profileDashboardData.paymentIntegrations
+        : [];
+    return integrations
+        .filter(function(item) { return item && item.name && item.active !== false; })
+        .map(function(item) {
+            return {
+                id: String(item.id || item.name || '').trim(),
+                name: String(item.name || item.id || '').trim(),
+                provider: String(item.providerLabel || item.provider || '').trim()
+            };
+        })
+        .filter(function(item) { return item.id; });
+}
+
+function collectKbBotNames(currentValue) {
+    var names = [];
+    var tabs = [];
+    if (kbCtx.tab) tabs.push(kbCtx.tab);
+    if (tabs.indexOf('Messages') === -1) tabs.push('Messages');
+    if (tabs.indexOf('Comments') === -1) tabs.push('Comments');
+    tabs.forEach(function(tab) {
+        (dataStore[tab] || []).forEach(function(row) {
+            var botName = String(row['Бот'] || '').trim();
+            if (botName && names.indexOf(botName) === -1) names.push(botName);
+        });
+        (getBotsForTab(tab) || []).forEach(function(botName) {
+            botName = String(botName || '').trim();
+            if (botName && names.indexOf(botName) === -1) names.push(botName);
+        });
+    });
+    var current = String(currentValue || '').trim();
+    if (current && names.indexOf(current) === -1) names.push(current);
+    return names;
+}
+
+function collectKbStepNames(botName, currentValue) {
+    var steps = [];
+    var normalizedBot = String(botName || '').trim();
+    ['Messages', 'Comments'].forEach(function(tab) {
+        (dataStore[tab] || []).forEach(function(row) {
+            var rowBot = String(row['Бот'] || '').trim();
+            var step = String(row['Шаг'] || '').trim();
+            if (rowBot === normalizedBot && step && steps.indexOf(step) === -1) steps.push(step);
+        });
+    });
+    var current = String(currentValue || '').trim();
+    if (current && steps.indexOf(current) === -1) steps.push(current);
+    return steps;
+}
+
+function buildKbOptionTags(values, selectedValue, emptyLabel) {
+    var selected = String(selectedValue || '').trim();
+    var html = '<option value="">' + escapeHtml(emptyLabel || 'Выберите') + '</option>';
+    values.forEach(function(value) {
+        value = String(value || '').trim();
+        if (!value) return;
+        html += '<option value="' + escapeHtml(value) + '"' + (value === selected ? ' selected' : '') + '>' + escapeHtml(value) + '</option>';
+    });
+    return html;
+}
+
+function buildKbBotOptions(currentValue) {
+    return buildKbOptionTags(collectKbBotNames(currentValue), currentValue, 'Выберите бота');
+}
+
+function buildKbStepOptions(botName, currentValue) {
+    return buildKbOptionTags(collectKbStepNames(botName, currentValue), currentValue, botName ? 'Выберите шаг' : 'Сначала выберите бота');
+}
+
+function updateKbPaymentStepOptions(routeName) {
+    var botEl = document.getElementById('kbButtonEditorPayment' + routeName + 'Bot');
+    var stepEl = document.getElementById('kbButtonEditorPayment' + routeName + 'Step');
+    if (!botEl || !stepEl) return;
+    var previous = stepEl.value;
+    stepEl.innerHTML = buildKbStepOptions(botEl.value, previous);
+    if (previous && !stepEl.value) stepEl.value = previous;
+}
+
+function getKbColorLabel(value) {
+    var found = KB_COLORS.find(function(item) { return item.v === value; });
+    return found ? found.l : 'Синий';
+}
+
+function getKbButtonKind(btn) {
+    if (!btn || !btn.action) return 'color';
+    var payload = parseKbActionPayload(btn.action.payload);
+    if (btn.action.type === 'payment' || payload.payment === true || payload.action === 'payment') return 'payment';
+    if (btn.action.type === 'open_link' || btn.action.link) return 'link';
+    return 'color';
+}
+
+function getKbButtonKindLabel(kind) {
+    if (kind === 'payment') return 'Оплата';
+    if (kind === 'link') return 'Ссылка';
+    return 'Цвет';
+}
+
+function getKbButtonPreviewClass(btn) {
+    var kind = getKbButtonKind(btn);
+    if (kind === 'payment') return 'kb-btn-preview--payment';
+    if (kind === 'link') return 'kb-btn-preview--link';
+    var color = btn && btn.color ? btn.color : 'primary';
+    if (color === 'positive') return 'kb-btn-preview--positive';
+    if (color === 'negative') return 'kb-btn-preview--negative';
+    if (color === 'secondary') return 'kb-btn-preview--secondary';
+    return 'kb-btn-preview--primary';
+}
+
+function getKbButtonKindIcon(kind) {
+    if (kind === 'payment') return '💰 ';
+    if (kind === 'link') return '📎 ';
+    return '';
+}
+
+function renderKbButtonPreview(btn) {
+    var kind = getKbButtonKind(btn);
+    var payload = getKbPaymentPayload(btn);
+    var title = String((btn && btn.action && btn.action.label) || 'Текст').trim() || 'Текст';
+    var detail = getKbColorLabel(btn && btn.color ? btn.color : 'primary');
+    if (kind === 'link') {
+        detail = String((btn.action && btn.action.link) || 'https://...').replace(/^https?:\\/\\//, '').substring(0, 36);
+    } else if (kind === 'payment') {
+        var amount = payload.amountRub ? (payload.amountRub + ' ₽') : 'сумма не задана';
+        detail = (payload.paymentIntegrationName || payload.paymentIntegrationId || 'интеграция не выбрана') + ' · ' + amount;
+    }
+    return '<div class="kb-btn-preview-inner">' +
+        '<div class="kb-button-preview-title">' + escapeHtml(title) + '</div>' +
+        '<div class="kb-button-preview-type">' + escapeHtml(getKbButtonKindIcon(kind) + getKbButtonKindLabel(kind)) + '</div>' +
+        '<div class="kb-button-preview-detail">' + escapeHtml(detail) + '</div>' +
+        '</div>';
+}
+
+function cloneKbButton(btn) {
+    return JSON.parse(JSON.stringify(btn || { action: { type: 'text', label: '', payload: {} }, color: 'primary' }));
+}
+
+function getKbEditorValue(id) {
+    var el = document.getElementById(id);
+    return el ? el.value : '';
+}
+
+function setKbButtonEditorPaymentVisibility() {
+    var type = getKbEditorValue('kbButtonEditorType');
+    ['kbButtonEditorColorFields','kbButtonEditorLinkFields','kbButtonEditorPaymentFields'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    var visibleId = type === 'payment' ? 'kbButtonEditorPaymentFields' : (type === 'link' ? 'kbButtonEditorLinkFields' : 'kbButtonEditorColorFields');
+    var visible = document.getElementById(visibleId);
+    if (visible) visible.style.display = 'grid';
+}
+
+function openKbButtonEditor(rowIdx, colIdx) {
+    var current = kbCtx.grid[rowIdx] ? kbCtx.grid[rowIdx][colIdx] : null;
+    if (!current) {
+        current = { action: { type: 'text', label: '', payload: {} }, color: 'primary' };
+    }
+    kbEditorCtx = { row: rowIdx, col: colIdx, draft: cloneKbButton(current) };
+    var editor = document.getElementById('kbButtonEditor');
+    var body = document.getElementById('kbButtonEditorBody');
+    if (!editor || !body) return;
+    var draft = kbEditorCtx.draft;
+    var kind = getKbButtonKind(draft);
+    var paymentPayload = getKbPaymentPayload(draft);
+    var paymentOptions = getProfilePaymentIntegrationOptions();
+    var paymentOptionsHtml = '<option value="">Выберите интеграцию</option>' + paymentOptions.map(function(item) {
+        var selected = paymentPayload.paymentIntegrationId === item.id || paymentPayload.paymentIntegrationName === item.name ? ' selected' : '';
+        return '<option value="' + escapeHtml(item.id) + '" data-name="' + escapeHtml(item.name) + '"' + selected + '>' + escapeHtml(item.name + (item.provider ? ' · ' + item.provider : '')) + '</option>';
+    }).join('');
+    var successBotOptionsHtml = buildKbBotOptions(paymentPayload.successBot);
+    var successStepOptionsHtml = buildKbStepOptions(paymentPayload.successBot, paymentPayload.successStep);
+    var failBotOptionsHtml = buildKbBotOptions(paymentPayload.failBot);
+    var failStepOptionsHtml = buildKbStepOptions(paymentPayload.failBot, paymentPayload.failStep);
+    body.innerHTML =
+        '<div class="kb-button-editor-grid">' +
+        '<div class="kb-button-editor-field"><label>Название кнопки</label><input id="kbButtonEditorLabel" type="text" maxlength="40" value="' + escapeHtml(draft.action.label || '') + '" placeholder="Текст кнопки"></div>' +
+        '<div class="kb-button-editor-field"><label>Тип кнопки</label><select id="kbButtonEditorType">' +
+        '<option value="color"' + (kind === 'color' ? ' selected' : '') + '>Цвет</option>' +
+        '<option value="link"' + (kind === 'link' ? ' selected' : '') + '>Ссылка</option>' +
+        '<option value="payment"' + (kind === 'payment' ? ' selected' : '') + '>Оплата</option>' +
+        '</select></div>' +
+        '</div>' +
+        '<div id="kbButtonEditorColorFields" class="kb-button-editor-grid" style="margin-top:10px;">' +
+        '<div class="kb-button-editor-field kb-button-editor-wide"><label>Цвет</label><select id="kbButtonEditorColor">' +
+        KB_COLORS.map(function(item) { return '<option value="' + item.v + '"' + ((draft.color || 'primary') === item.v ? ' selected' : '') + '>' + item.l + '</option>'; }).join('') +
+        '</select></div></div>' +
+        '<div id="kbButtonEditorLinkFields" class="kb-button-editor-grid" style="margin-top:10px;">' +
+        '<div class="kb-button-editor-field kb-button-editor-wide"><label>Ссылка</label><input id="kbButtonEditorLink" type="text" value="' + escapeHtml(draft.action.link || '') + '" placeholder="https://..."></div></div>' +
+        '<div id="kbButtonEditorPaymentFields" class="kb-button-editor-grid" style="margin-top:10px;">' +
+        '<div class="kb-button-editor-field"><label>Платежная интеграция</label><select id="kbButtonEditorPaymentIntegration" class="kb-payment-integration">' + paymentOptionsHtml + '</select></div>' +
+        '<div class="kb-button-editor-field"><label>Сумма, ₽</label><input id="kbButtonEditorPaymentAmount" class="kb-payment-amount" type="number" min="1" step="1" value="' + escapeHtml(paymentPayload.amountRub || '') + '"></div>' +
+        '<div class="kb-button-editor-field kb-button-editor-wide"><label>Описание платежа</label><input id="kbButtonEditorPaymentDescription" class="kb-payment-description" type="text" value="' + escapeHtml(paymentPayload.description || '') + '"></div>' +
+        '<div class="kb-button-editor-field kb-button-editor-wide"><label>Номер заказа в Prodamus</label><input id="kbButtonEditorPaymentProdamusOrderIdPrefix" class="kb-payment-prodamus-order-id-prefix" type="text" value="' + escapeHtml(paymentPayload.prodamusOrderIdPrefix || '') + '" placeholder="Например: invoice"></div>' +
+        '<div class="kb-button-editor-field"><label>Успешно: бот</label><select id="kbButtonEditorPaymentSuccessBot" class="kb-payment-success-bot">' + successBotOptionsHtml + '</select></div>' +
+        '<div class="kb-button-editor-field"><label>Успешно: шаг</label><select id="kbButtonEditorPaymentSuccessStep" class="kb-payment-success-step">' + successStepOptionsHtml + '</select></div>' +
+        '<div class="kb-button-editor-field"><label>Неуспешно: бот</label><select id="kbButtonEditorPaymentFailBot" class="kb-payment-fail-bot">' + failBotOptionsHtml + '</select></div>' +
+        '<div class="kb-button-editor-field"><label>Неуспешно: шаг</label><select id="kbButtonEditorPaymentFailStep" class="kb-payment-fail-step">' + failStepOptionsHtml + '</select></div>' +
+        '</div>';
+    document.getElementById('kbButtonEditorOverlay').style.display = 'flex';
+    document.getElementById('kbButtonEditorType').onchange = setKbButtonEditorPaymentVisibility;
+    document.getElementById('kbButtonEditorSave').onclick = saveKbButtonEditor;
+    document.getElementById('kbButtonEditorCancel').onclick = closeKbButtonEditor;
+    document.getElementById('kbButtonEditorClose').onclick = closeKbButtonEditor;
+    document.getElementById('kbButtonEditorDelete').onclick = deleteKbButtonFromEditor;
+    document.getElementById('kbButtonEditorPaymentSuccessBot').onchange = function() { updateKbPaymentStepOptions('Success'); };
+    document.getElementById('kbButtonEditorPaymentFailBot').onchange = function() { updateKbPaymentStepOptions('Fail'); };
+    updateKbPaymentStepOptions('Success');
+    updateKbPaymentStepOptions('Fail');
+    setKbButtonEditorPaymentVisibility();
+}
+
+function closeKbButtonEditor() {
+    var overlay = document.getElementById('kbButtonEditorOverlay');
+    if (overlay) overlay.style.display = 'none';
+    kbEditorCtx = { row: null, col: null, draft: null };
+}
+
+function deleteKbButtonFromEditor() {
+    if (kbEditorCtx.row === null || kbEditorCtx.col === null) return;
+    kbCtx.grid[kbEditorCtx.row][kbEditorCtx.col] = null;
+    closeKbButtonEditor();
+    renderKbGrid();
+}
+
+function saveKbButtonEditor() {
+    if (kbEditorCtx.row === null || kbEditorCtx.col === null) return;
+    var label = getKbEditorValue('kbButtonEditorLabel').trim().substring(0, 40);
+    if (!label) {
+        alert('Введите название кнопки');
+        return;
+    }
+    var type = getKbEditorValue('kbButtonEditorType');
+    var btn;
+    if (type === 'link') {
+        btn = { action: { type: 'open_link', label: label, link: getKbEditorValue('kbButtonEditorLink').trim() } };
+    } else if (type === 'payment') {
+        var select = document.getElementById('kbButtonEditorPaymentIntegration');
+        var selected = select ? select.options[select.selectedIndex] : null;
+        btn = {
+            action: {
+                type: 'payment',
+                label: label,
+                payload: {
+                    paymentIntegrationId: getKbEditorValue('kbButtonEditorPaymentIntegration').trim(),
+                    paymentIntegrationName: selected ? (selected.getAttribute('data-name') || selected.textContent || '') : '',
+                    amountRub: getKbEditorValue('kbButtonEditorPaymentAmount').trim(),
+                    description: getKbEditorValue('kbButtonEditorPaymentDescription').trim(),
+                    prodamusOrderIdPrefix: getKbEditorValue('kbButtonEditorPaymentProdamusOrderIdPrefix').trim(),
+                    successBot: getKbEditorValue('kbButtonEditorPaymentSuccessBot').trim(),
+                    successStep: getKbEditorValue('kbButtonEditorPaymentSuccessStep').trim(),
+                    failBot: getKbEditorValue('kbButtonEditorPaymentFailBot').trim(),
+                    failStep: getKbEditorValue('kbButtonEditorPaymentFailStep').trim()
+                }
+            },
+            color: 'positive'
+        };
+    } else {
+        btn = { action: { type: 'text', label: label, payload: {} }, color: getKbEditorValue('kbButtonEditorColor') || 'primary' };
+    }
+    kbCtx.grid[kbEditorCtx.row][kbEditorCtx.col] = btn;
+    closeKbButtonEditor();
+    renderKbGrid();
+}
 
 function initKbGrid() {
     kbCtx.grid = [];
@@ -6761,11 +12305,55 @@ function countKbButtons() {
     return count;
 }
 
+function countKbLinkLikeButtons(buttonRows) {
+    var count = 0;
+    (buttonRows || []).forEach(function(row) {
+        (row || []).forEach(function(button) {
+            var actionType = button && button.action ? button.action.type : '';
+            if (actionType === 'open_link' || actionType === 'payment') count += 1;
+        });
+    });
+    return count;
+}
+
+function validateKeyboardForVkRules(buttonRows) {
+    var errors = [];
+    var totalButtons = 0;
+    var linkLikeCount = countKbLinkLikeButtons(buttonRows);
+    (buttonRows || []).forEach(function(row, rowIndex) {
+        var rowButtons = Array.isArray(row) ? row : [];
+        var rowLinkLikeCount = countKbLinkLikeButtons([rowButtons]);
+        totalButtons += rowButtons.length;
+        if (rowButtons.length > 5) {
+            errors.push('Ряд ' + (rowIndex + 1) + ' — по правилам VK максимум 5 кнопок в одном ряду');
+        }
+        if (kbCtx.type === 'inline' && rowLinkLikeCount > 0 && rowButtons.length > 2) {
+            errors.push('Ряд ' + (rowIndex + 1) + ' — если в ряду есть Ссылка или Оплата, по правилам VK максимум 2 кнопки в одном ряду');
+        }
+    });
+    if (kbCtx.type === 'inline') {
+        if (totalButtons > 10) errors.push('Для клавиатуры "В сообщении" максимум 10 кнопок (сейчас ' + totalButtons + ')');
+        if (buttonRows.length > 6) errors.push('Для клавиатуры "В сообщении" максимум 6 рядов');
+    } else {
+        if (totalButtons > 40) errors.push('Для клавиатуры "Под сообщением" максимум 40 кнопок (сейчас ' + totalButtons + ')');
+        if (buttonRows.length > 10) errors.push('Для клавиатуры "Под сообщением" максимум 10 рядов');
+        if (linkLikeCount > 0) {
+            errors.push('Кнопки типа Ссылка и Оплата доступны только в режиме "В сообщении", потому что VK open_link работает в inline-клавиатуре');
+        }
+    }
+    return errors;
+}
+
 function openKeyboardModal(tab, rowIdx) {
     kbCtx.tab = tab;
     kbCtx.rowIdx = rowIdx;
     var row = dataStore[tab] ? dataStore[tab][rowIdx] : null;
     if (!row) { alert('Строка не найдена. Сохраните данные.'); return; }
+    if ((!window.profileDashboardData || !Array.isArray(window.profileDashboardData.paymentIntegrations)) && typeof window.loadProfileDashboard === 'function') {
+        window.loadProfileDashboard().then(function() {
+            if (document.getElementById('keyboardModal')?.style.display === 'flex') renderKbGrid();
+        }).catch(function() {});
+    }
 
     console.log('[Admin] 🎹 Opening keyboard modal, rowIdx:', rowIdx, '_keyboard:', row._keyboard ? 'present' : 'missing');
     console.log('[Admin] 🎹 Row keys:', Object.keys(row));
@@ -6882,6 +12470,7 @@ function openKeyboardModal(tab, rowIdx) {
 }
 
 function closeKeyboardModal() {
+    closeKbButtonEditor();
     document.getElementById('keyboardModal').style.display = 'none';
 }
 
@@ -6889,16 +12478,16 @@ function updateKbLimits() {
     var el = document.getElementById('kbLimits');
     var oldMaxCols = kbCtx.maxCols;
     if (kbCtx.type === 'inline') {
-        kbCtx.maxCols = 6; kbCtx.maxRows = 5; kbCtx.maxButtons = 10;
-        el.innerHTML = 'Сетка: 5&times;6 | До <span style="font-size:22px;font-weight:bold;color:#d32f2f;">10</span> кнопок | Текст: до 40 символов';
+        kbCtx.maxCols = 5; kbCtx.maxRows = 6; kbCtx.maxButtons = 10;
+        el.innerHTML = 'Сетка VK: 6&times;5 | До <span style="font-size:22px;font-weight:bold;color:#d32f2f;">10</span> кнопок | Текст: до 40 символов | Ссылки и оплата только здесь';
         el.style.borderLeftColor = '#2196F3';
     } else {
-        kbCtx.maxCols = 10; kbCtx.maxRows = 5; kbCtx.maxButtons = 40;
-        el.innerHTML = 'Сетка: 5&times;10 | До <span style="font-size:22px;font-weight:bold;color:#d32f2f;">40</span> кнопок | Текст: до 40 символов';
+        kbCtx.maxCols = 5; kbCtx.maxRows = 10; kbCtx.maxButtons = 40;
+        el.innerHTML = 'Сетка VK: 10&times;5 | До <span style="font-size:22px;font-weight:bold;color:#d32f2f;">40</span> кнопок | Текст: до 40 символов | Без ссылок и оплаты';
         el.style.borderLeftColor = '#9C27B0';
     }
     // Перестраиваем grid при изменении размеров, СОХРАНЯЯ данные
-    if (kbCtx.grid && kbCtx.grid.length > 0 && kbCtx.grid[0].length !== kbCtx.maxCols) {
+    if (kbCtx.grid && kbCtx.grid.length > 0 && (kbCtx.grid.length !== kbCtx.maxRows || kbCtx.grid[0].length !== kbCtx.maxCols)) {
         var oldGrid = kbCtx.grid;
         kbCtx.grid = [];
         for (var r = 0; r < kbCtx.maxRows; r++) {
@@ -6914,28 +12503,76 @@ function updateKbLimits() {
 
 function onKbTypeChange() {
     kbCtx.type = document.querySelector('input[name="kbType"]:checked').value;
-    // Rebuild grid to new dimensions
-    var oldGrid = kbCtx.grid || [];
-    kbCtx.grid = [];
-    for (var r = 0; r < kbCtx.maxRows; r++) {
-        var newRow = [];
-        for (var c = 0; c < kbCtx.maxCols; c++) {
-            newRow.push((oldGrid[r] && oldGrid[r][c]) || null);
-        }
-        kbCtx.grid.push(newRow);
-    }
     updateKbLimits();
     renderKbGrid();
 }
 
 function renderKbGrid() {
     var grid = document.getElementById('kbGrid');
-    grid.style.gridTemplateColumns = 'repeat(' + kbCtx.maxCols + ', 1fr)';
+    grid.style.gridTemplateColumns = 'repeat(' + kbCtx.maxCols + ', minmax(0, 1fr))';
     grid.innerHTML = '';
 
     if (!kbCtx.grid) initKbGrid();
 
     var totalCells = kbCtx.maxCols * kbCtx.maxRows;
+    for (var compactI = 0; compactI < totalCells; compactI++) {
+        var compactRowIdx = Math.floor(compactI / kbCtx.maxCols);
+        var compactColIdx = compactI % kbCtx.maxCols;
+        var compactBtn = kbCtx.grid[compactRowIdx] ? kbCtx.grid[compactRowIdx][compactColIdx] : null;
+
+        var compactCell = document.createElement('div');
+        compactCell.className = 'kb-cell';
+        compactCell.setAttribute('data-row', compactRowIdx);
+        compactCell.setAttribute('data-col', compactColIdx);
+
+        if (compactBtn && compactBtn.action) {
+            var compactBtnDiv = document.createElement('div');
+            compactBtnDiv.className = 'kb-btn kb-btn-preview ' + getKbButtonPreviewClass(compactBtn);
+            compactBtnDiv.innerHTML = renderKbButtonPreview(compactBtn);
+            compactBtnDiv.addEventListener('click', function(e) {
+                var cellEl = e.target.closest('.kb-cell');
+                if (!cellEl) return;
+                openKbButtonEditor(parseInt(cellEl.getAttribute('data-row'), 10), parseInt(cellEl.getAttribute('data-col'), 10));
+            });
+
+            var compactDelBtn = document.createElement('button');
+            compactDelBtn.className = 'kb-del';
+            compactDelBtn.textContent = '\u00D7';
+            compactDelBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var cellEl = e.target.closest('.kb-cell');
+                var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                kbCtx.grid[r][c] = null;
+                closeKbButtonEditor();
+                renderKbGrid();
+            });
+            compactBtnDiv.appendChild(compactDelBtn);
+            compactCell.appendChild(compactBtnDiv);
+        } else {
+            var compactBtnCount = countKbButtons();
+            if (compactBtnCount < kbCtx.maxButtons) {
+                var compactPh = document.createElement('div');
+                compactPh.className = 'kb-placeholder';
+                compactPh.textContent = '+ Кнопка';
+                compactPh.addEventListener('click', function(e) {
+                    var cellEl = e.target.closest('.kb-cell');
+                    var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                    var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                    openKbButtonEditor(r, c);
+                });
+                compactCell.appendChild(compactPh);
+            } else {
+                var compactEmpty = document.createElement('div');
+                compactEmpty.style.width = '100%';
+                compactEmpty.style.height = '65px';
+                compactCell.appendChild(compactEmpty);
+            }
+        }
+        grid.appendChild(compactCell);
+    }
+    return;
+
     for (var i = 0; i < totalCells; i++) {
         var rowIdx = Math.floor(i / kbCtx.maxCols);
         var colIdx = i % kbCtx.maxCols;
@@ -6980,7 +12617,9 @@ function renderKbGrid() {
             });
             kbBtnDiv.appendChild(txtInput);
 
-            var isLink = existingBtn.action.link ? true : false;
+            var paymentPayload = getKbPaymentPayload(existingBtn);
+            var isPayment = existingBtn.action.type === 'payment' || parseKbActionPayload(existingBtn.action.payload).payment === true;
+            var isLink = !isPayment && existingBtn.action.link ? true : false;
             // Для не-inline клавиатур VK НЕ поддерживает open_link — скрываем "Ссылка"
             var isInline = kbCtx.type === 'inline';
 
@@ -6989,7 +12628,7 @@ function renderKbGrid() {
             var optColor = document.createElement('option');
             optColor.value = 'color';
             optColor.textContent = 'Цвет';
-            if (!isLink) optColor.selected = true;
+            if (!isLink && !isPayment) optColor.selected = true;
             typeSelect.appendChild(optColor);
             if (isInline) {
                 var optLink = document.createElement('option');
@@ -6998,6 +12637,11 @@ function renderKbGrid() {
                 if (isLink) optLink.selected = true;
                 typeSelect.appendChild(optLink);
             }
+            var optPayment = document.createElement('option');
+            optPayment.value = 'payment';
+            optPayment.textContent = 'Оплата';
+            if (isPayment) optPayment.selected = true;
+            typeSelect.appendChild(optPayment);
             typeSelect.addEventListener('change', function(e) {
                 var cellEl = e.target.closest('.kb-cell');
                 var r = parseInt(cellEl.getAttribute('data-row'), 10);
@@ -7006,18 +12650,29 @@ function renderKbGrid() {
                 if (!btn || !btn.action) return;
                 var linkInput = cellEl.querySelector('.kb-link-input');
                 var colorSelect = cellEl.querySelector('.kb-color');
+                var paymentFields = cellEl.querySelector('.kb-payment-fields');
                 if (e.target.value === 'link') {
                     btn.action.type = 'open_link';
                     btn.action.link = btn.action.link || '';
                     delete btn.action.payload;
                     if (linkInput) linkInput.classList.add('show');
                     if (colorSelect) colorSelect.style.display = 'none';
+                    if (paymentFields) paymentFields.classList.remove('show');
+                } else if (e.target.value === 'payment') {
+                    btn.action.type = 'payment';
+                    delete btn.action.link;
+                    btn.color = 'positive';
+                    if (!btn.action.payload || typeof btn.action.payload !== 'object') btn.action.payload = getKbPaymentPayload(btn);
+                    if (linkInput) linkInput.classList.remove('show');
+                    if (colorSelect) colorSelect.style.display = 'none';
+                    if (paymentFields) paymentFields.classList.add('show');
                 } else {
                     btn.action.type = 'text';
                     btn.action.payload = {};
                     if (!btn.color) btn.color = 'primary';
                     if (linkInput) linkInput.classList.remove('show');
                     if (colorSelect) colorSelect.style.display = '';
+                    if (paymentFields) paymentFields.classList.remove('show');
                 }
             });
             kbBtnDiv.appendChild(typeSelect);
@@ -7037,10 +12692,133 @@ function renderKbGrid() {
             });
             kbBtnDiv.appendChild(linkInput);
 
+            var paymentFields = document.createElement('div');
+            paymentFields.className = 'kb-payment-fields' + (isPayment ? ' show' : '');
+
+            var paymentSelect = document.createElement('select');
+            paymentSelect.className = 'kb-payment-integration';
+            var paymentOptions = getProfilePaymentIntegrationOptions();
+            var emptyPaymentOption = document.createElement('option');
+            emptyPaymentOption.value = '';
+            emptyPaymentOption.textContent = paymentOptions.length ? 'Выберите интеграцию' : 'Нет интеграций в профиле';
+            paymentSelect.appendChild(emptyPaymentOption);
+            paymentOptions.forEach(function(item) {
+                var option = document.createElement('option');
+                option.value = item.id;
+                option.textContent = item.name + (item.provider ? ' · ' + item.provider : '');
+                option.setAttribute('data-name', item.name);
+                if (paymentPayload.paymentIntegrationId === item.id || paymentPayload.paymentIntegrationName === item.name) option.selected = true;
+                paymentSelect.appendChild(option);
+            });
+            paymentSelect.addEventListener('change', function(e) {
+                var cellEl = e.target.closest('.kb-cell');
+                var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                var btn = kbCtx.grid[r][c];
+                var selected = e.target.options[e.target.selectedIndex];
+                setKbPaymentPayloadValue(btn, 'paymentIntegrationId', e.target.value);
+                setKbPaymentPayloadValue(btn, 'paymentIntegrationName', selected ? (selected.getAttribute('data-name') || selected.textContent || '') : '');
+            });
+            paymentFields.appendChild(paymentSelect);
+
+            var amountInput = document.createElement('input');
+            amountInput.type = 'number';
+            amountInput.className = 'kb-payment-amount';
+            amountInput.min = '1';
+            amountInput.step = '1';
+            amountInput.placeholder = 'Сумма, ₽';
+            amountInput.value = paymentPayload.amountRub || '';
+            amountInput.addEventListener('input', function(e) {
+                var cellEl = e.target.closest('.kb-cell');
+                var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                setKbPaymentPayloadValue(kbCtx.grid[r][c], 'amountRub', e.target.value);
+            });
+            paymentFields.appendChild(amountInput);
+
+            var descriptionInput = document.createElement('input');
+            descriptionInput.type = 'text';
+            descriptionInput.className = 'kb-payment-description';
+            descriptionInput.placeholder = 'Описание платежа';
+            descriptionInput.value = paymentPayload.description || '';
+            descriptionInput.addEventListener('input', function(e) {
+                var cellEl = e.target.closest('.kb-cell');
+                var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                setKbPaymentPayloadValue(kbCtx.grid[r][c], 'description', e.target.value);
+            });
+            paymentFields.appendChild(descriptionInput);
+
+            var prodamusOrderInput = document.createElement('input');
+            prodamusOrderInput.type = 'text';
+            prodamusOrderInput.className = 'kb-payment-prodamus-order-id-prefix';
+            prodamusOrderInput.placeholder = 'Номер заказа в Prodamus';
+            prodamusOrderInput.value = paymentPayload.prodamusOrderIdPrefix || '';
+            prodamusOrderInput.addEventListener('input', function(e) {
+                var cellEl = e.target.closest('.kb-cell');
+                var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                setKbPaymentPayloadValue(kbCtx.grid[r][c], 'prodamusOrderIdPrefix', e.target.value);
+            });
+            paymentFields.appendChild(prodamusOrderInput);
+
+            var successBotInput = document.createElement('input');
+            successBotInput.type = 'text';
+            successBotInput.className = 'kb-payment-success-bot';
+            successBotInput.placeholder = 'После успешной оплаты: бот';
+            successBotInput.value = paymentPayload.successBot || '';
+            successBotInput.addEventListener('input', function(e) {
+                var cellEl = e.target.closest('.kb-cell');
+                var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                setKbPaymentPayloadValue(kbCtx.grid[r][c], 'successBot', e.target.value);
+            });
+            paymentFields.appendChild(successBotInput);
+
+            var successStepInput = document.createElement('input');
+            successStepInput.type = 'text';
+            successStepInput.className = 'kb-payment-success-step';
+            successStepInput.placeholder = 'После успешной оплаты: шаг';
+            successStepInput.value = paymentPayload.successStep || '';
+            successStepInput.addEventListener('input', function(e) {
+                var cellEl = e.target.closest('.kb-cell');
+                var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                setKbPaymentPayloadValue(kbCtx.grid[r][c], 'successStep', e.target.value);
+            });
+            paymentFields.appendChild(successStepInput);
+
+            var failBotInput = document.createElement('input');
+            failBotInput.type = 'text';
+            failBotInput.className = 'kb-payment-fail-bot';
+            failBotInput.placeholder = 'После неуспешной оплаты: бот';
+            failBotInput.value = paymentPayload.failBot || '';
+            failBotInput.addEventListener('input', function(e) {
+                var cellEl = e.target.closest('.kb-cell');
+                var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                setKbPaymentPayloadValue(kbCtx.grid[r][c], 'failBot', e.target.value);
+            });
+            paymentFields.appendChild(failBotInput);
+
+            var failStepInput = document.createElement('input');
+            failStepInput.type = 'text';
+            failStepInput.className = 'kb-payment-fail-step';
+            failStepInput.placeholder = 'После неуспешной оплаты: шаг';
+            failStepInput.value = paymentPayload.failStep || '';
+            failStepInput.addEventListener('input', function(e) {
+                var cellEl = e.target.closest('.kb-cell');
+                var r = parseInt(cellEl.getAttribute('data-row'), 10);
+                var c = parseInt(cellEl.getAttribute('data-col'), 10);
+                setKbPaymentPayloadValue(kbCtx.grid[r][c], 'failStep', e.target.value);
+            });
+            paymentFields.appendChild(failStepInput);
+            kbBtnDiv.appendChild(paymentFields);
+
             // Color selector
             var colorSelect = document.createElement('select');
             colorSelect.className = 'kb-color';
-            if (isLink) colorSelect.style.display = 'none';
+            if (isLink || isPayment) colorSelect.style.display = 'none';
             for (var ci = 0; ci < KB_COLORS.length; ci++) {
                 var opt = document.createElement('option');
                 opt.value = KB_COLORS[ci].v;
@@ -7112,6 +12890,35 @@ function saveKeyboard() {
                     }
                     // Для inline open_link: label ОБЯЗАТЕЛЕН для VK API
                     btnObj = { action: { type: 'open_link', label: label, link: b.action.link.trim() } };
+                } else if (b.action.type === 'payment') {
+                    var paymentPayload = getKbPaymentPayload(b);
+                    var amountRub = Number(paymentPayload.amountRub || 0);
+                    if (!paymentPayload.paymentIntegrationId) {
+                        errors.push('Ряд ' + (r + 1) + ', кнопка "' + label + '" — выберите платежную интеграцию');
+                        continue;
+                    }
+                    if (!Number.isFinite(amountRub) || amountRub <= 0) {
+                        errors.push('Ряд ' + (r + 1) + ', кнопка "' + label + '" — укажите сумму оплаты');
+                        continue;
+                    }
+                    btnObj = {
+                        action: {
+                            type: 'payment',
+                            label: label,
+                            payload: {
+                                paymentIntegrationId: paymentPayload.paymentIntegrationId,
+                                paymentIntegrationName: paymentPayload.paymentIntegrationName,
+                                amountRub: amountRub,
+                                description: paymentPayload.description,
+                                prodamusOrderIdPrefix: paymentPayload.prodamusOrderIdPrefix,
+                                successBot: paymentPayload.successBot,
+                                successStep: paymentPayload.successStep,
+                                failBot: paymentPayload.failBot,
+                                failStep: paymentPayload.failStep
+                            }
+                        },
+                        color: 'positive'
+                    };
                 } else {
                     btnObj = { action: { type: 'text', label: label, payload: b.action.payload || {} }, color: b.color || 'primary' };
                 }
@@ -7122,6 +12929,8 @@ function saveKeyboard() {
             validButtons.push(rowBtns);
         }
     }
+
+    errors = errors.concat(validateKeyboardForVkRules(validButtons));
 
     if (errors.length > 0) {
         var NL = String.fromCharCode(10);
@@ -7134,19 +12943,6 @@ function saveKeyboard() {
     // Проверка лимитов
     var totalBtns = 0;
     for (var i = 0; i < validButtons.length; i++) totalBtns += validButtons[i].length;
-
-    if (kbCtx.type === 'inline' && totalBtns > 10) {
-        alert('Для клавиатуры "В сообщении" максимум 10 кнопок (сейчас ' + totalBtns + ')');
-        return;
-    }
-    if (kbCtx.type === 'default' && totalBtns > 40) {
-        alert('Для клавиатуры "Под сообщением" максимум 40 кнопок (сейчас ' + totalBtns + ')');
-        return;
-    }
-    if (validButtons.length > 10) {
-        alert('Максимум 10 рядов в клавиатуре');
-        return;
-    }
 
     var kb = {
         one_time: false,
@@ -7184,6 +12980,7 @@ function saveKeyboard() {
 function attachTableHandlers(tab) {
 const table = document.getElementById('table-'+tab);
 if (!table) return;
+ensureTextareaColumnResizeListeners();
 table.querySelectorAll('.color-select').forEach(select => {
 select.removeEventListener('change', handleColorSelectChange);
 select.addEventListener('change', handleColorSelectChange);
@@ -7191,6 +12988,12 @@ select.addEventListener('change', handleColorSelectChange);
 table.querySelectorAll('.editable-cell').forEach(input => {
 input.removeEventListener('change', handleCellChange);
 input.addEventListener('change', handleCellChange);
+input.removeEventListener('mousedown', rememberTextareaColumnResizeStart);
+input.addEventListener('mousedown', rememberTextareaColumnResizeStart);
+input.removeEventListener('touchstart', rememberTextareaColumnResizeStart);
+input.addEventListener('touchstart', rememberTextareaColumnResizeStart);
+input.removeEventListener('pointerdown', rememberTextareaColumnResizeStart);
+input.addEventListener('pointerdown', rememberTextareaColumnResizeStart);
 });
 table.querySelectorAll('.btn-delete').forEach(btn => {
 btn.removeEventListener('click', handleDeleteRow);
@@ -7207,6 +13010,10 @@ btn.addEventListener('click', handleDuplicateRow);
 table.querySelectorAll('.trigger-mode-btn').forEach(btn => {
 btn.removeEventListener('click', handleTriggerModeClick);
 btn.addEventListener('click', handleTriggerModeClick);
+});
+table.querySelectorAll('.comment-reply-placement-toggle').forEach(btn => {
+btn.removeEventListener('click', handleCommentReplyPlacementClick);
+btn.addEventListener('click', handleCommentReplyPlacementClick);
 });
 // Конструктор клавиатуры — делегирование событий
 table.querySelectorAll('.kb-btn-cell').forEach(btn => {
@@ -7225,6 +13032,20 @@ function handleKbBtnClick(e) {
     const idx = parseInt(btn.getAttribute('data-idx'), 10);
     console.log('[Admin] 🎹 handleKbBtnClick: tab=' + tab + ', data-idx=' + idx);
     openKeyboardModal(tab, idx);
+}
+
+function handleCommentReplyPlacementClick(e) {
+    const btn = e.currentTarget;
+    const tab = btn.getAttribute('data-tab');
+    const idx = parseInt(btn.getAttribute('data-idx'), 10);
+    if (tab !== 'Comments' || !dataStore[tab] || !dataStore[tab][idx]) return;
+    const current = normalizeCommentReplyPlacement(dataStore[tab][idx][COMMENT_REPLY_PLACEMENT_COLUMN], 'В ПОСТЕ');
+    const next = current === 'В КОММЕНТАРИИ' ? 'В ПОСТЕ' : 'В КОММЕНТАРИИ';
+    dataStore[tab][idx][COMMENT_REPLY_PLACEMENT_COLUMN] = next;
+    btn.textContent = getCommentReplyPlacementLabel(next);
+    btn.setAttribute('data-tooltip', getCommentReplyPlacementTooltip(next));
+    btn.classList.toggle('is-comment', next === 'В КОММЕНТАРИИ');
+    hideAdminTooltip();
 }
 
 
@@ -7260,8 +13081,15 @@ function handleDeleteRow(e) {
 const btn = e.target;
 const tab = btn.getAttribute('data-tab');
 const idx = parseInt(btn.getAttribute('data-idx'), 10);
+if (dataStore[tab] && isProtectedConsentTemplateRow(dataStore[tab][idx]) && !isMainAdminSession()) {
+alert('Шаблонный шаг бота "Согласия" нельзя удалить.');
+return;
+}
 if (confirm('Удалить строку?')) {
 dataStore[tab].splice(idx, 1);
+if (tab === 'Messages' || tab === 'Comments') {
+renderBotButtons(tab);
+}
 renderTable(tab, dataStore[tab]);
 debug('Deleted row '+idx+' from '+tab);
 }
@@ -7275,12 +13103,13 @@ return;
 renderTable(tab, dataStore[tab]);
 }
 
-function handleDuplicateRow(e) {
+async function handleDuplicateRow(e) {
 const btn = e.target;
 const tab = btn.getAttribute('data-tab');
 const idx = parseInt(btn.getAttribute('data-idx'), 10);
 if (!dataStore[tab] || !dataStore[tab][idx]) return;
 
+await copyRowJsonToClipboard(tab, idx);
 const duplicatedRow = JSON.parse(JSON.stringify(dataStore[tab][idx]));
 dataStore[tab].splice(idx + 1, 0, duplicatedRow);
 rerenderAfterRowClone(tab);
@@ -7291,7 +13120,7 @@ function handleTriggerModeClick(e) {
 const btn = e.target;
 const tab = btn.getAttribute('data-tab');
 const idx = parseInt(btn.getAttribute('data-idx'), 10);
-const mode = normalizeTriggerMode(btn.getAttribute('data-mode'));
+const mode = normalizeTriggerModeForTab(tab, btn.getAttribute('data-mode'));
 if (!dataStore[tab] || !dataStore[tab][idx]) return;
 dataStore[tab][idx]._triggerMode = mode;
 renderTable(tab, dataStore[tab]);
@@ -7400,6 +13229,9 @@ linkInput.value = '';
 window.deleteRow = function(tab, idx) {
 if (confirm('Удалить строку?')) {
 dataStore[tab].splice(idx, 1);
+if (tab === 'Messages' || tab === 'Comments') {
+renderBotButtons(tab);
+}
 renderTable(tab, dataStore[tab]);
 debug('Deleted row '+idx+' from '+tab);
 }
@@ -7410,20 +13242,54 @@ debug('Deleted row '+idx+' from '+tab);
 
 window.deleteAllRows = async function(btn) {
     const tab = btn.getAttribute('data-tab');
-    if (!confirm('WARNING: Delete ALL rows from "' + tab + '"?')) return;
+    const isBotTab = tab === 'Messages' || tab === 'Comments';
+    let deletedLabel = 'все строки';
 
-    dataStore[tab] = [];
-    renderTable(tab, dataStore[tab]);
+    if (isBotTab) {
+        syncTableData(tab);
+        const activeBot = getActiveBot(tab);
+        if (!activeBot) {
+            showStatus('Сначала выберите бота для удаления.', 'error');
+            return;
+        }
+        var protectedRows = dataStore[tab].filter(function(row) {
+            return String(row['Бот'] || '') === activeBot && isProtectedConsentTemplateRow(row);
+        });
+        if (protectedRows.length && !isMainAdminSession()) {
+            showStatus('Бот "' + activeBot + '" содержит шаблонные шаги, которые нельзя удалить.', 'error');
+            return;
+        }
+        if (!confirm('Удалить текущего бота "' + activeBot + '" во вкладке "' + tab + '"?')) return;
 
-    // ОЧИЩАЕМ список ботов для этой вкладки в localStorage
-    if (tab === 'Messages' || tab === 'Comments') {
-        const botsKey = getBotsKey(tab);
-        delete window.botsList[botsKey];
-        delete window.activeBot[tab];
-        saveBotsListToStorage();
-        saveActiveBotToStorage();
-        console.log('[Admin] 🤖 deleteAllRows: cleared bots for ' + botsKey);
+        if (!dataStore[tab]) dataStore[tab] = new Array();
+        dataStore[tab] = dataStore[tab].filter(function(row) {
+            return String(row['Бот'] || '') !== activeBot;
+        });
+
+        const bots = getBotsForTab(tab);
+        setBotsForTab(tab, bots.filter(function(botName) {
+            return botName !== activeBot;
+        }));
+
+        if (window.activeBot[tab] === activeBot) {
+            const remainingBots = getBotsForTab(tab);
+            if (remainingBots.length > 0) {
+                setActiveBot(tab, remainingBots[0]);
+            } else {
+                delete window.activeBot[tab];
+                saveActiveBotToStorage();
+            }
+        }
+
+        renderBotButtons(tab);
+        deletedLabel = 'все шаги бота "' + activeBot + '"';
+        console.log('[Admin] 🤖 deleteAllRows: removed active bot only: ' + activeBot + ' in ' + tab);
+    } else {
+        if (!confirm('WARNING: Delete ALL rows from "' + tab + '"?')) return;
+        dataStore[tab] = (dataStore[tab] || []).slice(0, 0);
     }
+
+    renderTable(tab, dataStore[tab]);
 
     // АВТОМАТИЧЕСКИ сохраняем пустые данные на сервер и ЖДЁМ завершения
     const saved = await saveDataDirectly(tab);
@@ -7433,7 +13299,7 @@ window.deleteAllRows = async function(btn) {
     }
 
     debug('Deleted ALL rows from ' + tab);
-    showStatus('Все строки удалены и сохранены!', 'error');
+    showStatus(deletedLabel + ' удалены и сохранены!', 'error');
 };
 
 
@@ -7487,6 +13353,1555 @@ function syncTableData(tab) {
     }
 }
 
+function getCommentActivities() {
+    if (!Array.isArray(dataStore['CommentActivities'])) dataStore['CommentActivities'] = [];
+    return dataStore['CommentActivities'];
+}
+
+const COMMENT_ACTIVITY_TEMPLATE_POST_PLACEHOLDER = 'Замените это на ссылку на нужный пост';
+
+function getCommentActivityTemplateStorageKey() {
+    return 'papaBot_commentActivityTemplates_' + String(getCurrentProfileId() || getPrincipalProfileId() || '1');
+}
+
+function cloneCommentActivityTemplate(value) {
+    return JSON.parse(JSON.stringify(value || {}));
+}
+
+function buildCommentActivityAnswerId() {
+    return 'answer_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+}
+
+function makeCommentActivityAnswer(text, chance, messageText) {
+    return {
+        id: buildCommentActivityAnswerId(),
+        text: text || '',
+        messageText: messageText || '',
+        chance: String(chance || '100'),
+        noRepeat: false,
+        attachments: [],
+        messageAttachments: [],
+        messageBot: '',
+        messageStep: ''
+    };
+}
+
+function makeCommentActivityKeywordTemplate(keyword, winChance, loseChance, winText, loseText, matchType, caseMode) {
+    return {
+        keyword: keyword,
+        matchType: matchType || 'НЕ ТОЧНО',
+        caseMode: caseMode || 'НЕ ВАЖНО',
+        winChance: String(winChance),
+        loseChance: String(loseChance),
+        winAnswers: [makeCommentActivityAnswer(winText || 'Вы выиграли', 100)],
+        loseAnswers: [makeCommentActivityAnswer(loseText || 'Вы не выиграли', 100)]
+    };
+}
+
+function makeCommentActivityTriggerTemplate(keyword, wins, loseText, matchType, caseMode) {
+    return {
+        keyword: keyword,
+        matchType: matchType || 'ТОЧНО',
+        caseMode: caseMode || 'НЕ ВАЖНО',
+        winVariants: (wins || []).map(function(item) {
+            return makeCommentActivityAnswer(item.text, item.chance, item.messageText || '');
+        }),
+        loseAnswers: [makeCommentActivityAnswer(loseText || 'Сегодня не повезло. Попробуйте ещё раз.', 100)]
+    };
+}
+
+function makeCommentActivityTemplate(id, title, config) {
+    config = config || {};
+    return {
+        templateId: id,
+        templateLabel: title,
+        ID: '',
+        'Название': title,
+        'Активна': 'ДА',
+        'Количество попыток участия': String(config.maxAttempts || '1'),
+        'Количество победителей': String(config.maxWinners || '0'),
+        'Сколько раз может выигрывать один пользователь': String(config.maxWinsPerUser || '0'),
+        'Пост': COMMENT_ACTIVITY_TEMPLATE_POST_PLACEHOLDER,
+        'Первый Ответ если уже играл': config.alreadyPlayed || 'Вы уже играли',
+        'Отправлять последующие ответы если уже играл': config.subsequentEnabled || 'НЕТ',
+        'Последующие Ответы если уже играл': config.subsequentAnswer || '',
+        'Ответ если победители закончились': config.winnersFinished || 'Победители уже набраны',
+        'Ответ если нет разрешения на сообщения': config.messagesNotAllowed || 'Вы не дали разрешение на отправку сообщений сообществу. Продублируйте свой ответ в сообщения сообщества.',
+        'Обращение в комментариях': config.mentionMode || '@ID',
+        'Разделитель обращения': config.mentionSeparator || 'ПРОБЕЛ',
+        'Место ответа': normalizeCommentReplyPlacement(config.replyPlacement, 'В ПОСТЕ'),
+        'Ключевые слова JSON': JSON.stringify(config.keywords || []),
+        'Триггерные слова JSON': JSON.stringify(config.triggerWords || [])
+    };
+}
+
+function getBuiltInCommentActivityTemplates() {
+    return [
+        makeCommentActivityTemplate('fortune-wheel', 'Колесо фортуны', {
+            maxAttempts: 3,
+            maxWinsPerUser: 1,
+            triggerWords: [makeCommentActivityTriggerTemplate('крутить', [
+                { chance: 20, text: 'Выпал приз: скидка 5%' },
+                { chance: 10, text: 'Выпал приз: скидка 10%' },
+                { chance: 5, text: 'Выпал главный бонус' }
+            ], 'Колесо остановилось без приза. Попробуйте ещё раз.')]
+        }),
+        makeCommentActivityTemplate('magic-word', 'Магическое слово дня', {
+            maxAttempts: 5,
+            maxWinsPerUser: 1,
+            keywords: [makeCommentActivityKeywordTemplate('магия', 100, 0, 'Вы угадали магическое слово!', 'Пока не угадали.', 'ТОЧНО', 'НЕ ВАЖНО')]
+        }),
+        makeCommentActivityTemplate('coin-game', 'Орел и решка', {
+            maxAttempts: 3,
+            maxWinsPerUser: 1,
+            keywords: [
+                makeCommentActivityKeywordTemplate('орел', 50, 50, 'Орел принес победу!', 'Орел не сработал.'),
+                makeCommentActivityKeywordTemplate('орёл', 50, 50, 'Орёл принес победу!', 'Орёл не сработал.'),
+                makeCommentActivityKeywordTemplate('решка', 50, 50, 'Решка принесла победу!', 'Решка не сработала.')
+            ]
+        }),
+        makeCommentActivityTemplate('first-winners', 'Быстрый розыгрыш первых победителей', {
+            maxAttempts: 1,
+            maxWinners: 10,
+            maxWinsPerUser: 1,
+            winnersFinished: 'Победители уже набраны. Спасибо за участие!',
+            keywords: [makeCommentActivityKeywordTemplate('участвую', 100, 0, 'Вы в числе победителей!', 'В этот раз не получилось.')]
+        }),
+        makeCommentActivityTemplate('one-win-per-user', 'Одна победа на пользователя', {
+            maxAttempts: 5,
+            maxWinsPerUser: 1,
+            triggerWords: [makeCommentActivityTriggerTemplate('попытка', [
+                { chance: 25, text: 'Победа засчитана!' },
+                { chance: 15, text: 'Вы выиграли бонус!' }
+            ], 'Попытка не выиграла.')]
+        }),
+        makeCommentActivityTemplate('secret-prize-dm', 'Тайный приз в личку', {
+            maxAttempts: 3,
+            maxWinsPerUser: 1,
+            keywords: [{
+                keyword: 'секрет',
+                matchType: 'ТОЧНО',
+                caseMode: 'НЕ ВАЖНО',
+                winChance: '100',
+                loseChance: '0',
+                winAnswers: [makeCommentActivityAnswer('Ответ отправлен в сообщения сообщества.', 100, 'Ваш тайный приз: замените этот текст на нужный.')],
+                loseAnswers: [makeCommentActivityAnswer('Не угадали секретное слово.', 100)]
+            }]
+        }),
+        makeCommentActivityTemplate('quiz-options', 'Викторина с вариантами', {
+            maxAttempts: 1,
+            maxWinsPerUser: 1,
+            keywords: [
+                makeCommentActivityKeywordTemplate('А', 0, 100, 'Правильно!', 'Ответ А неверный.', 'ТОЧНО', 'НЕ ВАЖНО'),
+                makeCommentActivityKeywordTemplate('Б', 100, 0, 'Ответ Б верный!', 'Ответ Б неверный.', 'ТОЧНО', 'НЕ ВАЖНО'),
+                makeCommentActivityKeywordTemplate('В', 0, 100, 'Правильно!', 'Ответ В неверный.', 'ТОЧНО', 'НЕ ВАЖНО')
+            ]
+        }),
+        makeCommentActivityTemplate('promo-code', 'Промокод за активность', {
+            maxAttempts: 2,
+            maxWinsPerUser: 1,
+            triggerWords: [makeCommentActivityTriggerTemplate('хочу промокод', [
+                { chance: 20, text: 'Ваш промокод: PROMO5' },
+                { chance: 10, text: 'Ваш промокод: PROMO10' }
+            ], 'Сегодня промокод не выпал.')]
+        }),
+        makeCommentActivityTemplate('lead-collection', 'Сбор заявок через комментарии', {
+            maxAttempts: 1,
+            maxWinsPerUser: 0,
+            keywords: [{
+                keyword: 'участвую',
+                matchType: 'НЕ ТОЧНО',
+                caseMode: 'НЕ ВАЖНО',
+                winChance: '100',
+                loseChance: '0',
+                winAnswers: [makeCommentActivityAnswer('Заявка принята. Сейчас напишем вам в сообщения.', 100, 'Здравствуйте! Напишите имя и телефон для заявки.')],
+                loseAnswers: [makeCommentActivityAnswer('Заявка не принята. Попробуйте ещё раз.', 100)]
+            }]
+        }),
+        makeCommentActivityTemplate('subscriber-gift', 'Рандомный подарок подписчикам', {
+            maxAttempts: 3,
+            maxWinsPerUser: 1,
+            triggerWords: [makeCommentActivityTriggerTemplate('подарок', [
+                { chance: 20, text: 'Вам выпал подарок №1' },
+                { chance: 15, text: 'Вам выпал подарок №2' },
+                { chance: 5, text: 'Вам выпал редкий подарок' }
+            ], 'Подарок не выпал.')]
+        }),
+        makeCommentActivityTemplate('guess-number', 'Угадай число', {
+            maxAttempts: 3,
+            maxWinsPerUser: 1,
+            keywords: [
+                makeCommentActivityKeywordTemplate('1', 0, 100, 'Верно!', 'Число 1 неверное.', 'ТОЧНО', 'НЕ ВАЖНО'),
+                makeCommentActivityKeywordTemplate('2', 0, 100, 'Верно!', 'Число 2 неверное.', 'ТОЧНО', 'НЕ ВАЖНО'),
+                makeCommentActivityKeywordTemplate('3', 100, 0, 'Вы угадали число!', 'Число 3 неверное.', 'ТОЧНО', 'НЕ ВАЖНО')
+            ]
+        }),
+        makeCommentActivityTemplate('limited-anti-spam', 'Антиспам-игра с лимитами', {
+            maxAttempts: 3,
+            maxWinsPerUser: 1,
+            alreadyPlayed: 'Ваш лимит попыток по этой активности исчерпан.',
+            triggerWords: [makeCommentActivityTriggerTemplate('играть', [
+                { chance: 30, text: 'Вы выиграли!' }
+            ], 'Не выиграли. Остались попытки, если лимит не исчерпан.')]
+        }),
+        makeCommentActivityTemplate('post-quest', 'Квест по постам', {
+            maxAttempts: 1,
+            maxWinsPerUser: 1,
+            keywords: [{
+                keyword: 'ключ',
+                matchType: 'ТОЧНО',
+                caseMode: 'НЕ ВАЖНО',
+                winChance: '100',
+                loseChance: '0',
+                winAnswers: [makeCommentActivityAnswer('Ключ принят. Следующая подсказка отправлена в сообщения.', 100, 'Подсказка к следующему посту: замените этот текст.')],
+                loseAnswers: [makeCommentActivityAnswer('Ключ неверный.', 100)]
+            }]
+        }),
+        makeCommentActivityTemplate('instant-lottery', 'Моментальная лотерея', {
+            maxAttempts: 1,
+            maxWinsPerUser: 1,
+            triggerWords: [makeCommentActivityTriggerTemplate('лотерея', [
+                { chance: 25, text: 'Вы выиграли малый приз!' },
+                { chance: 10, text: 'Вы выиграли средний приз!' },
+                { chance: 3, text: 'Вы выиграли главный приз!' }
+            ], 'Билет без выигрыша.')]
+        }),
+        makeCommentActivityTemplate('attention-check', 'Проверка внимательности', {
+            maxAttempts: 2,
+            maxWinsPerUser: 1,
+            keywords: [makeCommentActivityKeywordTemplate('Секретная Фраза', 100, 0, 'Фраза введена точно. Победа!', 'Фраза не совпала.', 'ТОЧНО', 'ВАЖНО')]
+        })
+    ];
+}
+
+function getCustomCommentActivityTemplates() {
+    try {
+        var parsed = JSON.parse(localStorage.getItem(getCommentActivityTemplateStorageKey()) || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+    } catch(e) {
+        return [];
+    }
+}
+
+function saveCustomCommentActivityTemplates(items) {
+    localStorage.setItem(getCommentActivityTemplateStorageKey(), JSON.stringify(Array.isArray(items) ? items : []));
+}
+
+function getAllCommentActivityTemplates() {
+    var builtIn = getBuiltInCommentActivityTemplates().map(function(item) {
+        item.templateSource = 'built-in';
+        return item;
+    });
+    var custom = getCustomCommentActivityTemplates().map(function(item) {
+        item.templateSource = 'custom';
+        return item;
+    });
+    return builtIn.concat(custom);
+}
+
+function buildCommentActivityTemplateRows(items, source) {
+    return (items || []).map(function(item) {
+        var id = escapeHtml(item.templateId || '');
+        var label = escapeHtml(item.templateLabel || item['Название'] || 'Шаблон');
+        var deleteButton = source === 'custom'
+            ? '<button class="comment-activity-template-delete" type="button" title="Удалить шаблон" onclick="deleteCommentActivityTemplate(&quot;' + id + '&quot;, event)">x</button>'
+            : '<span></span>';
+        return '<div class="comment-activity-template-row">' +
+            '<button class="comment-activity-template-load" type="button" onclick="applyCommentActivityTemplateById(&quot;' + escapeHtml(source) + '&quot;,&quot;' + id + '&quot;)">' + label + '</button>' +
+            deleteButton +
+        '</div>';
+    }).join('');
+}
+
+function buildCommentActivityTemplatePickerHtml() {
+    var html = '<div class="comment-activity-template-picker" id="commentActivityTemplatePicker">' +
+        '<button id="commentActivityTemplateButton" class="comment-activity-template-current" type="button" onclick="toggleCommentActivityTemplateMenu(event)">Выбрать шаблон</button>' +
+        '<div id="commentActivityTemplateMenu" class="comment-activity-template-menu">' +
+            '<div class="comment-activity-template-group">Готовые шаблоны</div>' +
+            buildCommentActivityTemplateRows(getBuiltInCommentActivityTemplates(), 'built-in');
+    var custom = getCustomCommentActivityTemplates();
+    if (custom.length) {
+        html += '<div class="comment-activity-template-group">Мои шаблоны</div>' + buildCommentActivityTemplateRows(custom, 'custom');
+    }
+    html += '</div></div>';
+    return html;
+}
+
+function renderCommentActivityTemplatePicker() {
+    var holder = document.getElementById('commentActivityTemplatePickerHolder');
+    if (holder) holder.innerHTML = buildCommentActivityTemplatePickerHtml();
+}
+
+function setCommentActivityTemplateNotice(type, message) {
+    var el = document.getElementById('commentActivityTemplateStatus');
+    if (!el) return;
+    el.className = 'comment-activity-template-notice ' + (type || '');
+    el.textContent = message || '';
+    if (message) {
+        setTimeout(function() {
+            if (el.textContent === message) el.textContent = '';
+        }, 3000);
+    }
+}
+
+function normalizeActivityEnabledValue(value) {
+    var normalized = String(value || '').trim().toUpperCase();
+    if (!normalized) return 'ДА';
+    return ['НЕТ', 'NO', 'OFF', 'FALSE', '0', 'ВЫКЛ', 'ВЫКЛЮЧЕН'].indexOf(normalized) !== -1 ? 'НЕТ' : 'ДА';
+}
+
+function isCommentActivityEnabled(row) {
+    return normalizeActivityEnabledValue(row && row['Активна']) !== 'НЕТ';
+}
+
+function normalizeCommentActivityMatchType(value) {
+    var normalized = String(value || '').trim().replace(/\s+/g, ' ').toUpperCase();
+    return normalized === 'ТОЧНО' || normalized === 'EXACT' ? 'ТОЧНО' : 'НЕ ТОЧНО';
+}
+
+function normalizeCommentActivityCaseMode(value) {
+    var normalized = String(value || '').trim().replace(/\s+/g, ' ').toUpperCase();
+    return normalized === 'ВАЖНО' || normalized === 'IMPORTANT' || normalized === 'CASE_SENSITIVE' ? 'ВАЖНО' : 'НЕ ВАЖНО';
+}
+
+function collectCommentActivityMessageBotNames(currentValue) {
+    var names = [];
+    (dataStore['Messages'] || []).forEach(function(row) {
+        var bot = String(row['Бот'] || '').trim();
+        if (bot && names.indexOf(bot) === -1) names.push(bot);
+    });
+    var current = String(currentValue || '').trim();
+    if (current && names.indexOf(current) === -1) names.push(current);
+    return names;
+}
+
+function collectCommentActivityMessageStepNames(botName, currentValue) {
+    var steps = [];
+    var normalizedBot = String(botName || '').trim();
+    (dataStore['Messages'] || []).forEach(function(row) {
+        var rowBot = String(row['Бот'] || '').trim();
+        var step = String(row['Шаг'] || '').trim();
+        if (rowBot === normalizedBot && step && steps.indexOf(step) === -1) steps.push(step);
+    });
+    var current = String(currentValue || '').trim();
+    if (current && steps.indexOf(current) === -1) steps.push(current);
+    return steps;
+}
+
+function buildCommentActivityOptionTags(values, selectedValue, emptyLabel) {
+    var selected = String(selectedValue || '').trim();
+    var html = '<option value="">' + escapeHtml(emptyLabel || 'Не отправлять') + '</option>';
+    values.forEach(function(value) {
+        value = String(value || '').trim();
+        if (!value) return;
+        html += '<option value="' + escapeHtml(value) + '"' + (value === selected ? ' selected' : '') + '>' + escapeHtml(value) + '</option>';
+    });
+    return html;
+}
+
+function buildCommentActivityMessageBotOptions(currentValue) {
+    return buildCommentActivityOptionTags(collectCommentActivityMessageBotNames(currentValue), currentValue, 'Не отправлять в сообщения');
+}
+
+function buildCommentActivityMessageStepOptions(botName, currentValue) {
+    return buildCommentActivityOptionTags(collectCommentActivityMessageStepNames(botName, currentValue), currentValue, botName ? 'Выберите шаг' : 'Сначала выберите бота');
+}
+
+function buildCommentActivityStaticOptions(options, currentValue) {
+    var current = String(currentValue || '').trim();
+    return options.map(function(option) {
+        return '<option value="' + escapeHtml(option.value) + '"' + (option.value === current ? ' selected' : '') + '>' + escapeHtml(option.label) + '</option>';
+    }).join('');
+}
+
+function parseCommentActivityKeywords(row) {
+    try {
+        var parsed = JSON.parse(String(row && row['Ключевые слова JSON'] || '').trim() || '[]');
+        return Array.isArray(parsed) ? parsed.map(normalizeCommentActivityKeywordDraft) : [];
+    } catch(e) {
+        return [];
+    }
+}
+
+function parseCommentActivityTriggerWords(row) {
+    try {
+        var parsed = JSON.parse(String(row && row['Триггерные слова JSON'] || '').trim() || '[]');
+        return Array.isArray(parsed) ? parsed.map(normalizeCommentActivityTriggerWordDraft) : [];
+    } catch(e) {
+        return [];
+    }
+}
+
+function buildCommentActivityId() {
+    return 'activity_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+}
+
+function splitCommentActivityTextareaLines(value) {
+    var text = String(value || '');
+    var lines = [];
+    var current = '';
+    for (var i = 0; i < text.length; i++) {
+        var code = text.charCodeAt(i);
+        if (code === 10 || code === 13) {
+            lines.push(current);
+            current = '';
+            if (code === 13 && i + 1 < text.length && text.charCodeAt(i + 1) === 10) i++;
+        } else {
+            current += text.charAt(i);
+        }
+    }
+    lines.push(current);
+    return lines;
+}
+
+function parseWeightedAnswerTextarea(value) {
+    return splitCommentActivityTextareaLines(value).map(function(line) {
+        var text = String(line || '').trim();
+        if (!text) return null;
+        var match = text.match(/^(\\d+(?:[.,]\\d+)?)\\s*(?:[-:|])\\s*(.+)$/);
+        if (!match) return { chance: 1, text: text };
+        return {
+            chance: String(match[1] || '0').replace(',', '.'),
+            text: String(match[2] || '').trim()
+        };
+    }).filter(Boolean).filter(function(item) { return item.text; });
+}
+
+function weightedAnswersToTextarea(items) {
+    var newline = String.fromCharCode(10);
+    return (Array.isArray(items) ? items : []).map(function(item) {
+        return String(item.chance || '') + ' - ' + String(item.text || '');
+    }).join(newline);
+}
+
+function showAdminTooltip(event, text) {
+    hideAdminTooltip();
+    var tooltipText = String(text || '').trim();
+    if (!tooltipText) return;
+    var tooltip = document.createElement('div');
+    tooltip.id = 'adminFloatingTooltip';
+    tooltip.className = 'admin-floating-tooltip';
+    tooltip.textContent = tooltipText;
+    document.body.appendChild(tooltip);
+    moveAdminTooltip(event);
+}
+
+function moveAdminTooltip(event) {
+    var tooltip = document.getElementById('adminFloatingTooltip');
+    if (!tooltip || !event) return;
+    var offset = 22;
+    var left = Number(event.clientX || 0) + offset;
+    var top = Number(event.clientY || 0) + offset;
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    requestAnimationFrame(function() {
+        var maxLeft = Math.max(8, window.innerWidth - tooltip.offsetWidth - 8);
+        var maxTop = Math.max(8, window.innerHeight - tooltip.offsetHeight - 8);
+        tooltip.style.left = Math.max(8, Math.min(left, maxLeft)) + 'px';
+        tooltip.style.top = Math.max(8, Math.min(top, maxTop)) + 'px';
+    });
+}
+
+function hideAdminTooltip() {
+    var tooltip = document.getElementById('adminFloatingTooltip');
+    if (tooltip) tooltip.remove();
+}
+
+function buildAdminTooltipAttrs(text) {
+    return ' data-tooltip="' + escapeHtml(text) + '"';
+}
+
+function getAdminTooltipEventTarget(event) {
+    var target = event && event.target;
+    return target && target.closest ? target.closest('[data-tooltip]') : null;
+}
+
+function bindAdminFloatingTooltipEvents() {
+    if (window.adminFloatingTooltipEventsBound) return;
+    window.adminFloatingTooltipEventsBound = true;
+    document.addEventListener('mouseover', function(event) {
+        var target = getAdminTooltipEventTarget(event);
+        if (!target) return;
+        showAdminTooltip(event, target.getAttribute('data-tooltip'));
+    });
+    document.addEventListener('mousemove', function(event) {
+        if (document.getElementById('adminFloatingTooltip')) {
+            moveAdminTooltip(event);
+        }
+    });
+    document.addEventListener('mouseout', function(event) {
+        var target = getAdminTooltipEventTarget(event);
+        if (target && (!event.relatedTarget || !target.contains(event.relatedTarget))) {
+            hideAdminTooltip();
+        }
+    });
+    document.addEventListener('focusin', function(event) {
+        var target = getAdminTooltipEventTarget(event);
+        if (!target) return;
+        var rect = target.getBoundingClientRect();
+        showAdminTooltip({
+            clientX: rect.left + Math.min(rect.width, 24),
+            clientY: rect.top + rect.height
+        }, target.getAttribute('data-tooltip'));
+    });
+    document.addEventListener('focusout', function(event) {
+        if (getAdminTooltipEventTarget(event)) hideAdminTooltip();
+    });
+    document.addEventListener('click', function(event) {
+        var target = getAdminTooltipEventTarget(event);
+        if (!target) return;
+        showAdminTooltip(event, target.getAttribute('data-tooltip'));
+    });
+}
+
+bindAdminFloatingTooltipEvents();
+
+function normalizeCommentActivityAnswer(item) {
+    item = item || {};
+    var attachments = Array.isArray(item.attachments) ? item.attachments : String(item.attachments || '').split(/[,\\r\\n]+/);
+    var messageAttachments = Array.isArray(item.messageAttachments) ? item.messageAttachments : String(item.messageAttachments || '').split(/[,\\r\\n]+/);
+    var noRepeatRaw = item.noRepeat ?? item.excludeAfterUse ?? item.doNotRepeat ?? item['Не повторять'];
+    var noRepeat = noRepeatRaw === true || String(noRepeatRaw || '').trim().toUpperCase() === 'ДА' || String(noRepeatRaw || '').trim().toLowerCase() === 'true' || String(noRepeatRaw || '').trim() === '1';
+    var noRepeatSameRaw = item.noRepeatSameAnswer ?? item.noRepeatSame ?? item.doNotRepeatSame ?? item.excludeSameAnswer ?? item['Не повторять такой же ответ'];
+    var noRepeatSameAnswer = noRepeatSameRaw === true || String(noRepeatSameRaw || '').trim().toUpperCase() === 'ДА' || String(noRepeatSameRaw || '').trim().toLowerCase() === 'true' || String(noRepeatSameRaw || '').trim() === '1';
+    var order = String(item.order ?? item.sequence ?? item.queue ?? item.priority ?? item['Очередность'] ?? '').trim();
+    var limit = String(item.limit ?? item.answerLimit ?? item.maxUses ?? item['Лимит'] ?? '').trim();
+    return {
+        id: String(item.id || item.answerId || item.key || '').trim() || buildCommentActivityAnswerId(),
+        text: String(item.text || item.commentText || '').trim(),
+        messageText: String(item.messageText || item.privateText || item.messageAnswer || '').trim(),
+        chance: String(item.chance || item.weight || '100').trim() || '100',
+        noRepeat: noRepeat,
+        noRepeatSameAnswer: noRepeatSameAnswer,
+        order: order,
+        limit: limit,
+        limitExhaustedText: String(item.limitExhaustedText || item.limitComment || item.exhaustedText || '').trim(),
+        limitExhaustedMessageText: String(item.limitExhaustedMessageText || item.limitMessage || item.exhaustedMessageText || '').trim(),
+        attachments: attachments.map(function(value) { return String(value || '').trim(); }).filter(Boolean),
+        messageAttachments: messageAttachments.map(function(value) { return String(value || '').trim(); }).filter(Boolean),
+        messageBot: String(item.messageBot || item.routeBot || item.bot || '').trim(),
+        messageStep: String(item.messageStep || item.routeStep || item.step || '').trim()
+    };
+}
+
+function normalizeCommentActivityAnswerList(items, fallbackText) {
+    var list = Array.isArray(items) ? items.map(normalizeCommentActivityAnswer).filter(function(item) { return item.text || item.messageText || item.attachments.length || item.messageAttachments.length || (item.messageBot && item.messageStep); }) : [];
+    return list.length ? list : [{ id: buildCommentActivityAnswerId(), text: fallbackText, chance: '100', noRepeat: false, noRepeatSameAnswer: false, order: '', limit: '', limitExhaustedText: '', limitExhaustedMessageText: '', attachments: [] }];
+}
+
+function normalizeCommentActivityAnswerDraftList(items, fallbackText) {
+    var list = Array.isArray(items) ? items.map(normalizeCommentActivityAnswer) : [];
+    return list.length ? list : [{ id: buildCommentActivityAnswerId(), text: fallbackText, chance: '100', noRepeat: false, noRepeatSameAnswer: false, order: '', limit: '', limitExhaustedText: '', limitExhaustedMessageText: '', attachments: [] }];
+}
+
+function normalizeCommentActivityKeywordDraft(keyword) {
+    keyword = keyword || {};
+    return {
+        keyword: String(keyword.keyword || '').trim(),
+        matchType: normalizeCommentActivityMatchType(keyword.matchType || keyword.exact || keyword['Точность']),
+        caseMode: normalizeCommentActivityCaseMode(keyword.caseMode || keyword.caseSensitive || keyword['Строчность'] || keyword['Регистр']),
+        winChance: String(keyword.winChance || '50'),
+        loseChance: String(keyword.loseChance || '50'),
+        winAnswers: normalizeCommentActivityAnswerList(keyword.winAnswers, 'Вы выиграли'),
+        loseAnswers: normalizeCommentActivityAnswerList(keyword.loseAnswers, 'Вы не выиграли')
+    };
+}
+
+function normalizeCommentActivityKeywordEditorDraft(keyword) {
+    keyword = keyword || {};
+    return {
+        keyword: String(keyword.keyword || '').trim(),
+        matchType: normalizeCommentActivityMatchType(keyword.matchType || keyword.exact || keyword['Точность']),
+        caseMode: normalizeCommentActivityCaseMode(keyword.caseMode || keyword.caseSensitive || keyword['Строчность'] || keyword['Регистр']),
+        winChance: String(keyword.winChance || '50'),
+        loseChance: String(keyword.loseChance || '50'),
+        winAnswers: normalizeCommentActivityAnswerDraftList(keyword.winAnswers, 'Вы выиграли'),
+        loseAnswers: normalizeCommentActivityAnswerDraftList(keyword.loseAnswers, 'Вы не выиграли')
+    };
+}
+
+function normalizeCommentActivityTriggerWordDraft(trigger) {
+    trigger = trigger || {};
+    return {
+        keyword: String(trigger.keyword || trigger.triggerWord || '').trim(),
+        matchType: normalizeCommentActivityMatchType(trigger.matchType || trigger.exact || trigger['Точность']),
+        caseMode: normalizeCommentActivityCaseMode(trigger.caseMode || trigger.caseSensitive || trigger['Строчность'] || trigger['Регистр']),
+        winVariants: normalizeCommentActivityAnswerDraftList(trigger.winVariants || trigger.wins, 'Вы выиграли'),
+        loseAnswers: normalizeCommentActivityAnswerDraftList(trigger.loseAnswers, 'Вы не выиграли')
+    };
+}
+
+function renderCommentActivitiesBlock() {
+    var switcher = document.getElementById('commentActivitiesSwitcher');
+    var buttonsEl = document.getElementById('commentActivityButtons');
+    if (!switcher || !buttonsEl) return;
+    var activities = getCommentActivities();
+    switcher.style.display = 'block';
+    buttonsEl.innerHTML = '';
+
+    activities.forEach(function(activity, idx) {
+        var isEnabled = isCommentActivityEnabled(activity);
+        var chip = document.createElement('span');
+        chip.className = [
+            'bot-switcher-chip',
+            isEnabled ? 'bot-switcher-chip--active' : 'bot-switcher-chip--disabled'
+        ].filter(Boolean).join(' ');
+
+        var nameBtn = document.createElement('button');
+        nameBtn.type = 'button';
+        nameBtn.className = 'bot-name-3d-btn';
+        nameBtn.textContent = String(activity['Название'] || 'Активность');
+        if (isEnabled) {
+            var marker = document.createElement('span');
+            marker.className = 'bot-active-marker';
+            marker.setAttribute('aria-hidden', 'true');
+            nameBtn.appendChild(marker);
+        }
+        nameBtn.onclick = function() { showCommentActivityModal(idx); };
+        nameBtn.title = 'Нажмите, чтобы открыть настройки активности.';
+
+        var statusBtn = document.createElement('button');
+        statusBtn.type = 'button';
+        statusBtn.className = 'bot-status-toggle ' + (isEnabled ? 'bot-status-toggle--enabled' : 'bot-status-toggle--disabled');
+        statusBtn.textContent = isEnabled ? '✓' : '✕';
+        statusBtn.setAttribute('aria-label', isEnabled ? 'Активность включена' : 'Активность выключена');
+        statusBtn.onclick = function(event) { toggleCommentActivityEnabled(idx, event); };
+        statusBtn.title = isEnabled ? 'Активность работает. Нажмите, чтобы выключить.' : 'Активность выключена. Нажмите, чтобы включить.';
+
+        chip.appendChild(nameBtn);
+        chip.appendChild(statusBtn);
+        buttonsEl.appendChild(chip);
+    });
+}
+
+function getCommentActivityKeywordHtml(keyword, idx) {
+    keyword = normalizeCommentActivityKeywordEditorDraft(keyword || {});
+    var matchType = normalizeCommentActivityMatchType(keyword.matchType);
+    var caseMode = normalizeCommentActivityCaseMode(keyword.caseMode);
+    var exactTitle = matchType === 'ТОЧНО'
+        ? 'ТОЧНО: текст комментария должен полностью совпасть с ключевым словом.'
+        : 'НЕ ТОЧНО: ключевое слово должно содержаться в тексте комментария.';
+    var caseTitle = caseMode === 'ВАЖНО'
+        ? 'ВАЖНО: строчность должна совпадать с ключевым словом в настройках активности.'
+        : 'НЕ ВАЖНО: ключевое слово может быть написано в любой строчности.';
+    return '<div class="comment-activity-keyword-row" data-keyword-index="' + idx + '">' +
+        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;">' +
+            '<strong>Ключевое слово #' + (idx + 1) + '</strong>' +
+            '<button class="btn btn-delete" type="button" onclick="removeCommentActivityKeyword(' + idx + ')">Удалить слово</button>' +
+        '</div>' +
+        '<div class="comment-activity-grid" style="grid-template-columns:minmax(220px,1.5fr) minmax(120px,1fr) minmax(120px,1fr) minmax(120px,.8fr) minmax(120px,.8fr);">' +
+            '<div class="comment-activity-field"><label>Ключевое слово</label><textarea class="comment-activity-keyword" rows="2" placeholder="Например: орел">' + escapeHtml(keyword.keyword || '') + '</textarea></div>' +
+            '<div class="comment-activity-field"><label>Шанс выигрыша</label><input class="comment-activity-win-chance" type="number" min="0" step="1" value="' + escapeHtml(keyword.winChance || '50') + '"></div>' +
+            '<div class="comment-activity-field"><label>Шанс проигрыша</label><input class="comment-activity-lose-chance" type="number" min="0" step="1" value="' + escapeHtml(keyword.loseChance || '50') + '"></div>' +
+            '<div class="comment-activity-field"><label' + buildAdminTooltipAttrs(exactTitle) + '>Точность</label><button class="comment-activity-toggle-btn comment-activity-match-type ' + (matchType === 'ТОЧНО' ? '' : 'is-off') + '" type="button"' + buildAdminTooltipAttrs(exactTitle) + ' onclick="toggleCommentActivityKeywordMatchType(' + idx + ')">' + escapeHtml(matchType) + '</button></div>' +
+            '<div class="comment-activity-field"><label' + buildAdminTooltipAttrs(caseTitle) + '>Строчность</label><button class="comment-activity-toggle-btn comment-activity-case-mode ' + (caseMode === 'ВАЖНО' ? '' : 'is-off') + '" type="button"' + buildAdminTooltipAttrs(caseTitle) + ' onclick="toggleCommentActivityKeywordCaseMode(' + idx + ')">' + escapeHtml(caseMode) + '</button></div>' +
+        '</div>' +
+        getCommentActivityAnswersHtml(keyword.winAnswers, idx, 'win', 'Ответы при выигрыше') +
+        getCommentActivityAnswersHtml(keyword.loseAnswers, idx, 'lose', 'Ответы при проигрыше') +
+    '</div>';
+}
+
+function getCommentActivityTriggerWordHtml(trigger, idx) {
+    trigger = normalizeCommentActivityTriggerWordDraft(trigger || {});
+    var matchType = normalizeCommentActivityMatchType(trigger.matchType);
+    var caseMode = normalizeCommentActivityCaseMode(trigger.caseMode);
+    var exactTitle = matchType === 'ТОЧНО'
+        ? 'ТОЧНО: текст комментария должен полностью совпасть с триггерным словом.'
+        : 'НЕ ТОЧНО: триггерное слово должно содержаться в тексте комментария.';
+    var caseTitle = caseMode === 'ВАЖНО'
+        ? 'ВАЖНО: строчность должна совпадать с триггерным словом в настройках активности.'
+        : 'НЕ ВАЖНО: триггерное слово может быть написано в любой строчности.';
+    return '<div class="comment-activity-keyword-row" data-trigger-index="' + idx + '">' +
+        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px;">' +
+            '<strong>Триггерное слово #' + (idx + 1) + '</strong>' +
+            '<button class="btn btn-delete" type="button" onclick="removeCommentActivityTriggerWord(' + idx + ')">Удалить триггер</button>' +
+        '</div>' +
+        '<div class="comment-activity-grid" style="grid-template-columns:minmax(220px,1.5fr) minmax(120px,.8fr) minmax(120px,.8fr);">' +
+            '<div class="comment-activity-field"><label>Триггерное слово</label><textarea class="comment-activity-trigger-word" rows="2" placeholder="Например: крутить">' + escapeHtml(trigger.keyword || '') + '</textarea></div>' +
+            '<div class="comment-activity-field"><label' + buildAdminTooltipAttrs(exactTitle) + '>Точность</label><button class="comment-activity-toggle-btn comment-activity-trigger-match-type ' + (matchType === 'ТОЧНО' ? '' : 'is-off') + '" type="button"' + buildAdminTooltipAttrs(exactTitle) + ' onclick="toggleCommentActivityTriggerMatchType(' + idx + ')">' + escapeHtml(matchType) + '</button></div>' +
+            '<div class="comment-activity-field"><label' + buildAdminTooltipAttrs(caseTitle) + '>Строчность</label><button class="comment-activity-toggle-btn comment-activity-trigger-case-mode ' + (caseMode === 'ВАЖНО' ? '' : 'is-off') + '" type="button"' + buildAdminTooltipAttrs(caseTitle) + ' onclick="toggleCommentActivityTriggerCaseMode(' + idx + ')">' + escapeHtml(caseMode) + '</button></div>' +
+        '</div>' +
+        '<div class="community-empty-note" style="margin-top:8px;">Шансы выигрышей считаются как проценты. Остаток до 100% считается проигрышем.</div>' +
+        getCommentActivityAnswersHtml(trigger.winVariants, idx, 'trigger_win', 'Выигрыши триггера', 'trigger') +
+        getCommentActivityAnswersHtml(trigger.loseAnswers, idx, 'trigger_lose', 'Ответы если не выиграл', 'trigger') +
+    '</div>';
+}
+
+function getCommentActivityAnswersHtml(items, keywordIdx, type, title, ownerKind) {
+    ownerKind = ownerKind || 'keyword';
+    var answers = normalizeCommentActivityAnswerDraftList(items, getCommentActivityAnswerFallback(type));
+    return '<div class="comment-activity-answers-block" data-answer-type="' + type + '" style="margin-top:12px;padding:12px;border:1px solid var(--section-border);border-radius:12px;background:var(--surface-muted);">' +
+        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">' +
+            '<strong>' + title + '</strong>' +
+            '<button class="btn btn-add" type="button" onclick="addCommentActivityAnswer(' + keywordIdx + ',&quot;' + type + '&quot;,&quot;' + ownerKind + '&quot;)">+ Добавить ответ</button>' +
+        '</div>' +
+        answers.map(function(answer, answerIdx) {
+            return getCommentActivityAnswerHtml(answer, keywordIdx, type, answerIdx, ownerKind, answers.length);
+        }).join('') +
+    '</div>';
+}
+
+function getCommentActivityAnswerHtml(answer, keywordIdx, type, answerIdx, ownerKind, answersCount) {
+    ownerKind = ownerKind || 'keyword';
+    answer = normalizeCommentActivityAnswer(answer);
+    answersCount = Math.max(1, parseInt(answersCount || 1, 10) || 1);
+    var noRepeat = !!answer.noRepeat;
+    var noRepeatTitle = 'Если включено, этот вариант после выпадения больше не будет выбран для этого пользователя в этой активности, пока есть другие доступные ответы.';
+    var noRepeatButton = '<button class="comment-activity-answer-no-repeat ' + (noRepeat ? 'is-on' : '') + '" type="button" data-no-repeat="' + (noRepeat ? 'ДА' : 'НЕТ') + '"' + buildAdminTooltipAttrs(noRepeatTitle) + ' onclick="toggleCommentActivityAnswerNoRepeat(' + keywordIdx + ',&quot;' + type + '&quot;,' + answerIdx + ',&quot;' + ownerKind + '&quot;)">Не повторять: ' + (noRepeat ? 'ДА' : 'НЕТ') + '</button>';
+    var noRepeatSame = !!answer.noRepeatSameAnswer;
+    var noRepeatSameTitle = 'Если включено, сервис не будет повторно отправлять этому пользователю такой же ответ в этой активности, даже если он находится у другого ключевого или триггерного слова.';
+    var noRepeatSameButton = '<button class="comment-activity-answer-no-repeat comment-activity-answer-no-repeat-same ' + (noRepeatSame ? 'is-on' : '') + '" type="button" data-no-repeat-same="' + (noRepeatSame ? 'ДА' : 'НЕТ') + '"' + buildAdminTooltipAttrs(noRepeatSameTitle) + ' onclick="toggleCommentActivityAnswerNoRepeatSame(' + keywordIdx + ',&quot;' + type + '&quot;,' + answerIdx + ',&quot;' + ownerKind + '&quot;)">Не повторять такой же: ' + (noRepeatSame ? 'ДА' : 'НЕТ') + '</button>';
+    var orderTitle = 'Очередность: если указать номер, этот ответ придет на соответствующую попытку этой ветки и проигнорирует шанс. Пусто = выбирать по шансу.';
+    var orderControl = '<label class="comment-activity-answer-order"' + buildAdminTooltipAttrs(orderTitle) + '><span>Очередность</span><input class="comment-activity-answer-order-input" type="number" min="1" max="' + answersCount + '" step="1" value="' + escapeHtml(answer.order || '') + '" placeholder="-"></label>';
+    var limitTitle = 'Лимит: сколько раз этот ответ может выпасть по всей активности среди всех пользователей. Пусто = без лимита.';
+    var limitVariableTitle = 'Переменная остатка лимита: вставьте {{ОСТАТОК_ЛИМИТА}} в ответ в комментариях или сообщениях. При отправке она заменится на число оставшихся выдач после текущего ответа. Также работают {{LIMIT_REMAINING}} и {{limit_remaining}}.';
+    var attachments = answer.attachments || [];
+    var messageAttachments = answer.messageAttachments || [];
+    var botSelectId = 'commentActivityAnswerBot_' + keywordIdx + '_' + type + '_' + answerIdx;
+    var stepSelectId = 'commentActivityAnswerStep_' + keywordIdx + '_' + type + '_' + answerIdx;
+    var botOptions = buildCommentActivityMessageBotOptions(answer.messageBot);
+    var stepOptions = buildCommentActivityMessageStepOptions(answer.messageBot, answer.messageStep);
+    var attachmentHtml = attachments.length
+        ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">' + attachments.map(function(attachment, attachmentIdx) {
+            return '<span class="profile-payment-filter-chip" style="display:inline-flex;align-items:center;gap:6px;"><code>' + escapeHtml(attachment) + '</code><button type="button" class="btn btn-delete" style="padding:2px 6px;font-size:11px;" onclick="removeCommentActivityAnswerAttachment(' + keywordIdx + ',&quot;' + type + '&quot;,' + answerIdx + ',' + attachmentIdx + ',&quot;comment&quot;,&quot;' + ownerKind + '&quot;)">×</button></span>';
+        }).join('') + '</div>'
+        : '<div class="community-empty-note" style="margin-top:8px;">Вложений к комментарию нет</div>';
+    var messageAttachmentHtml = messageAttachments.length
+        ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">' + messageAttachments.map(function(attachment, attachmentIdx) {
+            return '<span class="profile-payment-filter-chip" style="display:inline-flex;align-items:center;gap:6px;"><code>' + escapeHtml(attachment) + '</code><button type="button" class="btn btn-delete" style="padding:2px 6px;font-size:11px;" onclick="removeCommentActivityAnswerAttachment(' + keywordIdx + ',&quot;' + type + '&quot;,' + answerIdx + ',' + attachmentIdx + ',&quot;message&quot;,&quot;' + ownerKind + '&quot;)">×</button></span>';
+        }).join('') + '</div>'
+        : '<div class="community-empty-note" style="margin-top:8px;">Вложений к сообщению нет</div>';
+    return '<div class="comment-activity-answer-row" data-answer-type="' + type + '" data-answer-index="' + answerIdx + '" data-answer-id="' + escapeHtml(answer.id || '') + '" style="display:grid;gap:12px;">' +
+        '<div class="comment-activity-answer-head"><span class="comment-activity-answer-title"><span class="comment-activity-answer-title-badge">' + (answerIdx + 1) + '</span>Вариант ответа ' + (answerIdx + 1) + '</span><div class="comment-activity-answer-head-actions">' + orderControl + noRepeatSameButton + noRepeatButton + '</div></div>' +
+        '<div class="comment-activity-answer-main-grid">' +
+            '<div class="comment-activity-field"><label>Ответ в комментариях - ' + (answerIdx + 1) + '</label><div style="display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:8px;align-items:start;"><textarea class="comment-activity-answer-text" rows="3" placeholder="Ответ в комментариях, можно пусто">' + escapeHtml(answer.text || '') + '</textarea><button class="btn btn-add comment-activity-attach-btn" type="button"' + buildAdminTooltipAttrs('Добавить вложение к комментарию') + ' style="height:38px;min-width:46px;padding:0;" onclick="addCommentActivityAnswerAttachment(' + keywordIdx + ',&quot;' + type + '&quot;,' + answerIdx + ',&quot;comment&quot;,&quot;' + ownerKind + '&quot;)">+</button></div>' + attachmentHtml + '</div>' +
+            '<div class="comment-activity-field"><label>Ответ в сообщениях - ' + (answerIdx + 1) + '</label><div style="display:grid;grid-template-columns:minmax(0,1fr) 46px;gap:8px;align-items:start;"><textarea class="comment-activity-answer-message-text" rows="3" placeholder="Ответ в сообщениях, можно пусто">' + escapeHtml(answer.messageText || '') + '</textarea><button class="btn btn-add comment-activity-attach-btn" type="button"' + buildAdminTooltipAttrs('Добавить вложение к сообщению') + ' style="height:38px;min-width:46px;padding:0;" onclick="addCommentActivityAnswerAttachment(' + keywordIdx + ',&quot;' + type + '&quot;,' + answerIdx + ',&quot;message&quot;,&quot;' + ownerKind + '&quot;)">+</button></div>' + messageAttachmentHtml + '</div>' +
+        '</div>' +
+        '<div class="comment-activity-answer-controls-grid">' +
+            '<div class="comment-activity-field"><label>Шанс</label><input class="comment-activity-answer-chance" type="number" min="0" step="1" value="' + escapeHtml(answer.chance || '100') + '"></div>' +
+            '<div class="comment-activity-field"><label>Сообщение: бот</label><select id="' + botSelectId + '" class="comment-activity-answer-message-bot" onchange="updateCommentActivityAnswerMessageStepOptions(' + keywordIdx + ',&quot;' + type + '&quot;,' + answerIdx + ',&quot;' + ownerKind + '&quot;)" style="width:100%;border:1px solid var(--border-color);border-radius:10px;padding:9px 10px;background:var(--bg-input);color:var(--text-input);font-weight:800;">' + botOptions + '</select></div>' +
+            '<div class="comment-activity-field"><label>Сообщение: шаг</label><select id="' + stepSelectId + '" class="comment-activity-answer-message-step" style="width:100%;border:1px solid var(--border-color);border-radius:10px;padding:9px 10px;background:var(--bg-input);color:var(--text-input);font-weight:800;">' + stepOptions + '</select></div>' +
+            '<button class="btn btn-delete" type="button" style="height:38px;min-width:100px;padding:0 10px;" onclick="removeCommentActivityAnswer(' + keywordIdx + ',&quot;' + type + '&quot;,' + answerIdx + ',&quot;' + ownerKind + '&quot;)">Удалить</button>' +
+        '</div>' +
+        '<div class="comment-activity-answer-limit-grid">' +
+            '<div class="comment-activity-field"><label style="display:flex;align-items:center;gap:6px;">Лимит <span class="comment-activity-limit-hint"' + buildAdminTooltipAttrs(limitTitle) + '>?</span></label><input class="comment-activity-answer-limit" type="number" min="0" step="1" value="' + escapeHtml(answer.limit || '') + '" placeholder="Пусто"></div>' +
+            '<div class="comment-activity-field"><label style="display:flex;align-items:center;gap:6px;">Комментарий если лимит исчерпан <span class="comment-activity-limit-hint"' + buildAdminTooltipAttrs(limitVariableTitle) + '>?</span></label><textarea class="comment-activity-answer-limit-comment" rows="2" placeholder="Можно пусто">' + escapeHtml(answer.limitExhaustedText || '') + '</textarea></div>' +
+            '<div class="comment-activity-field"><label style="display:flex;align-items:center;gap:6px;">Сообщение если лимит исчерпан <span class="comment-activity-limit-hint"' + buildAdminTooltipAttrs(limitVariableTitle) + '>?</span></label><textarea class="comment-activity-answer-limit-message" rows="2" placeholder="Можно пусто">' + escapeHtml(answer.limitExhaustedMessageText || '') + '</textarea></div>' +
+        '</div>' +
+    '</div>';
+}
+
+function getDefaultCommentActivityKeyword() {
+    return {
+        keyword: '',
+        matchType: 'НЕ ТОЧНО',
+        caseMode: 'НЕ ВАЖНО',
+        winChance: '50',
+        loseChance: '50',
+        winAnswers: [{ id: buildCommentActivityAnswerId(), chance: '100', text: 'Вы выиграли', messageText: '', noRepeat: false, noRepeatSameAnswer: false, order: '', limit: '', limitExhaustedText: '', limitExhaustedMessageText: '', attachments: [], messageAttachments: [] }],
+        loseAnswers: [{ id: buildCommentActivityAnswerId(), chance: '100', text: 'Вы не выиграли', messageText: '', noRepeat: false, noRepeatSameAnswer: false, order: '', limit: '', limitExhaustedText: '', limitExhaustedMessageText: '', attachments: [], messageAttachments: [] }]
+    };
+}
+
+function getDefaultCommentActivityTriggerWord() {
+    return {
+        keyword: '',
+        matchType: 'НЕ ТОЧНО',
+        caseMode: 'НЕ ВАЖНО',
+        winVariants: [{ id: buildCommentActivityAnswerId(), chance: '100', text: 'Вы выиграли', messageText: '', noRepeat: false, noRepeatSameAnswer: false, order: '', limit: '', limitExhaustedText: '', limitExhaustedMessageText: '', attachments: [], messageAttachments: [] }],
+        loseAnswers: [{ id: buildCommentActivityAnswerId(), chance: '100', text: 'Вы не выиграли', messageText: '', noRepeat: false, noRepeatSameAnswer: false, order: '', limit: '', limitExhaustedText: '', limitExhaustedMessageText: '', attachments: [], messageAttachments: [] }]
+    };
+}
+
+function getCommentActivityAnswerListKey(type, ownerKind) {
+    if (ownerKind === 'trigger') return type === 'trigger_lose' ? 'loseAnswers' : 'winVariants';
+    return type === 'lose' ? 'loseAnswers' : 'winAnswers';
+}
+
+function getCommentActivityAnswerFallback(type) {
+    return (type === 'lose' || type === 'trigger_lose') ? 'Вы не выиграли' : 'Вы выиграли';
+}
+
+function getCommentActivityOwnerList(ownerKind) {
+    return ownerKind === 'trigger'
+        ? (window.commentActivityDraftTriggerWords || [])
+        : (window.commentActivityDraftKeywords || []);
+}
+
+function getCommentActivityOwnerDraft(ownerKind, ownerIdx) {
+    return getCommentActivityOwnerList(ownerKind)[ownerIdx] || null;
+}
+
+function commentActivityAnswerHasDelivery(answer) {
+    return String(answer && answer.text || '').trim()
+        || String(answer && answer.messageText || '').trim()
+        || (Array.isArray(answer && answer.attachments) && answer.attachments.length)
+        || (Array.isArray(answer && answer.messageAttachments) && answer.messageAttachments.length)
+        || (String(answer && answer.messageBot || '').trim() && String(answer && answer.messageStep || '').trim());
+}
+
+function getCommentActivityModalStatusTargets() {
+    return ['commentActivityModalTopStatus', 'commentActivityModalStatus'].map(function(id) {
+        return document.getElementById(id);
+    }).filter(Boolean);
+}
+
+function setCommentActivityModalNotice(type, messageHtml, timeoutMs) {
+    var targets = getCommentActivityModalStatusTargets();
+    targets.forEach(function(target) {
+        if (timeoutMs) {
+            setInlineNoticeWithTimeout(target, type || 'info', messageHtml, timeoutMs);
+        } else {
+            target.innerHTML = makeInlineNotice(type || 'info', messageHtml);
+        }
+    });
+}
+
+window.showCommentActivityModal = function(editIndex) {
+    if (!window.currentCommunityId) {
+        showStatus('Сначала выберите сообщество.', 'error');
+        return;
+    }
+    var existing = document.getElementById('commentActivityModalOverlay');
+    if (existing) existing.remove();
+
+    var activities = getCommentActivities();
+    var row = Number.isInteger(editIndex) && activities[editIndex] ? activities[editIndex] : null;
+    var keywords = row ? parseCommentActivityKeywords(row) : [getDefaultCommentActivityKeyword()];
+    var triggerWords = row ? parseCommentActivityTriggerWords(row) : [];
+    window.commentActivityEditIndex = row ? editIndex : -1;
+    window.commentActivityDraftKeywords = keywords.length ? keywords : [getDefaultCommentActivityKeyword()];
+    window.commentActivityDraftTriggerWords = triggerWords;
+
+    var overlay = document.createElement('div');
+    overlay.id = 'commentActivityModalOverlay';
+    overlay.className = 'comment-activity-modal-overlay';
+    overlay.onclick = function(event) {
+        if (event.target === overlay) closeCommentActivityModal();
+    };
+    var mentionMode = String(row && row['Обращение в комментариях'] || '@ID').trim() || '@ID';
+    var mentionSeparator = String(row && row['Разделитель обращения'] || 'ПРОБЕЛ').trim() || 'ПРОБЕЛ';
+    var activityReplyPlacement = row
+        ? normalizeCommentReplyPlacement(row[COMMENT_REPLY_PLACEMENT_COLUMN], 'В КОММЕНТАРИИ')
+        : 'В ПОСТЕ';
+    var subsequentEnabled = normalizeActivityEnabledValue(row && row['Отправлять последующие ответы если уже играл'] || 'НЕТ') === 'ДА';
+    overlay.innerHTML = '<div class="comment-activity-modal" onclick="event.stopPropagation()">' +
+        '<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px;">' +
+            '<div style="flex:1;min-width:0;"><div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;"><div class="tab-panel-kicker" style="margin-top:10px;">Активность в комментариях</div><div id="commentActivityTemplatePickerHolder">' + buildCommentActivityTemplatePickerHtml() + '</div><div class="comment-activity-template-actions"><button id="commentActivitySaveTemplateButton" class="btn btn-info" type="button" onclick="saveCurrentCommentActivityAsTemplate()">Сохранить как шаблон</button><div id="commentActivityTemplateStatus" class="comment-activity-template-notice"></div></div></div><h3 style="margin:4px 0 0 0;">' + (row ? 'Настройка активности' : 'Новая активность') + '</h3></div>' +
+            '<button class="btn btn-neutral" type="button" onclick="closeCommentActivityModal()">Закрыть</button>' +
+        '</div>' +
+        '<div id="commentActivityModalTopStatus" class="comment-activity-modal-status-sticky"></div>' +
+        '<div class="comment-activity-editor-block comment-activity-editor-block--main"><div class="comment-activity-grid">' +
+            '<div class="comment-activity-field"><label>Название активности</label><input id="commentActivityTitle" type="text" value="' + escapeHtml(row && row['Название'] || '') + '" placeholder="Например: Орел и решка"></div>' +
+            '<div class="comment-activity-field"><label>Статус</label><select id="commentActivityActive" style="width:100%;border:1px solid var(--border-color);border-radius:10px;padding:9px 10px;background:var(--bg-input);color:var(--text-input);font-weight:800;"><option value="ДА">Активна</option><option value="НЕТ">Не активна</option></select></div>' +
+            '<div class="comment-activity-field"><label>Количество попыток участия</label><input id="commentActivityMaxAttempts" type="number" min="1" step="1" value="' + escapeHtml(row && row['Количество попыток участия'] || '1') + '"></div>' +
+            '<div class="comment-activity-field"><label>Количество победителей</label><input id="commentActivityMaxWinners" type="number" min="0" step="1" value="' + escapeHtml(row && row['Количество победителей'] || '0') + '" placeholder="0 = без ограничения"></div>' +
+            '<div class="comment-activity-field"><label>Сколько раз может выигрывать один пользователь</label><input id="commentActivityMaxWinsPerUser" type="number" min="0" step="1" value="' + escapeHtml(row && row['Сколько раз может выигрывать один пользователь'] || '0') + '" placeholder="0 = без ограничения"></div>' +
+            '<div class="comment-activity-field comment-activity-field--full"><label>Пост игры</label><input id="commentActivityPost" type="text" value="' + escapeHtml(row && row['Пост'] || '') + '" placeholder="https://vk.com/wall-123456_789"></div>' +
+        '</div></div>' +
+        '<div class="comment-activity-editor-block comment-activity-editor-block--repeat"><div class="comment-activity-grid">' +
+            '<div class="comment-activity-field comment-activity-field--full"><label>Первый Ответ если уже играл</label><textarea id="commentActivityAlreadyPlayed" rows="3">' + escapeHtml(row && (row['Первый Ответ если уже играл'] || row['Ответ если уже играл']) || 'Вы уже играли') + '</textarea></div>' +
+            '<div class="comment-activity-field"><label>Последующие Ответы если уже играл</label><textarea id="commentActivitySubsequentAlreadyPlayed" rows="3" placeholder="Текст для следующих повторных попыток">' + escapeHtml(row && row['Последующие Ответы если уже играл'] || '') + '</textarea></div>' +
+            '<div class="comment-activity-field"><label>&nbsp;</label><label style="display:flex;align-items:center;gap:8px;min-height:38px;font-weight:900;"><input id="commentActivitySubsequentAlreadyPlayedEnabled" type="checkbox" style="width:auto;" ' + (subsequentEnabled ? 'checked' : '') + '> Отправлять последующие ответы</label></div>' +
+        '</div></div>' +
+        '<div class="comment-activity-editor-block comment-activity-editor-block--service"><div class="comment-activity-grid">' +
+            '<div class="comment-activity-field comment-activity-field--full"><label>Ответ если победители закончились</label><textarea id="commentActivityWinnersFinished" rows="3">' + escapeHtml(row && row['Ответ если победители закончились'] || 'Победители уже набраны') + '</textarea></div>' +
+            '<div class="comment-activity-field comment-activity-field--full"><label>Ответ если нет разрешения на сообщения</label><textarea id="commentActivityMessagesNotAllowed" rows="3">' + escapeHtml(row && row['Ответ если нет разрешения на сообщения'] || 'Вы не дали разрешение на отправку сообщений сообществу. Продублируйте свой ответ в сообщения сообщества.') + '</textarea></div>' +
+        '</div></div>' +
+        '<div class="comment-activity-editor-block comment-activity-editor-block--mention"><div class="comment-activity-grid comment-activity-mention-grid">' +
+            '<div class="comment-activity-field"><label>Обращение в комментариях</label><select id="commentActivityMentionMode" style="width:100%;border:1px solid var(--border-color);border-radius:10px;padding:9px 10px;background:var(--bg-input);color:var(--text-input);font-weight:800;">' + buildCommentActivityStaticOptions([{ value: '@ID', label: '@id пользователя' }, { value: 'ИМЯ', label: 'Имя пользователя ссылкой' }], mentionMode) + '</select></div>' +
+            '<div class="comment-activity-field"><label>После обращения</label><select id="commentActivityMentionSeparator" style="width:100%;border:1px solid var(--border-color);border-radius:10px;padding:9px 10px;background:var(--bg-input);color:var(--text-input);font-weight:800;">' + buildCommentActivityStaticOptions([{ value: 'ПРОБЕЛ', label: 'Пробел' }, { value: 'ТИРЕ', label: 'Тире' }, { value: 'СЛЕДУЮЩАЯ СТРОКА', label: 'Следующая строка' }, { value: 'ЗАПЯТАЯ', label: 'Запятая' }], mentionSeparator) + '</select></div>' +
+            '<div class="comment-activity-field"><label>Место ответа</label><button id="commentActivityReplyPlacement" class="comment-activity-reply-placement' + (activityReplyPlacement === 'В КОММЕНТАРИИ' ? ' is-comment' : '') + '" type="button" data-value="' + escapeHtml(activityReplyPlacement) + '"' + buildAdminTooltipAttrs(getCommentReplyPlacementTooltip(activityReplyPlacement)) + ' onclick="toggleCommentActivityReplyPlacement()">' + escapeHtml(getCommentReplyPlacementLabel(activityReplyPlacement)) + '</button></div>' +
+        '</div></div>' +
+        '<div class="comment-activity-editor-block comment-activity-editor-block--words"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;">' +
+            '<strong>Ключевые слова и шансы</strong>' +
+            '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+                '<button class="btn btn-add" type="button" onclick="addCommentActivityKeyword()">+ Добавить ключевое слово</button>' +
+                '<button class="btn btn-add" type="button" onclick="addCommentActivityTriggerWord()">+ Добавить триггерное слово</button>' +
+            '</div>' +
+        '</div>' +
+        '<div id="commentActivityKeywords"></div>' +
+        '<div id="commentActivityTriggerWords"></div>' +
+        '</div>' +
+        '<div id="commentActivityStatsBlock" class="comment-activity-editor-block comment-activity-editor-block--stats"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;"><strong>Статистика активности</strong><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-info" type="button" onclick="loadCommentActivityStats()">Обновить статистику</button><button id="commentActivityStatsExportButton" class="btn btn-save" type="button" onclick="exportCommentActivityStats()" disabled>Скачать Excel</button><button id="commentActivityStatsResetButton" class="btn btn-delete" type="button" onclick="resetCommentActivityStats()">Сбросить статистику</button></div></div><div id="commentActivityStatsContent" style="margin-top:10px;">Статистика появится после сохранения активности.</div></div>' +
+        '<div id="commentActivityModalStatus" style="margin-top:12px;"></div>' +
+        '<div class="profile-card-actions" style="justify-content:flex-end;margin-top:14px;">' +
+            (row ? '<button id="commentActivityDeleteButton" class="btn btn-delete" type="button" onclick="deleteCommentActivity()">Удалить активность</button>' : '') +
+            '<button class="btn btn-neutral" type="button" onclick="closeCommentActivityModal()">Отмена</button>' +
+            '<button id="commentActivitySaveButton" class="btn btn-save" type="button" onclick="saveCommentActivity()">Сохранить активность</button>' +
+        '</div>' +
+    '</div>';
+    document.body.appendChild(overlay);
+    var activeSelect = document.getElementById('commentActivityActive');
+    if (activeSelect) activeSelect.value = normalizeActivityEnabledValue(row && row['Активна']);
+    renderCommentActivityKeywordRows();
+    if (row) loadCommentActivityStats();
+};
+
+window.closeCommentActivityModal = function() {
+    var modal = document.getElementById('commentActivityModalOverlay');
+    if (modal) modal.remove();
+};
+
+function renderCommentActivityKeywordRows() {
+    var container = document.getElementById('commentActivityKeywords');
+    var triggerContainer = document.getElementById('commentActivityTriggerWords');
+    var keywords = window.commentActivityDraftKeywords || [];
+    if (container) container.innerHTML = keywords.length ? keywords.map(function(keyword, idx) {
+        return getCommentActivityKeywordHtml(keyword, idx);
+    }).join('') : '<div class="community-empty-note" style="margin-top:10px;">Ключевые слова не добавлены. Можно использовать только триггерные слова.</div>';
+    var triggerWords = window.commentActivityDraftTriggerWords || [];
+    if (triggerContainer) triggerContainer.innerHTML = triggerWords.map(function(trigger, idx) {
+        return getCommentActivityTriggerWordHtml(trigger, idx);
+    }).join('');
+}
+
+function syncCommentActivityKeywordDraft() {
+    var rows = Array.from(document.querySelectorAll('.comment-activity-keyword-row[data-keyword-index]'));
+    window.commentActivityDraftKeywords = rows.map(function(rowEl) {
+        return {
+            keyword: rowEl.querySelector('.comment-activity-keyword')?.value || '',
+            matchType: rowEl.querySelector('.comment-activity-match-type')?.textContent || 'НЕ ТОЧНО',
+            caseMode: rowEl.querySelector('.comment-activity-case-mode')?.textContent || 'НЕ ВАЖНО',
+            winChance: rowEl.querySelector('.comment-activity-win-chance')?.value || '0',
+            loseChance: rowEl.querySelector('.comment-activity-lose-chance')?.value || '0',
+            winAnswers: collectCommentActivityAnswerRows(rowEl, 'win'),
+            loseAnswers: collectCommentActivityAnswerRows(rowEl, 'lose')
+        };
+    });
+}
+
+function syncCommentActivityTriggerWordDraft() {
+    var rows = Array.from(document.querySelectorAll('.comment-activity-keyword-row[data-trigger-index]'));
+    window.commentActivityDraftTriggerWords = rows.map(function(rowEl) {
+        return {
+            keyword: rowEl.querySelector('.comment-activity-trigger-word')?.value || '',
+            matchType: rowEl.querySelector('.comment-activity-trigger-match-type')?.textContent || 'НЕ ТОЧНО',
+            caseMode: rowEl.querySelector('.comment-activity-trigger-case-mode')?.textContent || 'НЕ ВАЖНО',
+            winVariants: collectCommentActivityAnswerRows(rowEl, 'trigger_win', 'trigger'),
+            loseAnswers: collectCommentActivityAnswerRows(rowEl, 'trigger_lose', 'trigger')
+        };
+    });
+}
+
+function syncCommentActivityDrafts() {
+    syncCommentActivityKeywordDraft();
+    syncCommentActivityTriggerWordDraft();
+}
+
+window.toggleCommentActivityKeywordMatchType = function(idx) {
+    syncCommentActivityDrafts();
+    var keyword = window.commentActivityDraftKeywords[idx];
+    if (!keyword) return;
+    keyword.matchType = normalizeCommentActivityMatchType(keyword.matchType) === 'ТОЧНО' ? 'НЕ ТОЧНО' : 'ТОЧНО';
+    renderCommentActivityKeywordRows();
+};
+
+window.toggleCommentActivityKeywordCaseMode = function(idx) {
+    syncCommentActivityDrafts();
+    var keyword = window.commentActivityDraftKeywords[idx];
+    if (!keyword) return;
+    keyword.caseMode = normalizeCommentActivityCaseMode(keyword.caseMode) === 'ВАЖНО' ? 'НЕ ВАЖНО' : 'ВАЖНО';
+    renderCommentActivityKeywordRows();
+};
+
+window.toggleCommentActivityTriggerMatchType = function(idx) {
+    syncCommentActivityDrafts();
+    var trigger = window.commentActivityDraftTriggerWords[idx];
+    if (!trigger) return;
+    trigger.matchType = normalizeCommentActivityMatchType(trigger.matchType) === 'ТОЧНО' ? 'НЕ ТОЧНО' : 'ТОЧНО';
+    renderCommentActivityKeywordRows();
+};
+
+window.toggleCommentActivityTriggerCaseMode = function(idx) {
+    syncCommentActivityDrafts();
+    var trigger = window.commentActivityDraftTriggerWords[idx];
+    if (!trigger) return;
+    trigger.caseMode = normalizeCommentActivityCaseMode(trigger.caseMode) === 'ВАЖНО' ? 'НЕ ВАЖНО' : 'ВАЖНО';
+    renderCommentActivityKeywordRows();
+};
+
+function collectCommentActivityAnswerRows(rowEl, type, ownerKind) {
+    ownerKind = ownerKind || (rowEl.hasAttribute('data-trigger-index') ? 'trigger' : 'keyword');
+    return Array.from(rowEl.querySelectorAll('.comment-activity-answer-row[data-answer-type="' + type + '"]')).map(function(answerEl) {
+        var answerIdx = parseInt(answerEl.getAttribute('data-answer-index') || '0', 10) || 0;
+        var ownerIdx = parseInt(rowEl.getAttribute(ownerKind === 'trigger' ? 'data-trigger-index' : 'data-keyword-index') || '0', 10) || 0;
+        var draftOwner = getCommentActivityOwnerDraft(ownerKind, ownerIdx) || {};
+        var draftList = draftOwner[getCommentActivityAnswerListKey(type, ownerKind)] || [];
+        var draftAnswer = draftList[answerIdx] || {};
+        var noRepeatEl = answerEl.querySelector('.comment-activity-answer-no-repeat[data-no-repeat]');
+        var noRepeatSameEl = answerEl.querySelector('.comment-activity-answer-no-repeat-same');
+        return {
+            id: String(draftAnswer.id || answerEl.getAttribute('data-answer-id') || '').trim() || buildCommentActivityAnswerId(),
+            text: answerEl.querySelector('.comment-activity-answer-text')?.value || '',
+            messageText: answerEl.querySelector('.comment-activity-answer-message-text')?.value || '',
+            chance: answerEl.querySelector('.comment-activity-answer-chance')?.value || '0',
+            noRepeat: noRepeatEl ? noRepeatEl.getAttribute('data-no-repeat') === 'ДА' : !!draftAnswer.noRepeat,
+            noRepeatSameAnswer: noRepeatSameEl ? noRepeatSameEl.getAttribute('data-no-repeat-same') === 'ДА' : !!draftAnswer.noRepeatSameAnswer,
+            order: answerEl.querySelector('.comment-activity-answer-order-input')?.value || '',
+            limit: answerEl.querySelector('.comment-activity-answer-limit')?.value || '',
+            limitExhaustedText: answerEl.querySelector('.comment-activity-answer-limit-comment')?.value || '',
+            limitExhaustedMessageText: answerEl.querySelector('.comment-activity-answer-limit-message')?.value || '',
+            attachments: Array.isArray(draftAnswer.attachments) ? draftAnswer.attachments.slice() : [],
+            messageAttachments: Array.isArray(draftAnswer.messageAttachments) ? draftAnswer.messageAttachments.slice() : [],
+            messageBot: answerEl.querySelector('.comment-activity-answer-message-bot')?.value || '',
+            messageStep: answerEl.querySelector('.comment-activity-answer-message-step')?.value || ''
+        };
+    });
+}
+
+window.updateCommentActivityAnswerMessageStepOptions = function(keywordIdx, type, answerIdx, ownerKind) {
+    var botEl = document.getElementById('commentActivityAnswerBot_' + keywordIdx + '_' + type + '_' + answerIdx);
+    var stepEl = document.getElementById('commentActivityAnswerStep_' + keywordIdx + '_' + type + '_' + answerIdx);
+    if (!botEl || !stepEl) return;
+    var previous = stepEl.value;
+    stepEl.innerHTML = buildCommentActivityMessageStepOptions(botEl.value, previous);
+    if (previous && !stepEl.value) stepEl.value = previous;
+};
+
+window.addCommentActivityKeyword = function() {
+    syncCommentActivityDrafts();
+    window.commentActivityDraftKeywords.push(getDefaultCommentActivityKeyword());
+    renderCommentActivityKeywordRows();
+};
+
+window.removeCommentActivityKeyword = function(idx) {
+    syncCommentActivityDrafts();
+    window.commentActivityDraftKeywords.splice(idx, 1);
+    renderCommentActivityKeywordRows();
+};
+
+window.addCommentActivityTriggerWord = function() {
+    syncCommentActivityDrafts();
+    window.commentActivityDraftTriggerWords.push(getDefaultCommentActivityTriggerWord());
+    renderCommentActivityKeywordRows();
+};
+
+window.removeCommentActivityTriggerWord = function(idx) {
+    syncCommentActivityDrafts();
+    window.commentActivityDraftTriggerWords.splice(idx, 1);
+    renderCommentActivityKeywordRows();
+};
+
+window.addCommentActivityAnswer = function(keywordIdx, type, ownerKind) {
+    ownerKind = ownerKind || 'keyword';
+    syncCommentActivityDrafts();
+    var owner = getCommentActivityOwnerDraft(ownerKind, keywordIdx);
+    if (!owner) return;
+    var key = getCommentActivityAnswerListKey(type, ownerKind);
+    owner[key] = normalizeCommentActivityAnswerDraftList(owner[key], getCommentActivityAnswerFallback(type));
+    owner[key].push({ id: buildCommentActivityAnswerId(), text: '', messageText: '', chance: '100', noRepeat: false, noRepeatSameAnswer: false, order: '', limit: '', limitExhaustedText: '', limitExhaustedMessageText: '', attachments: [], messageAttachments: [], messageBot: '', messageStep: '' });
+    renderCommentActivityKeywordRows();
+};
+
+window.toggleCommentActivityAnswerNoRepeat = function(keywordIdx, type, answerIdx, ownerKind) {
+    ownerKind = ownerKind || 'keyword';
+    syncCommentActivityDrafts();
+    var owner = getCommentActivityOwnerDraft(ownerKind, keywordIdx);
+    if (!owner) return;
+    var key = getCommentActivityAnswerListKey(type, ownerKind);
+    owner[key] = normalizeCommentActivityAnswerDraftList(owner[key], getCommentActivityAnswerFallback(type));
+    var answer = owner[key][answerIdx];
+    if (!answer) return;
+    answer.noRepeat = !answer.noRepeat;
+    if (!answer.id) answer.id = buildCommentActivityAnswerId();
+    renderCommentActivityKeywordRows();
+};
+
+window.toggleCommentActivityAnswerNoRepeatSame = function(keywordIdx, type, answerIdx, ownerKind) {
+    ownerKind = ownerKind || 'keyword';
+    syncCommentActivityDrafts();
+    var owner = getCommentActivityOwnerDraft(ownerKind, keywordIdx);
+    if (!owner) return;
+    var key = getCommentActivityAnswerListKey(type, ownerKind);
+    owner[key] = normalizeCommentActivityAnswerDraftList(owner[key], getCommentActivityAnswerFallback(type));
+    var answer = owner[key][answerIdx];
+    if (!answer) return;
+    answer.noRepeatSameAnswer = !answer.noRepeatSameAnswer;
+    if (!answer.id) answer.id = buildCommentActivityAnswerId();
+    renderCommentActivityKeywordRows();
+};
+
+window.removeCommentActivityAnswer = function(keywordIdx, type, answerIdx, ownerKind) {
+    ownerKind = ownerKind || 'keyword';
+    syncCommentActivityDrafts();
+    var owner = getCommentActivityOwnerDraft(ownerKind, keywordIdx);
+    if (!owner) return;
+    var key = getCommentActivityAnswerListKey(type, ownerKind);
+    owner[key] = normalizeCommentActivityAnswerDraftList(owner[key], getCommentActivityAnswerFallback(type));
+    if (owner[key].length <= 1) return;
+    owner[key].splice(answerIdx, 1);
+    renderCommentActivityKeywordRows();
+};
+
+window.addCommentActivityAnswerAttachment = function(keywordIdx, type, answerIdx, channel, ownerKind) {
+    ownerKind = ownerKind || 'keyword';
+    syncCommentActivityDrafts();
+    channel = channel === 'message' ? 'message' : 'comment';
+    var attachmentKey = channel === 'message' ? 'messageAttachments' : 'attachments';
+    var dialogTab = channel === 'message' ? 'Messages' : 'Comments';
+    var dialogColumn = channel === 'message' ? 'Вложения к сообщению' : 'Вложения к ответу';
+    showAttachmentDialog(dialogTab, 0, dialogColumn, function(attachment) {
+        syncCommentActivityDrafts();
+        var owner = getCommentActivityOwnerDraft(ownerKind, keywordIdx);
+        if (!owner) return;
+        var key = getCommentActivityAnswerListKey(type, ownerKind);
+        owner[key] = normalizeCommentActivityAnswerDraftList(owner[key], getCommentActivityAnswerFallback(type));
+        var answer = owner[key][answerIdx];
+        if (!answer) return;
+        if (!Array.isArray(answer[attachmentKey])) answer[attachmentKey] = [];
+        if (answer[attachmentKey].indexOf(attachment) === -1) answer[attachmentKey].push(attachment);
+        renderCommentActivityKeywordRows();
+    });
+};
+
+window.removeCommentActivityAnswerAttachment = function(keywordIdx, type, answerIdx, attachmentIdx, channel, ownerKind) {
+    ownerKind = ownerKind || 'keyword';
+    syncCommentActivityDrafts();
+    var owner = getCommentActivityOwnerDraft(ownerKind, keywordIdx);
+    if (!owner) return;
+    var key = getCommentActivityAnswerListKey(type, ownerKind);
+    var answer = (owner[key] || [])[answerIdx];
+    var attachmentKey = channel === 'message' ? 'messageAttachments' : 'attachments';
+    if (!answer || !Array.isArray(answer[attachmentKey])) return;
+    answer[attachmentKey].splice(attachmentIdx, 1);
+    renderCommentActivityKeywordRows();
+};
+
+function setCommentActivityInputValue(id, value) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.value = value == null ? '' : String(value);
+}
+
+function setCommentActivityCheckboxValue(id, checked) {
+    var el = document.getElementById(id);
+    if (el) el.checked = !!checked;
+}
+
+function setCommentActivityReplyPlacement(value) {
+    var el = document.getElementById('commentActivityReplyPlacement');
+    if (!el) return;
+    var normalized = normalizeCommentReplyPlacement(value, 'В ПОСТЕ');
+    el.setAttribute('data-value', normalized);
+    el.setAttribute('data-tooltip', getCommentReplyPlacementTooltip(normalized));
+    el.textContent = getCommentReplyPlacementLabel(normalized);
+    el.classList.toggle('is-comment', normalized === 'В КОММЕНТАРИИ');
+}
+
+window.toggleCommentActivityReplyPlacement = function() {
+    var el = document.getElementById('commentActivityReplyPlacement');
+    if (!el) return;
+    var current = normalizeCommentReplyPlacement(el.getAttribute('data-value'), 'В ПОСТЕ');
+    setCommentActivityReplyPlacement(current === 'В КОММЕНТАРИИ' ? 'В ПОСТЕ' : 'В КОММЕНТАРИИ');
+    hideAdminTooltip();
+};
+
+function applyCommentActivityTemplateToEditor(template) {
+    if (!template) return;
+    setCommentActivityInputValue('commentActivityTitle', template['Название'] || template.templateLabel || '');
+    setCommentActivityInputValue('commentActivityActive', normalizeActivityEnabledValue(template['Активна'] || 'ДА'));
+    setCommentActivityInputValue('commentActivityMaxAttempts', template['Количество попыток участия'] || '1');
+    setCommentActivityInputValue('commentActivityMaxWinners', template['Количество победителей'] || '0');
+    setCommentActivityInputValue('commentActivityMaxWinsPerUser', template['Сколько раз может выигрывать один пользователь'] || '0');
+    setCommentActivityInputValue('commentActivityPost', template['Пост'] || COMMENT_ACTIVITY_TEMPLATE_POST_PLACEHOLDER);
+    setCommentActivityInputValue('commentActivityAlreadyPlayed', template['Первый Ответ если уже играл'] || template['Ответ если уже играл'] || 'Вы уже играли');
+    setCommentActivityInputValue('commentActivitySubsequentAlreadyPlayed', template['Последующие Ответы если уже играл'] || '');
+    setCommentActivityCheckboxValue('commentActivitySubsequentAlreadyPlayedEnabled', normalizeActivityEnabledValue(template['Отправлять последующие ответы если уже играл'] || 'НЕТ') === 'ДА');
+    setCommentActivityInputValue('commentActivityWinnersFinished', template['Ответ если победители закончились'] || 'Победители уже набраны');
+    setCommentActivityInputValue('commentActivityMessagesNotAllowed', template['Ответ если нет разрешения на сообщения'] || 'Вы не дали разрешение на отправку сообщений сообществу. Продублируйте свой ответ в сообщения сообщества.');
+    setCommentActivityInputValue('commentActivityMentionMode', template['Обращение в комментариях'] || '@ID');
+    setCommentActivityInputValue('commentActivityMentionSeparator', template['Разделитель обращения'] || 'ПРОБЕЛ');
+    setCommentActivityReplyPlacement(template[COMMENT_REPLY_PLACEMENT_COLUMN] || 'В ПОСТЕ');
+    window.commentActivityDraftKeywords = parseCommentActivityKeywords(template);
+    window.commentActivityDraftTriggerWords = parseCommentActivityTriggerWords(template);
+    renderCommentActivityKeywordRows();
+    setCommentActivityModalNotice('success', 'Шаблон загружен в редактор. Замените пост и сохраните активность.', 3000);
+}
+
+window.toggleCommentActivityTemplateMenu = function(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    var picker = document.getElementById('commentActivityTemplatePicker');
+    if (picker) picker.classList.toggle('is-open');
+};
+
+window.applyCommentActivityTemplateById = function(source, templateId) {
+    var list = source === 'custom' ? getCustomCommentActivityTemplates() : getBuiltInCommentActivityTemplates();
+    var template = list.find(function(item) { return String(item.templateId || '') === templateId; });
+    if (!template) return;
+    applyCommentActivityTemplateToEditor(cloneCommentActivityTemplate(template));
+    var picker = document.getElementById('commentActivityTemplatePicker');
+    if (picker) picker.classList.remove('is-open');
+    var button = document.getElementById('commentActivityTemplateButton');
+    if (button) button.textContent = template.templateLabel || template['Название'] || 'Выбрать шаблон';
+};
+
+window.deleteCommentActivityTemplate = function(templateId, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    var templates = getCustomCommentActivityTemplates();
+    var template = templates.find(function(item) { return String(item.templateId || '') === String(templateId || ''); });
+    if (!template) return;
+    var name = template.templateLabel || template['Название'] || 'шаблон';
+    if (!confirm('Удалить шаблон "' + name + '"?')) return;
+    saveCustomCommentActivityTemplates(templates.filter(function(item) {
+        return String(item.templateId || '') !== String(templateId || '');
+    }));
+    renderCommentActivityTemplatePicker();
+    setCommentActivityTemplateNotice('success', 'Шаблон удален.');
+};
+
+function buildCommentActivityEditorRow(options) {
+    options = options || {};
+    syncCommentActivityDrafts();
+    var title = String(document.getElementById('commentActivityTitle')?.value || '').trim();
+    var post = String(document.getElementById('commentActivityPost')?.value || '').trim();
+    var maxAttempts = Math.max(1, parseInt(document.getElementById('commentActivityMaxAttempts')?.value || '1', 10) || 1);
+    var maxWinners = Math.max(0, parseInt(document.getElementById('commentActivityMaxWinners')?.value || '0', 10) || 0);
+    var maxWinsPerUser = Math.max(0, parseInt(document.getElementById('commentActivityMaxWinsPerUser')?.value || '0', 10) || 0);
+    var alreadyPlayed = String(document.getElementById('commentActivityAlreadyPlayed')?.value || '').trim() || 'Вы уже играли';
+    var subsequentAlreadyPlayed = String(document.getElementById('commentActivitySubsequentAlreadyPlayed')?.value || '').trim();
+    var subsequentAlreadyPlayedEnabled = document.getElementById('commentActivitySubsequentAlreadyPlayedEnabled')?.checked ? 'ДА' : 'НЕТ';
+    var winnersFinished = String(document.getElementById('commentActivityWinnersFinished')?.value || '').trim() || 'Победители уже набраны';
+    var messagesNotAllowed = String(document.getElementById('commentActivityMessagesNotAllowed')?.value || '').trim() || 'Вы не дали разрешение на отправку сообщений сообществу. Продублируйте свой ответ в сообщения сообщества.';
+    var mentionMode = String(document.getElementById('commentActivityMentionMode')?.value || '@ID').trim() || '@ID';
+    var mentionSeparator = String(document.getElementById('commentActivityMentionSeparator')?.value || 'ПРОБЕЛ').trim() || 'ПРОБЕЛ';
+    var replyPlacement = normalizeCommentReplyPlacement(document.getElementById('commentActivityReplyPlacement')?.getAttribute('data-value'), 'В ПОСТЕ');
+    var active = normalizeActivityEnabledValue(document.getElementById('commentActivityActive')?.value || 'ДА');
+    var keywords = (window.commentActivityDraftKeywords || []).filter(function(item) {
+        return String(item.keyword || '').trim();
+    }).map(function(item) {
+        var keyword = normalizeCommentActivityKeywordDraft(item);
+        keyword.winAnswers = (keyword.winAnswers || []).filter(commentActivityAnswerHasDelivery);
+        keyword.loseAnswers = (keyword.loseAnswers || []).filter(commentActivityAnswerHasDelivery);
+        return keyword;
+    });
+    var triggerWords = (window.commentActivityDraftTriggerWords || []).filter(function(item) {
+        return String(item.keyword || '').trim();
+    }).map(function(item) {
+        var trigger = normalizeCommentActivityTriggerWordDraft(item);
+        trigger.winVariants = (trigger.winVariants || []).filter(commentActivityAnswerHasDelivery);
+        trigger.loseAnswers = (trigger.loseAnswers || []).filter(commentActivityAnswerHasDelivery);
+        return trigger;
+    });
+
+    if (!title) {
+        return { ok: false, error: 'Укажи название активности.' };
+    }
+    if (!options.forTemplate && !post) {
+        return { ok: false, error: 'Укажи ссылку на пост игры.' };
+    }
+    if (!options.forTemplate && post === COMMENT_ACTIVITY_TEMPLATE_POST_PLACEHOLDER) {
+        return { ok: false, error: 'Замените шаблонный текст в поле "Пост игры" на ссылку на нужный пост.' };
+    }
+    if (!keywords.length && !triggerWords.length) {
+        return { ok: false, error: 'Добавь хотя бы одно ключевое слово или триггерное слово.' };
+    }
+    for (var i = 0; i < keywords.length; i++) {
+        if (!keywords[i].winAnswers.length || !keywords[i].loseAnswers.length) {
+            return { ok: false, error: 'Для каждого слова нужны ответы выигрыша и проигрыша.' };
+        }
+    }
+    for (var t = 0; t < triggerWords.length; t++) {
+        if (!triggerWords[t].winVariants.length || !triggerWords[t].loseAnswers.length) {
+            return { ok: false, error: 'Для каждого триггерного слова нужны выигрыши и ответ если пользователь не выиграл.' };
+        }
+    }
+
+    var existing = options.existing || null;
+    var row = {
+        ID: options.forTemplate ? '' : (existing && existing.ID || buildCommentActivityId()),
+        'Название': title,
+        'Активна': active,
+        'Количество попыток участия': String(maxAttempts),
+        'Количество победителей': String(maxWinners),
+        'Сколько раз может выигрывать один пользователь': String(maxWinsPerUser),
+        'Пост': options.forTemplate ? COMMENT_ACTIVITY_TEMPLATE_POST_PLACEHOLDER : post,
+        'Первый Ответ если уже играл': alreadyPlayed,
+        'Отправлять последующие ответы если уже играл': subsequentAlreadyPlayedEnabled,
+        'Последующие Ответы если уже играл': subsequentAlreadyPlayed,
+        'Ответ если победители закончились': winnersFinished,
+        'Ответ если нет разрешения на сообщения': messagesNotAllowed,
+        'Обращение в комментариях': mentionMode,
+        'Разделитель обращения': mentionSeparator,
+        'Место ответа': replyPlacement,
+        'Ключевые слова JSON': JSON.stringify(keywords),
+        'Триггерные слова JSON': JSON.stringify(triggerWords)
+    };
+    return { ok: true, row: row };
+}
+
+window.saveCurrentCommentActivityAsTemplate = function() {
+    var result = buildCommentActivityEditorRow({ forTemplate: true });
+    if (!result.ok) {
+        setCommentActivityTemplateNotice('error', result.error);
+        return;
+    }
+    var templates = getCustomCommentActivityTemplates();
+    var row = result.row;
+    row.templateId = 'custom_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    row.templateLabel = row['Название'];
+    row.templateSource = 'custom';
+    templates.push(row);
+    saveCustomCommentActivityTemplates(templates);
+    renderCommentActivityTemplatePicker();
+    setCommentActivityTemplateNotice('success', 'Шаблон сохранен.');
+    setCommentActivityModalNotice('success', 'Шаблон появится в списке "Мои шаблоны".', 3000);
+};
+
+window.saveCommentActivity = async function() {
+    var activities = getCommentActivities();
+    var existing = window.commentActivityEditIndex >= 0 ? activities[window.commentActivityEditIndex] : null;
+    var result = buildCommentActivityEditorRow({ existing: existing });
+    if (!result.ok) {
+        setCommentActivityModalNotice('error', result.error);
+        return;
+    }
+    var row = result.row;
+    var saveButton = document.getElementById('commentActivitySaveButton');
+    setCommentActivityModalNotice('warn', 'Сохраняю активность...');
+    if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.textContent = 'Сохраняю...';
+    }
+
+    if (existing) activities[window.commentActivityEditIndex] = row;
+    else activities.push(row);
+
+    renderCommentActivitiesBlock();
+    var saved = await saveDataDirectly('CommentActivities');
+    if (saveButton) {
+        saveButton.disabled = false;
+        saveButton.textContent = 'Сохранить активность';
+    }
+    if (!saved) {
+        setCommentActivityModalNotice('error', 'Активность создана локально, но не сохранилась на сервере.');
+        return;
+    }
+    closeCommentActivityModal();
+    showStatus('Активность сохранена.', 'success');
+};
+
+window.toggleCommentActivityEnabled = async function(idx, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    var activities = getCommentActivities();
+    if (!activities[idx]) return;
+    activities[idx]['Активна'] = isCommentActivityEnabled(activities[idx]) ? 'НЕТ' : 'ДА';
+    renderCommentActivitiesBlock();
+    var saved = await saveDataDirectly('CommentActivities');
+    showStatus(saved ? 'Статус активности сохранен.' : 'Не удалось сохранить статус активности.', saved ? 'success' : 'error');
+};
+
+window.deleteCommentActivity = async function() {
+    var idx = window.commentActivityEditIndex;
+    if (idx < 0) return;
+    if (!confirm('Удалить активность?')) return;
+    var deleteButton = document.getElementById('commentActivityDeleteButton');
+    setCommentActivityModalNotice('warn', 'Удаляю активность...');
+    if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.textContent = 'Удаляю...';
+    }
+    getCommentActivities().splice(idx, 1);
+    renderCommentActivitiesBlock();
+    var saved = await saveDataDirectly('CommentActivities');
+    if (deleteButton) {
+        deleteButton.disabled = false;
+        deleteButton.textContent = 'Удалить активность';
+    }
+    closeCommentActivityModal();
+    showStatus(saved ? 'Активность удалена.' : 'Активность удалена локально, но не сохранилась на сервере.', saved ? 'success' : 'error');
+};
+
+async function getCurrentVkGroupIdForCommentActivities() {
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var settingsRes = await fetch(baseUrl + '?getBotSettings');
+        var settingsData = await settingsRes.json();
+        var communityConfig = settingsData.communities?.[window.currentCommunityId] || {};
+        return communityConfig.vk_group_id || window.currentCommunityId || '';
+    } catch(e) {
+        return window.currentCommunityId || '';
+    }
+}
+
+function getEditingCommentActivityRow() {
+    var activities = getCommentActivities();
+    var idx = window.commentActivityEditIndex;
+    return idx >= 0 && activities[idx] ? activities[idx] : null;
+}
+
+function renderCommentActivityStats(stats) {
+    var content = document.getElementById('commentActivityStatsContent');
+    var exportButton = document.getElementById('commentActivityStatsExportButton');
+    if (!content) return;
+    var summary = stats && stats.summary ? stats.summary : {};
+    var rows = Array.isArray(stats && stats.rows) ? stats.rows : [];
+    if (exportButton) exportButton.disabled = rows.length === 0;
+    var uniqueUsers = {};
+    rows.forEach(function(row) {
+        if (row.userId) uniqueUsers[row.userId] = true;
+    });
+    var lastRows = rows.slice(0, 20);
+    var tableHtml = lastRows.length ? '<div class="profile-payment-operations-table-wrap" style="margin-top:10px;max-height:260px;overflow:auto;"><table class="profile-payment-operations-table"><thead><tr><th>Дата</th><th>Пользователь</th><th>Попытка</th><th>Слово</th><th>Результат</th><th>Ответ</th></tr></thead><tbody>' +
+        lastRows.map(function(row) {
+            return '<tr><td>' + escapeHtml(String(row.createdAt || '').replace('T', ' ').slice(0, 19)) + '</td><td>' + escapeHtml((row.userName ? row.userName + ' ' : '') + '(' + (row.userId || '') + ')') + '</td><td>' + escapeHtml(String(row.attemptNumber || '')) + '</td><td>' + escapeHtml(row.keyword || '') + '</td><td>' + escapeHtml(row.resultLabel || row.result || '') + '</td><td>' + escapeHtml(row.answer || '') + '</td></tr>';
+        }).join('') +
+        '</tbody></table></div>' : '<div class="community-empty-note" style="margin-top:10px;">Пока нет зачётных попыток.</div>';
+
+    var keywordHtml = Array.isArray(summary.byKeyword) && summary.byKeyword.length
+        ? summary.byKeyword.map(function(item) { return escapeHtml(item.value) + ': <strong>' + escapeHtml(String(item.count)) + '</strong>'; }).join(' • ')
+        : 'Нет данных';
+    var answerHtml = Array.isArray(summary.byAnswer) && summary.byAnswer.length
+        ? summary.byAnswer.slice(0, 8).map(function(item) { return escapeHtml(item.value) + ': <strong>' + escapeHtml(String(item.count)) + '</strong>'; }).join(' • ')
+        : 'Нет данных';
+
+    content.innerHTML =
+        '<div class="profile-card-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">' +
+            '<div class="profile-card"><div class="profile-card-name">Попыток</div><div class="profile-card-value">' + escapeHtml(String(summary.total || 0)) + '</div></div>' +
+            '<div class="profile-card"><div class="profile-card-name">Участников</div><div class="profile-card-value">' + escapeHtml(String(Object.keys(uniqueUsers).length)) + '</div></div>' +
+            '<div class="profile-card"><div class="profile-card-name">Выиграли</div><div class="profile-card-value">' + escapeHtml(String(summary.winners || 0)) + '</div></div>' +
+            '<div class="profile-card"><div class="profile-card-name">Проиграли</div><div class="profile-card-value">' + escapeHtml(String(summary.losers || 0)) + '</div></div>' +
+            '<div class="profile-card"><div class="profile-card-name">% выигрышей</div><div class="profile-card-value">' + escapeHtml(String(summary.winRate || 0)) + '%</div></div>' +
+        '</div>' +
+        '<div style="margin-top:10px;"><strong>По словам:</strong> ' + keywordHtml + '</div>' +
+        '<div style="margin-top:6px;"><strong>По ответам:</strong> ' + answerHtml + '</div>' +
+        tableHtml;
+}
+
+window.loadCommentActivityStats = async function() {
+    var row = getEditingCommentActivityRow();
+    var content = document.getElementById('commentActivityStatsContent');
+    if (!row || !row.ID) {
+        if (content) content.innerHTML = 'Статистика появится после сохранения активности.';
+        return;
+    }
+    try {
+        if (content) content.innerHTML = makeInlineNotice('warn', 'Загружаю статистику...');
+        var baseUrl = window.location.href.split('?')[0];
+        var profileId = encodeURIComponent(getCurrentProfileId() || getPrincipalProfileId() || '1');
+        var principalProfileId = encodeURIComponent(getPrincipalProfileId() || '1');
+        var communityId = encodeURIComponent(await getCurrentVkGroupIdForCommentActivities());
+        var activityId = encodeURIComponent(row.ID);
+        var activityTitle = encodeURIComponent(row['Название'] || '');
+        var response = await fetch(baseUrl + '?getCommentActivityStats=1&profileId=' + profileId + '&principalProfileId=' + principalProfileId + '&communityId=' + communityId + '&activityId=' + activityId + '&activityTitle=' + activityTitle + '&_ts=' + Date.now(), { cache: 'no-store' });
+        var payload = await response.json();
+        if (!payload.success) throw new Error(payload.error || 'Не удалось загрузить статистику');
+        window.commentActivityCurrentStats = payload.stats;
+        renderCommentActivityStats(payload.stats);
+    } catch(error) {
+        if (content) content.innerHTML = makeInlineNotice('error', 'Ошибка статистики: ' + escapeHtml(error.message));
+    }
+};
+
+window.buildCommentActivityStatsFilename = function(dateValue) {
+    var row = getEditingCommentActivityRow();
+    var date = dateValue instanceof Date ? dateValue : new Date();
+    var pad = function(value) { return String(value).padStart(2, '0'); };
+    var rawTitle = String(row && row['Название'] || 'activity').trim().replace(/[^a-zA-Zа-яА-Я0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
+    return 'Статистика_' + (rawTitle || 'активности') + '_' + date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + '_' + pad(date.getHours()) + '-' + pad(date.getMinutes()) + '.xlsx';
+};
+
+window.exportCommentActivityStats = async function() {
+    var row = getEditingCommentActivityRow();
+    var button = document.getElementById('commentActivityStatsExportButton');
+    if (!row || !row.ID) {
+        setCommentActivityModalNotice('error', 'Сначала сохраните активность.', 3000);
+        return;
+    }
+    var fileName = window.buildCommentActivityStatsFilename(new Date());
+    try {
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Создаю Excel...';
+        }
+        var baseUrl = window.location.href.split('?')[0];
+        var communityId = await getCurrentVkGroupIdForCommentActivities();
+        var response = await fetch(baseUrl + '?exportCommentActivityStats=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profileId: getCurrentProfileId() || getPrincipalProfileId() || '1',
+                principalProfileId: getPrincipalProfileId() || '1',
+                communityId: communityId,
+                activityId: row.ID,
+                activityTitle: row['Название'] || '',
+                fileName: fileName
+            })
+        });
+        if (!response.ok) {
+            var errorPayload = await response.json().catch(function() { return {}; });
+            throw new Error(errorPayload.error || 'Не удалось создать Excel');
+        }
+        var blob = await response.blob();
+        var objectUrl = URL.createObjectURL(blob);
+        var downloadLink = document.createElement('a');
+        downloadLink.href = objectUrl;
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+        URL.revokeObjectURL(objectUrl);
+        setCommentActivityModalNotice('success', 'Excel-файл статистики загружен.', 3000);
+    } catch(error) {
+        setCommentActivityModalNotice('error', 'Ошибка экспорта статистики: ' + error.message, 3000);
+    } finally {
+        if (button) {
+            button.textContent = 'Скачать Excel';
+            button.disabled = !(window.commentActivityCurrentStats && Array.isArray(window.commentActivityCurrentStats.rows) && window.commentActivityCurrentStats.rows.length);
+        }
+    }
+};
+
+window.resetCommentActivityStats = async function() {
+    var row = getEditingCommentActivityRow();
+    var button = document.getElementById('commentActivityStatsResetButton');
+    var exportButton = document.getElementById('commentActivityStatsExportButton');
+    if (!row || !row.ID) {
+        setCommentActivityModalNotice('error', 'Сначала сохраните активность.', 3000);
+        return;
+    }
+    if (!confirm('Сбросить статистику активности "' + (row['Название'] || 'Активность') + '"? Это удалит все попытки, победы, проигрыши и историю выпавших ответов по этой активности.')) return;
+    try {
+        setCommentActivityModalNotice('warn', 'Сбрасываю статистику активности...');
+        if (button) {
+            button.disabled = true;
+            button.textContent = 'Сбрасываю...';
+        }
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?resetCommentActivityStats=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profileId: getCurrentProfileId() || getPrincipalProfileId() || '1',
+                principalProfileId: getPrincipalProfileId() || '1',
+                activityId: row.ID
+            })
+        });
+        var payload = await response.json().catch(function() { return {}; });
+        if (!response.ok || !payload.success) throw new Error(payload.error || 'Не удалось сбросить статистику');
+        window.commentActivityCurrentStats = { rows: [], summary: { total: 0, winners: 0, losers: 0, winRate: 0 } };
+        renderCommentActivityStats(window.commentActivityCurrentStats);
+        if (exportButton) exportButton.disabled = true;
+        setCommentActivityModalNotice('success', 'Статистика сброшена. Удалено записей: ' + String(payload.result && payload.result.deleted || 0) + '.', 3000);
+    } catch(error) {
+        setCommentActivityModalNotice('error', 'Ошибка сброса статистики: ' + error.message, 3000);
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.textContent = 'Сбросить статистику';
+        }
+    }
+};
+
 // ===== СИСТЕМА БОТОВ =====
 // Хранит состояние активного бота для каждой вкладки
 // Формат: { 'Messages': 'Бот1', 'Comments': 'Бот1' }
@@ -7518,13 +14933,30 @@ loadBotsFromStorage();
 
 // Получает ключ для botsList на основе текущего сообщества и вкладки
 function getBotsKey(tab) {
-    return (window.currentCommunityId || 'default') + '_' + tab;
+    return (getAdminDataContextId() || 'default') + '_' + tab;
 }
 
 // Получает список ботов для текущей вкладки
 function getBotsForTab(tab) {
     const key = getBotsKey(tab);
-    return window.botsList[key] || [];
+    const savedBots = Array.isArray(window.botsList[key]) ? window.botsList[key] : [];
+    if (tab === 'Messages' || tab === 'Comments') {
+        const rowBots = [];
+        (dataStore[tab] || []).forEach(function(row) {
+            const botName = String(row && row['Бот'] || '').trim();
+            if (botName && rowBots.indexOf(botName) === -1) rowBots.push(botName);
+        });
+        const merged = savedBots.concat(rowBots).filter(function(botName, idx, list) {
+            botName = String(botName || '').trim();
+            return botName && rowBots.indexOf(botName) !== -1 && list.indexOf(botName) === idx;
+        });
+        if (JSON.stringify(savedBots) !== JSON.stringify(merged)) {
+            window.botsList[key] = merged;
+            saveBotsListToStorage();
+        }
+        return merged;
+    }
+    return savedBots;
 }
 
 // Устанавливает список ботов для текущей вкладки
@@ -7534,7 +14966,417 @@ function setBotsForTab(tab, bots) {
     saveBotsListToStorage();
 }
 
+function getRowsForBot(tab, botName) {
+    return (dataStore[tab] || []).filter(function(row) {
+        return String(row['Бот'] || '') === String(botName || '');
+    });
+}
+
+function getBotEnabledStatus(tab, botName) {
+    const rows = getRowsForBot(tab, botName);
+    if (!rows.length) return true;
+    rows.forEach(function(row) {
+        if (!String(row[BOT_ENABLED_COLUMN] || '').trim()) {
+            row[BOT_ENABLED_COLUMN] = defaultBotEnabledValue();
+        }
+    });
+    return !rows.some(function(row) {
+        return !isBotEnabledInAdminRow(row);
+    });
+}
+
+function setBotEnabledStatus(tab, botName, enabled) {
+    const value = enabled ? 'ДА' : 'НЕТ';
+    getRowsForBot(tab, botName).forEach(function(row) {
+        row[BOT_ENABLED_COLUMN] = value;
+    });
+    return value;
+}
+
+window.toggleBotEnabledStatus = function(botName, tab, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    if (!dataStore[tab]) dataStore[tab] = [];
+    syncTableData(tab);
+    const nextEnabled = !getBotEnabledStatus(tab, botName);
+    setBotEnabledStatus(tab, botName, nextEnabled);
+    renderBotButtons(tab);
+    renderTable(tab, dataStore[tab] || []);
+    const statusEl = document.getElementById('status-' + tab);
+    if (statusEl) {
+        statusEl.innerHTML = makeInlineNotice(
+            nextEnabled ? 'success' : 'error',
+            'Бот "' + escapeHtml(botName) + '" теперь ' + (nextEnabled ? 'включен' : 'выключен') + '. Нажмите "Сохранить", чтобы применить это на сервере.'
+        );
+    }
+    debug('🤖 Бот "' + botName + '" ' + (nextEnabled ? 'включен' : 'выключен') + ' (вкладка ' + tab + ')');
+};
+
 // Рендерит кнопки ботов для вкладки
+const BOT_TEMPLATE_POST_PLACEHOLDER = 'Замените это на ссылку на нужный пост';
+
+function isBotTemplateTab(tab) {
+    return tab === 'Messages' || tab === 'Comments';
+}
+
+function botTemplateLine() {
+    return Array.prototype.slice.call(arguments).join(String.fromCharCode(10));
+}
+
+function getBotTemplateStorageKey(tab) {
+    return 'papaBot_botTemplates_' + String(tab || '') + '_' + String(getCurrentProfileId() || getPrincipalProfileId() || '1');
+}
+
+function cloneBotTemplateValue(value) {
+    return JSON.parse(JSON.stringify(value || {}));
+}
+
+function makeBotTemplateRow(tab, overrides) {
+    const row = {};
+    const cols = columns[tab] || [];
+    cols.forEach(function(col) {
+        const name = typeof col === 'object' ? col.name : col;
+        if (name === 'Тип кнопок ответа' || name === 'Тип кнопок ЗО') {
+            row[name] = 'ДА';
+        } else if (name === BOT_ENABLED_COLUMN) {
+            row[name] = defaultBotEnabledValue();
+        } else if (name === 'Точно/Не точно') {
+            row[name] = 'НЕ ТОЧНО';
+        } else if (name === 'Регистр') {
+            row[name] = 'не важно';
+        } else if (name === 'Ответ с ИИ') {
+            row[name] = 'НЕТ';
+        } else {
+            row[name] = '';
+        }
+    });
+    Object.assign(row, overrides || {});
+    if (!row[BOT_ENABLED_COLUMN]) row[BOT_ENABLED_COLUMN] = defaultBotEnabledValue();
+    return row;
+}
+
+function makeBotTemplate(id, title, tab, rows) {
+    return {
+        templateId: id,
+        templateLabel: title,
+        tab: tab,
+        rows: rows || []
+    };
+}
+
+function getBuiltInMessageBotTemplates() {
+    return [
+        makeBotTemplate('welcome-menu', 'Приветствие и меню', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'START', 'Триггер': botTemplateLine('начать', 'старт', 'привет'), 'Ответ': botTemplateLine('Здравствуйте! Выберите, что вам нужно:', '1. Каталог', '2. Цены', '3. Связаться с менеджером'), 'Кнопка Ответа-1': 'Каталог', 'Цвет/Ссылка Ответа-1': 'синий', 'Кнопка Ответа-2': 'Цены', 'Цвет/Ссылка Ответа-2': 'белый', 'Кнопка Ответа-3': 'Менеджер', 'Цвет/Ссылка Ответа-3': 'зелёный' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'CATALOG', 'Триггер': 'каталог', 'Ответ': 'Замените это на описание каталога или ссылку.', 'Точно/Не точно': 'ТОЧНО' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'MANAGER', 'Триггер': botTemplateLine('менеджер', 'оператор'), 'Ответ': 'Передаю ваш запрос менеджеру. Напишите, что нужно уточнить.' })
+        ]),
+        makeBotTemplate('lead-request', 'Сбор заявки', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'START', 'Триггер': botTemplateLine('заявка', 'оставить заявку', 'хочу'), 'Ответ': 'Напишите ваше имя.', 'Отправить на Шаг': 'NAME' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'NAME', 'Триггер': '', 'Ответ': 'Укажите телефон или удобный способ связи.', 'Ответил на Шаг': 'NAME', 'Отправить на Шаг': 'CONTACT', 'Действия с ПП': 'lead_name = {message_text}' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'CONTACT', 'Триггер': '', 'Ответ': 'Заявка принята. Мы свяжемся с вами.', 'Ответил на Шаг': 'CONTACT', 'ДОБАВИТЬ ГРУППУ': 'Заявка', 'Действия с ПП': 'lead_contact = {message_text}' })
+        ]),
+        makeBotTemplate('faq', 'FAQ по частым вопросам', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'FAQ_PRICE', 'Триггер': botTemplateLine('цена', 'стоимость', 'сколько стоит'), 'Ответ': 'Замените это на информацию о цене.' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'FAQ_DELIVERY', 'Триггер': botTemplateLine('доставка', 'получить', 'как забрать'), 'Ответ': 'Замените это на условия доставки или получения.' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'FAQ_PAYMENT', 'Триггер': botTemplateLine('оплата', 'как оплатить'), 'Ответ': 'Замените это на способы оплаты.' })
+        ]),
+        makeBotTemplate('lead-magnet', 'Выдача лид-магнита', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'START', 'Триггер': botTemplateLine('гайд', 'чеклист', 'получить'), 'Ответ': 'Ваш материал готов. Замените это на текст выдачи и добавьте вложение.', 'Вложения к ответу': '', 'ДОБАВИТЬ ГРУППУ': 'Получил лид-магнит' })
+        ]),
+        makeBotTemplate('consultation-booking', 'Запись на консультацию', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'START', 'Триггер': botTemplateLine('консультация', 'записаться'), 'Ответ': 'На какую дату вам удобно записаться?', 'Отправить на Шаг': 'DATE' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'DATE', 'Триггер': '', 'Ответ': 'Во сколько вам удобно?', 'Ответил на Шаг': 'DATE', 'Отправить на Шаг': 'TIME', 'Действия с ПП': 'consultation_date = {message_text}' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'TIME', 'Триггер': '', 'Ответ': 'Запись принята. Мы подтвердим время.', 'Ответил на Шаг': 'TIME', 'ДОБАВИТЬ ГРУППУ': 'Консультация', 'Действия с ПП': 'consultation_time = {message_text}' })
+        ]),
+        makeBotTemplate('quiz-picker', 'Квиз-подбор', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'START', 'Триггер': botTemplateLine('подобрать', 'квиз'), 'Ответ': 'Ответьте на первый вопрос: какой вариант вам ближе?', 'Кнопка Ответа-1': 'Вариант 1', 'Цвет/Ссылка Ответа-1': 'синий', 'Кнопка Ответа-2': 'Вариант 2', 'Цвет/Ссылка Ответа-2': 'белый', 'Отправить на Шаг': 'Q1' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'Q1', 'Триггер': '', 'Ответ': 'Спасибо. Замените это на результат подбора.', 'Ответил на Шаг': 'Q1', 'ДОБАВИТЬ ГРУППУ': 'Прошел квиз' })
+        ]),
+        makeBotTemplate('payment-offer', 'Оплата товара/услуги', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'START', 'Триггер': botTemplateLine('купить', 'оплатить'), 'Ответ': 'Выберите товар или услугу для оплаты. Замените это на вашу оферту.', 'Кнопка Ответа-1': 'Оплатить', 'Цвет/Ссылка Ответа-1': 'зелёный' })
+        ]),
+        makeBotTemplate('mailing-subscribe', 'Подписка/отписка от рассылки', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'SUBSCRIBE', 'Триггер': botTemplateLine('подписаться', 'рассылка'), 'Ответ': 'Вы подписаны на рассылку.', 'ДОБАВИТЬ ГРУППУ': 'Рассылка' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'UNSUBSCRIBE', 'Триггер': botTemplateLine('отписаться', 'стоп'), 'Ответ': 'Вы отписаны от рассылки.', 'УДАЛИТЬ ГРУППУ': 'Рассылка' })
+        ]),
+        makeBotTemplate('access-check', 'Проверка доступа', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'ACCESS_OK', 'Триггер': botTemplateLine('доступ', 'проверить доступ'), 'Ответ': 'Доступ подтвержден. Замените группу доступа на свою.', 'Ответить если в Группе': 'Оплатил' }),
+            makeBotTemplateRow('Messages', { 'Шаг': 'ACCESS_NO', 'Триггер': botTemplateLine('доступ', 'проверить доступ'), 'Ответ': 'Доступ не найден. Напишите менеджеру или оплатите доступ.' })
+        ]),
+        makeBotTemplate('operator-handoff', 'Передача оператору', 'Messages', [
+            makeBotTemplateRow('Messages', { 'Шаг': 'OPERATOR', 'Триггер': botTemplateLine('оператор', 'помощь', 'менеджер'), 'Ответ': 'Передаю ваш вопрос оператору. Опишите задачу одним сообщением.', 'ДОБАВИТЬ ГРУППУ': 'Нужен оператор' })
+        ])
+    ];
+}
+
+function getBuiltInCommentBotTemplates() {
+    return [
+        makeBotTemplate('comment-want', 'Ответ на “хочу”', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'START', 'Триггер': 'хочу', 'Ответ': 'Написали вам в сообщения сообщества. Проверьте личные сообщения.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER, 'Точно/Не точно': 'НЕ ТОЧНО' })
+        ]),
+        makeBotTemplate('comment-material', 'Выдача материала за комментарий', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'MATERIAL', 'Триггер': botTemplateLine('гайд', 'чеклист', 'материал'), 'Ответ': 'Материал отправлен. Если сообщения закрыты, напишите нам в сообщения сообщества.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER, 'ДОБАВИТЬ ГРУППУ': 'Запросил материал' })
+        ]),
+        makeBotTemplate('comment-lead', 'Сбор заявок из комментариев', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'LEAD', 'Триггер': botTemplateLine('заявка', 'хочу консультацию'), 'Ответ': 'Заявка принята. Напишите нам в сообщения сообщества для уточнения деталей.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER, 'ДОБАВИТЬ ГРУППУ': 'Заявка из комментария' })
+        ]),
+        makeBotTemplate('comment-faq', 'FAQ под постом', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'PRICE', 'Триггер': botTemplateLine('цена', 'стоимость'), 'Ответ': 'Замените это на короткий ответ о цене.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER }),
+            makeBotTemplateRow('Comments', { 'Шаг': 'DELIVERY', 'Триггер': 'доставка', 'Ответ': 'Замените это на короткий ответ о доставке.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER })
+        ]),
+        makeBotTemplate('comment-negative', 'Реакция на негатив', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'NEGATIVE', 'Триггер': botTemplateLine('плохо', 'ужасно', 'обман'), 'Ответ': 'Нам важно разобраться. Напишите, пожалуйста, в сообщения сообщества, и мы поможем.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER, 'ДОБАВИТЬ ГРУППУ': 'Негативный комментарий' })
+        ]),
+        makeBotTemplate('comment-product', 'Автоответ на упоминание товара', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'PRODUCT', 'Триггер': 'название товара', 'Ответ': 'По этому товару: замените текст на цену, наличие и условия покупки.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER, 'Точно/Не точно': 'НЕ ТОЧНО' })
+        ]),
+        makeBotTemplate('comment-subscribe', 'Подписка через комментарий', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'SUBSCRIBE', 'Триггер': botTemplateLine('подписаться', 'хочу новости'), 'Ответ': 'Вы подписаны на обновления.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER, 'ДОБАВИТЬ ГРУППУ': 'Рассылка' })
+        ]),
+        makeBotTemplate('comment-promo-dm', 'Промокод в личку', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'PROMO', 'Триггер': botTemplateLine('промокод', 'скидка'), 'Ответ': 'Промокод отправим в сообщения сообщества. Если сообщения закрыты, напишите нам первым.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER, 'ДОБАВИТЬ ГРУППУ': 'Запросил промокод' })
+        ]),
+        makeBotTemplate('comment-to-bot', 'Переход в бота из комментария', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'COMMENT_START', 'Триггер': botTemplateLine('начать', 'старт'), 'Ответ': 'Продолжим в сообщениях сообщества. Напишите нам “старт”.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER, 'Отправить на Шаг': 'START' })
+        ]),
+        makeBotTemplate('comment-repeat-filter', 'Фильтр повторных вопросов', 'Comments', [
+            makeBotTemplateRow('Comments', { 'Шаг': 'REPEAT', 'Триггер': botTemplateLine('когда', 'где', 'сколько'), 'Ответ': 'Ответ есть в посте выше. Если нужно подробнее, напишите нам в сообщения сообщества.', 'Пост': BOT_TEMPLATE_POST_PLACEHOLDER, 'ДОБАВИТЬ ГРУППУ': 'Повторный вопрос' })
+        ])
+    ];
+}
+
+function getBuiltInBotTemplates(tab) {
+    if (tab === 'Messages') return getBuiltInMessageBotTemplates();
+    if (tab === 'Comments') return getBuiltInCommentBotTemplates();
+    return [];
+}
+
+function getCustomBotTemplates(tab) {
+    try {
+        const raw = localStorage.getItem(getBotTemplateStorageKey(tab));
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        console.warn('[Admin] Не удалось прочитать шаблоны ботов:', e);
+        return [];
+    }
+}
+
+function saveCustomBotTemplates(tab, templates) {
+    localStorage.setItem(getBotTemplateStorageKey(tab), JSON.stringify(templates || []));
+}
+
+function buildBotTemplateRows(tab, items, source) {
+    return (items || []).map(function(item) {
+        const id = escapeHtml(item.templateId || '');
+        const label = escapeHtml(item.templateLabel || 'Шаблон');
+        const deleteButton = source === 'custom'
+            ? '<button class="bot-template-delete" type="button" title="Удалить шаблон" onclick="deleteCustomBotTemplate(&quot;' + escapeHtml(tab) + '&quot;,&quot;' + id + '&quot;, event)">x</button>'
+            : '<span></span>';
+        return '<div class="bot-template-row">' +
+            '<button class="bot-template-load" type="button" onclick="applyBotTemplateById(&quot;' + escapeHtml(tab) + '&quot;,&quot;' + escapeHtml(source) + '&quot;,&quot;' + id + '&quot;)">' + label + '</button>' +
+            deleteButton +
+        '</div>';
+    }).join('');
+}
+
+function buildBotTemplatePickerHtml(tab) {
+    const builtIns = getBuiltInBotTemplates(tab);
+    const custom = getCustomBotTemplates(tab);
+    let html = '<div class="bot-template-picker" id="botTemplatePickerBox-' + escapeHtml(tab) + '">' +
+        '<button id="botTemplateButton-' + escapeHtml(tab) + '" class="bot-template-current" type="button" onclick="toggleBotTemplateMenu(&quot;' + escapeHtml(tab) + '&quot;, event)">Выбрать шаблон</button>' +
+        '<div id="botTemplateMenu-' + escapeHtml(tab) + '" class="bot-template-menu">' +
+            '<div class="bot-template-group">Готовые шаблоны</div>' +
+            buildBotTemplateRows(tab, builtIns, 'builtin');
+    if (custom.length) {
+        html += '<div class="bot-template-group">Мои шаблоны</div>' + buildBotTemplateRows(tab, custom, 'custom');
+    }
+    html += '</div></div>';
+    return html;
+}
+
+function getBotTemplateById(tab, source, templateId) {
+    const templates = source === 'custom' ? getCustomBotTemplates(tab) : getBuiltInBotTemplates(tab);
+    return templates.find(function(item) { return String(item.templateId || '') === String(templateId || ''); }) || null;
+}
+
+function getUniqueBotName(tab, baseName) {
+    const existing = getBotsForTab(tab).map(function(name) { return String(name || '').trim(); }).filter(Boolean);
+    const base = String(baseName || 'Бот из шаблона').trim() || 'Бот из шаблона';
+    if (existing.indexOf(base) === -1) return base;
+    let idx = 2;
+    while (existing.indexOf(base + ' ' + idx) !== -1) idx++;
+    return base + ' ' + idx;
+}
+
+function getUniqueCustomBotTemplateName(tab, baseName) {
+    const existing = getCustomBotTemplates(tab).map(function(item) { return String(item.templateLabel || '').trim(); });
+    const base = String(baseName || 'Мой шаблон').trim() || 'Мой шаблон';
+    if (existing.indexOf(base) === -1) return base;
+    let idx = 2;
+    while (existing.indexOf(base + ' ' + idx) !== -1) idx++;
+    return base + ' ' + idx;
+}
+
+function normalizeBotTemplateRowsForInsert(tab, templateRows, botName) {
+    const rows = Array.isArray(templateRows) ? templateRows : [];
+    const sourceRows = rows.length ? rows : [makeBotTemplateRow(tab, { 'Шаг': 'START', 'Ответ': 'Замените это на ответ бота.' })];
+    return sourceRows.map(function(sourceRow) {
+        const copied = cloneBotTemplateValue(sourceRow);
+        const normalized = makeBotTemplateRow(tab, copied);
+        normalized['Бот'] = botName;
+        normalized[BOT_ENABLED_COLUMN] = defaultBotEnabledValue();
+        return normalized;
+    });
+}
+
+function showBotTemplateNotice(tab, type, message) {
+    const holder = document.getElementById('botTemplateStatus-' + tab);
+    if (holder) {
+        if (typeof setInlineNoticeWithTimeout === 'function') {
+            setInlineNoticeWithTimeout(holder, type, message, 5000);
+        } else {
+            holder.innerHTML = makeInlineNotice(type, message);
+        }
+    }
+    showBotTemplateTableNotice(tab, type, message);
+}
+
+function showBotTemplateTableNotice(tab, type, message) {
+    const table = document.getElementById('table-' + tab);
+    if (!table) return;
+    const scroll = table.closest('.scroll');
+    if (!scroll || !scroll.parentNode) return;
+    let notice = document.getElementById('botTemplateTableNotice-' + tab);
+    if (!notice) {
+        notice = document.createElement('div');
+        notice.id = 'botTemplateTableNotice-' + tab;
+        notice.className = 'bot-template-table-notice';
+        scroll.parentNode.insertBefore(notice, scroll);
+    }
+    if (typeof setInlineNoticeWithTimeout === 'function') {
+        setInlineNoticeWithTimeout(notice, type, message, 5000);
+    } else {
+        notice.innerHTML = makeInlineNotice(type, message);
+    }
+}
+
+function renderBotTemplatePicker(tab) {
+    if (!isBotTemplateTab(tab)) return;
+    const holder = document.getElementById('botTemplatePicker-' + tab);
+    if (!holder) return;
+    holder.innerHTML = buildBotTemplatePickerHtml(tab);
+}
+
+window.handleBotTemplatePickerChange = function(tab, value) {
+    if (!value) return;
+    const parts = String(value).split('::');
+    const source = parts[0] || 'builtin';
+    const templateId = parts.slice(1).join('::');
+    applyBotTemplateById(tab, source, templateId);
+    renderBotTemplatePicker(tab);
+};
+
+window.toggleBotTemplateMenu = function(tab, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    const picker = document.getElementById('botTemplatePickerBox-' + tab);
+    if (picker) picker.classList.toggle('is-open');
+};
+
+window.applyBotTemplateById = function(tab, source, templateId) {
+    if (!isBotTemplateTab(tab)) return;
+    if (!ensureCommunityReadyForBotEditing(tab)) return;
+    syncTableData(tab);
+    const template = getBotTemplateById(tab, source, templateId);
+    if (!template) {
+        showBotTemplateNotice(tab, 'error', 'Шаблон не найден.');
+        return;
+    }
+    if (!dataStore[tab]) dataStore[tab] = [];
+    const newBotName = getUniqueBotName(tab, template.templateLabel || 'Бот из шаблона');
+    const rows = normalizeBotTemplateRowsForInsert(tab, template.rows || [], newBotName);
+    dataStore[tab] = dataStore[tab].concat(rows);
+    const bots = getBotsForTab(tab);
+    if (bots.indexOf(newBotName) === -1) {
+        bots.push(newBotName);
+        setBotsForTab(tab, bots);
+    }
+    setActiveBot(tab, newBotName);
+    saveActiveBotToStorage();
+    renderBotButtons(tab);
+    renderTable(tab, dataStore[tab]);
+    const button = document.getElementById('botTemplateButton-' + tab);
+    if (button) button.textContent = template.templateLabel || 'Выбрать шаблон';
+    const picker = document.getElementById('botTemplatePickerBox-' + tab);
+    if (picker) picker.classList.remove('is-open');
+    showBotTemplateNotice(tab, 'success', 'Шаблон "' + escapeHtml(template.templateLabel || newBotName) + '" добавлен как бот "' + escapeHtml(newBotName) + '". Нажмите "Сохранить", чтобы применить на сервере.');
+};
+
+window.deleteCustomBotTemplate = function(tab, templateId, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    if (!isBotTemplateTab(tab)) return;
+    const templates = getCustomBotTemplates(tab);
+    const template = templates.find(function(item) {
+        return String(item.templateId || '') === String(templateId || '');
+    });
+    if (!template) {
+        showBotTemplateNotice(tab, 'error', 'Шаблон уже не найден.');
+        renderBotTemplatePicker(tab);
+        return;
+    }
+    if (!confirm('Удалить шаблон "' + String(template.templateLabel || 'Мой шаблон') + '" из "Мои шаблоны"?')) return;
+    const nextTemplates = templates.filter(function(item) {
+        return String(item.templateId || '') !== String(templateId || '');
+    });
+    saveCustomBotTemplates(tab, nextTemplates);
+    renderBotTemplatePicker(tab);
+    showBotTemplateNotice(tab, 'success', 'Шаблон "' + escapeHtml(template.templateLabel || 'Мой шаблон') + '" удален.');
+};
+
+window.saveActiveBotAsTemplate = function(tab, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    if (!isBotTemplateTab(tab)) return;
+    if (!ensureCommunityReadyForBotEditing(tab)) return;
+    syncTableData(tab);
+    const activeBot = getActiveBot(tab);
+    if (!activeBot) {
+        showBotTemplateNotice(tab, 'error', 'Сначала выберите бота.');
+        return;
+    }
+    const rows = (dataStore[tab] || []).filter(function(row) {
+        return String(row && row['Бот'] || '') === String(activeBot);
+    }).map(function(row) {
+        return cloneBotTemplateValue(row);
+    });
+    if (!rows.length) {
+        showBotTemplateNotice(tab, 'error', 'У выбранного бота нет строк для шаблона.');
+        return;
+    }
+    const templateLabel = getUniqueCustomBotTemplateName(tab, activeBot);
+    const templates = getCustomBotTemplates(tab);
+    templates.push({
+        templateId: 'custom-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+        templateLabel: templateLabel,
+        tab: tab,
+        rows: rows
+    });
+    saveCustomBotTemplates(tab, templates);
+    renderBotTemplatePicker(tab);
+    showBotTemplateNotice(tab, 'success', 'Бот "' + escapeHtml(activeBot) + '" сохранен в "Мои шаблоны" как "' + escapeHtml(templateLabel) + '".');
+};
+
 function renderBotButtons(tab) {
     const switcherEl = document.getElementById('botSwitcher-' + tab);
     const buttonsEl = document.getElementById('botButtons-' + tab);
@@ -7542,8 +15384,9 @@ function renderBotButtons(tab) {
 
     const bots = getBotsForTab(tab);
     const activeBot = getActiveBot(tab);
+    renderBotTemplatePicker(tab);
 
-    if (bots.length === 0) {
+    if (bots.length === 0 && !isBotTemplateTab(tab)) {
         switcherEl.style.display = 'none';
         return;
     }
@@ -7552,24 +15395,40 @@ function renderBotButtons(tab) {
     buttonsEl.innerHTML = '';
 
     bots.forEach(botName => {
-        const btn = document.createElement('button');
         const isActive = botName === activeBot;
-        btn.className = 'btn';
-        btn.style.background = isActive ? '#2E7D32' : '#e0e0e0';
-        btn.style.color = isActive ? 'white' : '#333';
-        btn.style.border = isActive ? '2px solid #1B5E20' : '1px solid #ccc';
-        btn.style.padding = '4px 10px';
-        btn.style.borderRadius = '6px';
-        btn.style.cursor = 'pointer';
-        btn.style.fontSize = '11px';
-        btn.textContent = botName + (isActive ? ' ✓' : '');
-        btn.onclick = function() { switchBot(botName, tab); };
+        const isEnabled = getBotEnabledStatus(tab, botName);
+        const chip = document.createElement('span');
+        chip.className = [
+            'bot-switcher-chip',
+            isActive ? 'bot-switcher-chip--active' : '',
+            isEnabled ? 'bot-switcher-chip--enabled' : 'bot-switcher-chip--disabled'
+        ].filter(Boolean).join(' ');
 
-        // Добавляем иконку редактирования при наведении
-        btn.ondblclick = function() { renameBot(botName, tab); };
-        btn.title = 'Нажмите чтобы переключиться. Двойной клик чтобы переименовать.';
+        const nameBtn = document.createElement('button');
+        nameBtn.type = 'button';
+        nameBtn.className = 'bot-name-3d-btn';
+        nameBtn.textContent = botName;
+        if (isActive) {
+            const marker = document.createElement('span');
+            marker.className = 'bot-active-marker';
+            marker.setAttribute('aria-hidden', 'true');
+            nameBtn.appendChild(marker);
+        }
+        nameBtn.onclick = function() { switchBot(botName, tab); };
+        nameBtn.ondblclick = function() { renameBot(botName, tab); };
+        nameBtn.title = 'Нажмите чтобы переключиться. Двойной клик чтобы переименовать.';
 
-        buttonsEl.appendChild(btn);
+        const statusBtn = document.createElement('button');
+        statusBtn.type = 'button';
+        statusBtn.className = 'bot-status-toggle ' + (isEnabled ? 'bot-status-toggle--enabled' : 'bot-status-toggle--disabled');
+        statusBtn.textContent = isEnabled ? '✓' : '✕';
+        statusBtn.setAttribute('aria-label', isEnabled ? 'Бот включен' : 'Бот выключен');
+        statusBtn.onclick = function(event) { toggleBotEnabledStatus(botName, tab, event); };
+        statusBtn.title = isEnabled ? 'Бот работает. Нажмите, чтобы выключить.' : 'Бот выключен. Нажмите, чтобы включить.';
+
+        chip.appendChild(nameBtn);
+        chip.appendChild(statusBtn);
+        buttonsEl.appendChild(chip);
     });
 }
 
@@ -7604,10 +15463,11 @@ function getActiveBot(tab) {
     return bots[0];
 }
 
-// Показать модальное окно для добавления бота
-window.showAddBotModal = function(tab) {
-    const existing = document.getElementById('addBotModal');
-    if (existing) existing.remove();
+    // Показать модальное окно для добавления бота
+    window.showAddBotModal = function(tab) {
+        if (!ensureCommunityReadyForBotEditing(tab)) return;
+        const existing = document.getElementById('addBotModal');
+        if (existing) existing.remove();
 
     const modal = document.createElement('div');
     modal.id = 'addBotModal';
@@ -7726,15 +15586,22 @@ function addStepForBot(tab, botName) {
     if (template.hasOwnProperty('Бот') || cols.some(c => (typeof c === 'object' ? c.name : c) === 'Бот')) {
         template['Бот'] = botName;
     }
+    if (template.hasOwnProperty(BOT_ENABLED_COLUMN) || cols.some(c => (typeof c === 'object' ? c.name : c) === BOT_ENABLED_COLUMN)) {
+        template[BOT_ENABLED_COLUMN] = defaultBotEnabledValue();
+    }
+    if (tab === 'Comments') {
+        template[COMMENT_REPLY_PLACEMENT_COLUMN] = 'В ПОСТЕ';
+    }
     dataStore[tab].push(template);
     renderTable(tab, dataStore[tab]);
     debug('📝 Добавлен шаг для бота ' + botName + ' (вкладка ' + tab + ')');
 }
 
-// ===== ФУНКЦИЯ addStep (публичная, вызывается из HTML) =====
-window.addStep = function(tab) {
-    const activeBot = getActiveBot(tab);
-    if (!activeBot) {
+    // ===== ФУНКЦИЯ addStep (публичная, вызывается из HTML) =====
+    window.addStep = function(tab) {
+        if (!ensureCommunityReadyForBotEditing(tab)) return;
+        const activeBot = getActiveBot(tab);
+        if (!activeBot) {
         // Если нет ботов — сначала добавим бота
         showAddBotModal(tab);
         return;
@@ -7763,6 +15630,7 @@ template[name] = '';
 }
 });
 if (template['№']) template['№'] = (dataStore[tab].length + 1).toString();
+if (tab === 'Comments') template[COMMENT_REPLY_PLACEMENT_COLUMN] = 'В ПОСТЕ';
 dataStore[tab].push(template);
 renderTable(tab, dataStore[tab]);
 debug('Added row to '+tab);
@@ -7857,16 +15725,20 @@ btn.disabled = true;
 try {
 const sheet = sheetMap[tab];
 const baseUrl = window.location.href.split('?')[0];
+const contextId = getAdminDataContextId();
+if (!contextId) throw new Error('Сначала выберите бота или сообщество.');
 
-// ✅ Получаем vk_group_id из настроек для сохранения в правильный файл
-const settingsRes = await fetch(baseUrl + '?getBotSettings');
-const settingsData = await settingsRes.json();
-const communityConfig = settingsData.communities?.[window.currentCommunityId] || {};
-const vkGroupId = communityConfig.vk_group_id || window.currentCommunityId || '';
+// VK сохраняется по vk_group_id, Telegram — строго по выбранному tg_<bot_id>.
+let settingsData = {};
+if (window.currentAdminPlatform === 'vk') {
+    const settingsRes = await fetch(baseUrl + '?getBotSettings');
+    settingsData = await settingsRes.json();
+}
+const storageCommunityId = resolveAdminStorageCommunityId(settingsData, contextId);
 
-debug('💾 Saving ' + sheet + ' with vk_group_id: ' + vkGroupId);
+debug('💾 Saving ' + sheet + ' with communityId: ' + storageCommunityId);
 
-const targetCommunityId = tab === 'Shared_Variables' ? '' : vkGroupId;
+const targetCommunityId = tab === 'Shared_Variables' ? '' : storageCommunityId;
 const url = baseUrl + '?save=' + encodeURIComponent(sheet) +
            (targetCommunityId ? '&communityId=' + encodeURIComponent(targetCommunityId) : '');
 const res = await fetch(url, {
@@ -7895,12 +15767,18 @@ window.saveDataDirectly = async function(tab) {
             return false;
         }
         const baseUrl = window.location.href.split('?')[0];
+        const contextId = getAdminDataContextId();
+        if (!contextId) {
+            console.error('[Admin] ❌ saveDataDirectly: no active bot or community');
+            return false;
+        }
 
-        // Получаем vk_group_id
-        const settingsRes = await fetch(baseUrl + '?getBotSettings');
-        const settingsData = await settingsRes.json();
-        const communityConfig = settingsData.communities?.[window.currentCommunityId] || {};
-        const vkGroupId = communityConfig.vk_group_id || window.currentCommunityId || '';
+        let settingsData = {};
+        if (window.currentAdminPlatform === 'vk') {
+            const settingsRes = await fetch(baseUrl + '?getBotSettings');
+            settingsData = await settingsRes.json();
+        }
+        const storageCommunityId = resolveAdminStorageCommunityId(settingsData, contextId);
 
         let dataToSave = dataStore[tab] || [];
         if (tab === 'Variables' || tab === 'Variables_User' || tab === 'VK_Variables') {
@@ -7937,7 +15815,7 @@ window.saveDataDirectly = async function(tab) {
         }
         console.log('[Admin] 💾 saveDataDirectly: saving ' + sheet + ' with ' + dataToSave.length + ' rows');
 
-        const targetCommunityId = tab === 'Shared_Variables' ? '' : vkGroupId;
+        const targetCommunityId = tab === 'Shared_Variables' ? '' : storageCommunityId;
         const url = baseUrl + '?save=' + encodeURIComponent(sheet) +
                    (targetCommunityId ? '&communityId=' + encodeURIComponent(targetCommunityId) : '');
         const res = await fetch(url, {
@@ -7968,6 +15846,46 @@ el.innerText = msg;
 el.className = 'status ' + type;
 setTimeout(() => el.style.display = 'none', 5000);
 }
+
+function getActiveAdminTabTopElement() {
+    return document.querySelector('.tabcontent.active') ||
+        Array.from(document.querySelectorAll('.tabcontent')).find(function(el) { return el.style.display === 'block'; }) ||
+        document.querySelector('.container') ||
+        document.body;
+}
+
+function updateAdminBackToTopButton() {
+    var buttons = Array.from(document.querySelectorAll('.admin-back-to-top-btn'));
+    if (!buttons.length) return;
+    var scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+    buttons.forEach(function(btn) {
+        btn.classList.toggle('is-visible', scrollTop > 620);
+    });
+}
+
+window.scrollToAdminTabTop = function() {
+    document.querySelectorAll('.admin-back-to-top-btn').forEach(function(btn) {
+        btn.classList.remove('is-visible');
+    });
+    var target = getActiveAdminTabTopElement();
+    if (target && target.scrollIntoView) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    setTimeout(updateAdminBackToTopButton, 700);
+};
+
+window.scrollToProfileSection = function(sectionId) {
+    var target = document.getElementById(sectionId);
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.admin-back-to-top-btn').forEach(function(btn) {
+        btn.classList.add('is-visible');
+    });
+};
+
+window.addEventListener('scroll', updateAdminBackToTopButton, { passive: true });
 
 // 🖼️ Функции для показа изображений инструкций
 window.showInstructionImage = function(imageName) {
@@ -8010,6 +15928,7 @@ window.openTab = function(evt, name) {
         if (btn) btn.classList.add('active');
     }
     if (loadingEl) loadingEl.style.display = 'block';
+    updateAdminBackToTopButton();
     if (name === 'Settings') {
         loadSettings();
     } else if (name === 'Admin') {
@@ -8145,22 +16064,11 @@ window.loadSettings = async function() {
     document.getElementById('confirmationCode').value = data.confirmation_token || '';
     document.getElementById('secretKey').value = data.secret_key || '';
     
-    // &#x2728; НОВОЕ: Загрузка массива токенов
-    const vkTokensTextarea = document.getElementById('vkTokens');
-    if (data.vk_tokens && Array.isArray(data.vk_tokens)) {
-        // Если есть массив - выводим каждый токен с новой строки
-        vkTokensTextarea.value = data.vk_tokens.join('\\n');
-    } else if (data.vk_token) {
-        // Если старого формата - выводим один токен
-        vkTokensTextarea.value = data.vk_token;
-    } else {
-        vkTokensTextarea.value = '';
-    }
-    
+    const activeConfig = data.communities?.[data.active_community] || {};
+    renderStoredVkTokenStatus(activeConfig);
     document.getElementById('vkGroupId').value = data.vk_group_id || '';
-    document.getElementById('userToken').value = data.user_token || '';
     // Выводим отладочную информацию
-    settingsDebug.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+    settingsDebug.innerHTML = '<pre>User Token: ' + (activeConfig.user_token_set ? 'сохранён в базе' : 'не указан') + '\\nCommunity Tokens: ' + (activeConfig.community_tokens_count || 0) + '</pre>';
     if (tokenStatusEl) {
       tokenStatusEl.innerHTML = makeInlineNotice('success', '✅ Настройки загружены из Object Storage') +
         '<div><strong>VK Token:</strong> ' + (data.vk_token ? '***' + data.vk_token.slice(-4) : 'не настроен') + '</div>' +
@@ -8271,6 +16179,9 @@ window.onload = async function() {
         applyAdminAccessUI();
         injectTabRefreshButtons();
         await loadBotVersion();
+        if (window.adminPlatformReadyPromise) {
+            await window.adminPlatformReadyPromise;
+        }
     } catch(e) {
         console.error('Auth check error:', e);
         hideLoadOverlay();
@@ -8281,25 +16192,35 @@ window.onload = async function() {
         debug('🚀 onload: восстанавливаем state tabName=' + state.tabName + ', communityId=' + state.communityId);
         updateLoadStatus('Открываем настройки...');
 
-        // ✅ ВСЕГДА начинаем с вкладки НАСТРОЙКА
-        debug('📋 Открываем вкладку НАСТРОЙКА...');
-        const settingsTabBtn = Array.from(document.querySelectorAll('.tablinks')).find(b =>
-            b.getAttribute('onclick')?.includes(",'Settings')")
-        );
-        if (settingsTabBtn) {
-            openTab({ currentTarget: settingsTabBtn }, 'Settings');
+        const isTelegramWorkspace = window.currentAdminPlatform === 'telegram';
+
+        // VK начинает с настройки сообщества; Telegram — с подключённых ботов.
+        if (!isTelegramWorkspace) {
+            debug('📋 Открываем вкладку НАСТРОЙКА...');
+            const settingsTabBtn = Array.from(document.querySelectorAll('.tablinks')).find(b =>
+                b.getAttribute('onclick')?.includes(",'Settings')")
+            );
+            if (settingsTabBtn) {
+                openTab({ currentTarget: settingsTabBtn }, 'Settings');
+            }
         }
 
         // ✅ Загружаем настройки сообществ и рендерим кнопки
         if (isMainAdminSession()) {
             await loadAdminProfiles();
         }
-        debug('🏘️ Загружаем renderCommunityButtons...');
-        updateLoadStatus('Загружаем настройки...');
-        await renderCommunityButtons();
+        updateLoadStatus(isTelegramWorkspace ? 'Загружаем Telegram-ботов...' : 'Загружаем настройки...');
+        if (isTelegramWorkspace) {
+            await loadTelegramBots();
+        } else {
+            debug('🏘️ Загружаем renderCommunityButtons...');
+            await renderCommunityButtons();
+        }
 
-        // ✅ Теперь загружаем данные для ВСЕХ вкладок последовательно
-        const allTabs = ['Messages', 'Comments', 'Users', 'Variables', 'Mailing', 'Delayed', 'Triggers'];
+        // Загружаем только вкладки активной платформы.
+        const allTabs = isTelegramWorkspace
+            ? ['Users', 'Variables']
+            : ['Messages', 'Comments', 'Users', 'Variables', 'Mailing', 'Delayed', 'Triggers'];
         const tabEmojis = {
             'Messages': '💬 СООБЩЕНИЯ',
             'Comments': '📝 КОММЕНТАРИИ В ПОСТАХ',
@@ -8369,8 +16290,9 @@ window.autoSetupCallback = async function() {
         // ✅ Получаем VK Group ID из поля ввода - это надёжный идентификатор сообщества
         const vkGroupId = document.getElementById('vkGroupId').value ? parseInt(document.getElementById('vkGroupId').value, 10) : null;
         
-        // ✅ Используем vk_group_id как community_id для консистентности
-        const communityId = vkGroupId ? vkGroupId.toString() : window.currentCommunityId;
+        // Внутренний ID выбранного сообщества позволяет серверу прочитать уже
+        // сохранённые секретные токены, даже когда поля ввода очищены.
+        const communityId = window.currentCommunityId || (vkGroupId ? vkGroupId.toString() : '');
         
         debug('🛠️ Автонастройка: community_id=' + communityId + ', vk_group_id=' + vkGroupId + ', internal=' + window.currentCommunityId);
 
@@ -8408,16 +16330,26 @@ window.autoSetupCallback = async function() {
             const autoOverlay = document.getElementById('autoSetupOverlay');
             if (autoOverlay && autoOverlay.parentNode) autoOverlay.parentNode.removeChild(autoOverlay);
 
+            var exampleBotsText = '';
+            if (data.exampleBots && Number(data.exampleBots.createdCount || 0) > 0) {
+                exampleBotsText = '<br><strong>Шаблоны:</strong> созданы 2 шаблона ботов для примера';
+            }
+
             // ✅ Показываем полноэкранное уведомление об успехе на 5 секунд
             const successMsg = '<div style="font-size:36px;font-weight:bold;color:var(--status-success-text);margin-bottom:20px;">✅ АВТОНАСТРОЙКА УСПЕШНА!</div>' +
                 '<div style="font-size:18px;color:var(--text-primary);line-height:1.8;">' +
-                '<strong>VK Group ID:</strong> ' + vkGroupId + '<br>' +
+                '<strong>VK Group ID:</strong> ' + (data.vk_group_id || vkGroupId || 'сохранённый ID') + '<br>' +
                 '<strong>Сервер:</strong> ' + (data.server_name || 'PAPA_BOT') + ' (ID: ' + data.server_id + ')<br>' +
                 '<strong>Confirmation code:</strong> ' + data.confirmation_code + '<br>' +
                 '<strong>Secret key:</strong> ' + data.secret_key +
+                exampleBotsText +
                 '</div>';
 
-            showSuccessOverlay(successMsg);
+            showSuccessOverlay(successMsg, {
+                autoCloseMs: 0,
+                reloadAfterMs: 5000,
+                reloadText: 'Админ-панель перезагрузится через'
+            });
         } else {
             // ✅ Закрываем оверлей "АВТОНАСТРОЙКА" если ещё висит
             const autoOverlay = document.getElementById('autoSetupOverlay');
@@ -8442,7 +16374,7 @@ window.autoSetupCallback = async function() {
 
 window.currentCommunityId = null;
 window.adminProfiles = [];
-window.adminDashboard = { promoCodes: [], recoveryRequests: [], loginLogs: [] };
+window.adminDashboard = { promoCodes: [], recoveryRequests: [], loginLogs: [], limitRequests: [], balanceTopUps: [], financialOperations: [], errorReports: [], suggestionReports: [] };
 window.triggersHubFilter = 'all';
 
 function getTriggerHubSourceLabel(sourceTab) {
@@ -8540,8 +16472,9 @@ window.openTriggerSource = function(sourceTab, rowIdx, botName) {
     }, 120);
 };
 
-window.duplicateTriggerSource = function(sourceTab, rowIdx) {
+window.duplicateTriggerSource = async function(sourceTab, rowIdx) {
     if (!dataStore[sourceTab] || !dataStore[sourceTab][rowIdx]) return;
+    await copyRowJsonToClipboard(sourceTab, rowIdx);
     const duplicatedRow = JSON.parse(JSON.stringify(dataStore[sourceTab][rowIdx]));
     dataStore[sourceTab].splice(rowIdx + 1, 0, duplicatedRow);
     renderTriggersHub();
@@ -8652,6 +16585,8 @@ window.editAdminProfile = function(profileId) {
     document.getElementById('profileFormEmail').value = profile.recoveryEmail || '';
     document.getElementById('profileFormDuration').value = profile.remainingMinutes || '';
     document.getElementById('profileFormRequestsLimit').value = profile.requestsLimit || '';
+    document.getElementById('profileFormBalance').value = profile.balance || 0;
+    document.getElementById('profileFormExtraRequestLimit').value = profile.extraRequestLimit || 0;
     var form = document.getElementById('adminProfileForm');
     if (form) {
         form.style.display = '';
@@ -8681,7 +16616,7 @@ window.closeAdminProfileForm = function() {
 };
 
 window.resetAdminProfileForm = function() {
-    var fields = ['profileFormId', 'profileFormName', 'profileFormUsername', 'profileFormPassword', 'profileFormEmail', 'profileFormDuration', 'profileFormRequestsLimit'];
+    var fields = ['profileFormId', 'profileFormName', 'profileFormUsername', 'profileFormPassword', 'profileFormEmail', 'profileFormDuration', 'profileFormRequestsLimit', 'profileFormBalance', 'profileFormExtraRequestLimit'];
     fields.forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.value = '';
@@ -8743,6 +16678,16 @@ window.togglePromoFilters = function() {
     toggle.textContent = isHidden ? '▼ 🔍 Фильтры Промокодов' : '▶ 🔍 Фильтры Промокодов';
 };
 
+window.togglePromoHistory = function() {
+    var block = document.getElementById('promoHistoryBlock');
+    var toggle = document.getElementById('promoHistoryToggle');
+    if (!block || !toggle) return;
+    var isHidden = block.style.display === 'none';
+    block.style.display = isHidden ? '' : 'none';
+    toggle.textContent = isHidden ? '▼ История Промокодов' : '▶ История Промокодов';
+    if (isHidden) renderPromoHistory();
+};
+
 window.resetPromoFilters = function() {
     var defaults = {
         promoFilterSearch: '',
@@ -8781,6 +16726,8 @@ window.resetPromoForm = function() {
         promoFormLabel: '',
         promoFormDuration: '',
         promoFormRequestsLimit: '',
+        promoFormBalanceCredit: '',
+        promoFormExtraRequestLimitCredit: '',
         promoFormMaxUses: '1'
     };
     Object.keys(defaults).forEach(function(id) {
@@ -8875,6 +16822,8 @@ window.renderAdminProfiles = function() {
             : String(profile.remainingMinutes);
         var openButton = '<button class="btn btn-accent" type="button" onclick="switchAdminWorkingProfile(&quot;' + escapeHtml(profile.id) + '&quot;)" style="min-width:auto;">Открыть профиль</button>';
         var requestsLimitLabel = profile.requestsLimit ? String(profile.requestsLimit) : 'Не задан';
+        var balanceLabel = Number.isFinite(Number(profile.balance)) ? (String(Math.max(0, Math.floor(Number(profile.balance)))) + ' ₽') : '0 ₽';
+        var extraRequestLimitLabel = Number.isFinite(Number(profile.extraRequestLimit)) ? String(Math.max(0, Math.floor(Number(profile.extraRequestLimit)))) : '0';
         var deleteButton = profile.role === 'main_admin'
             ? '<button class="btn btn-neutral" type="button" disabled style="opacity:0.6;cursor:not-allowed;">Главный профиль</button>'
             : '<button class="btn btn-delete" type="button" onclick="deleteAdminProfileById(&quot;' + escapeHtml(profile.id) + '&quot;)" style="min-width:auto;">Удалить</button>';
@@ -8892,6 +16841,8 @@ window.renderAdminProfiles = function() {
                 '<div class="profile-card-row"><span class="profile-card-label">Промокод:</span> ' + escapeHtml(profile.promoCodeUsed || 'не использовался') + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Осталось минут:</span> ' + escapeHtml(remainingMinutesLabel) + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Лимит запросов:</span> ' + escapeHtml(requestsLimitLabel) + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Баланс:</span> ' + escapeHtml(balanceLabel) + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Вне суточного лимита:</span> ' + escapeHtml(extraRequestLimitLabel) + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Доступ до:</span> ' + escapeHtml(expiresLabel) + '</div>' +
             '</div>' +
             '<div class="profile-card-actions">' +
@@ -8931,6 +16882,8 @@ window.renderPromoCodes = function() {
     listEl.innerHTML = filtered.map(function(promo) {
         var durationLabel = promo.durationMinutes ? (promo.durationMinutes + ' мин.') : 'Бессрочно';
         var requestsLimitLabel = promo.dailyRequestsLimit ? String(promo.dailyRequestsLimit) : 'Не задан';
+        var balanceCreditLabel = promo.balanceCredit ? (String(promo.balanceCredit) + ' ₽') : 'Не задан';
+        var extraRequestLimitCreditLabel = promo.extraRequestLimitCredit ? String(promo.extraRequestLimitCredit) : 'Не задан';
         var isFullyUsed = promo.usedCount >= promo.maxUses;
         var isExpired = promo.expiresAt ? (new Date(promo.expiresAt).getTime() <= Date.now()) : false;
         var isDeprecated = isFullyUsed || isExpired;
@@ -8941,6 +16894,8 @@ window.renderPromoCodes = function() {
             '<div class="profile-card-details">' +
                 '<div class="profile-card-row"><span class="profile-card-label">Срок профиля:</span> ' + escapeHtml(durationLabel) + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Лимит запросов:</span> ' + escapeHtml(requestsLimitLabel) + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Баланс:</span> ' + escapeHtml(balanceCreditLabel) + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Вне суточного лимита:</span> ' + escapeHtml(extraRequestLimitCreditLabel) + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Создан:</span> ' + escapeHtml(new Date(promo.createdAt).toLocaleString('ru-RU')) + '</div>' +
             '</div>' +
             '<div class="profile-card-actions">' +
@@ -8948,6 +16903,56 @@ window.renderPromoCodes = function() {
             '</div>' +
         '</div>';
     }).join('');
+    renderPromoHistory();
+};
+
+window.renderPromoHistory = function() {
+    const tableEl = document.getElementById('promoHistoryTable');
+    if (!tableEl) return;
+    const promoCodes = (window.adminDashboard.promoCodes || []).map(function(promo) {
+        return {
+            createdAt: promo.createdAt,
+            code: promo.code,
+            label: promo.label || '',
+            event: 'created_or_active',
+            profileId: promo.createdByProfileId || '',
+            used: String((promo.usedCount || 0) + '/' + (promo.maxUses || 1)),
+            status: promo.active === false ? 'выключен' : ((promo.usedCount || 0) >= (promo.maxUses || 1) ? 'исчерпан' : 'активен')
+        };
+    });
+    const promoLogEvents = (window.adminDashboard.loginLogs || [])
+        .filter(function(item) { return /^promo_/.test(String(item.type || '')) && item.code; })
+        .map(function(item) {
+            return {
+                createdAt: item.createdAt,
+                code: item.code,
+                label: item.reason || '',
+                event: item.type,
+                profileId: item.profileId || '',
+                used: '',
+                status: item.type === 'promo_deleted' ? 'удалён' : (item.type === 'promo_consumed' ? 'активирован' : 'событие')
+            };
+        });
+    const rows = promoCodes.concat(promoLogEvents).sort(function(a, b) {
+        return String(b.createdAt || '').localeCompare(String(a.createdAt || ''));
+    });
+    if (!rows.length) {
+        tableEl.innerHTML = '<div class="community-empty-note">История промокодов пока пуста.</div>';
+        return;
+    }
+    tableEl.innerHTML = '<table><thead><tr>' +
+        '<th>Дата</th><th>Промокод</th><th>Описание</th><th>Событие</th><th>Профиль</th><th>Использование</th><th>Статус</th>' +
+        '</tr></thead><tbody>' + rows.map(function(row) {
+            return '<tr>' +
+                '<td>' + escapeHtml(formatRuDateTime(row.createdAt)) + '</td>' +
+                '<td>' + escapeHtml(row.code || '') + '</td>' +
+                '<td>' + escapeHtml(row.label || '') + '</td>' +
+                '<td>' + escapeHtml(row.event || '') + '</td>' +
+                '<td>' + escapeHtml(row.profileId || '') + '</td>' +
+                '<td>' + escapeHtml(row.used || '') + '</td>' +
+                '<td>' + escapeHtml(row.status || '') + '</td>' +
+            '</tr>';
+        }).join('') + '</tbody></table>';
 };
 
 window.renderRecoveryRequests = function() {
@@ -8985,6 +16990,8 @@ window.renderRecoveryRequests = function() {
 
 window.profileDashboardData = null;
 window.selectedProfileSupportLimit = null;
+window.selectedProfileDailyLimitPackageCost = null;
+window.selectedProfileExtraLimitPackageCost = null;
 window.groupManagerState = { search: '', editingIndex: -1 };
 
 function formatRuDateTime(value) {
@@ -9026,26 +17033,350 @@ window.openAdminTabDirect = function() {
 };
 
 window.renderAdminAuditPanel = function() {
-    var panel = document.getElementById('adminLimitRequestsPanel');
-    if (!panel) return;
-    var limitRequests = window.adminDashboard?.limitRequests || [];
+    renderAdminFinancialOperations();
+    renderAdminErrorReports();
+    renderAdminSuggestionReports();
+};
 
-    var limitHtml = limitRequests.length ? limitRequests.map(function(item) {
+window.renderAdminLimitRequestHistory = function(limitRequests) {
+    limitRequests = Array.isArray(limitRequests) ? limitRequests : [];
+    return limitRequests.length ? limitRequests.map(function(item) {
+        var communityUrl = item.communityUrl || buildVkCommunityUrl(item.communityId || item.vkGroupId || '');
+        var communityButton = communityUrl
+            ? '<a class="btn btn-info limit-request-action-btn" href="' + escapeHtml(communityUrl) + '" target="_blank" rel="noopener noreferrer">Связаться с сообществом</a>'
+            : '';
         var actions = item.status === 'pending'
-            ? '<div class="profile-card-actions"><button class="btn btn-save" type="button" onclick="resolveProfileLimitRequestById(&quot;' + escapeHtml(item.id) + '&quot;, &quot;approved&quot;)">Одобрить</button><button class="btn btn-delete" type="button" onclick="resolveProfileLimitRequestById(&quot;' + escapeHtml(item.id) + '&quot;, &quot;rejected&quot;)">Не одобрять</button></div>'
+            ? '<div class="profile-card-actions"><button class="btn btn-save" type="button" onclick="resolveProfileLimitRequestById(&quot;' + escapeHtml(item.id) + '&quot;, &quot;approved&quot;)">Одобрить</button><button class="btn btn-delete" type="button" onclick="resolveProfileLimitRequestById(&quot;' + escapeHtml(item.id) + '&quot;, &quot;rejected&quot;)">Не одобрять</button>' + communityButton + '</div>'
             : '';
         return '<div class="app-log-card">' +
             '<div class="app-log-card-header"><div><div class="app-log-card-title">Запрос на увеличение лимита</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div><div class="app-log-card-badge">' + escapeHtml(item.status || 'pending') + '</div></div>' +
             '<div class="app-log-card-summary">' + escapeHtml(item.profileName || ('Профиль ' + item.profileId)) + ' запросил ' + escapeHtml(String(item.requestedLimit || '0')) + ' запросов в сутки</div>' +
             '<div class="app-log-card-details">' +
                 '<div class="app-log-card-detail">Профиль: ' + escapeHtml(item.profileId || '') + '</div>' +
+                (item.communityId ? '<div class="app-log-card-detail">Сообщество: ' + escapeHtml(item.communityName || item.communityId) + '</div>' : '') +
                 (item.resolvedAt ? '<div class="app-log-card-detail">Обработан: ' + escapeHtml(formatRuDateTime(item.resolvedAt)) + '</div>' : '') +
                 (item.note ? '<div class="app-log-card-detail">Комментарий: ' + escapeHtml(item.note) + '</div>' : '') +
             '</div>' + actions +
         '</div>';
     }).join('') : '<div class="community-empty-note">Запросов на увеличение лимита пока нет.</div>';
+};
 
-    panel.innerHTML = limitHtml;
+function formatAdminFinancialDelta(value, suffix) {
+    if (value === null || value === undefined || value === '') return '—';
+    var numeric = Number(value);
+    if (!Number.isFinite(numeric)) return '—';
+    return (numeric > 0 ? '+' : '') + String(numeric) + (suffix || '');
+}
+
+window.filterAdminFinancialOperations = function() {
+    var profileValue = String(document.getElementById('adminFinancialProfileFilter')?.value || '').toLowerCase();
+    var typeValue = String(document.getElementById('adminFinancialTypeFilter')?.value || '').toLowerCase();
+    var statusValue = String(document.getElementById('adminFinancialStatusFilter')?.value || '').toLowerCase();
+    var fromValue = String(document.getElementById('adminFinancialDateFrom')?.value || '');
+    var toValue = String(document.getElementById('adminFinancialDateTo')?.value || '');
+    var searchValue = String(document.getElementById('adminFinancialSearch')?.value || '').trim().toLowerCase();
+    var fromTime = fromValue ? new Date(fromValue + 'T00:00:00').getTime() : null;
+    var toTime = toValue ? new Date(toValue + 'T23:59:59.999').getTime() : null;
+    var rows = Array.from(document.querySelectorAll('#adminFinancialOperationsTableBody .admin-financial-operation-row'));
+    var visibleCount = 0;
+    rows.forEach(function(row) {
+        var rowTime = Date.parse(row.getAttribute('data-financial-date') || '');
+        var profileMatches = !profileValue || String(row.getAttribute('data-financial-profile') || '') === profileValue;
+        var typeMatches = !typeValue || String(row.getAttribute('data-financial-type') || '') === typeValue;
+        var statusMatches = !statusValue || String(row.getAttribute('data-financial-status') || '') === statusValue;
+        var fromMatches = fromTime === null || (Number.isFinite(rowTime) && rowTime >= fromTime);
+        var toMatches = toTime === null || (Number.isFinite(rowTime) && rowTime <= toTime);
+        var searchMatches = !searchValue || String(row.getAttribute('data-financial-search') || '').includes(searchValue);
+        var matches = profileMatches && typeMatches && statusMatches && fromMatches && toMatches && searchMatches;
+        row.style.display = matches ? '' : 'none';
+        if (matches) visibleCount += 1;
+    });
+    var visibleCountEl = document.getElementById('adminFinancialOperationsVisibleCount');
+    if (visibleCountEl) visibleCountEl.textContent = String(visibleCount);
+    var exportButton = document.getElementById('exportAdminFinancialOperationsButton');
+    if (exportButton && !exportButton.dataset.loading) {
+        exportButton.disabled = visibleCount === 0;
+        exportButton.textContent = 'Скачать Excel (' + visibleCount + ')';
+    }
+    var emptyRow = document.getElementById('adminFinancialOperationsFilteredEmpty');
+    if (emptyRow) emptyRow.style.display = rows.length && visibleCount === 0 ? '' : 'none';
+};
+
+window.getVisibleAdminFinancialOperationIds = function() {
+    return Array.from(document.querySelectorAll('#adminFinancialOperationsTableBody .admin-financial-operation-row'))
+        .filter(function(row) { return row.style.display !== 'none'; })
+        .map(function(row) { return String(row.getAttribute('data-financial-operation-id') || '').trim(); })
+        .filter(Boolean);
+};
+
+window.buildAdminFinancialOperationsExportFilename = function(dateValue) {
+    var date = dateValue instanceof Date ? dateValue : new Date();
+    var pad = function(value) { return String(value).padStart(2, '0'); };
+    return 'Финансовые_операции_' + date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + '_' + pad(date.getHours()) + '-' + pad(date.getMinutes()) + '.xlsx';
+};
+
+window.exportAdminFinancialOperations = async function() {
+    var operationIds = window.getVisibleAdminFinancialOperationIds();
+    var exportButton = document.getElementById('exportAdminFinancialOperationsButton');
+    var statusEl = document.getElementById('adminFinancialOperationsExportStatus');
+    if (!operationIds.length) {
+        if (statusEl) setInlineNoticeWithTimeout(statusEl, 'error', 'Нет операций для экспорта.', 3000);
+        return;
+    }
+
+    var fileName = window.buildAdminFinancialOperationsExportFilename(new Date());
+    try {
+        if (exportButton) {
+            exportButton.dataset.loading = '1';
+            exportButton.disabled = true;
+            exportButton.textContent = 'Создаем Excel...';
+        }
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Формируем Excel-файл...');
+        var response = await fetch(window.location.href.split('?')[0] + '?exportAdminFinancialOperations=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                operationIds: operationIds,
+                fileName: fileName
+            })
+        });
+        if (!response.ok) {
+            var errorPayload = await response.json().catch(function() { return {}; });
+            throw new Error(errorPayload.error || 'Не удалось создать Excel-файл');
+        }
+        var blob = await response.blob();
+        var objectUrl = URL.createObjectURL(blob);
+        var downloadLink = document.createElement('a');
+        downloadLink.href = objectUrl;
+        downloadLink.download = fileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        downloadLink.remove();
+        URL.revokeObjectURL(objectUrl);
+        if (statusEl) setInlineNoticeWithTimeout(statusEl, 'success', 'Excel-файл загружен.', 3000);
+    } catch (error) {
+        if (statusEl) setInlineNoticeWithTimeout(statusEl, 'error', 'Ошибка экспорта: ' + error.message, 3000);
+    } finally {
+        if (exportButton) {
+            delete exportButton.dataset.loading;
+        }
+        window.filterAdminFinancialOperations();
+    }
+};
+
+window.renderAdminFinancialOperations = function() {
+    var panel = document.getElementById('adminFinancialOperationsPanel');
+    if (!panel) return;
+    var operations = Array.isArray(window.adminDashboard?.financialOperations) ? window.adminDashboard.financialOperations : [];
+    var profiles = new Map();
+    var types = new Map();
+    var statuses = new Map();
+    operations.forEach(function(item) {
+        var profileId = String(item.profileId || '').trim();
+        var type = String(item.type || 'other').trim();
+        var status = String(item.status || 'succeeded').trim();
+        if (profileId) profiles.set(profileId, String(item.profileName || ('Профиль ' + profileId)));
+        if (type) types.set(type, String(item.typeLabel || type));
+        if (status) statuses.set(status, String(item.statusLabel || status));
+    });
+    var profileOptions = Array.from(profiles.entries()).sort(function(a, b) { return a[1].localeCompare(b[1], 'ru'); }).map(function(entry) {
+        return '<option value="' + escapeHtml(entry[0].toLowerCase()) + '">' + escapeHtml(entry[1] + ' (' + entry[0] + ')') + '</option>';
+    }).join('');
+    var typeOptions = Array.from(types.entries()).sort(function(a, b) { return a[1].localeCompare(b[1], 'ru'); }).map(function(entry) {
+        return '<option value="' + escapeHtml(entry[0].toLowerCase()) + '">' + escapeHtml(entry[1]) + '</option>';
+    }).join('');
+    var statusOptions = Array.from(statuses.entries()).sort(function(a, b) { return a[1].localeCompare(b[1], 'ru'); }).map(function(entry) {
+        return '<option value="' + escapeHtml(entry[0].toLowerCase()) + '">' + escapeHtml(entry[1]) + '</option>';
+    }).join('');
+    var rowsHtml = operations.map(function(item) {
+        var profileId = String(item.profileId || '').trim();
+        var profileName = String(item.profileName || ('Профиль ' + profileId));
+        var communityLabel = String(item.communityName || item.communityId || 'Не указано');
+        var sourceLabel = [item.source, item.description, item.providerPaymentId].filter(Boolean).join('. ');
+        var searchText = [profileName, profileId, communityLabel, item.communityId, item.source, item.description, item.providerPaymentId, item.id].filter(Boolean).join(' ').toLowerCase();
+        var amountLabel = item.amountRub === null || item.amountRub === undefined ? '—' : String(item.amountRub) + ' ₽';
+        return '<tr class="admin-financial-operation-row" data-financial-operation-id="' + escapeHtml(String(item.id || '')) + '" data-financial-profile="' + escapeHtml(profileId.toLowerCase()) + '" data-financial-type="' + escapeHtml(String(item.type || 'other').toLowerCase()) + '" data-financial-status="' + escapeHtml(String(item.status || 'succeeded').toLowerCase()) + '" data-financial-date="' + escapeHtml(String(item.createdAt || '')) + '" data-financial-search="' + escapeHtml(searchText) + '">' +
+            '<td>' + escapeHtml(item.createdAt ? formatRuDateTime(item.createdAt) : 'Не указано') + '</td>' +
+            '<td>' + escapeHtml(profileName) + '<div class="app-log-card-meta">' + escapeHtml(profileId) + '</div></td>' +
+            '<td>' + escapeHtml(item.typeLabel || 'Прочая операция') + '</td>' +
+            '<td><span class="app-log-card-badge">' + escapeHtml(item.statusLabel || item.status || 'Успешно') + '</span></td>' +
+            '<td>' + escapeHtml(amountLabel) + '</td>' +
+            '<td>' + escapeHtml(formatAdminFinancialDelta(item.balanceDelta, ' ₽')) + '</td>' +
+            '<td>' + escapeHtml(formatAdminFinancialDelta(item.limitDelta, '')) + '</td>' +
+            '<td>' + escapeHtml(communityLabel) + '</td>' +
+            '<td>' + escapeHtml(sourceLabel || 'Не указано') + '</td>' +
+            '<td><code>' + escapeHtml(item.id || 'Не указано') + '</code></td>' +
+        '</tr>';
+    }).join('');
+    panel.innerHTML =
+        '<div class="structured-trigger-grid" style="margin:12px 0;">' +
+            '<div class="structured-trigger-field"><label>Профиль</label><select id="adminFinancialProfileFilter" onchange="filterAdminFinancialOperations()"><option value="">Все профили</option>' + profileOptions + '</select></div>' +
+            '<div class="structured-trigger-field"><label>Тип операции</label><select id="adminFinancialTypeFilter" onchange="filterAdminFinancialOperations()"><option value="">Все типы</option>' + typeOptions + '</select></div>' +
+            '<div class="structured-trigger-field"><label>Статус</label><select id="adminFinancialStatusFilter" onchange="filterAdminFinancialOperations()"><option value="">Все статусы</option>' + statusOptions + '</select></div>' +
+            '<div class="structured-trigger-field"><label>Дата от</label><input id="adminFinancialDateFrom" type="date" onchange="filterAdminFinancialOperations()"></div>' +
+            '<div class="structured-trigger-field"><label>Дата до</label><input id="adminFinancialDateTo" type="date" onchange="filterAdminFinancialOperations()"></div>' +
+            '<div class="structured-trigger-field"><label>Поиск</label><input id="adminFinancialSearch" type="text" placeholder="Профиль, сообщество, основание или ID" oninput="filterAdminFinancialOperations()"></div>' +
+        '</div>' +
+        '<div id="adminFinancialOperationsExportStatus"></div>' +
+        '<div class="profile-payment-operations-toolbar"><div>Отображается: <strong id="adminFinancialOperationsVisibleCount">' + operations.length + '</strong> из <strong id="adminFinancialOperationsTotalCount">' + operations.length + '</strong></div><button id="exportAdminFinancialOperationsButton" class="btn btn-save" type="button" onclick="exportAdminFinancialOperations()" ' + (operations.length ? '' : 'disabled') + '>Скачать Excel (' + operations.length + ')</button></div>' +
+        '<div class="admin-financial-operations-table-wrap"><table style="width:100%;border-collapse:collapse;"><thead><tr><th>Дата и время</th><th>Профиль</th><th>Тип операции</th><th>Статус</th><th>Денежная сумма</th><th>Изменение баланса</th><th>Изменение лимита</th><th>Сообщество</th><th>Источник / основание</th><th>ID операции</th></tr></thead><tbody id="adminFinancialOperationsTableBody">' +
+            rowsHtml +
+            '<tr id="adminFinancialOperationsFilteredEmpty" style="' + (operations.length ? 'display:none;' : '') + '"><td colspan="10" class="community-empty-note" style="text-align:left;">' + (operations.length ? 'Нет операций по выбранным фильтрам.' : 'Финансовых операций пока нет.') + '</td></tr>' +
+        '</tbody></table></div>';
+};
+
+const BUG_REPORT_STATUSES = [
+    { value: 'submitted', label: 'Отправлено', className: 'bug-status--submitted' },
+    { value: 'in_progress', label: 'В процессе исправления', className: 'bug-status--in-progress' },
+    { value: 'not_bug', label: 'Это не ошибка', className: 'bug-status--not-bug' },
+    { value: 'fixed', label: 'Исправлено', className: 'bug-status--fixed' }
+];
+const SUGGESTION_REPORT_STATUSES = [
+    { value: 'submitted', label: 'Отправлено', className: 'bug-status--submitted' },
+    { value: 'in_development', label: 'В Разработке', className: 'bug-status--in-progress' },
+    { value: 'rejected', label: 'Отклонено', className: 'bug-status--not-bug' },
+    { value: 'implemented', label: 'Реализовано', className: 'bug-status--fixed' }
+];
+
+function getBugReportStatusMeta(status) {
+    var normalized = String(status || '').trim();
+    if (normalized === 'new') normalized = 'submitted';
+    return BUG_REPORT_STATUSES.find(function(item) { return item.value === normalized; }) || BUG_REPORT_STATUSES[0];
+}
+
+function renderBugReportStatusBadge(status) {
+    var meta = getBugReportStatusMeta(status);
+    return '<div class="app-log-card-badge bug-status-badge ' + meta.className + '">' + escapeHtml(meta.label) + '</div>';
+}
+
+function getSuggestionReportStatusMeta(status) {
+    var normalized = String(status || '').trim();
+    if (normalized === 'new') normalized = 'submitted';
+    return SUGGESTION_REPORT_STATUSES.find(function(item) { return item.value === normalized; }) || SUGGESTION_REPORT_STATUSES[0];
+}
+
+function renderSuggestionReportStatusBadge(status) {
+    var meta = getSuggestionReportStatusMeta(status);
+    return '<div class="app-log-card-badge bug-status-badge ' + meta.className + '">' + escapeHtml(meta.label) + '</div>';
+}
+
+function renderBugReportScreenshots(screenshots) {
+    screenshots = Array.isArray(screenshots) ? screenshots : [];
+    if (!screenshots.length) return '<div class="app-log-card-detail">Скриншоты: не приложены</div>';
+    var thumbs = screenshots.map(function(file, index) {
+        var title = file.fileName || ('Скриншот ' + (index + 1));
+        var attachment = String(file.attachment || '').trim();
+        if (file.previewDataUrl) {
+            return '<button class="bug-report-thumb-button" type="button" style="background:none;border:0;padding:0;" onclick="openBugReportScreenshotViewer(&quot;' + escapeHtml(file.previewDataUrl) + '&quot;,&quot;' + escapeHtml(title) + '&quot;)"><img class="bug-report-thumb" src="' + escapeHtml(file.previewDataUrl) + '" alt="' + escapeHtml(title) + '"></button>';
+        }
+        var photoMatch = attachment.match(/^photo(-?\\d+_\\d+)/);
+        var photoUrl = photoMatch ? ('https://vk.com/photo' + photoMatch[1]) : '';
+        return '<div class="app-log-card-detail">Скриншот ' + (index + 1) + ': <code>' + escapeHtml(attachment) + '</code>' + (photoUrl ? ' <a href="' + escapeHtml(photoUrl) + '" target="_blank" rel="noopener noreferrer">Открыть VK</a>' : '') + '</div>';
+    }).join('');
+    return '<div class="bug-report-thumb-grid">' + thumbs + '</div>';
+}
+
+window.openBugReportScreenshotViewer = function(src, title) {
+    var existing = document.getElementById('bugReportScreenshotViewer');
+    if (existing) existing.remove();
+    var modal = document.createElement('div');
+    modal.id = 'bugReportScreenshotViewer';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.86);z-index:10020;display:flex;align-items:center;justify-content:center;padding:18px;';
+    modal.innerHTML = '<div style="max-width:min(1100px,100%);max-height:100%;display:flex;flex-direction:column;gap:10px;"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;color:white;"><strong>' + escapeHtml(title || 'Скриншот') + '</strong><button class="btn btn-neutral" type="button" onclick="document.getElementById(&quot;bugReportScreenshotViewer&quot;).remove()">Закрыть</button></div><img src="' + escapeHtml(src) + '" alt="' + escapeHtml(title || 'Скриншот') + '" style="max-width:100%;max-height:calc(100vh - 90px);object-fit:contain;border-radius:12px;border:1px solid rgba(255,255,255,0.24);background:#0f172a;"></div>';
+    modal.onclick = function(event) {
+        if (event.target === modal) modal.remove();
+    };
+    document.body.appendChild(modal);
+};
+
+window.renderAdminErrorReports = function() {
+    var panel = document.getElementById('adminErrorReportsPanel');
+    if (!panel) return;
+    var reports = window.adminDashboard?.errorReports || [];
+    panel.innerHTML = reports.length ? reports.map(function(item) {
+        var statusActions = BUG_REPORT_STATUSES.map(function(status) {
+            return '<button class="btn bug-status-action-btn ' + status.className + '" type="button" onclick="updateBugReportStatusById(&quot;' + escapeHtml(item.id || '') + '&quot;,&quot;' + escapeHtml(status.value) + '&quot;)">' + escapeHtml(status.label) + '</button>';
+        }).join('');
+        return '<div class="app-log-card">' +
+            '<div class="app-log-card-header"><div><div class="app-log-card-title">Сообщение об ошибке</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div>' + renderBugReportStatusBadge(item.status) + '</div>' +
+            '<div class="app-log-card-summary" style="white-space:pre-wrap;">' + escapeHtml(item.description || '') + '</div>' +
+            '<div class="app-log-card-details">' +
+                '<div class="app-log-card-detail">Профиль: ' + escapeHtml(item.profileName || ('Профиль ' + item.profileId)) + ' (' + escapeHtml(item.profileId || '') + ')</div>' +
+                (item.communityId ? '<div class="app-log-card-detail">Сообщество: ' + escapeHtml(item.communityId) + '</div>' : '') +
+                (item.pageUrl ? '<div class="app-log-card-detail">Страница: ' + escapeHtml(item.pageUrl) + '</div>' : '') +
+                (item.fixedRewardGrantedAt ? '<div class="app-log-card-detail">Бонус за исправление: +' + escapeHtml(String(item.fixedRewardAmount || 1000)) + ' вне суточного лимита, ' + escapeHtml(formatRuDateTime(item.fixedRewardGrantedAt)) + '</div>' : '') +
+                renderBugReportScreenshots(item.screenshots) +
+            '</div>' +
+            '<div class="profile-card-actions" style="margin-top:12px;">' + statusActions + '</div>' +
+        '</div>';
+    }).join('') : '<div class="community-empty-note">Сообщений об ошибках пока нет.</div>';
+};
+
+window.updateBugReportStatusById = async function(reportId, status) {
+    var statusEl = document.getElementById('appLogsStatus');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?updateBugReportStatus=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reportId: reportId, status: status, principalProfileId: getPrincipalProfileId() })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Не удалось изменить статус ошибки');
+        if (window.adminDashboard && Array.isArray(window.adminDashboard.errorReports)) {
+            var idx = window.adminDashboard.errorReports.findIndex(function(item) { return String(item.id || '') === String(reportId); });
+            if (idx >= 0 && data.report) window.adminDashboard.errorReports[idx] = data.report;
+        }
+        renderAdminErrorReports();
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', data.reward ? '✅ Статус изменён. Профилю начислено +' + data.reward.amount + ' вне суточного лимита.' : '✅ Статус ошибки изменён.');
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+    }
+};
+
+window.renderAdminSuggestionReports = function() {
+    var panel = document.getElementById('adminSuggestionReportsPanel');
+    if (!panel) return;
+    var reports = window.adminDashboard?.suggestionReports || [];
+    panel.innerHTML = reports.length ? reports.map(function(item) {
+        var statusActions = SUGGESTION_REPORT_STATUSES.map(function(status) {
+            return '<button class="btn bug-status-action-btn ' + status.className + '" type="button" onclick="updateSuggestionReportStatusById(&quot;' + escapeHtml(item.id || '') + '&quot;,&quot;' + escapeHtml(status.value) + '&quot;)">' + escapeHtml(status.label) + '</button>';
+        }).join('');
+        return '<div class="app-log-card">' +
+            '<div class="app-log-card-header"><div><div class="app-log-card-title">Предложение</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div>' + renderSuggestionReportStatusBadge(item.status) + '</div>' +
+            '<div class="app-log-card-summary" style="white-space:pre-wrap;">' + escapeHtml(item.description || '') + '</div>' +
+            '<div class="app-log-card-details">' +
+                '<div class="app-log-card-detail">Профиль: ' + escapeHtml(item.profileName || ('Профиль ' + item.profileId)) + ' (' + escapeHtml(item.profileId || '') + ')</div>' +
+                (item.communityId ? '<div class="app-log-card-detail">Сообщество: ' + escapeHtml(item.communityId) + '</div>' : '') +
+                (item.pageUrl ? '<div class="app-log-card-detail">Страница: ' + escapeHtml(item.pageUrl) + '</div>' : '') +
+                (item.implementedRewardGrantedAt ? '<div class="app-log-card-detail">Бонус за реализацию: +' + escapeHtml(String(item.implementedRewardAmount || 1000)) + ' вне суточного лимита, ' + escapeHtml(formatRuDateTime(item.implementedRewardGrantedAt)) + '</div>' : '') +
+                renderBugReportScreenshots(item.screenshots) +
+            '</div>' +
+            '<div class="profile-card-actions" style="margin-top:12px;">' + statusActions + '</div>' +
+        '</div>';
+    }).join('') : '<div class="community-empty-note">Предложений пока нет.</div>';
+};
+
+window.updateSuggestionReportStatusById = async function(reportId, status) {
+    var statusEl = document.getElementById('appLogsStatus');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?updateSuggestionReportStatus=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ reportId: reportId, status: status, principalProfileId: getPrincipalProfileId() })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Не удалось изменить статус предложения');
+        if (window.adminDashboard && Array.isArray(window.adminDashboard.suggestionReports)) {
+            var idx = window.adminDashboard.suggestionReports.findIndex(function(item) { return String(item.id || '') === String(reportId); });
+            if (idx >= 0 && data.report) window.adminDashboard.suggestionReports[idx] = data.report;
+        }
+        renderAdminSuggestionReports();
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', data.reward ? '✅ Статус изменён. Профилю начислено +' + data.reward.amount + ' вне суточного лимита.' : '✅ Статус предложения изменён.');
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+    }
 };
 
 window.resolveProfileLimitRequestById = async function(requestId, status) {
@@ -9106,6 +17437,8 @@ window.formatProfileFileSize = function(bytes) {
     return size.toFixed(precision).replace(/\.0$/, '') + ' ' + units[unitIndex];
 };
 
+const PROFILE_CONSENT_DOCUMENTS_SECTION_ID = 'profileConsentDocuments';
+
 window.filterProfileFiles = function() {
     var input = document.getElementById('profileFilesFilter');
     var tbody = document.getElementById('profileFilesTableBody');
@@ -9115,6 +17448,962 @@ window.filterProfileFiles = function() {
         var haystack = String(row.getAttribute('data-file-search') || '').toLowerCase();
         row.style.display = !query || haystack.indexOf(query) >= 0 ? '' : 'none';
     });
+};
+
+function getSelectedProfileDashboardCommunityKeys() {
+    var data = window.profileDashboardData || {};
+    var communities = Array.isArray(data.communities) ? data.communities : [];
+    var activeCommunityId = String(window.currentCommunityId || '').trim();
+    var keys = [];
+    if (activeCommunityId) keys.push(activeCommunityId);
+    var selectedCommunity = communities.find(function(item) {
+        var communityKey = String(item.communityId || '').trim();
+        var vkGroupId = String(item.vkGroupId || item.communityId || '').trim();
+        return !!activeCommunityId && (activeCommunityId === communityKey || activeCommunityId === vkGroupId);
+    }) || communities[0] || null;
+    if (selectedCommunity) {
+        var vkGroupId = String(selectedCommunity.vkGroupId || selectedCommunity.communityId || '').trim();
+        var communityKey = String(selectedCommunity.communityId || '').trim();
+        if (vkGroupId) keys.push(vkGroupId);
+        if (communityKey) keys.push(communityKey);
+    }
+    return keys.filter(function(item, index) {
+        return item && keys.indexOf(item) === index;
+    });
+}
+
+function getSelectedProfileDashboardCommunityVkGroupId() {
+    var keys = getSelectedProfileDashboardCommunityKeys();
+    return keys[1] || keys[0] || '';
+}
+
+function getSelectedProfileDashboardCommunitySummary() {
+    var data = window.profileDashboardData || {};
+    var communities = Array.isArray(data.communities) ? data.communities : [];
+    var activeCommunityId = String(window.currentCommunityId || '').trim();
+    return communities.find(function(item) {
+        var communityKey = String(item.communityId || '').trim();
+        var vkGroupId = String(item.vkGroupId || item.communityId || '').trim();
+        return !!activeCommunityId && (activeCommunityId === communityKey || activeCommunityId === vkGroupId);
+    }) || communities[0] || null;
+}
+
+function buildVkCommunityUrl(communityId) {
+    var normalized = String(communityId || '').trim().replace(/^club/i, '').replace(/^-/, '');
+    return normalized ? 'https://vk.com/club' + encodeURIComponent(normalized) : '';
+}
+
+window.deleteProfileUploadedDocument = async function(payload) {
+    if (!isMainAdminSession()) {
+        throw new Error('Удалять документы профилей может только главный админ');
+    }
+    var baseUrl = window.location.href.split('?')[0];
+    var response = await fetch(baseUrl + '?deleteProfileUploadedDocument=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            profileId: getCurrentProfileId(),
+            principalProfileId: getPrincipalProfileId(),
+            communityId: payload.communityId || getSelectedProfileDashboardCommunityVkGroupId(),
+            kind: payload.kind || 'file',
+            documentType: payload.documentType || '',
+            attachment: payload.attachment || '',
+            version: payload.version || ''
+        })
+    });
+    var result = await response.json();
+    if (!result.success) {
+        throw new Error(result.error || 'Не удалось удалить документ');
+    }
+    if (result.dashboard) {
+        window.profileDashboardData = result.dashboard;
+    }
+    return result;
+};
+
+window.deleteProfileUploadedDocumentRecord = async function(documentType, attachment, version) {
+    var statusEl = document.getElementById('profileConsentDocumentsStatus') || document.getElementById('profileDashboardStatus');
+    if (!attachment) return;
+    if (!confirm('Удалить эту версию документа из профиля?')) return;
+    try {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Удаляем документ...');
+        await deleteProfileUploadedDocument({
+            kind: 'consent_document',
+            documentType: documentType,
+            attachment: attachment,
+            version: version,
+            communityId: getSelectedProfileDashboardCommunityVkGroupId()
+        });
+        renderProfileDashboard();
+        var freshStatusEl = document.getElementById('profileConsentDocumentsStatus') || document.getElementById('profileDashboardStatus');
+        if (freshStatusEl) freshStatusEl.innerHTML = makeInlineNotice('success', 'Документ удалён из профиля.');
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+    }
+};
+
+window.deleteProfileUploadedFileRecord = async function(attachment) {
+    var statusEl = document.getElementById('profileFilesStatus') || document.getElementById('profileDashboardStatus');
+    if (!attachment) return;
+    if (!confirm('Удалить этот файл из профиля?')) return;
+    try {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Удаляем файл...');
+        await deleteProfileUploadedDocument({
+            kind: 'file',
+            attachment: attachment,
+            communityId: getSelectedProfileDashboardCommunityVkGroupId()
+        });
+        renderProfileDashboard();
+        var freshStatusEl = document.getElementById('profileFilesStatus') || document.getElementById('profileDashboardStatus');
+        if (freshStatusEl) freshStatusEl.innerHTML = makeInlineNotice('success', 'Файл удалён из профиля.');
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+    }
+};
+
+const PROFILE_CONSENT_DOCUMENT_TYPES = [
+    { type: 'personal_data_consent', label: 'Согласие на Обработку Персональных Данных' },
+    { type: 'personal_data_policy', label: 'Политика обработки персональных данных' },
+    { type: 'public_offer', label: 'Публичная оферта' }
+];
+
+function readProfileConsentDocumentFileAsBase64(file) {
+    return new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function() {
+            var result = String(reader.result || '');
+            resolve(result.includes(',') ? result.split(',')[1] : result);
+        };
+        reader.onerror = function() {
+            reject(new Error('Не удалось прочитать файл'));
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+async function getProfileConsentDocumentUploadContext() {
+    var communityId = String(window.currentCommunityId || '').trim();
+    if (!communityId) {
+        communityId = restoreCurrentCommunityIdFromStorage();
+    }
+    var settings = await getBotSettings();
+    var communityConfig = settings.communities?.[communityId] || {};
+    var groupId = communityConfig.vk_group_id || '';
+
+    if (!communityId) throw new Error('Сообщество не выбрано. Обновите страницу и выберите сообщество.');
+    if (!(communityConfig.community_tokens_count > 0)) throw new Error('VK Token (Community Token) не настроен. Проверьте НАСТРОЙКА сообщества.');
+    if (!communityConfig.user_token_set) {
+        var userTokenError = new Error('USER_TOKEN_REQUIRED');
+        userTokenError.needsUserToken = true;
+        throw userTokenError;
+    }
+    if (!groupId) throw new Error('VK Group ID не настроен');
+
+    return { communityId: communityId, groupId: groupId };
+}
+
+function recoverProfileConsentRenderUploadResult(baseUrl, uploadId, timeoutMs) {
+    var startedAt = Date.now();
+    return new Promise(function(resolve, reject) {
+        var poll = function() {
+            fetch(baseUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'recover_render_upload', upload_id: uploadId }),
+                signal: AbortSignal.timeout(5000)
+            }).then(function(response) {
+                if (response.status === 202 || response.status === 404) {
+                    if (Date.now() - startedAt >= timeoutMs) throw new Error('Render result is not ready');
+                    setTimeout(poll, 2000);
+                    return null;
+                }
+                if (!response.ok) {
+                    return response.text().then(function(text) {
+                        throw new Error('Render result error: ' + response.status + ' - ' + text.substring(0, 200));
+                    });
+                }
+                return response.json().then(function(result) {
+                    if (!result || !result.success) throw new Error((result && result.error) || 'Render result failed');
+                    resolve(new Response(JSON.stringify(result), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' }
+                    }));
+                    return null;
+                });
+            }).catch(function(error) {
+                if (Date.now() - startedAt >= timeoutMs) {
+                    reject(error);
+                    return;
+                }
+                setTimeout(poll, 2000);
+            });
+        };
+        poll();
+    });
+}
+
+function isProfileConsentRenderWakeCandidate(error) {
+    var message = String((error && error.message) || '').toLowerCase();
+    return !!(
+        (error && error.name === 'AbortError') ||
+        message.includes('fetch') ||
+        message.includes('502') ||
+        message.includes('503') ||
+        message.includes('504') ||
+        message.includes('timeout') ||
+        message.includes('timed out') ||
+        message.includes('network')
+    );
+}
+
+window.uploadConsentDocumentFileToVk = async function(file, documentType, statusEl) {
+    var baseUrl = window.location.href.split('?')[0];
+    var context = await getProfileConsentDocumentUploadContext();
+    var fileSizeMB = file.size / (1024 * 1024);
+    // Документы больше 3,5 МБ также должны обходить лимит Yandex Cloud.
+    var useRenderService = fileSizeMB > 3.5;
+    var base64 = await readProfileConsentDocumentFileAsBase64(file);
+    var target = ['personal_data_consent', 'personal_data_policy', 'public_offer'].includes(documentType) ? 'wall' : 'message';
+
+    if (statusEl) statusEl.innerText = 'Загрузка в VK через сервис ' + (useRenderService ? 'Render' : 'PAPA BOT');
+
+    if (!useRenderService) {
+        var response = await fetch(baseUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'upload_attachment',
+                fileBase64: base64,
+                fileName: file.name,
+                fileType: file.type || 'application/octet-stream',
+                fileSize: file.size || 0,
+                target: target,
+                groupId: context.groupId,
+                communityId: context.communityId,
+                profileId: getCurrentProfileId()
+            })
+        });
+        if (!response.ok) {
+            var smallText = await response.text();
+            var smallPayload = null;
+            try { smallPayload = JSON.parse(smallText); } catch (e) {}
+            if (smallPayload && smallPayload.needsUserToken) {
+                var tokenError = new Error(smallPayload.error || 'USER_TOKEN_REQUIRED');
+                tokenError.needsUserToken = true;
+                throw tokenError;
+            }
+            throw new Error('HTTP ' + response.status + ': ' + smallText.substring(0, 200));
+        }
+        var smallResult = await response.json();
+        if (!smallResult.success) throw new Error(smallResult.error || 'Ошибка загрузки документа');
+        return { attachment: smallResult.attachment, context: context };
+    }
+
+    var renderUploaderUrl = 'https://vk-uploader.onrender.com/upload';
+    var uploadId = 'consent_doc_' + Date.now() + '_' + Math.random().toString(36).slice(2, 12);
+    var renderGrant = await requestRenderRelayGrant(baseUrl, { communityId: context.communityId, groupId: context.groupId, target: target, uploadId: uploadId });
+    var byteString = atob(base64);
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+    for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+    var blob = new Blob([ab], { type: file.type || 'application/octet-stream' });
+    var formData = new FormData();
+    formData.append('file', blob, file.name);
+    formData.append('profile_id', getCurrentProfileId());
+    formData.append('community_id', context.communityId);
+    formData.append('group_id', context.groupId);
+    formData.append('target', target);
+    formData.append('upload_id', uploadId);
+    formData.append('render_grant', renderGrant);
+
+    var uploadViaRender = function(timeoutMs) {
+        return fetch(renderUploaderUrl, {
+            method: 'POST',
+            body: formData,
+            signal: AbortSignal.timeout(timeoutMs)
+        }).then(function(response) {
+            if (!response.ok) {
+                return response.text().then(function(text) {
+                    throw new Error('Render service error: ' + response.status + ' - ' + text.substring(0, 200));
+                });
+            }
+            return response;
+        });
+    };
+
+    var renderResponse;
+    try {
+        renderResponse = await uploadViaRender(20000);
+    } catch (error) {
+        if (!isProfileConsentRenderWakeCandidate(error)) throw new Error('Render недоступен: ' + error.message);
+        if (statusEl) statusEl.innerText = 'Render долго отвечает, проверяем результат и повторяем при необходимости...';
+        try {
+            renderResponse = await recoverProfileConsentRenderUploadResult(baseUrl, uploadId, 15000);
+        } catch (_recoveryError) {
+            try {
+                renderResponse = await uploadViaRender(120000);
+            } catch (retryError) {
+                if (!isProfileConsentRenderWakeCandidate(retryError)) throw new Error('Render недоступен: ' + retryError.message);
+                if (statusEl) statusEl.innerText = 'Render всё ещё обрабатывает файл, восстанавливаем результат...';
+                renderResponse = await recoverProfileConsentRenderUploadResult(baseUrl, uploadId, 60000);
+            }
+        }
+    }
+
+    var renderResult = await renderResponse.json();
+    if (!renderResult.success) throw new Error(renderResult.error || 'Ошибка загрузки документа через Render');
+    return { attachment: renderResult.attachment, context: context };
+};
+
+window.recordUploadedConsentDocumentVersion = async function(documentType, file, attachment, context) {
+    var baseUrl = window.location.href.split('?')[0];
+    var response = await fetch(baseUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            action: 'record_consent_document',
+            profileId: getCurrentProfileId(),
+            communityId: context.communityId,
+            groupId: context.groupId,
+            documentType: documentType,
+            fileName: file.name,
+            fileType: file.type || 'application/octet-stream',
+            fileSize: file.size || 0,
+            attachment: attachment
+        })
+    });
+    var result = await response.json();
+    if (!result.success) throw new Error(result.error || 'Не удалось сохранить документ');
+    return result;
+};
+
+function clearProfileDashboardNoticeAfterDelay(elementId, html, delayMs) {
+    var el = document.getElementById(elementId);
+    if (!el) return;
+    el.innerHTML = html;
+    setTimeout(function() {
+        var currentEl = document.getElementById(elementId);
+        if (currentEl && currentEl.innerHTML === html) {
+            currentEl.innerHTML = '';
+        }
+    }, delayMs || 5000);
+}
+
+window.closeBugReportModal = function() {
+    var modal = document.getElementById('bugReportModal');
+    if (modal) modal.remove();
+};
+
+function getCurrentProfileReportLimit(kind) {
+    var dashboard = window.profileDashboardData || {};
+    var key = kind === 'suggestion' ? 'suggestionReportDailyLimit' : 'bugReportDailyLimit';
+    var limit = parseInt(dashboard[key] && dashboard[key].limit, 10);
+    return Number.isFinite(limit) && limit > 0 ? limit : 5;
+}
+
+window.openBugReportModal = function() {
+    var existing = document.getElementById('bugReportModal');
+    if (existing) existing.remove();
+
+    var modal = document.createElement('div');
+    modal.id = 'bugReportModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.72);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    modal.innerHTML =
+        '<div style="background:var(--modal-bg);color:var(--text-color);border:1px solid var(--section-border);border-radius:14px;box-shadow:var(--container-shadow);width:min(680px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:18px;">' +
+            '<div class="profile-manager-header" style="margin-bottom:12px;"><div><h3 class="profile-manager-title">Сообщить об Ошибке</h3><div class="profile-manager-subtitle">Опишите, что произошло. Скриншоты можно приложить через загрузку вложений. Если ошибка реально существовала и главный администратор переведёт её в статус «Исправлено», этому профилю один раз начислится +1000 вне суточного лимита за эту ошибку. Лимит отправки: ' + escapeHtml(String(getCurrentProfileReportLimit('bug'))) + ' ошибок в день.</div></div></div>' +
+            '<div class="structured-trigger-field structured-trigger-field--full"><label>Описание ошибки</label><textarea id="bugReportDescription" rows="8" placeholder="Что произошло, где нажимали, что ожидали увидеть и что получилось"></textarea></div>' +
+            '<div class="settings-surface profile-manager" style="margin:12px 0;"><div class="profile-manager-header"><div><h4 class="profile-manager-title" style="font-size:15px;">Скриншоты</h4><div class="profile-manager-subtitle">Можно выбрать несколько изображений. До 3.5 МБ загрузка идёт через PAPA BOT, больше 3.5 МБ - через Render.</div></div></div><input id="bugReportScreenshots" type="file" accept="image/*" multiple></div>' +
+            '<div id="bugReportStatus" style="margin-top:10px;font-size:13px;"></div>' +
+            '<div class="profile-card-actions" style="justify-content:flex-end;margin-top:14px;"><button class="btn btn-neutral" type="button" onclick="closeBugReportModal()">Отмена</button><button id="bugReportSubmit" class="btn btn-bug-report" type="button" onclick="submitBugReport()">Отправить</button></div>' +
+        '</div>';
+    document.body.appendChild(modal);
+};
+
+function createBugReportScreenshotPreview(file) {
+    return new Promise(function(resolve) {
+        if (!file || !String(file.type || '').startsWith('image/')) {
+            resolve('');
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function() {
+            var img = new Image();
+            img.onload = function() {
+                var maxSide = 1200;
+                var width = img.width || maxSide;
+                var height = img.height || maxSide;
+                var scale = Math.min(1, maxSide / Math.max(width, height));
+                var canvas = document.createElement('canvas');
+                canvas.width = Math.max(1, Math.round(width * scale));
+                canvas.height = Math.max(1, Math.round(height * scale));
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL('image/jpeg', 0.72));
+            };
+            img.onerror = function() { resolve(''); };
+            img.src = String(reader.result || '');
+        };
+        reader.onerror = function() { resolve(''); };
+        reader.readAsDataURL(file);
+    });
+}
+
+window.submitBugReport = async function() {
+    var descriptionEl = document.getElementById('bugReportDescription');
+    var filesEl = document.getElementById('bugReportScreenshots');
+    var statusEl = document.getElementById('bugReportStatus');
+    var submitBtn = document.getElementById('bugReportSubmit');
+    var description = String(descriptionEl ? descriptionEl.value : '').trim();
+    if (!description) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Опишите обнаруженную ошибку.');
+        return;
+    }
+    var files = filesEl && filesEl.files ? Array.prototype.slice.call(filesEl.files) : [];
+    var screenshots = [];
+    if (submitBtn) submitBtn.disabled = true;
+    try {
+        for (var i = 0; i < files.length; i++) {
+            if (statusEl) statusEl.innerText = 'Загрузка скриншота ' + (i + 1) + ' из ' + files.length + '...';
+            var previewDataUrl = await createBugReportScreenshotPreview(files[i]);
+            var upload = await uploadConsentDocumentFileToVk(files[i], 'bug_report_screenshot', statusEl);
+            screenshots.push({
+                fileName: files[i].name,
+                fileType: files[i].type || 'image/*',
+                fileSize: files[i].size || 0,
+                attachment: upload.attachment,
+                previewDataUrl: previewDataUrl
+            });
+        }
+        if (statusEl) statusEl.innerText = 'Отправляем сообщение об ошибке...';
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?submitBugReport=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId(),
+                communityId: String(window.currentCommunityId || '').trim(),
+                description: description,
+                screenshots: screenshots,
+                pageUrl: window.location.href,
+                userAgent: navigator.userAgent
+            })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Не удалось отправить сообщение об ошибке');
+        if (!window.adminDashboard) window.adminDashboard = {};
+        if (!Array.isArray(window.adminDashboard.errorReports)) window.adminDashboard.errorReports = [];
+        if (data.report) {
+            window.adminDashboard.errorReports.unshift(data.report);
+            renderAdminErrorReports();
+        }
+        if (data.dashboard) {
+            window.profileDashboardData = data.dashboard;
+            renderProfileDashboard();
+        }
+        closeBugReportModal();
+        alert('Сообщение об ошибке отправлено.');
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+        if (submitBtn) submitBtn.disabled = false;
+    }
+};
+
+window.closeSuggestionReportModal = function() {
+    var modal = document.getElementById('suggestionReportModal');
+    if (modal) modal.remove();
+};
+
+window.openSuggestionReportModal = function() {
+    var existing = document.getElementById('suggestionReportModal');
+    if (existing) existing.remove();
+
+    var modal = document.createElement('div');
+    modal.id = 'suggestionReportModal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(2,6,23,0.72);z-index:10000;display:flex;align-items:center;justify-content:center;padding:16px;';
+    modal.innerHTML =
+        '<div style="background:var(--modal-bg);color:var(--text-color);border:1px solid var(--section-border);border-radius:14px;box-shadow:var(--container-shadow);width:min(680px,100%);max-height:calc(100vh - 32px);overflow:auto;padding:18px;">' +
+            '<div class="profile-manager-header" style="margin-bottom:12px;"><div><h3 class="profile-manager-title">Предложения</h3><div class="profile-manager-subtitle">Опишите идею или улучшение. Скриншоты можно приложить через загрузку вложений. Если предложение будет реализовано и главный администратор переведёт его в статус «Реализовано», этому профилю один раз начислится +1000 вне суточного лимита за это предложение. Лимит отправки: ' + escapeHtml(String(getCurrentProfileReportLimit('suggestion'))) + ' предложений в день.</div></div></div>' +
+            '<div class="structured-trigger-field structured-trigger-field--full"><label>Описание предложения</label><textarea id="suggestionReportDescription" rows="8" placeholder="Что предлагаете добавить или изменить, зачем это нужно, как должно работать"></textarea></div>' +
+            '<div class="settings-surface profile-manager" style="margin:12px 0;"><div class="profile-manager-header"><div><h4 class="profile-manager-title" style="font-size:15px;">Скриншоты</h4><div class="profile-manager-subtitle">Можно выбрать несколько изображений. До 3.5 МБ загрузка идёт через PAPA BOT, больше 3.5 МБ - через Render.</div></div></div><input id="suggestionReportScreenshots" type="file" accept="image/*" multiple></div>' +
+            '<div id="suggestionReportStatus" style="margin-top:10px;font-size:13px;"></div>' +
+            '<div class="profile-card-actions" style="justify-content:flex-end;margin-top:14px;"><button class="btn btn-neutral" type="button" onclick="closeSuggestionReportModal()">Отмена</button><button id="suggestionReportSubmit" class="btn btn-suggestion-report" type="button" onclick="submitSuggestionReport()">Отправить</button></div>' +
+        '</div>';
+    document.body.appendChild(modal);
+};
+
+window.submitSuggestionReport = async function() {
+    var descriptionEl = document.getElementById('suggestionReportDescription');
+    var filesEl = document.getElementById('suggestionReportScreenshots');
+    var statusEl = document.getElementById('suggestionReportStatus');
+    var submitBtn = document.getElementById('suggestionReportSubmit');
+    var description = String(descriptionEl ? descriptionEl.value : '').trim();
+    if (!description) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Опишите предложение.');
+        return;
+    }
+    var files = filesEl && filesEl.files ? Array.prototype.slice.call(filesEl.files) : [];
+    var screenshots = [];
+    if (submitBtn) submitBtn.disabled = true;
+    try {
+        for (var i = 0; i < files.length; i++) {
+            if (statusEl) statusEl.innerText = 'Загрузка скриншота ' + (i + 1) + ' из ' + files.length + '...';
+            var previewDataUrl = await createBugReportScreenshotPreview(files[i]);
+            var upload = await uploadConsentDocumentFileToVk(files[i], 'suggestion_report_screenshot', statusEl);
+            screenshots.push({
+                fileName: files[i].name,
+                fileType: files[i].type || 'image/*',
+                fileSize: files[i].size || 0,
+                attachment: upload.attachment,
+                previewDataUrl: previewDataUrl
+            });
+        }
+        if (statusEl) statusEl.innerText = 'Отправляем предложение...';
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?submitSuggestionReport=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId(),
+                communityId: String(window.currentCommunityId || '').trim(),
+                description: description,
+                screenshots: screenshots,
+                pageUrl: window.location.href,
+                userAgent: navigator.userAgent
+            })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Не удалось отправить предложение');
+        if (!window.adminDashboard) window.adminDashboard = {};
+        if (!Array.isArray(window.adminDashboard.suggestionReports)) window.adminDashboard.suggestionReports = [];
+        if (data.report) {
+            window.adminDashboard.suggestionReports.unshift(data.report);
+            renderAdminSuggestionReports();
+        }
+        if (data.dashboard) {
+            window.profileDashboardData = data.dashboard;
+            renderProfileDashboard();
+        }
+        closeSuggestionReportModal();
+        alert('Предложение отправлено.');
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+        if (submitBtn) submitBtn.disabled = false;
+    }
+};
+
+window.uploadConsentDocument = function(documentType) {
+    var existing = document.getElementById('profileConsentDocumentModal');
+    if (existing) existing.remove();
+
+    var modal = document.createElement('div');
+    modal.id = 'profileConsentDocumentModal';
+    modal.style.cssText = 'position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--modal-bg); color:var(--text-color); padding:20px; border-radius:12px; border:1px solid var(--section-border); z-index:10000; width:min(520px, calc(100% - 32px)); box-shadow:var(--container-shadow);';
+    modal.innerHTML =
+        '<h4 style="margin:0 0 12px 0;">Загрузить документ</h4>' +
+        '<label style="display:block;font-weight:700;margin-bottom:6px;">Файл документа</label>' +
+        '<input id="profileConsentDocumentFile" type="file" accept=".pdf,.doc,.docx,.txt,.rtf,image/*,application/*" style="width:100%;margin-bottom:12px;">' +
+        '<div class="profile-manager-subtitle" style="margin-bottom:12px;">До 3.5 МБ загрузка идёт через PAPA BOT, больше 3.5 МБ - через Render.</div>' +
+        '<div style="display:flex;justify-content:flex-end;gap:10px;"><button id="profileConsentDocumentCancel" class="btn btn-neutral" type="button">Отмена</button><button id="profileConsentDocumentSave" class="btn btn-save" type="button">Загрузить документ</button></div>' +
+        '<div id="profileConsentDocumentUploadStatus" style="margin-top:10px;font-size:13px;"></div>';
+    document.body.appendChild(modal);
+
+    var fileInput = document.getElementById('profileConsentDocumentFile');
+    var statusEl = document.getElementById('profileConsentDocumentUploadStatus');
+    var saveButton = document.getElementById('profileConsentDocumentSave');
+    document.getElementById('profileConsentDocumentCancel').onclick = function() {
+        modal.remove();
+    };
+    saveButton.onclick = async function() {
+        if (!fileInput.files || !fileInput.files.length) {
+            statusEl.innerHTML = makeInlineNotice('error', 'Выберите файл документа.');
+            return;
+        }
+        var file = fileInput.files[0];
+        saveButton.disabled = true;
+        try {
+            statusEl.innerText = 'Подготовка загрузки...';
+            var upload = await uploadConsentDocumentFileToVk(file, documentType, statusEl);
+            statusEl.innerText = 'Сохраняем версию документа...';
+            var result = await recordUploadedConsentDocumentVersion(documentType, file, upload.attachment, upload.context);
+            if (result.dashboard) {
+                window.profileDashboardData = result.dashboard;
+            } else if (result.document) {
+                if (!window.profileDashboardData) window.profileDashboardData = {};
+                if (!window.profileDashboardData.communityDocuments) window.profileDashboardData.communityDocuments = {};
+                if (!window.profileDashboardData.communityDocuments[upload.context.communityId]) window.profileDashboardData.communityDocuments[upload.context.communityId] = {};
+                if (!Array.isArray(window.profileDashboardData.communityDocuments[upload.context.communityId][documentType])) {
+                    window.profileDashboardData.communityDocuments[upload.context.communityId][documentType] = [];
+                }
+                window.profileDashboardData.communityDocuments[upload.context.communityId][documentType].unshift(result.document);
+            }
+            modal.remove();
+            renderProfileDashboard();
+            var freshStatusEl = document.getElementById('profileConsentDocumentsStatus') || document.getElementById('profileDashboardStatus');
+            if (freshStatusEl) {
+                var noticeId = freshStatusEl.id || 'profileConsentDocumentsStatus';
+                clearProfileDashboardNoticeAfterDelay(noticeId, makeInlineNotice('success', 'Документ загружен и сохранён.'), 5000);
+            }
+        } catch (e) {
+            saveButton.disabled = false;
+            if (e && e.needsUserToken) {
+                showUserTokenRequiredNotice(statusEl);
+                return;
+            }
+            statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+        }
+    };
+};
+
+function renderConsentDocumentVersionRows(documentType, versions, communityId) {
+    versions = Array.isArray(versions) ? versions : [];
+    if (!versions.length) {
+        return '<tr>' +
+            '<td>' + escapeHtml(documentType.label) + '</td>' +
+            '<td>Нет версий</td>' +
+            '<td></td>' +
+            '<td></td>' +
+            '<td><code></code></td>' +
+            '<td></td>' +
+            '<td><button class="btn btn-save" type="button" onclick="uploadConsentDocument(&quot;' + escapeHtml(documentType.type) + '&quot;)">Загрузить документ</button></td>' +
+        '</tr>';
+    }
+
+    return versions.map(function(version, index) {
+        var isLatest = index === 0;
+        var uploadButton = index === 0 ? '<button class="btn btn-save" type="button" onclick="uploadConsentDocument(&quot;' + escapeHtml(documentType.type) + '&quot;)">Загрузить документ</button>' : '';
+        var deleteButton = isMainAdminSession() && version.attachment
+            ? '<button class="btn btn-delete" type="button" onclick="deleteProfileUploadedDocumentRecord(&quot;' + escapeHtml(documentType.type) + '&quot;,&quot;' + escapeHtml(version.attachment || '') + '&quot;,&quot;' + escapeHtml(version.version || '') + '&quot;)">Удалить</button>'
+            : '';
+        return '<tr>' +
+            '<td>' + (index === 0 ? escapeHtml(documentType.label) : '<span class="profile-manager-subtitle">История версий</span>') + '</td>' +
+            '<td>' + escapeHtml(version.version || '') + (isLatest ? ' <span class="app-log-card-badge">последняя</span>' : '') + '</td>' +
+            '<td>' + escapeHtml(version.fileName || '') + '</td>' +
+            '<td>' + escapeHtml(formatProfileFileSize(version.fileSize)) + '</td>' +
+            '<td><code>' + escapeHtml(version.attachment || '') + '</code></td>' +
+            '<td>' + escapeHtml(formatRuDateTime(version.uploadedAt)) + '</td>' +
+            '<td><div style="display:flex;gap:8px;flex-wrap:wrap;">' + uploadButton + deleteButton + '</div></td>' +
+        '</tr>';
+    }).join('');
+}
+
+const AI_PROVIDER_PRESETS = [
+  {
+    id: 'openai',
+    label: 'OpenAI',
+    baseUrl: 'https://api.openai.com/v1',
+    models: ['gpt-4.1', 'gpt-4.1-mini', 'gpt-4o', 'gpt-4o-mini']
+  },
+  {
+    id: 'anthropic',
+    label: 'Anthropic',
+    baseUrl: 'https://api.anthropic.com/v1',
+    models: ['claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest']
+  },
+  {
+    id: 'google',
+    label: 'Google Gemini',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
+    models: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash']
+  },
+  {
+    id: 'mistral',
+    label: 'Mistral',
+    baseUrl: 'https://api.mistral.ai/v1',
+    models: ['mistral-large-latest', 'mistral-small-latest']
+  },
+  {
+    id: 'openrouter',
+    label: 'OpenRouter',
+    baseUrl: 'https://openrouter.ai/api/v1',
+    models: ['openai/gpt-4o-mini', 'anthropic/claude-3.5-sonnet', 'google/gemini-flash-1.5']
+  },
+  {
+    id: 'custom',
+    label: 'Custom',
+    baseUrl: '',
+    models: []
+  }
+];
+
+const PAYMENT_PROVIDER_PRESETS = [
+  { id: 'yookassa', label: 'ЮKassa / YooKassa', fields: [
+    { key: 'shopId', label: 'Shop ID', placeholder: '1357799', required: true, help: 'Зачем: идентификатор магазина YooKassa, по нему платежная система понимает, на чей счет принимать оплату. Где взять: личный кабинет YooKassa -> Настройки магазина -> Shop ID.' },
+    { key: 'secretKey', label: 'Secret key', placeholder: 'live_...', type: 'password', required: true, help: 'Зачем: секретный ключ API для создания и проверки платежей. Где взять: личный кабинет YooKassa -> Интеграция -> Ключи API.' }
+  ] },
+  { id: 'prodamus', label: 'Prodamus', fields: [
+    { key: 'shopId', label: 'URL платежной формы', placeholder: 'https://demo.payform.ru/', required: true, help: 'Зачем: адрес платежной формы Prodamus, на которую PAPA BOT будет отправлять пользователя из кнопки оплаты. Где взять: личный кабинет Prodamus -> платежная страница/форма.' },
+    { key: 'secretKey', label: 'Секретный ключ формы', placeholder: 'Секретный ключ', type: 'password', required: true, help: 'Зачем: секрет платежной формы для подписи ссылок и проверки webhook Sign. Где взять: личный кабинет Prodamus -> настройки платежной страницы.' },
+    { key: 'prodamusSignatureMode', label: 'Режим подписи', placeholder: 'live или demo', required: false, help: 'Зачем: для тестовой платежной страницы Prodamus укажите demo, тогда подпись считается с суффиксом demo к секретному ключу. Для боевой формы оставьте пустым или укажите live.' },
+    { key: 'prodamusSys', label: 'Код системы Prodamus (sys)', placeholder: 'Оставьте пустым, если Prodamus не выдал код', required: false, help: 'Зачем: Prodamus использует sys для некоторых готовых систем. Для самописной интеграции PAPA BOT оставьте пустым; если поддержка Prodamus выдала отдельный код, укажите его здесь.' }
+  ] },
+  { id: 'robokassa', label: 'Robokassa', fields: [
+    { key: 'merchantLogin', label: 'Идентификатор магазина', placeholder: 'Идентификатор магазина', required: true, help: 'Зачем: идентификатор магазина Robokassa, по нему Robokassa понимает, на чей магазин принимать оплату. Где взять: личный кабинет Robokassa -> Мои магазины -> "ВАШ МАГАЗИН" -> Технические настройки -> Идентификатор магазина.' },
+    { key: 'password1', label: 'Пароль #1', placeholder: 'Пароль #1', type: 'password', required: true, help: 'Зачем: Пароль #1 Robokassa нужен для подписи ссылок на оплату, которые создает PAPA BOT. Где взять: личный кабинет Robokassa -> Мои магазины -> "ВАШ МАГАЗИН" -> Технические настройки -> Пароль #1.' },
+    { key: 'password2', label: 'Пароль #2', placeholder: 'Пароль #2', type: 'password', required: true, help: 'Зачем: Пароль #2 Robokassa нужен для проверки серверных уведомлений Result URL об успешной оплате. Где взять: личный кабинет Robokassa -> Мои магазины -> "ВАШ МАГАЗИН" -> Технические настройки -> Пароль #2.' },
+    { key: 'robokassaHashAlgorithm', label: 'Signature algorithm', type: 'select', required: true, options: [
+      { value: 'md5', label: 'MD5' },
+      { value: 'sha256', label: 'SHA-256' },
+      { value: 'sha512', label: 'SHA-512' }
+    ], help: 'Зачем: алгоритм SignatureValue должен совпадать с техническими настройками магазина Robokassa. Где взять: личный кабинет Robokassa -> Технические настройки -> Алгоритм расчета хеша.' }
+  ] },
+  { id: 'yoomoney', label: 'ЮMoney', fields: [
+    { key: 'wallet', label: 'Кошелек', placeholder: '4100...', required: true, help: 'Зачем: номер кошелька ЮMoney, на который будут приниматься платежи. Где взять: в профиле ЮMoney рядом с номером кошелька.' },
+    { key: 'secretKey', label: 'Secret key', placeholder: 'Секрет уведомлений', type: 'password', required: true, help: 'Зачем: секрет для проверки уведомлений ЮMoney. Где взять: настройки HTTP-уведомлений или формы приема платежей в ЮMoney.' }
+  ] },
+  { id: 'unitpay', label: 'Unitpay', fields: [
+    { key: 'projectId', label: 'Project ID', placeholder: 'ID проекта', required: true, help: 'Зачем: ID проекта Unitpay, к которому будут привязаны платежи. Где взять: личный кабинет Unitpay -> Проекты -> нужный проект.' },
+    { key: 'secretKey', label: 'Secret key', placeholder: 'Секретный ключ', type: 'password', required: true, help: 'Зачем: секретный ключ проекта для подписи платежей. Где взять: настройки проекта Unitpay.' }
+  ] },
+  { id: 'custom', label: 'Custom', fields: [
+    { key: 'apiKey', label: 'API key', placeholder: 'API key', type: 'password', required: true, help: 'Зачем: публичный или API-ключ вашей платежной системы. Где взять: в API/Developer-разделе личного кабинета провайдера.' },
+    { key: 'secretKey', label: 'Secret key', placeholder: 'Secret key', type: 'password', required: true, help: 'Зачем: секрет для подписи запросов и проверки платежей. Где взять: в API/Developer-разделе личного кабинета провайдера.' },
+    { key: 'notificationUrl', label: 'Webhook URL', placeholder: 'https://...', required: false, help: 'Зачем: адрес, куда платежная система отправляет уведомления. Где взять: это URL обработчика платежей PAPA BOT или вашего сервера; пока можно оставить пустым.' }
+  ] }
+];
+const PROFILE_PAYMENT_PROVIDER_SELECT_IDS = ['yookassa', 'prodamus', 'robokassa'];
+
+function getAiProviderPreset(providerId) {
+  return AI_PROVIDER_PRESETS.find(function(item) { return item.id === providerId || item.label === providerId; }) || AI_PROVIDER_PRESETS[0];
+}
+
+function getPaymentProviderPreset(providerId) {
+  var value = String(providerId || '').trim();
+  if (!value) return null;
+  return PAYMENT_PROVIDER_PRESETS.find(function(item) { return item.id === value || item.label === value; }) || null;
+}
+
+function renderPaymentProviderOptions(selectedProvider) {
+  var selected = String(selectedProvider || '');
+  var html = '<option value=""' + (!selected ? ' selected' : '') + '>Выберите платежную систему</option>';
+  return html + PAYMENT_PROVIDER_PRESETS.filter(function(item) {
+    return PROFILE_PAYMENT_PROVIDER_SELECT_IDS.indexOf(item.id) >= 0;
+  }).map(function(item) {
+    var isSelected = selected === item.id || selected === item.label;
+    return '<option value="' + escapeHtml(item.id) + '"' + (isSelected ? ' selected' : '') + '>' + escapeHtml(item.label) + '</option>';
+  }).join('');
+}
+
+function slugifyPaymentIntegrationId(value, fallback) {
+  var slug = String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .slice(0, 64);
+  return slug || fallback || 'payment_1';
+}
+
+function buildProfilePaymentIntegrationWebhookUrl(values) {
+  values = values || {};
+  var providerPreset = getPaymentProviderPreset(values.provider || document.getElementById('paymentIntegrationProvider')?.value || '');
+  if (!providerPreset || (providerPreset.id !== 'prodamus' && providerPreset.id !== 'robokassa')) return '';
+  var baseUrl = window.location.href.split('?')[0];
+  var integrationId = String(values.id || document.getElementById('paymentIntegrationId')?.value || '').trim() ||
+    slugifyPaymentIntegrationId(values.name || document.getElementById('paymentIntegrationName')?.value || '', 'payment_1');
+  try {
+    var url = new URL(baseUrl);
+    if (providerPreset.id === 'robokassa') {
+      url.searchParams.set('robokassaResult', '1');
+      return url.toString();
+    }
+    url.searchParams.set('prodamusWebhook', '1');
+    url.searchParams.set('profileId', getCurrentProfileId() || getPrincipalProfileId() || '1');
+    url.searchParams.set('integrationId', integrationId);
+    return url.toString();
+  } catch (e) {
+    if (providerPreset.id === 'robokassa') {
+      return baseUrl + '?robokassaResult=1';
+    }
+    return baseUrl + '?prodamusWebhook=1&profileId=' + encodeURIComponent(getCurrentProfileId() || getPrincipalProfileId() || '1') + '&integrationId=' + encodeURIComponent(integrationId);
+  }
+}
+
+function getPaymentIntegrationFieldValue(fieldKey, values, providerId) {
+  values = values || {};
+  var current = values[fieldKey] == null ? '' : String(values[fieldKey]);
+  if (fieldKey === 'notificationUrl' && !current && (providerId === 'prodamus' || providerId === 'robokassa')) {
+    return buildProfilePaymentIntegrationWebhookUrl(values);
+  }
+  return current;
+}
+
+function renderPaymentIntegrationFieldHelp(field) {
+  var requirement = field.required ? 'Обязательно' : 'Необязательно';
+  var help = field.help || 'Зачем: служебное поле для платежной интеграции. Где взять: в личном кабинете платежной системы.';
+  return '<div class="profile-manager-subtitle" style="margin-top:6px;line-height:1.45;"><strong>' + escapeHtml(requirement) + '.</strong> ' + escapeHtml(help) + '</div>';
+}
+
+function renderPaymentIntegrationDynamicFields(providerId, values) {
+  var preset = getPaymentProviderPreset(providerId);
+  if (!preset) {
+    return '<div class="community-empty-note">Выберите платежную систему, чтобы заполнить ее реквизиты.</div>';
+  }
+  var fieldsHtml = (preset.fields || []).map(function(field) {
+    var requiredMark = field.required ? ' *' : '';
+    if (field.type === 'select') {
+      var currentValue = getPaymentIntegrationFieldValue(field.key, values, providerId);
+      var optionsHtml = (field.options || []).map(function(option) {
+        var optionValue = String(option.value || '');
+        var optionLabel = String(option.label || optionValue);
+        var currentNormalized = String(currentValue || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+        var optionNormalized = optionValue.toLowerCase().replace(/[^a-z0-9]+/g, '');
+        var labelNormalized = optionLabel.toLowerCase().replace(/[^a-z0-9]+/g, '');
+        var isSelected = String(currentValue) === optionValue || currentNormalized === optionNormalized || currentNormalized === labelNormalized;
+        return '<option value="' + escapeHtml(optionValue) + '"' + (isSelected ? ' selected' : '') + '>' + escapeHtml(optionLabel) + '</option>';
+      }).join('');
+      return '<div class="structured-trigger-field"><label>' + escapeHtml(field.label + requiredMark) + '</label><select id="paymentIntegration' + escapeHtml(field.key.charAt(0).toUpperCase() + field.key.slice(1)) + '" data-payment-field="' + escapeHtml(field.key) + '" data-required="' + (field.required ? 'true' : 'false') + '">' + optionsHtml + '</select>' + renderPaymentIntegrationFieldHelp(field) + '</div>';
+    }
+    return '<div class="structured-trigger-field"><label>' + escapeHtml(field.label + requiredMark) + '</label><input id="paymentIntegration' + escapeHtml(field.key.charAt(0).toUpperCase() + field.key.slice(1)) + '" type="' + escapeHtml(field.type || 'text') + '" placeholder="' + escapeHtml(field.placeholder || '') + '" value="' + escapeHtml(getPaymentIntegrationFieldValue(field.key, values, providerId)) + '" data-payment-field="' + escapeHtml(field.key) + '" data-required="' + (field.required ? 'true' : 'false') + '">' + renderPaymentIntegrationFieldHelp(field) + '</div>';
+  }).join('');
+  var notificationUrlValue = getPaymentIntegrationFieldValue('notificationUrl', values, providerId);
+  var notificationAutoGenerated = (providerId === 'prodamus' || providerId === 'robokassa') && !String(values.notificationUrl || '').trim();
+  var notificationLabel = providerId === 'robokassa' ? 'Result URL' : 'Webhook URL';
+  var notificationHelp = providerId === 'robokassa'
+    ? 'Зачем: Result URL для технических настроек Robokassa. PAPA BOT заполняет его автоматически по текущей ссылке сервиса. Этот URL подтверждает успешную оплату по серверному уведомлению.'
+    : 'Зачем: URL для уведомлений от платежной системы о статусе оплаты. Для Prodamus PAPA BOT заполняет этот URL автоматически по текущей ссылке сервиса; вручную меняйте только если используете другой обработчик.';
+  var providerNotice = providerId === 'robokassa'
+    ? '<div class="structured-trigger-field structured-trigger-field--full">' + makeInlineNotice('warn', 'Robokassa notice: production-only; no Receipt is sent by PAPA BOT; fiscalization outside PAPA BOT; ResultURL confirms success; FailURL/browser return is best-effort.') + '</div>'
+    : '';
+  var commonFieldsHtml =
+    '<div class="structured-trigger-field"><label>' + notificationLabel + '</label><input id="paymentIntegrationNotificationUrl" type="text" placeholder="https://..." value="' + escapeHtml(notificationUrlValue) + '" data-payment-field="notificationUrl" data-auto-generated="' + (notificationAutoGenerated ? 'true' : 'false') + '" oninput="this.setAttribute(&quot;data-auto-generated&quot;,&quot;false&quot;)">' + renderPaymentIntegrationFieldHelp({ required: false, help: notificationHelp }) + '</div>' +
+    '<div class="structured-trigger-field"><label>Success URL</label><input id="paymentIntegrationSuccessUrl" type="text" placeholder="https://..." value="' + escapeHtml(getPaymentIntegrationFieldValue('successUrl', values, providerId)) + '" data-payment-field="successUrl">' + renderPaymentIntegrationFieldHelp({ required: false, help: 'Зачем: куда отправлять пользователя после успешной оплаты. Где взять: можно указать страницу сайта, VK-сообщество или оставить пустым до настройки платежного сценария.' }) + '</div>' +
+    '<div class="structured-trigger-field"><label>Fail URL</label><input id="paymentIntegrationFailUrl" type="text" placeholder="https://..." value="' + escapeHtml(getPaymentIntegrationFieldValue('failUrl', values, providerId)) + '" data-payment-field="failUrl">' + renderPaymentIntegrationFieldHelp({ required: false, help: 'Зачем: куда отправлять пользователя после отмены или ошибки оплаты. Где взять: можно указать страницу сайта, VK-сообщество или оставить пустым.' }) + '</div>';
+  return '<div class="structured-trigger-grid">' + fieldsHtml + providerNotice + commonFieldsHtml + '</div>';
+}
+
+function renderAiProviderOptions(selectedProvider) {
+  var selected = String(selectedProvider || 'openai');
+  return AI_PROVIDER_PRESETS.map(function(item) {
+    var isSelected = selected === item.id || selected === item.label;
+    return '<option value="' + escapeHtml(item.id) + '"' + (isSelected ? ' selected' : '') + '>' + escapeHtml(item.label) + '</option>';
+  }).join('');
+}
+
+function renderAiModelOptions(providerId, selectedModel) {
+  var preset = getAiProviderPreset(providerId);
+  var selected = String(selectedModel || '').trim();
+  var options = preset.models.map(function(model) {
+    return '<option value="' + escapeHtml(model) + '"' + (selected === model ? ' selected' : '') + '>' + escapeHtml(model) + '</option>';
+  }).join('');
+  return options + '<option value="custom"' + (selected && !preset.models.includes(selected) ? ' selected' : '') + '>Своя модель</option>';
+}
+
+window.onAiIntegrationBaseUrlModeChange = function() {
+  var selectEl = document.getElementById('aiIntegrationBaseUrl');
+  var customEl = document.getElementById('aiIntegrationBaseUrlCustom');
+  if (customEl) customEl.style.display = selectEl && selectEl.value === 'custom' ? '' : 'none';
+};
+
+window.onAiIntegrationModelChange = function() {
+  var selectEl = document.getElementById('aiIntegrationModel');
+  var customEl = document.getElementById('aiIntegrationModelCustom');
+  if (customEl) customEl.style.display = selectEl && selectEl.value === 'custom' ? '' : 'none';
+};
+
+window.onAiIntegrationProviderChange = function() {
+  var providerId = document.getElementById('aiIntegrationProvider')?.value || 'openai';
+  var preset = getAiProviderPreset(providerId);
+  var baseUrlEl = document.getElementById('aiIntegrationBaseUrl');
+  var baseUrlCustomEl = document.getElementById('aiIntegrationBaseUrlCustom');
+  var modelEl = document.getElementById('aiIntegrationModel');
+  var modelCustomEl = document.getElementById('aiIntegrationModelCustom');
+  if (baseUrlEl) {
+    baseUrlEl.innerHTML = (preset.baseUrl ? '<option value="' + escapeHtml(preset.baseUrl) + '">' + escapeHtml(preset.baseUrl) + '</option>' : '') +
+      '<option value="custom">Свой Base URL</option>';
+    baseUrlEl.value = preset.baseUrl || 'custom';
+  }
+  if (baseUrlCustomEl) {
+    baseUrlCustomEl.style.display = preset.baseUrl ? 'none' : '';
+  }
+  if (modelEl) {
+    modelEl.innerHTML = renderAiModelOptions(providerId, '');
+  }
+  if (modelCustomEl) {
+    modelCustomEl.style.display = preset.models.length ? 'none' : '';
+  }
+};
+
+function normalizeProfilePaymentOperationStatus(status) {
+    var normalized = String(status || '').trim().toLowerCase();
+    if (!normalized || normalized === 'pending' || normalized === 'waiting' || normalized === 'created') return 'pending';
+    if (normalized === 'succeeded' || normalized === 'success' || normalized === 'paid') return 'succeeded';
+    if (normalized === 'canceled' || normalized === 'cancelled' || normalized === 'failed') return 'canceled';
+    if (normalized === 'error') return 'error';
+    return normalized;
+}
+
+function getProfilePaymentOperationStatusLabel(status) {
+    var normalized = normalizeProfilePaymentOperationStatus(status);
+    if (normalized === 'pending') return 'Ожидает';
+    if (normalized === 'succeeded') return 'Успешно';
+    if (normalized === 'canceled') return 'Отменено';
+    if (normalized === 'error') return 'Ошибка';
+    return String(status || 'Ожидает').trim() || 'Ожидает';
+}
+
+window.filterProfilePaymentOperations = function() {
+    var integrationFilter = String(document.getElementById('paymentOperationsIntegrationFilter')?.value || '').trim().toLowerCase();
+    var statusFilter = String(document.getElementById('paymentOperationsStatusFilter')?.value || '').trim().toLowerCase();
+    var botFilter = String(document.getElementById('paymentOperationsBotFilter')?.value || '').trim().toLowerCase();
+    var userFilter = String(document.getElementById('paymentOperationsUserFilter')?.value || '').trim().toLowerCase();
+    var rows = Array.from(document.querySelectorAll('#profilePaymentOperationsTableBody .payment-operation-row'));
+    var visibleCount = 0;
+    rows.forEach(function(row) {
+        var matches = (!integrationFilter || String(row.getAttribute('data-integration') || '').toLowerCase() === integrationFilter) &&
+            (!statusFilter || String(row.getAttribute('data-status') || '').toLowerCase() === statusFilter) &&
+            (!botFilter || String(row.getAttribute('data-bot') || '').toLowerCase() === botFilter) &&
+            (!userFilter || String(row.getAttribute('data-user') || '').toLowerCase().includes(userFilter));
+        row.style.display = matches ? '' : 'none';
+        if (matches) visibleCount += 1;
+    });
+    var emptyRow = document.getElementById('paymentOperationsFilteredEmpty');
+    if (emptyRow) emptyRow.style.display = rows.length ? (visibleCount === 0 ? '' : 'none') : '';
+    var visibleRows = rows.filter(function(row) { return row.style.display !== 'none'; });
+    var visiblePaymentIds = visibleRows
+        .map(function(row) { return String(row.getAttribute('data-payment-id') || '').trim(); })
+        .filter(Boolean);
+    var visibleCountEl = document.getElementById('paymentOperationsVisibleCount');
+    var deleteButton = document.getElementById('deleteFilteredPaymentOperationsButton');
+    if (visibleCountEl) visibleCountEl.textContent = String(visibleRows.length);
+    if (deleteButton) {
+        deleteButton.disabled = visiblePaymentIds.length === 0;
+        deleteButton.textContent = 'Удалить отфильтрованные (' + visiblePaymentIds.length + ')';
+    }
+};
+
+window.deleteFilteredProfilePaymentOperations = async function() {
+    var rows = Array.from(document.querySelectorAll('#profilePaymentOperationsTableBody .payment-operation-row'))
+        .filter(function(row) { return row.style.display !== 'none'; });
+    var paymentIds = Array.from(new Set(rows
+        .map(function(row) { return String(row.getAttribute('data-payment-id') || '').trim(); })
+        .filter(Boolean)));
+    if (!paymentIds.length) return;
+    if (!confirm('Удалить ' + paymentIds.length + ' операций без возможности восстановления?')) return;
+
+    var statusEl = document.getElementById('profilePaymentOperationsStatus');
+    try {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Удаляем платежные операции...');
+        var response = await fetch(window.location.href.split('?')[0] + '?deleteProfilePaymentOperations=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId(),
+                paymentIds: paymentIds
+            })
+        });
+        var result = await response.json();
+        if (!result.success) throw new Error(result.error || 'Не удалось удалить платежные операции');
+        await loadProfileDashboard();
+        var freshStatusEl = document.getElementById('profilePaymentOperationsStatus');
+        if (freshStatusEl) {
+            setInlineNoticeWithTimeout(freshStatusEl, 'success', 'Удалено операций: ' + String(result.removedCount || 0) + '.', 3000);
+        }
+    } catch (error) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка удаления: ' + error.message);
+    }
 };
 
 window.renderProfileDashboard = function() {
@@ -9132,14 +18421,26 @@ window.renderProfileDashboard = function() {
     }
 
     var communities = Array.isArray(data.communities) ? data.communities : [];
-    var history = Array.isArray(data.limitHistory) ? data.limitHistory : [];
-    var requests = Array.isArray(data.limitRequests) ? data.limitRequests : [];
-    var packages = Array.isArray(data.supportPackages) ? data.supportPackages : [];
     var communityFiles = data.communityFiles && typeof data.communityFiles === 'object' ? data.communityFiles : {};
+    var communityDocuments = data.communityDocuments && typeof data.communityDocuments === 'object' ? data.communityDocuments : {};
+    var aiIntegrations = Array.isArray(data.aiIntegrations) ? data.aiIntegrations : [];
+    var paymentIntegrations = Array.isArray(data.paymentIntegrations) ? data.paymentIntegrations : [];
+    var paymentOperations = Array.isArray(data.paymentOperations) ? data.paymentOperations : [];
+    var balanceOperations = Array.isArray(data.balanceOperations) ? data.balanceOperations : [];
+    var balanceTopUps = Array.isArray(data.balanceTopUps) ? data.balanceTopUps : [];
+    var errorReports = Array.isArray(data.errorReports) ? data.errorReports : [];
+    var bugReportDailyLimit = data.bugReportDailyLimit || { limit: 5, used: 0, remaining: 5 };
+    var suggestionReports = Array.isArray(data.suggestionReports) ? data.suggestionReports : [];
+    var suggestionReportDailyLimit = data.suggestionReportDailyLimit || { limit: 5, used: 0, remaining: 5 };
+    var dailyLimitPackages = Array.isArray(data.dailyLimitPackages) ? data.dailyLimitPackages : [];
+    var extraLimitPackages = Array.isArray(data.extraLimitPackages) ? data.extraLimitPackages : [];
     var promoStatus = data.promoActivationStatus || { attempts: 0, remainingAttempts: 3, blocked: false, nextResetAt: 0 };
     var activeCommunityId = String(window.currentCommunityId || '').trim();
-    if (!window.selectedProfileSupportLimit) {
-        window.selectedProfileSupportLimit = packages[0] || 1000;
+    if (!window.selectedProfileDailyLimitPackageCost && dailyLimitPackages.length) {
+        window.selectedProfileDailyLimitPackageCost = Number(dailyLimitPackages[0].cost || 0);
+    }
+    if (!window.selectedProfileExtraLimitPackageCost && extraLimitPackages.length) {
+        window.selectedProfileExtraLimitPackageCost = Number(extraLimitPackages[0].cost || 0);
     }
 
     var selectedCommunity = communities.find(function(item) {
@@ -9151,6 +18452,24 @@ window.renderProfileDashboard = function() {
     var selectedCommunityFiles = selectedCommunityVkGroupId && Array.isArray(communityFiles[selectedCommunityVkGroupId])
         ? communityFiles[selectedCommunityVkGroupId]
         : [];
+    var selectedCommunityDocuments = selectedCommunityVkGroupId && communityDocuments[selectedCommunityVkGroupId] && typeof communityDocuments[selectedCommunityVkGroupId] === 'object'
+        ? communityDocuments[selectedCommunityVkGroupId]
+        : {};
+    var selectedCommunityDailyLimitPlan = selectedCommunity && selectedCommunity.dailyLimitPlan ? selectedCommunity.dailyLimitPlan : null;
+    var effectiveDailyLimit = selectedCommunityDailyLimitPlan ? selectedCommunityDailyLimitPlan.limit : data.dailyLimit;
+    var effectiveDailyUsed = selectedCommunityDailyLimitPlan ? Number(selectedCommunity.dailyUsed || 0) : Number(data.dailyUsed || 0);
+    var effectiveDailyRemaining = effectiveDailyLimit ? Math.max(Number(effectiveDailyLimit || 0) - effectiveDailyUsed, 0) : null;
+    var effectiveDailyLimitSource = selectedCommunityDailyLimitPlan
+        ? ('Пакет выбранного сообщества до ' + formatRuDateTime(selectedCommunityDailyLimitPlan.expiresAt))
+        : 'Профиль';
+    var documentsRowsHtml = PROFILE_CONSENT_DOCUMENT_TYPES.map(function(documentType) {
+        var versions = Array.isArray(selectedCommunityDocuments[documentType.type]) ? selectedCommunityDocuments[documentType.type] : [];
+        return renderConsentDocumentVersionRows(documentType, versions, selectedCommunityVkGroupId);
+    }).join('');
+    var documentsSectionHtml =
+        '<div id="profileConsentDocuments" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Документы</h3><div class="profile-manager-subtitle">Версии документов согласий активного сообщества.</div></div></div>' +
+        (selectedCommunity ? '<div class="profile-manager-subtitle" style="margin-bottom:12px;">Сейчас показано сообщество: <strong>' + escapeHtml(selectedCommunity.groupName || ('Сообщество ' + selectedCommunityVkGroupId)) + '</strong> (' + escapeHtml(selectedCommunityVkGroupId) + ')</div>' : '') +
+        '<div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th>Документ</th><th>Версия</th><th>Файл</th><th>Размер</th><th>Аттачмент</th><th>Загружен</th><th>Действие</th></tr></thead><tbody>' + documentsRowsHtml + '</tbody></table></div><div id="profileConsentDocumentsStatus" style="margin-top:10px;"></div></div>';
     var filesRowsHtml = selectedCommunityFiles.length
         ? selectedCommunityFiles.map(function(item) {
             var fileName = String(item.fileName || '').trim();
@@ -9158,34 +18477,282 @@ window.renderProfileDashboard = function() {
             var fileSize = formatProfileFileSize(item.fileSize);
             var attachment = String(item.attachment || '').trim();
             var searchText = [fileName, fileType, fileSize, attachment].join(' ').toLowerCase();
+            var deleteButton = isMainAdminSession() && attachment
+                ? '<button class="btn btn-delete" type="button" onclick="deleteProfileUploadedFileRecord(&quot;' + escapeHtml(attachment) + '&quot;)">Удалить</button>'
+                : '';
             return '<tr data-file-search="' + escapeHtml(searchText) + '">' +
                 '<td>' + escapeHtml(fileName || 'Без названия') + '</td>' +
                 '<td>' + escapeHtml(fileType || 'Не указан') + '</td>' +
                 '<td>' + escapeHtml(fileSize) + '</td>' +
                 '<td><code>' + escapeHtml(attachment) + '</code></td>' +
+                '<td>' + deleteButton + '</td>' +
             '</tr>';
         }).join('')
-        : '<tr><td colspan="4" class="community-empty-note" style="text-align:left;">' + escapeHtml(selectedCommunity ? 'Для этого сообщества файлы пока не загружались.' : 'Сначала выбери или подключи сообщество.') + '</td></tr>';
+        : '<tr><td colspan="5" class="community-empty-note" style="text-align:left;">' + escapeHtml(selectedCommunity ? 'Для этого сообщества файлы пока не загружались.' : 'Сначала выбери или подключи сообщество.') + '</td></tr>';
     var filesSectionHtml =
-        '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Файлы</h3><div class="profile-manager-subtitle">Каталог файлов активного сообщества. Аттачмент можно повторно использовать во вложениях без новой загрузки.</div></div></div>' +
+        '<div id="profileFiles" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Файлы</h3><div class="profile-manager-subtitle">Каталог файлов активного сообщества. Аттачмент можно повторно использовать во вложениях без новой загрузки.</div></div></div>' +
         (selectedCommunity ? '<div class="profile-manager-subtitle" style="margin-bottom:12px;">Сейчас показано сообщество: <strong>' + escapeHtml(selectedCommunity.groupName || ('Сообщество ' + selectedCommunityVkGroupId)) + '</strong> (' + escapeHtml(selectedCommunityVkGroupId) + ')</div>' : '') +
         '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;"><input type="text" id="profileFilesFilter" placeholder="Поиск по названию, типу, размеру или аттачменту" oninput="filterProfileFiles()" style="flex:1;min-width:280px;"></div>' +
-        '<div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th>Название</th><th>Тип</th><th>Размер</th><th>Аттачмент</th></tr></thead><tbody id="profileFilesTableBody">' + filesRowsHtml + '</tbody></table></div></div>';
+        '<div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th>Название</th><th>Тип</th><th>Размер</th><th>Аттачмент</th><th>Действие</th></tr></thead><tbody id="profileFilesTableBody">' + filesRowsHtml + '</tbody></table></div><div id="profileFilesStatus" style="margin-top:10px;"></div></div>';
 
-    var promoSectionHtml = '';
-    if (data.isMainAdmin) {
-        promoSectionHtml = '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Активация промокода</h3><div class="profile-manager-subtitle">Промокоды в этой вкладке доступны только обычным профилям.</div></div></div><div class="community-empty-note">Главному админу промокоды не требуются.</div></div>';
-    } else {
-        var resetLabel = promoStatus.nextResetAt ? formatRuDateTime(promoStatus.nextResetAt) : '00:00 МСК';
-        var promoHint = promoStatus.blocked
-            ? ('Лимит попыток ввода исчерпан до ' + resetLabel + '. Новый ввод станет доступен после 00:00 МСК.')
-            : ('Осталось попыток ввода сегодня: ' + escapeHtml(String(promoStatus.remainingAttempts || 0)) + ' из 3.');
-        var disabledAttr = promoStatus.blocked ? 'disabled' : '';
-        promoSectionHtml = '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Активация промокода</h3><div class="profile-manager-subtitle">Промокод доначисляет срок жизни профиля и суточный лимит запросов, указанные в самом промокоде.</div></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;"><input type="text" id="profilePromoCodeInput" placeholder="Введите активный промокод" ' + disabledAttr + ' style="flex:1;min-width:260px;"><button class="btn btn-accent" type="button" onclick="activateProfilePromoCode()" ' + disabledAttr + '>Активировать</button></div><div class="profile-manager-subtitle" style="margin-top:10px;">' + promoHint + '</div><div id="profilePromoActivationStatus" style="margin-top:10px;"></div></div>';
+    var resetLabel = promoStatus.nextResetAt ? formatRuDateTime(promoStatus.nextResetAt) : '00:00 МСК';
+    var promoHint = promoStatus.blocked
+        ? ('Лимит попыток ввода исчерпан до ' + resetLabel + '. Новый ввод станет доступен после 00:00 МСК.')
+        : ('Осталось попыток ввода сегодня: ' + escapeHtml(String(promoStatus.remainingAttempts || 0)) + ' из 3.');
+    var disabledAttr = promoStatus.blocked ? 'disabled' : '';
+    var promoSectionHtml = '<div id="profilePromoActivation" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Активация промокода</h3><div class="profile-manager-subtitle">Промокод доначисляет срок жизни профиля, суточный лимит запросов, баланс и пакет вне суточного лимита.</div></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;"><input type="text" id="profilePromoCodeInput" placeholder="Введите активный промокод" ' + disabledAttr + ' style="flex:1;min-width:260px;"><button class="btn btn-accent" type="button" onclick="activateProfilePromoCode()" ' + disabledAttr + '>Активировать</button></div><div class="profile-manager-subtitle" style="margin-top:10px;">' + promoHint + '</div><div id="profilePromoActivationStatus" style="margin-top:10px;"></div></div>';
+
+    var aiRowsHtml = aiIntegrations.length
+        ? aiIntegrations.map(function(item, index) {
+            return '<div class="app-log-card"><div class="app-log-card-header"><div><div class="app-log-card-title">' + escapeHtml(item.name || 'Без названия') + '</div><div class="app-log-card-meta">' + escapeHtml(item.provider || 'OpenAI-compatible') + ' • ' + escapeHtml(item.model || 'модель не указана') + '</div></div><div class="app-log-card-badge">' + (item.active === false ? 'выключена' : 'активна') + '</div></div><div class="app-log-card-summary">Контекст: ' + escapeHtml(String(item.contextMessages || 10)) + ', лимит: ' + escapeHtml(String(item.maxChars || 4000)) + ' символов</div><div class="profile-card-actions" style="margin-top:10px;"><button class="btn btn-info profile-ai-action-btn" type="button" onclick="editProfileAiIntegration(' + index + ')">Редактировать</button><button class="btn btn-save profile-ai-action-btn" type="button" onclick="testProfileAiIntegration(' + index + ')">Тест</button><button class="btn btn-delete profile-ai-action-btn" type="button" onclick="deleteProfileAiIntegration(' + index + ')">Удалить</button></div></div>';
+        }).join('')
+        : '<div class="community-empty-note">AI-интеграции пока не настроены.</div>';
+    var aiSectionHtml = '<div id="profileAiIntegrations" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Интеграции с ИИ</h3><div class="profile-manager-subtitle">Выберите популярного провайдера или Custom, затем укажите название интеграции в колонке ИИ нужной строки.</div></div></div>' +
+        '<div class="structured-trigger-grid" style="margin-top:12px;">' +
+        '<input id="aiIntegrationEditIndex" type="hidden" value="-1">' +
+        '<div class="structured-trigger-field"><label>Название интеграции</label><input id="aiIntegrationName" type="text" placeholder="support-ai"></div>' +
+        '<div class="structured-trigger-field"><label>Провайдер</label><select id="aiIntegrationProvider" onchange="onAiIntegrationProviderChange()">' + renderAiProviderOptions('openai') + '</select></div>' +
+        '<div class="structured-trigger-field"><label>API key</label><input id="aiIntegrationApiKey" type="password" placeholder="sk-..."></div>' +
+        '<div class="structured-trigger-field"><label>Base URL</label><select id="aiIntegrationBaseUrl" onchange="onAiIntegrationBaseUrlModeChange()"><option value="https://api.openai.com/v1">https://api.openai.com/v1</option><option value="custom">Свой Base URL</option></select><input id="aiIntegrationBaseUrlCustom" type="text" placeholder="https://your-provider.example/v1" style="display:none;margin-top:6px;"></div>' +
+        '<div class="structured-trigger-field"><label>Model</label><select id="aiIntegrationModel" onchange="onAiIntegrationModelChange()">' + renderAiModelOptions('openai', 'gpt-4o-mini') + '</select><input id="aiIntegrationModelCustom" type="text" placeholder="your-model" style="display:none;margin-top:6px;"></div>' +
+        '<div id="aiIntegrationLimitsRow" class="structured-trigger-field structured-trigger-field--full"><div class="structured-trigger-grid">' +
+            '<div class="structured-trigger-field"><label>Контекст сообщений</label><input id="aiIntegrationContextMessages" type="number" min="0" max="30" value="10"></div>' +
+            '<div class="structured-trigger-field"><label>Максимум символов в ответе</label><input id="aiIntegrationMaxChars" type="number" min="1" max="4000" value="4000"></div>' +
+            '<div class="structured-trigger-field"><label>Таймаут, мс</label><input id="aiIntegrationTimeoutMs" type="number" min="1000" max="60000" value="15000"></div>' +
+        '</div></div>' +
+        '<div class="structured-trigger-field structured-trigger-field--full"><label>Системный промпт</label><textarea id="aiIntegrationSystemPrompt" placeholder="Как должен отвечать ассистент"></textarea></div>' +
+        '<div class="structured-trigger-field"><label>Цели общения</label><textarea id="aiIntegrationGoals"></textarea></div>' +
+        '<div class="structured-trigger-field"><label>Компания/сообщество</label><textarea id="aiIntegrationCompanyDescription"></textarea></div>' +
+        '<div class="structured-trigger-field"><label>Тон</label><input id="aiIntegrationTone" type="text" placeholder="Спокойный, деловой"></div>' +
+        '<div class="structured-trigger-field"><label>Запрещенные темы</label><textarea id="aiIntegrationForbiddenTopics"></textarea></div>' +
+        '<div class="structured-trigger-field"><label>Правила fallback</label><textarea id="aiIntegrationHandoffRules"></textarea></div>' +
+        '<div class="structured-trigger-field"><label>Активна</label><select id="aiIntegrationActive"><option value="ДА">ДА</option><option value="НЕТ">НЕТ</option></select></div>' +
+        '</div><div class="profile-card-actions" style="margin-top:12px;"><button class="btn btn-add" type="button" onclick="addProfileAiIntegrationFromForm()">Добавить интеграцию</button><button class="btn btn-save" type="button" onclick="saveProfileAiIntegrations()">Сохранить AI-интеграции</button></div><div id="profileAiIntegrationsStatus" style="margin-top:10px;"></div><div id="profileAiIntegrationsList" style="margin-top:12px;">' + aiRowsHtml + '</div></div>';
+
+    var paymentRowsHtml = paymentIntegrations.length
+        ? paymentIntegrations.map(function(item, index) {
+            var providerPreset = getPaymentProviderPreset(item.provider || item.providerLabel);
+            var shopIdLabel = item.provider === 'prodamus' ? 'Форма оплаты' : 'Shop ID';
+            var credentialParts = [
+                item.shopId ? shopIdLabel + ': ' + item.shopId : '',
+                item.merchantLogin ? 'Идентификатор магазина: ' + item.merchantLogin : '',
+                item.projectId ? 'Project: ' + item.projectId : '',
+                item.wallet ? 'Wallet: ' + item.wallet : '',
+                item.apiKey ? 'API key: задан' : '',
+                item.secretKey ? 'Secret: задан' : '',
+                item.provider === 'prodamus' && item.prodamusSignatureMode ? 'Режим подписи: ' + item.prodamusSignatureMode : '',
+                item.provider === 'prodamus' && item.prodamusSys ? 'sys: ' + item.prodamusSys : '',
+                item.password1 ? 'Пароль #1: задан' : '',
+                item.password2 ? 'Пароль #2: задан' : '',
+                item.provider === 'robokassa' && item.robokassaHashAlgorithm ? 'Signature algorithm: ' + item.robokassaHashAlgorithm : ''
+            ].filter(Boolean).join(' • ');
+            return '<div class="app-log-card"><div class="app-log-card-header"><div><div class="app-log-card-title">' + escapeHtml(item.name || 'Без названия') + '</div><div class="app-log-card-meta">' + escapeHtml(item.providerLabel || providerPreset.label || item.provider || 'Custom') + '</div></div><div class="app-log-card-badge">' + (item.active === false ? 'выключена' : 'активна') + '</div></div><div class="app-log-card-summary">' + escapeHtml(credentialParts || 'Реквизиты пока не заполнены') + '</div><div class="profile-card-actions" style="margin-top:10px;"><button class="btn btn-info profile-payment-action-btn" type="button" onclick="editProfilePaymentIntegration(' + index + ')">Редактировать</button><button class="btn btn-save profile-payment-action-btn" type="button" onclick="testProfilePaymentIntegration(' + index + ')">TEST</button><button class="btn btn-delete profile-payment-action-btn" type="button" onclick="deleteProfilePaymentIntegration(' + index + ')">Удалить</button></div></div>';
+        }).join('')
+        : '<div class="community-empty-note">Платежные системы пока не добавлены.</div>';
+    var paymentSectionHtml =
+        '<div id="profilePaymentIntegrations" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Интеграции Платежных систем</h3><div class="profile-manager-subtitle">Платежные реквизиты профиля для будущих кнопок оплаты и других сценариев приема платежей.</div></div></div>' +
+        '<div class="structured-trigger-grid" style="margin-top:12px;">' +
+        '<input id="paymentIntegrationEditIndex" type="hidden" value="-1"><input id="paymentIntegrationId" type="hidden" value="">' +
+        '<div class="structured-trigger-field"><label>Название интеграции</label><input id="paymentIntegrationName" type="text" placeholder="Оплата заказов" oninput="refreshPaymentIntegrationNotificationUrlDefault()"></div>' +
+        '<div class="structured-trigger-field"><label>Платежная система</label><select id="paymentIntegrationProvider" onchange="onPaymentIntegrationProviderChange()">' + renderPaymentProviderOptions('') + '</select></div>' +
+        '<div class="structured-trigger-field"><label>Активна</label><select id="paymentIntegrationActive"><option value="ДА">ДА</option><option value="НЕТ">НЕТ</option></select></div>' +
+        '<div id="paymentIntegrationDynamicFields" class="structured-trigger-field structured-trigger-field--full">' + renderPaymentIntegrationDynamicFields('', {}) + '</div>' +
+        '</div><div class="profile-card-actions" style="margin-top:12px;"><button class="btn btn-add" type="button" onclick="addProfilePaymentIntegrationFromForm()">Добавить интеграцию</button><button class="btn btn-save" type="button" onclick="saveProfilePaymentIntegrations()">Сохранить платежные интеграции</button></div><div id="profilePaymentIntegrationsStatus" style="margin-top:10px;"></div><div id="profilePaymentIntegrationsList" style="margin-top:12px;">' + paymentRowsHtml + '</div></div>';
+
+    var paymentOperationIntegrations = [];
+    var paymentOperationBots = [];
+    var paymentOperationStatusOptions = [
+        { value: 'pending', label: 'Ожидает' },
+        { value: 'succeeded', label: 'Успешно' },
+        { value: 'canceled', label: 'Отменено' },
+        { value: 'error', label: 'Ошибка' }
+    ];
+    paymentOperations.forEach(function(item) {
+        var statusValue = normalizeProfilePaymentOperationStatus(item.status || item.providerPaymentStatus);
+        if (!paymentOperationStatusOptions.some(function(option) { return option.value === statusValue; })) {
+            paymentOperationStatusOptions.push({
+                value: statusValue,
+                label: getProfilePaymentOperationStatusLabel(item.status || item.providerPaymentStatus)
+            });
+        }
+        var integrationValue = String(item.integrationId || item.integrationName || item.provider || '').trim() || '__missing__';
+        var integrationLabel = String(item.integrationName || item.providerLabel || item.provider || item.integrationId || 'Не указана').trim();
+        if (!paymentOperationIntegrations.some(function(option) { return option.value === integrationValue; })) {
+            paymentOperationIntegrations.push({ value: integrationValue, label: integrationLabel });
+        }
+        var sourceBot = String(item.sourceBot || '').trim();
+        var sourceBotValue = sourceBot || '__missing__';
+        if (!paymentOperationBots.some(function(option) { return option.value === sourceBotValue; })) {
+            paymentOperationBots.push({ value: sourceBotValue, label: sourceBot || 'Не указан' });
+        }
+    });
+    var paymentOperationIntegrationOptionsHtml = '<option value="">Все интеграции</option>' + paymentOperationIntegrations.map(function(option) {
+        return '<option value="' + escapeHtml(option.value) + '">' + escapeHtml(option.label) + '</option>';
+    }).join('');
+    var paymentOperationStatusOptionsHtml = '<option value="">Все статусы</option>' + paymentOperationStatusOptions.map(function(option) {
+        return '<option value="' + escapeHtml(option.value) + '">' + escapeHtml(option.label) + '</option>';
+    }).join('');
+    var paymentOperationBotOptionsHtml = '<option value="">Все боты</option>' + paymentOperationBots.map(function(option) {
+        return '<option value="' + escapeHtml(option.value) + '">' + escapeHtml(option.label) + '</option>';
+    }).join('');
+    var paymentOperationsRowsHtml = paymentOperations.map(function(item) {
+        var statusKey = normalizeProfilePaymentOperationStatus(item.status || item.providerPaymentStatus);
+        var paymentId = String(item.paymentId || item.providerPaymentId || '').trim();
+        var integrationValue = String(item.integrationId || item.integrationName || item.provider || '').trim() || '__missing__';
+        var integrationLabel = String(item.integrationName || item.providerLabel || item.provider || item.integrationId || 'Не указана').trim();
+        var sourceBot = String(item.sourceBot || '').trim();
+        var sourceBotValue = sourceBot || '__missing__';
+        var userId = String(item.userId || '').trim();
+        var userName = String(item.userName || '').trim();
+        var userLabel = userName ? (userName + (userId ? ' (VK ID: ' + userId + ')' : '')) : (userId ? 'VK ID: ' + userId : 'Не указан');
+        var communityId = String(item.communityId || '').trim();
+        var communityName = String(item.communityName || '').trim();
+        var communityLabel = communityName ? (communityName + (communityId ? ' (' + communityId + ')' : '')) : (communityId || 'Не указано');
+        var amountLabel = String(item.amountRub || '').trim();
+        var operationDate = item.createdAt || item.resolvedAt || item.updatedAt || '';
+        var userSearch = (userName + ' ' + userId).trim();
+        return '<tr class="payment-operation-row" data-payment-id="' + escapeHtml(paymentId) + '" data-integration="' + escapeHtml(integrationValue) + '" data-status="' + escapeHtml(statusKey) + '" data-bot="' + escapeHtml(sourceBotValue) + '" data-user="' + escapeHtml(userSearch) + '">' +
+            '<td>' + escapeHtml(operationDate ? formatRuDateTime(operationDate) : 'Не указано') + '</td>' +
+            '<td><span class="app-log-card-badge">' + escapeHtml(getProfilePaymentOperationStatusLabel(item.status || item.providerPaymentStatus)) + '</span></td>' +
+            '<td>' + escapeHtml(integrationLabel) + '</td>' +
+            '<td>' + escapeHtml(sourceBot || 'Не указан') + '</td>' +
+            '<td>' + escapeHtml(userLabel) + '</td>' +
+            '<td>' + escapeHtml(item.description || 'Без описания') + '</td>' +
+            '<td>' + escapeHtml(amountLabel ? amountLabel + ' ₽' : '—') + '</td>' +
+            '<td>' + escapeHtml(communityLabel) + '</td>' +
+            '<td><code>' + escapeHtml(paymentId || 'Не указан') + '</code></td>' +
+        '</tr>';
+    }).join('');
+    var paymentOperationDeletableCount = paymentOperations.filter(function(item) {
+        return String(item.paymentId || item.providerPaymentId || '').trim();
+    }).length;
+    var paymentOperationsEmptyStyle = paymentOperations.length ? 'display:none;' : '';
+    var paymentOperationsEmptyText = paymentOperations.length ? 'Нет операций по выбранным фильтрам.' : 'Платежных операций пока нет.';
+    var paymentOperationsSectionHtml =
+        '<div id="profilePaymentOperations" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Платежные операции</h3><div class="profile-manager-subtitle">Полный журнал оплат со всех ботов и сообществ профиля: ожидающие, успешные, отмененные и ошибочные операции.</div></div></div>' +
+        '<div class="structured-trigger-grid" style="margin:12px 0;">' +
+            '<div class="structured-trigger-field"><label>Интеграция</label><select id="paymentOperationsIntegrationFilter" onchange="filterProfilePaymentOperations()">' + paymentOperationIntegrationOptionsHtml + '</select></div>' +
+            '<div class="structured-trigger-field"><label>Статус</label><select id="paymentOperationsStatusFilter" onchange="filterProfilePaymentOperations()">' + paymentOperationStatusOptionsHtml + '</select></div>' +
+            '<div class="structured-trigger-field"><label>Бот</label><select id="paymentOperationsBotFilter" onchange="filterProfilePaymentOperations()">' + paymentOperationBotOptionsHtml + '</select></div>' +
+            '<div class="structured-trigger-field"><label>Пользователь</label><input id="paymentOperationsUserFilter" type="text" placeholder="Имя или VK ID" oninput="filterProfilePaymentOperations()"></div>' +
+        '</div>' +
+        '<div class="profile-payment-operations-toolbar"><div>Отображается: <strong id="paymentOperationsVisibleCount">' + paymentOperations.length + '</strong> из <strong id="paymentOperationsTotalCount">' + paymentOperations.length + '</strong></div><button id="deleteFilteredPaymentOperationsButton" class="btn btn-delete" type="button" onclick="deleteFilteredProfilePaymentOperations()" ' + (paymentOperationDeletableCount ? '' : 'disabled') + '>Удалить отфильтрованные (' + paymentOperationDeletableCount + ')</button></div>' +
+        '<div id="profilePaymentOperationsStatus" style="margin-bottom:10px;"></div>' +
+        '<div class="profile-payment-operations-table-wrap"><table style="width:100%;border-collapse:collapse;"><thead><tr><th>Дата и время</th><th>Статус</th><th>Интеграция</th><th>Бот</th><th>Пользователь</th><th>Назначение</th><th>Сумма</th><th>Сообщество</th><th>ID платежа</th></tr></thead><tbody id="profilePaymentOperationsTableBody">' +
+            paymentOperationsRowsHtml +
+            '<tr id="paymentOperationsFilteredEmpty" style="' + paymentOperationsEmptyStyle + '"><td colspan="9" class="community-empty-note" style="text-align:left;">' + escapeHtml(paymentOperationsEmptyText) + '</td></tr>' +
+        '</tbody></table></div></div>';
+
+    function renderProfileTariffButton(pkg, selectedCost, selectFunctionName, baseRequestsPerRub) {
+        var cost = Number(pkg.cost || 0);
+        var requests = Number(pkg.requests || 0);
+        var benefit = Math.max(0, requests - (cost * baseRequestsPerRub));
+        var selected = cost === Number(selectedCost);
+        var durationMinutes = Number(pkg.durationMinutes || 0);
+        var durationLabel = durationMinutes ? (' · ' + durationMinutes + ' мин.') : '';
+        var label = requests + ' = ' + cost + '₽' + durationLabel;
+        return '<span class="profile-tariff-wrap">' +
+            '<button class="btn profile-tariff-button ' + (selected ? 'btn-save' : 'btn-neutral') + '" type="button" onclick="' + selectFunctionName + '(' + cost + ')">' + escapeHtml(label) + '</button>' +
+            (benefit ? '<span class="profile-benefit-badge">Выгода +' + escapeHtml(String(benefit)) + '</span>' : '') +
+        '</span>';
+    }
+    var dailyPackageButtons = dailyLimitPackages.map(function(pkg) {
+        return renderProfileTariffButton(pkg, window.selectedProfileDailyLimitPackageCost, 'selectProfileDailyLimitPackage', 5);
+    }).join('');
+    var extraPackageButtons = extraLimitPackages.map(function(pkg) {
+        return renderProfileTariffButton(pkg, window.selectedProfileExtraLimitPackageCost, 'selectProfileExtraLimitPackage', 10);
+    }).join('');
+    var topUpBonuses = Array.isArray(data.balanceTopUpBonuses) ? data.balanceTopUpBonuses : [{ from: 1000, percent: 10 }, { from: 5000, percent: 20 }];
+    var topUpMin = Number(data.balanceTopUpLimits?.min || 50);
+    var topUpMax = Number(data.balanceTopUpLimits?.max || 50000);
+    var topUpHint = topUpBonuses.map(function(tier) { return 'От ' + Number(tier.from || 0) + ' ₽: +' + Number(tier.percent || 0) + '%'; }).join('&#10;') + '&#10;Допустимая сумма пополнения: от ' + topUpMin + ' до ' + topUpMax + ' ₽.';
+    var initialTopUpPercent = topUpBonuses.reduce(function(current, tier) { return 1000 >= Number(tier.from || 0) ? Number(tier.percent || 0) : current; }, 0);
+    var balanceHistoryHtml = balanceOperations.length
+        ? '<div class="app-log-grid profile-history-scroll profile-history-scroll--3">' + balanceOperations.map(function(item) {
+            return '<div class="app-log-card"><div class="app-log-card-header"><div><div class="app-log-card-title">' + escapeHtml(item.type || 'Операция') + '</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div><div class="app-log-card-badge">' + escapeHtml(String(item.amount || 0)) + '</div></div><div class="app-log-card-summary">Баланс после операции: ' + escapeHtml(String(item.balanceAfter || 0)) + ' ₽</div></div>';
+        }).join('') + '</div>'
+        : '<div class="community-empty-note">Операций по балансу пока нет.</div>';
+    var topUpsHistoryHtml = balanceTopUps.length
+        ? '<div class="app-log-grid profile-history-scroll profile-history-scroll--3">' + balanceTopUps.map(function(item) {
+            return '<div class="app-log-card"><div class="app-log-card-header"><div><div class="app-log-card-title">Пополнение</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div><div class="app-log-card-badge">' + escapeHtml(item.status || 'pending') + '</div></div><div class="app-log-card-summary">' + escapeHtml(String(item.amountRub || 0)) + ' ₽ → ' + escapeHtml(String(item.credit || 0)) + ' ₽ баланса</div></div>';
+        }).join('') + '</div>'
+        : '<div class="community-empty-note">Пополнений пока нет.</div>';
+    var balanceSectionHtml =
+        '<div id="profileBalance" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Баланс</h3><div class="profile-manager-subtitle">Баланс оплачивает пакеты суточного лимита по сообществу и вне суточного лимита по профилю.</div></div></div>' +
+        '<div class="profile-balance-stack">' +
+            '<div class="profile-balance-card current">' +
+                '<div class="profile-balance-heading-row"><div class="profile-card-name">Текущий баланс</div><div class="profile-balance-value">' + escapeHtml(String(data.balance || 0)) + ' ₽</div></div>' +
+                '<div class="profile-balance-topup-row"><div class="profile-topup-input-wrap"><input id="profileTopUpAmount" type="number" inputmode="numeric" min="' + escapeHtml(String(topUpMin)) + '" max="' + escapeHtml(String(topUpMax)) + '" value="1000" oninput="updateProfileTopUpBonus()"><span id="profileTopUpBonus" class="profile-topup-bonus profile-topup-bonus--' + escapeHtml(initialTopUpPercent ? 'ten' : 'zero') + '">+' + escapeHtml(String(initialTopUpPercent)) + '%</span></div><button class="profile-topup-help" type="button" aria-label="Справка о бонусах пополнения" data-hint="' + topUpHint + '">?</button><button class="btn btn-accent profile-balance-action" type="button" onclick="createProfileBalanceTopUp()">Пополнить</button></div>' +
+                '<div id="profileBalanceStatus" style="margin-top:10px;"></div>' +
+            '</div>' +
+            '<div class="profile-balance-card">' +
+                '<div class="profile-card-name">Подписка</div>' +
+                '<div class="profile-manager-subtitle">Срок каждой подписки указан на её кнопке. Подписка даёт ежедневный лимит запросов к сервису PAPA BOT.</div>' +
+                '<div class="profile-tariff-list">' + dailyPackageButtons + '</div>' +
+                '<button class="btn btn-accent profile-balance-action" type="button" onclick="purchaseSelectedDailyLimitPackage()" ' + (selectedCommunityVkGroupId ? '' : 'disabled') + '>Купить суточный лимит</button>' +
+            '</div>' +
+            '<div class="profile-balance-card">' +
+                '<div class="profile-card-name">Пакеты</div>' +
+                '<div class="profile-manager-subtitle">Приобретенные Пакеты не сгорают, если они не используются, и расходуются после окончания суточного лимита в вашей Подписке.</div>' +
+                '<div class="profile-tariff-list">' + extraPackageButtons + '</div>' +
+                '<button class="btn btn-accent profile-balance-action" type="button" onclick="purchaseSelectedExtraLimitPackage()">Купить вне суточного лимита</button>' +
+            '</div>' +
+        '</div>' +
+        '<div style="height:12px"></div><h4>Операции баланса</h4>' + balanceHistoryHtml +
+        '<div style="height:12px"></div><h4>Пополнения</h4>' + topUpsHistoryHtml +
+        '</div>';
+
+    var profileErrorReportsHtml = errorReports.length
+        ? '<div class="app-log-grid profile-history-scroll profile-history-scroll--3">' + errorReports.map(function(item) {
+            return '<div class="app-log-card">' +
+                '<div class="app-log-card-header"><div><div class="app-log-card-title">Отправленная ошибка</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div>' + renderBugReportStatusBadge(item.status) + '</div>' +
+                '<div class="app-log-card-summary" style="white-space:pre-wrap;">' + escapeHtml(item.description || '') + '</div>' +
+                '<div class="app-log-card-details">' +
+                    (item.fixedRewardGrantedAt ? '<div class="app-log-card-detail">Бонус начислен: +' + escapeHtml(String(item.fixedRewardAmount || 1000)) + ' вне суточного лимита, ' + escapeHtml(formatRuDateTime(item.fixedRewardGrantedAt)) + '</div>' : '') +
+                    renderBugReportScreenshots(item.screenshots) +
+                '</div>' +
+            '</div>';
+        }).join('') + '</div>'
+        : '<div class="community-empty-note">Этот профиль пока не отправлял ошибки.</div>';
+    var bugReportsSectionHtml =
+        '<div id="profileErrorReports" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Отправленные Ошибка</h3><div class="profile-manager-subtitle">Здесь отображаются ошибки, отправленные этим профилем, и статус решения от главного администратора. Сегодня отправлено: ' + escapeHtml(String(bugReportDailyLimit.used || 0)) + ' из ' + escapeHtml(String(bugReportDailyLimit.limit || 5)) + '.</div></div></div>' +
+            profileErrorReportsHtml +
+        '</div>';
+    var profileSuggestionReportsHtml = suggestionReports.length
+        ? '<div class="app-log-grid profile-history-scroll profile-history-scroll--3">' + suggestionReports.map(function(item) {
+            return '<div class="app-log-card">' +
+                '<div class="app-log-card-header"><div><div class="app-log-card-title">Отправленное предложение</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div>' + renderSuggestionReportStatusBadge(item.status) + '</div>' +
+                '<div class="app-log-card-summary" style="white-space:pre-wrap;">' + escapeHtml(item.description || '') + '</div>' +
+                '<div class="app-log-card-details">' +
+                    (item.implementedRewardGrantedAt ? '<div class="app-log-card-detail">Бонус начислен: +' + escapeHtml(String(item.implementedRewardAmount || 1000)) + ' вне суточного лимита, ' + escapeHtml(formatRuDateTime(item.implementedRewardGrantedAt)) + '</div>' : '') +
+                    renderBugReportScreenshots(item.screenshots) +
+                '</div>' +
+            '</div>';
+        }).join('') + '</div>'
+        : '<div class="community-empty-note">Этот профиль пока не отправлял предложения.</div>';
+    var suggestionReportsSectionHtml =
+        '<div id="profileSuggestionReports" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Отправленные Предложения</h3><div class="profile-manager-subtitle">Здесь отображаются предложения, отправленные этим профилем, и статус решения от главного администратора. Сегодня отправлено: ' + escapeHtml(String(suggestionReportDailyLimit.used || 0)) + ' из ' + escapeHtml(String(suggestionReportDailyLimit.limit || 5)) + '.</div></div></div>' +
+            profileSuggestionReportsHtml +
+        '</div>';
+
+    function countProfileCommunityDocuments(vkGroupId) {
+        var documentsByType = communityDocuments[vkGroupId] && typeof communityDocuments[vkGroupId] === 'object'
+            ? communityDocuments[vkGroupId]
+            : {};
+        return Object.keys(documentsByType).reduce(function(total, typeKey) {
+            return total + (Array.isArray(documentsByType[typeKey]) ? documentsByType[typeKey].length : 0);
+        }, 0);
+    }
+
+    function renderProfileCommunityMetricLink(label, value, sectionId, title) {
+        return '<button class="profile-community-metric-btn" type="button" onclick="scrollToProfileSection(&quot;' + escapeHtml(sectionId) + '&quot;)" title="' + escapeHtml(title || label) + '">' +
+            '<span>' + escapeHtml(label) + '</span>' +
+            '<span class="profile-community-metric-value">' + escapeHtml(String(value)) + '</span>' +
+        '</button>';
     }
 
     var communitiesHtml = communities.length
-        ? '<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;align-items:start;">' + communities.map(function(item) {
+        ? '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;align-items:start;">' + communities.map(function(item) {
             var communityKey = String(item.communityId || '').trim();
             var vkGroupId = String(item.vkGroupId || item.communityId || '').trim();
             var isActiveCommunity = !!activeCommunityId && (activeCommunityId === communityKey || activeCommunityId === vkGroupId);
@@ -9193,15 +18760,39 @@ window.renderProfileDashboard = function() {
             var activeBadge = isActiveCommunity
                 ? '<span class="profile-card-badge">🟢 Активно</span>'
                 : '';
+            var communityFileCount = Array.isArray(communityFiles[vkGroupId]) ? communityFiles[vkGroupId].length : 0;
+            var communityDocumentCount = countProfileCommunityDocuments(vkGroupId);
+            var communityPaymentOperationsCount = paymentOperations.filter(function(operation) {
+                var operationCommunityId = String(operation.communityId || '').trim();
+                return operationCommunityId === communityKey || operationCommunityId === vkGroupId;
+            }).length;
+            var dailyPlanLabel = item.dailyLimitPlan
+                ? (String(item.dailyLimitPlan.limit || 0) + ' до ' + formatRuDateTime(item.dailyLimitPlan.expiresAt))
+                : 'Профиль';
+            var communityMetricsHtml = '<div class="profile-community-metrics">' +
+                renderProfileCommunityMetricLink('Баланс', String(data.balance || 0) + ' ₽', 'profileBalance', 'Перейти к балансу профиля') +
+                renderProfileCommunityMetricLink('Активация промокода', promoStatus.blocked ? 'заблокирована' : String(promoStatus.remainingAttempts || 0) + '/3', 'profilePromoActivation', 'Перейти к активации промокода') +
+                renderProfileCommunityMetricLink('Интеграции с ИИ', aiIntegrations.length, 'profileAiIntegrations', 'Перейти к AI-интеграциям профиля') +
+                renderProfileCommunityMetricLink('Платежные системы', paymentIntegrations.length, 'profilePaymentIntegrations', 'Перейти к платежным интеграциям профиля') +
+                renderProfileCommunityMetricLink('Платежные операции', communityPaymentOperationsCount, 'profilePaymentOperations', 'Перейти к платежным операциям профиля') +
+                renderProfileCommunityMetricLink('Отправленные Ошибка', errorReports.length, 'profileErrorReports', 'Перейти к отправленным ошибкам') +
+                renderProfileCommunityMetricLink('Отправленные Предложения', suggestionReports.length, 'profileSuggestionReports', 'Перейти к отправленным предложениям') +
+                renderProfileCommunityMetricLink('Документы', communityDocumentCount, 'profileConsentDocuments', 'Перейти к документам выбранного сообщества') +
+                renderProfileCommunityMetricLink('Файлы', communityFileCount, 'profileFiles', 'Перейти к файлам выбранного сообщества') +
+            '</div>';
             return '<div class="' + cardClass + '">' +
                 '<div class="profile-card-header"><div><div class="profile-card-name">' + escapeHtml(item.groupName || ('Сообщество ' + vkGroupId)) + '</div><div class="profile-card-id">VK Group ID: ' + escapeHtml(vkGroupId) + '</div></div>' + activeBadge + '</div>' +
                 '<div class="profile-card-details">' +
+                    '<div class="profile-card-row"><span class="profile-card-label">ID проекта:</span> ' + escapeHtml(communityKey || vkGroupId) + '</div>' +
                     '<div class="profile-card-row"><span class="profile-card-label">Пользователей:</span> ' + escapeHtml(String(item.usersCount || 0)) + '</div>' +
                     '<div class="profile-card-row"><span class="profile-card-label">Обработано сообщений:</span> ' + escapeHtml(String(item.messages || 0)) + '</div>' +
                     '<div class="profile-card-row"><span class="profile-card-label">Обработано комментариев:</span> ' + escapeHtml(String(item.comments || 0)) + '</div>' +
                     '<div class="profile-card-row"><span class="profile-card-label">Срабатываний триггеров:</span> ' + escapeHtml(String(item.triggers || 0)) + '</div>' +
                     '<div class="profile-card-row"><span class="profile-card-label">Запросов к PAPA BOT:</span> ' + escapeHtml(String(item.papaRequests || 0)) + '</div>' +
+                    '<div class="profile-card-row"><span class="profile-card-label">Суточный лимит:</span> ' + escapeHtml(dailyPlanLabel) + '</div>' +
+                    '<div class="profile-card-row"><span class="profile-card-label">Вне суточного лимита:</span> ' + escapeHtml(String(data.extraRequestLimit || 0)) + '</div>' +
                     (item.lastEventAt ? '<div class="profile-card-row"><span class="profile-card-label">Последняя активность:</span> ' + escapeHtml(formatRuDateTime(item.lastEventAt)) + '</div>' : '') +
+                    communityMetricsHtml +
                 '</div>' +
             '</div>';
         }).join('') + '</div>'
@@ -9210,27 +18801,627 @@ window.renderProfileDashboard = function() {
     container.innerHTML = foreignProfileBanner +
         '<div class="profile-manager-header"><div><h3 class="profile-manager-title">' + escapeHtml(data.profileName || getCurrentProfileName()) + '</h3><div class="profile-manager-subtitle">Текущий профиль: ' + escapeHtml(getCurrentProfileId()) + '. Здесь можно выйти из профиля, посмотреть статистику и запросить увеличение лимита.</div></div><div class="profile-card-actions"><button class="btn btn-delete" type="button" onclick="exitProfileSession()">Выйти с профиля</button></div></div>' +
         '<div class="profile-grid">' +
-            '<div class="profile-card current"><div class="profile-card-name">Лимит запросов в сутки</div><div class="profile-card-details"><div class="profile-card-row"><span class="profile-card-label">Лимит:</span> ' + escapeHtml(data.dailyLimit ? String(data.dailyLimit) : 'Без ограничений') + '</div><div class="profile-card-row"><span class="profile-card-label">Использовано сегодня:</span> ' + escapeHtml(String(data.dailyUsed || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Осталось:</span> ' + escapeHtml(data.dailyRemaining === null ? 'Без ограничений' : String(data.dailyRemaining)) + '</div></div></div>' +
+            '<div class="profile-card current"><div class="profile-card-name">Лимит запросов в сутки</div><div class="profile-card-details"><div class="profile-card-row"><span class="profile-card-label">Лимит:</span> ' + escapeHtml(effectiveDailyLimit ? String(effectiveDailyLimit) : 'Без ограничений') + '</div><div class="profile-card-row"><span class="profile-card-label">Источник:</span> ' + escapeHtml(effectiveDailyLimitSource) + '</div><div class="profile-card-row"><span class="profile-card-label">Использовано сегодня:</span> ' + escapeHtml(String(effectiveDailyUsed || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Осталось:</span> ' + escapeHtml(effectiveDailyRemaining === null ? 'Без ограничений' : String(effectiveDailyRemaining)) + '</div></div></div>' +
             '<div class="profile-card"><div class="profile-card-name">Суммарная активность</div><div class="profile-card-details"><div class="profile-card-row"><span class="profile-card-label">Запросов к PAPA BOT:</span> ' + escapeHtml(String(data.totalPapaRequests || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Сообщения:</span> ' + escapeHtml(String(data.totalMessages || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Комментарии:</span> ' + escapeHtml(String(data.totalComments || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Триггеры:</span> ' + escapeHtml(String(data.totalTriggers || 0)) + '</div></div></div>' +
         '</div>' +
-        promoSectionHtml +
-        '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Подключённые сообщества</h3><div class="profile-manager-subtitle">По каждому сообществу показаны пользователи и накопленная статистика обработки.</div></div></div>' +
+        '<div id="profileConnectedCommunities" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Подключённые сообщества</h3><div class="profile-manager-subtitle">По каждому сообществу показаны пользователи и накопленная статистика обработки.</div></div></div>' +
             communitiesHtml +
         '</div>' +
-        filesSectionHtml +
-        '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Поддержка автора</h3><div class="profile-manager-subtitle">Пока это ручной процесс: выбери пакет и отправь запрос главному админу.</div></div></div><div class="profile-card-row" style="margin-bottom:12px;"><span class="profile-card-label">Увеличения лимитов:</span></div><div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;">' + packages.map(function(limitValue) { var selected = Number(limitValue) === Number(window.selectedProfileSupportLimit); return '<button class="btn ' + (selected ? 'btn-save' : 'btn-neutral') + '" type="button" onclick="selectProfileLimitPackage(' + Number(limitValue) + ')">' + escapeHtml(Number(limitValue).toLocaleString('ru-RU')) + '</button>'; }).join('') + '</div><div class="profile-manager-subtitle">Выбран пакет: <strong>' + escapeHtml(Number(window.selectedProfileSupportLimit || packages[0] || 1000).toLocaleString('ru-RU')) + '</strong> запросов в сутки. Нажатие кнопки отправляет запрос главному админу.</div><div style="margin-top:12px;"><button class="btn btn-accent" type="button" onclick="requestSelectedProfileLimit()">Приобрести</button></div></div>' +
-        '<div class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">История начислений и запросов</h3><div class="profile-manager-subtitle">Здесь видно, когда лимит менялся и какие запросы уже были отправлены.</div></div></div>' +
-            (history.length ? history.map(function(item) {
-                return '<div class="app-log-card"><div class="app-log-card-header"><div><div class="app-log-card-title">Начислен лимит</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.at)) + '</div></div><div class="app-log-card-badge">' + escapeHtml(String(item.limit || 0)) + '/сутки</div></div>' +
-                (item.note ? '<div class="app-log-card-summary">' + escapeHtml(item.note) + '</div>' : '') + '</div>';
-            }).join('') : '<div class="community-empty-note">Начислений лимита пока не было.</div>') +
-            (requests.length ? '<div style="height:12px"></div>' + requests.map(function(item) {
-                var deleteButton = item.status === 'pending'
-                    ? '<div class="profile-card-actions" style="margin-top:10px;"><button class="btn btn-delete" type="button" onclick="deleteProfileLimitRequestById(&quot;' + escapeHtml(item.id) + '&quot;)">Удалить запрос</button></div>'
-                    : '';
-                return '<div class="app-log-card"><div class="app-log-card-header"><div><div class="app-log-card-title">Запрос на лимит</div><div class="app-log-card-meta">' + escapeHtml(formatRuDateTime(item.createdAt)) + '</div></div><div class="app-log-card-badge">' + escapeHtml(item.status || 'pending') + '</div></div><div class="app-log-card-summary">' + escapeHtml(String(item.requestedLimit || 0)) + ' запросов в сутки</div>' + deleteButton + '</div>';
-            }).join('') : '') +
+        balanceSectionHtml +
+        promoSectionHtml +
+        bugReportsSectionHtml +
+        suggestionReportsSectionHtml +
+        aiSectionHtml +
+        paymentSectionHtml +
+        paymentOperationsSectionHtml +
+        documentsSectionHtml +
+        filesSectionHtml;
+};
+
+window.selectProfileDailyLimitPackage = function(cost) {
+    window.selectedProfileDailyLimitPackageCost = Number(cost || 0);
+    renderProfileDashboard();
+};
+
+window.selectProfileExtraLimitPackage = function(cost) {
+    window.selectedProfileExtraLimitPackageCost = Number(cost || 0);
+    renderProfileDashboard();
+};
+
+window.updateProfileTopUpBonus = function() {
+    var amountEl = document.getElementById('profileTopUpAmount');
+    var bonusEl = document.getElementById('profileTopUpBonus');
+    if (!bonusEl) return;
+    var amountRub = Number(amountEl ? amountEl.value : 0);
+    var dashboard = window.profileDashboardData || {};
+    var bonuses = Array.isArray(dashboard.balanceTopUpBonuses) ? dashboard.balanceTopUpBonuses : [{ from: 1000, percent: 10 }, { from: 5000, percent: 20 }];
+    var percent = Number.isFinite(amountRub) ? bonuses.reduce(function(current, tier) { return amountRub >= Number(tier.from || 0) ? Number(tier.percent || 0) : current; }, 0) : 0;
+    bonusEl.textContent = '+' + percent + '%';
+    bonusEl.className = 'profile-topup-bonus profile-topup-bonus--' + (percent === 20 ? 'twenty' : (percent === 10 ? 'ten' : 'zero'));
+};
+
+window.createProfileBalanceTopUp = async function() {
+    var statusEl = document.getElementById('profileBalanceStatus');
+    try {
+        var amountEl = document.getElementById('profileTopUpAmount');
+        var amountRub = Number(amountEl ? amountEl.value : 0);
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?createBalanceTopUp=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                amountRub: amountRub,
+                returnUrl: window.location.href,
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId()
+            })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Не удалось создать платёж');
+        if (data.confirmationUrl) {
+            window.location.assign(data.confirmationUrl);
+            return;
+        }
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', data.confirmationUrl ? 'Платёж создан. Откройте страницу оплаты YooKassa.' : 'Платёж создан.');
+        await loadProfileDashboard();
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+    }
+};
+
+window.purchaseSelectedDailyLimitPackage = async function() {
+    var statusEl = document.getElementById('profileBalanceStatus');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?purchaseDailyLimitPackage=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cost: window.selectedProfileDailyLimitPackageCost,
+                communityId: getSelectedProfileDashboardCommunityVkGroupId(),
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId()
+            })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Не удалось купить пакет');
+        window.profileDashboardData = data.dashboard || window.profileDashboardData;
+        renderProfileDashboard();
+        var freshStatusEl = document.getElementById('profileBalanceStatus') || statusEl;
+        setInlineNoticeWithTimeout(freshStatusEl, 'success', 'Пакет суточного лимита подключён.', 5000);
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+    }
+};
+
+window.purchaseSelectedExtraLimitPackage = async function() {
+    var statusEl = document.getElementById('profileBalanceStatus');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?purchaseExtraLimitPackage=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cost: window.selectedProfileExtraLimitPackageCost,
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId()
+            })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Не удалось купить пакет');
+        window.profileDashboardData = data.dashboard || window.profileDashboardData;
+        renderProfileDashboard();
+        var freshStatusEl = document.getElementById('profileBalanceStatus') || statusEl;
+        setInlineNoticeWithTimeout(freshStatusEl, 'success', 'Пакет вне суточного лимита начислен.', 5000);
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+    }
+};
+
+function readPaymentIntegrationDynamicValues() {
+    var values = {};
+    document.querySelectorAll('[data-payment-field]').forEach(function(el) {
+        var key = el.getAttribute('data-payment-field');
+        if (key) values[key] = String(el.value || '').trim();
+    });
+    return values;
+}
+
+window.onPaymentIntegrationProviderChange = function(values) {
+    var providerEl = document.getElementById('paymentIntegrationProvider');
+    var target = document.getElementById('paymentIntegrationDynamicFields');
+    if (!target) return;
+    target.innerHTML = renderPaymentIntegrationDynamicFields(providerEl ? providerEl.value : '', values || readPaymentIntegrationDynamicValues());
+    refreshPaymentIntegrationNotificationUrlDefault();
+};
+
+window.refreshPaymentIntegrationNotificationUrlDefault = function() {
+    var providerPreset = getPaymentProviderPreset(document.getElementById('paymentIntegrationProvider')?.value || '');
+    var notificationEl = document.getElementById('paymentIntegrationNotificationUrl');
+    if (!providerPreset || (providerPreset.id !== 'prodamus' && providerPreset.id !== 'robokassa') || !notificationEl) return;
+    var shouldRefresh = !String(notificationEl.value || '').trim() || notificationEl.getAttribute('data-auto-generated') === 'true';
+    if (!shouldRefresh) return;
+    var webhookUrl = buildProfilePaymentIntegrationWebhookUrl({
+        id: document.getElementById('paymentIntegrationId')?.value || '',
+        name: document.getElementById('paymentIntegrationName')?.value || '',
+        provider: providerPreset.id
+    });
+    if (webhookUrl) {
+        notificationEl.value = webhookUrl;
+        notificationEl.setAttribute('data-auto-generated', 'true');
+    }
+};
+
+function readProfilePaymentIntegrationForm() {
+    var value = function(id) {
+        var el = document.getElementById(id);
+        return el ? String(el.value || '').trim() : '';
+    };
+    var providerPreset = getPaymentProviderPreset(value('paymentIntegrationProvider'));
+    return {
+        id: value('paymentIntegrationId'),
+        name: value('paymentIntegrationName'),
+        provider: providerPreset ? providerPreset.id : '',
+        providerLabel: providerPreset ? providerPreset.label : '',
+        shopId: value('paymentIntegrationShopId'),
+        merchantLogin: value('paymentIntegrationMerchantLogin'),
+        projectId: value('paymentIntegrationProjectId'),
+        wallet: value('paymentIntegrationWallet'),
+        apiKey: value('paymentIntegrationApiKey'),
+        secretKey: value('paymentIntegrationSecretKey'),
+        prodamusSignatureMode: value('paymentIntegrationProdamusSignatureMode'),
+        prodamusSys: value('paymentIntegrationProdamusSys'),
+        password1: value('paymentIntegrationPassword1'),
+        password2: value('paymentIntegrationPassword2'),
+        robokassaHashAlgorithm: value('paymentIntegrationRobokassaHashAlgorithm'),
+        notificationUrl: value('paymentIntegrationNotificationUrl') || buildProfilePaymentIntegrationWebhookUrl({
+            id: value('paymentIntegrationId'),
+            name: value('paymentIntegrationName'),
+            provider: providerPreset ? providerPreset.id : ''
+        }),
+        successUrl: value('paymentIntegrationSuccessUrl'),
+        failUrl: value('paymentIntegrationFailUrl'),
+        active: value('paymentIntegrationActive') !== 'НЕТ'
+    };
+}
+
+function hasProfilePaymentIntegrationDraft(item) {
+    return !!(
+        item.name ||
+        item.provider ||
+        item.shopId ||
+        item.merchantLogin ||
+        item.projectId ||
+        item.wallet ||
+        item.apiKey ||
+        item.secretKey ||
+        item.prodamusSignatureMode ||
+        item.prodamusSys ||
+        item.password1 ||
+        item.password2 ||
+        item.robokassaHashAlgorithm ||
+        item.notificationUrl ||
+        item.successUrl ||
+        item.failUrl
+    );
+}
+
+function validateProfilePaymentIntegration(item) {
+    if (!item.name) return 'Укажите название платежной интеграции.';
+    var providerPreset = getPaymentProviderPreset(item.provider);
+    if (!providerPreset) return 'Выберите платежную систему.';
+    var missingField = (providerPreset.fields || []).find(function(field) {
+        return field.required && !String(item[field.key] || '').trim();
+    });
+    if (missingField) {
+        return 'Заполните поле "' + missingField.label + '" для ' + providerPreset.label + '.';
+    }
+    return '';
+}
+
+function setProfilePaymentIntegrationForm(item, index) {
+    item = item || {};
+    function setValue(id, value) {
+        var el = document.getElementById(id);
+        if (el) el.value = value == null ? '' : String(value);
+    }
+    var providerPreset = getPaymentProviderPreset(item.provider || item.providerLabel);
+    setValue('paymentIntegrationEditIndex', Number.isFinite(Number(index)) ? String(index) : '-1');
+    setValue('paymentIntegrationId', item.id || '');
+    setValue('paymentIntegrationName', item.name || '');
+    setValue('paymentIntegrationProvider', providerPreset ? providerPreset.id : '');
+    if (typeof window.onPaymentIntegrationProviderChange === 'function') window.onPaymentIntegrationProviderChange(item);
+    setValue('paymentIntegrationShopId', item.shopId || '');
+    setValue('paymentIntegrationMerchantLogin', item.merchantLogin || '');
+    setValue('paymentIntegrationProjectId', item.projectId || '');
+    setValue('paymentIntegrationWallet', item.wallet || '');
+    setValue('paymentIntegrationApiKey', item.apiKey || '');
+    setValue('paymentIntegrationSecretKey', item.secretKey || '');
+    setValue('paymentIntegrationProdamusSignatureMode', item.prodamusSignatureMode || '');
+    setValue('paymentIntegrationProdamusSys', item.prodamusSys || '');
+    setValue('paymentIntegrationPassword1', item.password1 || '');
+    setValue('paymentIntegrationPassword2', item.password2 || '');
+    setValue('paymentIntegrationRobokassaHashAlgorithm', item.robokassaHashAlgorithm || '');
+    setValue('paymentIntegrationNotificationUrl', item.notificationUrl || '');
+    setValue('paymentIntegrationSuccessUrl', item.successUrl || '');
+    setValue('paymentIntegrationFailUrl', item.failUrl || '');
+    setValue('paymentIntegrationActive', item.active === false ? 'НЕТ' : 'ДА');
+    refreshPaymentIntegrationNotificationUrlDefault();
+}
+
+function upsertProfilePaymentIntegrationDraft(options) {
+    options = options || {};
+    var statusEl = document.getElementById('profilePaymentIntegrationsStatus');
+    var item = readProfilePaymentIntegrationForm();
+    if (!hasProfilePaymentIntegrationDraft(item)) {
+        if (options.allowEmpty) return true;
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Заполните данные платежной интеграции.');
+        return false;
+    }
+    var validationError = validateProfilePaymentIntegration(item);
+    if (validationError) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', validationError);
+        return false;
+    }
+    if (!window.profileDashboardData) window.profileDashboardData = {};
+    var integrations = Array.isArray(window.profileDashboardData.paymentIntegrations) ? window.profileDashboardData.paymentIntegrations : [];
+    var editIndex = Number(document.getElementById('paymentIntegrationEditIndex')?.value || -1);
+    var existingIndex = integrations.findIndex(function(entry) {
+        return (item.id && String(entry.id || '').trim() === item.id) || String(entry.name || '').trim() === item.name;
+    });
+    if (editIndex >= 0 && integrations[editIndex]) integrations[editIndex] = item;
+    else if (existingIndex >= 0) integrations[existingIndex] = item;
+    else integrations.push(item);
+    window.profileDashboardData.paymentIntegrations = integrations;
+    return true;
+}
+
+window.addProfilePaymentIntegrationFromForm = function() {
+    if (!upsertProfilePaymentIntegrationDraft()) return;
+    renderProfileDashboard();
+};
+
+window.editProfilePaymentIntegration = function(index) {
+    var integrations = window.profileDashboardData && Array.isArray(window.profileDashboardData.paymentIntegrations) ? window.profileDashboardData.paymentIntegrations : [];
+    var item = integrations[Number(index)];
+    if (!item) return;
+    setProfilePaymentIntegrationForm(item, Number(index));
+    var statusEl = document.getElementById('profilePaymentIntegrationsStatus');
+    if (statusEl) statusEl.innerHTML = makeInlineNotice('info', 'Редактирование платежной интеграции: <strong>' + escapeHtml(item.name || '') + '</strong>.');
+};
+
+window.deleteProfilePaymentIntegration = function(index) {
+    if (!window.profileDashboardData) return;
+    var integrations = Array.isArray(window.profileDashboardData.paymentIntegrations) ? window.profileDashboardData.paymentIntegrations : [];
+    if (!confirm('Удалить эту платежную интеграцию?')) return;
+    integrations.splice(Number(index), 1);
+    window.profileDashboardData.paymentIntegrations = integrations;
+    renderProfileDashboard();
+};
+
+window.testProfilePaymentIntegration = async function(index) {
+    var statusEl = document.getElementById('profilePaymentIntegrationsStatus') || document.getElementById('profileDashboardStatus');
+    var integrations = window.profileDashboardData && Array.isArray(window.profileDashboardData.paymentIntegrations) ? window.profileDashboardData.paymentIntegrations : [];
+    var integration = Number(index) >= 0 && integrations[Number(index)] ? integrations[Number(index)] : readProfilePaymentIntegrationForm();
+    try {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Проверяю платежную интеграцию...');
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?testProfilePaymentIntegration=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId(),
+                integration: integration
+            })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Платежная интеграция не прошла проверку');
+        var detailsHtml = Array.isArray(data.details) && data.details.length
+            ? '<br>' + data.details.map(function(line) { return '• ' + escapeHtml(line); }).join('<br>')
+            : '';
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', 'TEST успешен: ' + escapeHtml(data.message || 'Реквизиты заполнены корректно.') + detailsHtml);
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'TEST не пройден: ' + escapeHtml(e.message));
+    }
+};
+
+window.saveProfilePaymentIntegrations = async function() {
+    var statusEl = document.getElementById('profilePaymentIntegrationsStatus') || document.getElementById('profileDashboardStatus');
+    try {
+        if (!upsertProfilePaymentIntegrationDraft({ allowEmpty: true })) return;
+        var integrations = window.profileDashboardData && Array.isArray(window.profileDashboardData.paymentIntegrations)
+            ? window.profileDashboardData.paymentIntegrations
+            : [];
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?saveProfilePaymentIntegrations=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId(),
+                integrations: integrations
+            })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Не удалось сохранить платежные интеграции');
+        window.profileDashboardData.paymentIntegrations = Array.isArray(data.integrations) ? data.integrations : integrations;
+        renderProfileDashboard();
+        var freshStatusEl = document.getElementById('profilePaymentIntegrationsStatus') || document.getElementById('profileDashboardStatus');
+        if (freshStatusEl) freshStatusEl.innerHTML = makeInlineNotice('success', 'Платежные интеграции сохранены.');
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка платежных интеграций: ' + e.message);
+    }
+};
+
+function readProfileAiIntegrationForm() {
+    var value = function(id) {
+        var el = document.getElementById(id);
+        return el ? String(el.value || '').trim() : '';
+    };
+    var providerPreset = getAiProviderPreset(value('aiIntegrationProvider') || 'openai');
+    var baseUrlValue = value('aiIntegrationBaseUrl') === 'custom' ? value('aiIntegrationBaseUrlCustom') : value('aiIntegrationBaseUrl');
+    var modelValue = value('aiIntegrationModel') === 'custom' ? value('aiIntegrationModelCustom') : value('aiIntegrationModel');
+    return {
+        name: value('aiIntegrationName'),
+        provider: providerPreset.label || 'OpenAI-compatible',
+        apiKey: value('aiIntegrationApiKey'),
+        baseUrl: baseUrlValue,
+        model: modelValue,
+        contextMessages: value('aiIntegrationContextMessages') || '10',
+        maxChars: value('aiIntegrationMaxChars') || '4000',
+        timeoutMs: value('aiIntegrationTimeoutMs') || '15000',
+        systemPrompt: value('aiIntegrationSystemPrompt'),
+        goals: value('aiIntegrationGoals'),
+        companyDescription: value('aiIntegrationCompanyDescription'),
+        tone: value('aiIntegrationTone'),
+        forbiddenTopics: value('aiIntegrationForbiddenTopics'),
+        handoffRules: value('aiIntegrationHandoffRules'),
+        active: value('aiIntegrationActive') !== 'НЕТ'
+    };
+}
+
+function setProfileAiIntegrationForm(item, index) {
+    item = item || {};
+    function setValue(id, value) {
+        var el = document.getElementById(id);
+        if (el) el.value = value == null ? '' : String(value);
+    }
+    var providerPreset = AI_PROVIDER_PRESETS.find(function(preset) {
+        return preset.id === item.provider || preset.label === item.provider || preset.baseUrl === item.baseUrl;
+    }) || getAiProviderPreset('custom');
+    setValue('aiIntegrationEditIndex', Number.isFinite(Number(index)) ? String(index) : '-1');
+    setValue('aiIntegrationName', item.name || '');
+    setValue('aiIntegrationProvider', providerPreset.id || 'custom');
+    onAiIntegrationProviderChange();
+
+    var baseUrlEl = document.getElementById('aiIntegrationBaseUrl');
+    var baseUrlCustomEl = document.getElementById('aiIntegrationBaseUrlCustom');
+    if (baseUrlEl) {
+        var hasBaseOption = Array.prototype.some.call(baseUrlEl.options || [], function(option) {
+            return option.value === item.baseUrl;
+        });
+        baseUrlEl.value = hasBaseOption ? item.baseUrl : 'custom';
+        if (baseUrlCustomEl) {
+            baseUrlCustomEl.style.display = hasBaseOption ? 'none' : '';
+            baseUrlCustomEl.value = hasBaseOption ? '' : (item.baseUrl || '');
+        }
+    }
+
+    var modelEl = document.getElementById('aiIntegrationModel');
+    var modelCustomEl = document.getElementById('aiIntegrationModelCustom');
+    if (modelEl) {
+        var hasModelOption = Array.prototype.some.call(modelEl.options || [], function(option) {
+            return option.value === item.model;
+        });
+        modelEl.value = hasModelOption ? item.model : 'custom';
+        if (modelCustomEl) {
+            modelCustomEl.style.display = hasModelOption ? 'none' : '';
+            modelCustomEl.value = hasModelOption ? '' : (item.model || '');
+        }
+    }
+
+    setValue('aiIntegrationApiKey', item.apiKey || '');
+    setValue('aiIntegrationContextMessages', item.contextMessages || 10);
+    setValue('aiIntegrationMaxChars', item.maxChars || 4000);
+    setValue('aiIntegrationTimeoutMs', item.timeoutMs || 15000);
+    setValue('aiIntegrationSystemPrompt', item.systemPrompt || '');
+    setValue('aiIntegrationGoals', item.goals || '');
+    setValue('aiIntegrationCompanyDescription', item.companyDescription || '');
+    setValue('aiIntegrationTone', item.tone || '');
+    setValue('aiIntegrationForbiddenTopics', item.forbiddenTopics || '');
+    setValue('aiIntegrationHandoffRules', item.handoffRules || '');
+    setValue('aiIntegrationActive', item.active === false ? 'НЕТ' : 'ДА');
+}
+
+function upsertProfileAiIntegrationDraft(options) {
+    options = options || {};
+    var statusEl = document.getElementById('profileAiIntegrationsStatus');
+    var item = readProfileAiIntegrationForm();
+    if (!item.name) {
+        if (!options.silent && statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Укажите название AI-интеграции.');
+        return false;
+    }
+    if (!window.profileDashboardData) window.profileDashboardData = {};
+    var integrations = Array.isArray(window.profileDashboardData.aiIntegrations) ? window.profileDashboardData.aiIntegrations : [];
+    var editIndex = Number(document.getElementById('aiIntegrationEditIndex')?.value || -1);
+    var existingIndex = integrations.findIndex(function(entry) { return String(entry.name || '').trim() === item.name; });
+    if (editIndex >= 0 && integrations[editIndex]) integrations[editIndex] = item;
+    else if (existingIndex >= 0) integrations[existingIndex] = item;
+    else integrations.push(item);
+    window.profileDashboardData.aiIntegrations = integrations;
+    return true;
+}
+
+window.addProfileAiIntegrationFromForm = function() {
+    if (!upsertProfileAiIntegrationDraft()) return;
+    renderProfileDashboard();
+};
+
+window.editProfileAiIntegration = function(index) {
+    var integrations = window.profileDashboardData && Array.isArray(window.profileDashboardData.aiIntegrations) ? window.profileDashboardData.aiIntegrations : [];
+    var item = integrations[Number(index)];
+    if (!item) return;
+    setProfileAiIntegrationForm(item, Number(index));
+    var statusEl = document.getElementById('profileAiIntegrationsStatus');
+    if (statusEl) statusEl.innerHTML = makeInlineNotice('info', 'Редактирование AI-интеграции: <strong>' + escapeHtml(item.name || '') + '</strong>.');
+};
+
+window.deleteProfileAiIntegration = function(index) {
+    if (!window.profileDashboardData) return;
+    var integrations = Array.isArray(window.profileDashboardData.aiIntegrations) ? window.profileDashboardData.aiIntegrations : [];
+    if (!confirm('Удалить эту AI-интеграцию?')) return;
+    integrations.splice(Number(index), 1);
+    window.profileDashboardData.aiIntegrations = integrations;
+    renderProfileDashboard();
+};
+
+function clearProfileAiIntegrationTestNoticeTimer() {
+    if (window.profileAiTestNoticeTimer) {
+        clearInterval(window.profileAiTestNoticeTimer);
+        window.profileAiTestNoticeTimer = null;
+    }
+}
+
+window.closeProfileAiIntegrationTestNotice = function(event) {
+    if (event && typeof event.stopPropagation === 'function') event.stopPropagation();
+    clearProfileAiIntegrationTestNoticeTimer();
+    var statusEl = document.getElementById('profileAiIntegrationsStatus') || document.getElementById('profileDashboardStatus');
+    if (statusEl) statusEl.innerHTML = '';
+};
+
+window.stopProfileAiIntegrationTestNoticeCountdown = function(event) {
+    if (event && event.target && event.target.closest && event.target.closest('.profile-ai-test-notice-close')) return;
+    clearProfileAiIntegrationTestNoticeTimer();
+    var notice = document.getElementById('profileAiTestNotice');
+    if (notice) notice.classList.add('is-paused');
+};
+
+function updateProfileAiIntegrationTestNoticeCountdown() {
+    var countdownEl = document.getElementById('profileAiTestNoticeCountdown');
+    if (countdownEl) countdownEl.textContent = String(Math.max(0, window.profileAiTestNoticeRemainingSeconds || 0)) + ' сек';
+}
+
+function showProfileAiIntegrationTestNotice(type, messageHtml) {
+    var statusEl = document.getElementById('profileAiIntegrationsStatus') || document.getElementById('profileDashboardStatus');
+    if (!statusEl) return;
+    clearProfileAiIntegrationTestNoticeTimer();
+    window.profileAiTestNoticeRemainingSeconds = 10;
+    statusEl.innerHTML =
+        '<div id="profileAiTestNotice" class="inline-notice inline-notice--' + (type || 'success') + ' profile-ai-test-notice" onclick="stopProfileAiIntegrationTestNoticeCountdown(event)">' +
+            '<div class="profile-ai-test-notice-body">' + messageHtml + '</div>' +
+            '<div class="profile-ai-test-notice-countdown"><span>Кликни чтобы остановить отчет</span><strong id="profileAiTestNoticeCountdown">10 сек</strong></div>' +
+            '<button class="profile-ai-test-notice-close" type="button" aria-label="Закрыть уведомление" onclick="closeProfileAiIntegrationTestNotice(event)">×</button>' +
         '</div>';
+    window.profileAiTestNoticeTimer = setInterval(function() {
+        window.profileAiTestNoticeRemainingSeconds = Number(window.profileAiTestNoticeRemainingSeconds || 0) - 1;
+        updateProfileAiIntegrationTestNoticeCountdown();
+        if (window.profileAiTestNoticeRemainingSeconds <= 0) {
+            window.closeProfileAiIntegrationTestNotice();
+        }
+    }, 1000);
+}
+
+function clearProfileAiIntegrationTestNoticeOnTabChange() {
+    window.closeProfileAiIntegrationTestNotice();
+}
+
+window.testProfileAiIntegration = async function(index) {
+    var statusEl = document.getElementById('profileAiIntegrationsStatus') || document.getElementById('profileDashboardStatus');
+    var integrations = window.profileDashboardData && Array.isArray(window.profileDashboardData.aiIntegrations) ? window.profileDashboardData.aiIntegrations : [];
+    var integration = Number(index) >= 0 && integrations[Number(index)] ? integrations[Number(index)] : readProfileAiIntegrationForm();
+    try {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Проверяю AI-интеграцию...');
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?testProfileAiIntegration=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId(),
+                integration: integration
+            })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'AI-интеграция не ответила');
+        showProfileAiIntegrationTestNotice('success', 'Ответ AI-интеграции:<br><strong>' + escapeHtml(data.answer || '') + '</strong>');
+    } catch (e) {
+        showProfileAiIntegrationTestNotice('error', 'Ошибка AI-интеграции: ' + escapeHtml(e.message));
+    }
+};
+
+window.saveProfileAiIntegrations = async function() {
+    var statusEl = document.getElementById('profileAiIntegrationsStatus') || document.getElementById('profileDashboardStatus');
+    try {
+        upsertProfileAiIntegrationDraft({ silent: true });
+        var integrations = window.profileDashboardData && Array.isArray(window.profileDashboardData.aiIntegrations)
+            ? window.profileDashboardData.aiIntegrations
+            : [];
+        var baseUrl = window.location.href.split('?')[0];
+        var res = await fetch(baseUrl + '?saveProfileAiIntegrations=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                profileId: getCurrentProfileId(),
+                principalProfileId: getPrincipalProfileId(),
+                integrations: integrations
+            })
+        });
+        var data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Не удалось сохранить AI-интеграции');
+        window.profileDashboardData.aiIntegrations = Array.isArray(data.integrations) ? data.integrations : integrations;
+        renderProfileDashboard();
+        var freshStatusEl = document.getElementById('profileAiIntegrationsStatus') || document.getElementById('profileDashboardStatus');
+        if (freshStatusEl) freshStatusEl.innerHTML = makeInlineNotice('success', 'AI-интеграции сохранены.');
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка AI-интеграций: ' + e.message);
+    }
+};
+
+async function ensureProfileDashboardForAiHistory() {
+    if (window.profileDashboardData && Array.isArray(window.profileDashboardData.aiSentAnswers)) {
+        return window.profileDashboardData;
+    }
+    if (typeof window.loadProfileDashboard === 'function') {
+        await window.loadProfileDashboard();
+    }
+    return window.profileDashboardData || {};
+}
+
+function renderAiSentAnswerHistory(entry, userId, stepName) {
+    var titleHtml = '<div style="font-size:24px;font-weight:bold;color:var(--text-primary);margin-bottom:12px;">История AI-ответа</div>';
+    if (!entry) {
+        return titleHtml +
+            '<div style="font-size:16px;color:var(--text-secondary);margin-bottom:8px;">Для пользователя ' + escapeHtml(userId || 'без ID') + ' AI-ответ не найден.</div>' +
+            (stepName ? '<div style="font-size:14px;color:var(--text-muted);">Текущий шаг: ' + escapeHtml(stepName) + '</div>' : '');
+    }
+    return titleHtml +
+        '<div style="font-size:14px;color:var(--text-secondary);margin-bottom:8px;">' +
+            'Пользователь: ' + escapeHtml(entry.userId || userId || '') +
+            (entry.step ? ' · шаг: ' + escapeHtml(entry.step) : '') +
+            (entry.integrationName ? ' · AI: ' + escapeHtml(entry.integrationName) : '') +
+            (entry.sentAt ? ' · ' + escapeHtml(formatRuDateTime(entry.sentAt)) : '') +
+        '</div>' +
+        '<div style="white-space:pre-wrap;text-align:left;font-size:16px;line-height:1.5;color:var(--text-primary);max-height:55vh;overflow:auto;">' + escapeHtml(entry.text || '') + '</div>';
+}
+
+window.openAiSentAnswerForUser = async function(userId, stepName) {
+    try {
+        var data = await ensureProfileDashboardForAiHistory();
+        var answers = Array.isArray(data.aiSentAnswers) ? data.aiSentAnswers : [];
+        var normalizedUserId = String(userId || '').trim();
+        var normalizedStepName = String(stepName || '').trim();
+        var exactMatch = answers.find(function(item) {
+            return String(item.userId || '').trim() === normalizedUserId &&
+                (!normalizedStepName || String(item.step || '').trim() === normalizedStepName);
+        });
+        var fallbackMatch = exactMatch || answers.find(function(item) {
+            return String(item.userId || '').trim() === normalizedUserId;
+        });
+        showSuccessOverlay(renderAiSentAnswerHistory(fallbackMatch, normalizedUserId, normalizedStepName), { autoCloseMs: 0 });
+    } catch (e) {
+        showSuccessOverlay(renderAiSentAnswerHistory(null, userId, stepName) + '<div style="margin-top:10px;color:var(--status-error-text);">Ошибка загрузки истории: ' + escapeHtml(e.message) + '</div>', { autoCloseMs: 0 });
+    }
 };
 
 window.loadProfileDashboard = async function() {
@@ -9241,7 +19432,7 @@ window.loadProfileDashboard = async function() {
         var baseUrl = window.location.href.split('?')[0];
         var profileId = encodeURIComponent(getCurrentProfileId() || getPrincipalProfileId() || '1');
         var principalProfileId = encodeURIComponent(getPrincipalProfileId() || '1');
-        var res = await fetch(baseUrl + '?getProfileDashboard=1&profileId=' + profileId + '&principalProfileId=' + principalProfileId);
+        var res = await fetch(baseUrl + '?getProfileDashboard=1&profileId=' + profileId + '&principalProfileId=' + principalProfileId + '&_ts=' + Date.now(), { cache: 'no-store' });
         var data = await res.json();
         if (!data.success) throw new Error(data.error || 'Не удалось загрузить профиль');
         window.profileDashboardData = data.dashboard;
@@ -9259,7 +19450,7 @@ window.activateProfilePromoCode = async function() {
     var inputEl = document.getElementById('profilePromoCodeInput');
     var code = String(inputEl && inputEl.value || '').trim();
     if (!code) {
-        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ Введите промокод.');
+        setInlineNoticeWithTimeout(statusEl, 'error', '❌ Введите промокод.', 5000);
         return;
     }
     try {
@@ -9285,13 +19476,13 @@ window.activateProfilePromoCode = async function() {
         if (!data.success) {
             throw new Error(data.error || 'Не удалось активировать промокод');
         }
-        if (statusEl) statusEl.innerHTML = makeInlineNotice('success', '✅ Промокод активирован. Показатели профиля обновлены.');
+        setInlineNoticeWithTimeout(statusEl, 'success', '✅ Промокод активирован. Показатели профиля обновлены.', 5000);
         if (isMainAdminSession()) {
             await loadAdminProfiles();
         }
     } catch (e) {
         statusEl = document.getElementById('profilePromoActivationStatus') || document.getElementById('profileDashboardStatus');
-        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ ' + e.message);
+        setInlineNoticeWithTimeout(statusEl, 'error', '❌ ' + e.message, 5000);
     }
 };
 
@@ -9299,10 +19490,18 @@ window.requestProfileLimitIncrease = async function(limitValue) {
     var statusEl = document.getElementById('profileDashboardStatus');
     try {
         var baseUrl = window.location.href.split('?')[0];
+        var community = getSelectedProfileDashboardCommunitySummary();
+        var communityId = community ? String(community.vkGroupId || community.communityId || '').trim() : getSelectedProfileDashboardCommunityVkGroupId();
         var res = await fetch(baseUrl + '?requestProfileLimit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ requestedLimit: limitValue, principalProfileId: getPrincipalProfileId() })
+            body: JSON.stringify({
+                requestedLimit: limitValue,
+                principalProfileId: getPrincipalProfileId(),
+                communityId: communityId,
+                communityName: community ? String(community.groupName || '').trim() : '',
+                communityUrl: buildVkCommunityUrl(communityId)
+            })
         });
         var data = await res.json();
         if (!data.success) throw new Error(data.error || 'Не удалось отправить запрос');
@@ -9388,6 +19587,43 @@ function getMiniAppBaseUrl() {
     }
 }
 
+function normalizeMiniAppButtonColor(value, fallback) {
+    var normalized = String(value || '').trim();
+    return /^#[0-9a-fA-F]{6}$/.test(normalized) ? normalized.toLowerCase() : fallback;
+}
+
+function normalizeMiniAppRedirectMode(value) {
+    var normalized = String(value || '').trim().toLowerCase();
+    return ['messages', 'community', 'none', 'url'].includes(normalized) ? normalized : 'none';
+}
+
+function normalizeMiniAppRedirectUrl(value) {
+    var normalized = String(value || '').trim();
+    if (!normalized) return '';
+    try {
+        var parsed = new URL(normalized);
+        return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.toString() : '';
+    } catch (e) {
+        return '';
+    }
+}
+
+function buildMiniAppRedirectOptions(selectedMode) {
+    var normalized = normalizeMiniAppRedirectMode(selectedMode);
+    return '<option value="messages"' + (normalized === 'messages' ? ' selected' : '') + '>В сообщения с сообществом</option>' +
+        '<option value="community"' + (normalized === 'community' ? ' selected' : '') + '>В сообщество</option>' +
+        '<option value="none"' + (normalized === 'none' ? ' selected' : '') + '>Никуда</option>' +
+        '<option value="url"' + (normalized === 'url' ? ' selected' : '') + '>По ссылке</option>';
+}
+
+window.updateMiniAppRedirectField = function(action) {
+    var isSubscribe = action === 'subscribe';
+    var select = document.getElementById(isSubscribe ? 'groupFormMiniAppSubscribeRedirectMode' : 'groupFormMiniAppUnsubscribeRedirectMode');
+    var input = document.getElementById(isSubscribe ? 'groupFormMiniAppSubscribeRedirectUrl' : 'groupFormMiniAppUnsubscribeRedirectUrl');
+    if (!select || !input) return;
+    input.hidden = normalizeMiniAppRedirectMode(select.value) !== 'url';
+};
+
 function getCurrentMiniAppCommunityId() {
     var communityId = String(window.currentCommunityId || '').trim();
     var settings = window.cachedBotSettings || window.lastBotSettings || {};
@@ -9409,7 +19645,10 @@ window.renderGroupsManager = function() {
     var groups = Array.isArray(dataStore['Groups']) ? dataStore['Groups'] : [];
     var users = Array.isArray(dataStore['Users']) ? dataStore['Users'] : [];
     var query = String(window.groupManagerState.search || '').trim().toLowerCase();
-    var filteredGroups = groups.filter(function(group) {
+    var filteredGroups = groups.map(function(group, sourceIndex) {
+        return { group: group, sourceIndex: sourceIndex };
+    }).filter(function(item) {
+        var group = item.group;
         var title = String(group['Группа'] || '').trim().toLowerCase();
         var description = String(group['Описание'] || '').trim().toLowerCase();
         if (!title && !description) return false;
@@ -9419,7 +19658,9 @@ window.renderGroupsManager = function() {
     container.innerHTML = '<div class="profile-manager-header"><div><h3 class="profile-manager-title">Группы профиля</h3><div class="profile-manager-subtitle">Создавайте группы, добавляйте пользователей, смотрите кто состоит в группе и когда он был добавлен или удалён.</div></div><div class="profile-card-actions"><button class="btn btn-add" type="button" onclick="openGroupForm()">+ Новая группа</button></div></div>' +
         '<details class="settings-surface profile-manager" style="margin-bottom:12px;"><summary style="cursor:pointer;font-weight:700;">Фильтр групп</summary><div style="margin-top:12px;"><input type="text" id="groupsSearchInput" value="' + escapeHtml(window.groupManagerState.search || '') + '" placeholder="Поиск по названию или описанию" oninput="handleGroupsFilterChange()"></div></details>' +
         '<div id="groupsFormPanel"></div>' +
-        (filteredGroups.length ? filteredGroups.map(function(group, idx) {
+        (filteredGroups.length ? filteredGroups.map(function(item) {
+            var group = item.group;
+            var sourceIndex = item.sourceIndex;
             var groupName = String(group['Группа'] || '').trim();
             var members = users.filter(function(user) { return getNormalizedUserGroups(user).includes(groupName.toLowerCase()); });
             var formerMembers = users.filter(function(user) {
@@ -9441,7 +19682,7 @@ window.renderGroupsManager = function() {
             return '<div class="profile-card" style="margin-bottom:12px;">' +
                 '<div class="profile-card-header"><div><div class="profile-card-name">' + escapeHtml(groupName || 'Без названия') + '</div><div class="profile-card-id">' + escapeHtml(group['Описание'] || 'Описание не заполнено') + '</div></div><div class="profile-card-actions">' + miniAppBadge + '<span class="profile-card-badge">Участников: ' + escapeHtml(String(members.length)) + '</span></div></div>' +
                 '<div class="profile-card-details">' + miniAppLinkHtml + '<div class="profile-card-row"><span class="profile-card-label">Сейчас в группе:</span></div>' + membersHtml + '<div class="profile-card-row" style="margin-top:10px;"><span class="profile-card-label">Уже вышли из группы:</span></div>' + formerMembersHtml + '</div>' +
-                '<div class="profile-card-actions"><button class="btn btn-info group-action-btn" type="button" onclick="openGroupForm(' + idx + ')">Редактировать</button><button class="btn btn-save group-action-btn" type="button" onclick="manageGroupMembers(' + idx + ', true)">Добавить пользователей</button><button class="btn btn-neutral group-action-btn" type="button" onclick="manageGroupMembers(' + idx + ', false)">Удалить пользователей</button><button class="btn btn-delete group-action-btn" type="button" onclick="deleteGroupByIndex(' + idx + ')">Удалить группу</button></div>' +
+                '<div class="profile-card-actions"><button class="btn btn-info group-action-btn" type="button" onclick="openGroupForm(' + sourceIndex + ')">Редактировать</button><button class="btn btn-save group-action-btn" type="button" onclick="manageGroupMembers(' + sourceIndex + ', true)">Добавить пользователей</button><button class="btn btn-neutral group-action-btn" type="button" onclick="manageGroupMembers(' + sourceIndex + ', false)">Удалить пользователей</button><button class="btn btn-delete group-action-btn" type="button" onclick="deleteGroupByIndex(' + sourceIndex + ')">Удалить группу</button></div>' +
             '</div>';
         }).join('') : '<div class="community-empty-note">Группы пока не созданы.</div>');
 
@@ -9469,6 +19710,12 @@ function renderGroupFormPanel() {
     var miniAppBannerFile = row['MiniApp баннер файл'] || '';
     var miniAppSubscribeText = row['MiniApp текст подписки'] || 'Подписаться';
     var miniAppUnsubscribeText = row['MiniApp текст отписки'] || 'Отписаться';
+    var miniAppSubscribeColor = normalizeMiniAppButtonColor(row['MiniApp цвет подписки'], '#2f6fed');
+    var miniAppUnsubscribeColor = normalizeMiniAppButtonColor(row['MiniApp цвет отписки'], '#2f6fed');
+    var miniAppSubscribeRedirectMode = normalizeMiniAppRedirectMode(row['MiniApp переход после подписки']);
+    var miniAppSubscribeRedirectUrl = row['MiniApp ссылка после подписки'] || '';
+    var miniAppUnsubscribeRedirectMode = normalizeMiniAppRedirectMode(row['MiniApp переход после отписки']);
+    var miniAppUnsubscribeRedirectUrl = row['MiniApp ссылка после отписки'] || '';
     var miniAppLink = buildMiniAppGroupLink(row);
     panel.innerHTML = '<div class="settings-surface profile-manager" style="margin-bottom:12px;"><div class="profile-manager-header"><div><h3 class="profile-manager-title">' + (groups[editIndex] ? 'Редактирование группы' : 'Новая группа') + '</h3></div></div>' +
         '<div class="profile-form-grid"><div><label><strong>Название группы</strong></label><input id="groupFormName" type="text" value="' + escapeHtml(row['Группа'] || '') + '" placeholder="Например: vip"></div><div><label><strong>Описание группы</strong></label><input id="groupFormDescription" type="text" value="' + escapeHtml(row['Описание'] || '') + '" placeholder="Кто входит в группу и зачем она нужна"></div></div>' +
@@ -9483,12 +19730,16 @@ function renderGroupFormPanel() {
                 '<div><label><strong>MiniApp баннер URL</strong></label><input id="groupFormMiniAppBannerUrl" type="url" value="' + escapeHtml(miniAppBannerUrl) + '" placeholder="https://..."></div>' +
                 '<div><label><strong>MiniApp иконка файл</strong></label><input id="groupFormMiniAppIconFile" type="text" readonly value="' + escapeHtml(miniAppIconFile) + '"><button class="btn btn-info group-action-btn" type="button" onclick="uploadMiniAppGroupImage(&quot;icon&quot;)">Загрузить</button></div>' +
                 '<div><label><strong>MiniApp баннер файл</strong></label><input id="groupFormMiniAppBannerFile" type="text" readonly value="' + escapeHtml(miniAppBannerFile) + '"><button class="btn btn-info group-action-btn" type="button" onclick="uploadMiniAppGroupImage(&quot;banner&quot;)">Загрузить</button></div>' +
-                '<div><label><strong>MiniApp текст подписки</strong></label><input id="groupFormMiniAppSubscribeText" type="text" value="' + escapeHtml(miniAppSubscribeText) + '" placeholder="Подписаться"></div>' +
-                '<div><label><strong>MiniApp текст отписки</strong></label><input id="groupFormMiniAppUnsubscribeText" type="text" value="' + escapeHtml(miniAppUnsubscribeText) + '" placeholder="Отписаться"></div>' +
+                '<div><label><strong>MiniApp текст подписки</strong></label><div class="miniapp-button-setting-controls"><input id="groupFormMiniAppSubscribeText" type="text" value="' + escapeHtml(miniAppSubscribeText) + '" placeholder="Подписаться"><input id="groupFormMiniAppSubscribeColor" class="miniapp-button-color-picker" type="color" value="' + escapeHtml(miniAppSubscribeColor) + '" aria-label="Цвет кнопки подписки" data-tooltip="Выберите цвет кнопки Подписаться"></div></div>' +
+                '<div><label><strong>MiniApp текст отписки</strong></label><div class="miniapp-button-setting-controls"><input id="groupFormMiniAppUnsubscribeText" type="text" value="' + escapeHtml(miniAppUnsubscribeText) + '" placeholder="Отписаться"><input id="groupFormMiniAppUnsubscribeColor" class="miniapp-button-color-picker" type="color" value="' + escapeHtml(miniAppUnsubscribeColor) + '" aria-label="Цвет кнопки отписки" data-tooltip="Выберите цвет кнопки Вы подписаны / Отписаться"></div></div>' +
+                '<div><label><strong>Куда отправить пользователя после Подписки</strong></label><select id="groupFormMiniAppSubscribeRedirectMode" onchange="updateMiniAppRedirectField(&quot;subscribe&quot;)">' + buildMiniAppRedirectOptions(miniAppSubscribeRedirectMode) + '</select><input id="groupFormMiniAppSubscribeRedirectUrl" class="miniapp-redirect-url" type="url" value="' + escapeHtml(miniAppSubscribeRedirectUrl) + '" placeholder="https://..."></div>' +
+                '<div><label><strong>Куда отправить пользователя после Отписки</strong></label><select id="groupFormMiniAppUnsubscribeRedirectMode" onchange="updateMiniAppRedirectField(&quot;unsubscribe&quot;)">' + buildMiniAppRedirectOptions(miniAppUnsubscribeRedirectMode) + '</select><input id="groupFormMiniAppUnsubscribeRedirectUrl" class="miniapp-redirect-url" type="url" value="' + escapeHtml(miniAppUnsubscribeRedirectUrl) + '" placeholder="https://..."></div>' +
                 '<div style="grid-column:1/-1;"><label><strong>Ссылка Mini App</strong></label><input readonly value="' + escapeHtml(miniAppLink) + '" onclick="this.select()" placeholder="Ссылка появится после выбора сообщества и slug"></div>' +
             '</div>' +
         '</details>' +
         '<div class="profile-card-actions"><button class="btn btn-save" type="button" onclick="saveGroupForm()">Сохранить группу</button><button class="btn btn-neutral" type="button" onclick="closeGroupForm()">Отмена</button></div></div>';
+    window.updateMiniAppRedirectField('subscribe');
+    window.updateMiniAppRedirectField('unsubscribe');
 }
 
 window.openGroupForm = function(index) {
@@ -9518,7 +19769,17 @@ window.saveGroupForm = async function() {
         var groupName = String(document.getElementById('groupFormName')?.value || '').trim();
         var description = String(document.getElementById('groupFormDescription')?.value || '').trim();
         var getValue = function(id) { return String(document.getElementById(id)?.value || '').trim(); };
+        var miniAppSubscribeRedirectMode = normalizeMiniAppRedirectMode(getValue('groupFormMiniAppSubscribeRedirectMode'));
+        var miniAppUnsubscribeRedirectMode = normalizeMiniAppRedirectMode(getValue('groupFormMiniAppUnsubscribeRedirectMode'));
+        var miniAppSubscribeRedirectUrl = miniAppSubscribeRedirectMode === 'url'
+            ? normalizeMiniAppRedirectUrl(getValue('groupFormMiniAppSubscribeRedirectUrl'))
+            : '';
+        var miniAppUnsubscribeRedirectUrl = miniAppUnsubscribeRedirectMode === 'url'
+            ? normalizeMiniAppRedirectUrl(getValue('groupFormMiniAppUnsubscribeRedirectUrl'))
+            : '';
         if (!groupName) throw new Error('Введите название группы');
+        if (miniAppSubscribeRedirectMode === 'url' && !miniAppSubscribeRedirectUrl) throw new Error('Выберите корректную http/https ссылку после подписки');
+        if (miniAppUnsubscribeRedirectMode === 'url' && !miniAppUnsubscribeRedirectUrl) throw new Error('Выберите корректную http/https ссылку после отписки');
         if (groups.some(function(item, idx) { return idx !== editIndex && String(item['Группа'] || '').trim().toLowerCase() === groupName.toLowerCase(); })) {
             throw new Error('Группа с таким названием уже существует');
         }
@@ -9549,7 +19810,13 @@ window.saveGroupForm = async function() {
             'MiniApp баннер URL': getValue('groupFormMiniAppBannerUrl'),
             'MiniApp баннер файл': getValue('groupFormMiniAppBannerFile'),
             'MiniApp текст подписки': getValue('groupFormMiniAppSubscribeText') || 'Подписаться',
-            'MiniApp текст отписки': getValue('groupFormMiniAppUnsubscribeText') || 'Отписаться'
+            'MiniApp текст отписки': getValue('groupFormMiniAppUnsubscribeText') || 'Отписаться',
+            'MiniApp цвет подписки': normalizeMiniAppButtonColor(getValue('groupFormMiniAppSubscribeColor'), '#2f6fed'),
+            'MiniApp цвет отписки': normalizeMiniAppButtonColor(getValue('groupFormMiniAppUnsubscribeColor'), '#2f6fed'),
+            'MiniApp переход после подписки': miniAppSubscribeRedirectMode,
+            'MiniApp ссылка после подписки': miniAppSubscribeRedirectUrl,
+            'MiniApp переход после отписки': miniAppUnsubscribeRedirectMode,
+            'MiniApp ссылка после отписки': miniAppUnsubscribeRedirectUrl
         });
         await saveDataDirectly('Groups');
         window.groupManagerState.editingIndex = -1;
@@ -9700,8 +19967,331 @@ window.appLogCurrentFilter = 'ALL';
 window.appLogsEnabled = true;
 window.appLogsFileName = '';
 window.botVersionData = null;
+window.botVersionNotificationSection = 'new';
+window.botVersionNotificationSnapshot = null;
 window.versionEditorSelectedKey = 'global';
 window.structuredTriggerFilterState = { query: '', eventCode: 'ALL' };
+window.deliveryIncidents = [];
+window.deliveryIncidentUnreadCount = 0;
+window.deliveryIncidentLastUnreadCount = null;
+window.deliveryIncidentCommunityKey = '';
+window.deliveryIncidentResolvedCommunityId = '';
+window.deliveryIncidentPollTimer = null;
+window.deliveryIncidentPollInFlight = false;
+window.deliveryIncidentPollingEventsInstalled = false;
+const PAPA_BOT_DELIVERY_INDICATOR_HIDDEN_KEY = 'papaBotDeliveryIncidentIndicatorHidden';
+const PAPA_BOT_READ_VERSION_KEY = 'papaBotReadDisplayVersion';
+const PAPA_BOT_VERSION_SEGMENT_LABELS = [
+    'Общая версия PAPA BOT',
+    'Админ-панель: интерфейс',
+    'Админ-панель: стиль',
+    'Вкладка СООБЩЕНИЯ',
+    'Вкладка КОММЕНТАРИИ В ПОСТАХ',
+    'Вкладка ПОЛЬЗОВАТЕЛИ',
+    'Вкладка ПЕРЕМЕННЫЕ',
+    'Вкладка РАССЫЛКА',
+    'Вкладка ОТЛОЖЕННЫЕ',
+    'Вкладка ТРИГГЕРЫ',
+    'Вкладки НАСТРОЙКА и АДМИН',
+    'Ядро и инфраструктура',
+    'Telegram'
+];
+
+function formatDeliveryIncidentDate(value) {
+    var date = new Date(String(value || ''));
+    if (!Number.isFinite(date.getTime())) return 'Дата не указана';
+    return date.toLocaleString('ru-RU', {
+        timeZone: 'Europe/Moscow',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) + ' МСК';
+}
+
+function getDeliveryIncidentStatusLabel(status) {
+    if (status === 'resolved') return 'Доставлено';
+    if (status === 'cancelled') return 'Не повторять';
+    if (status === 'retrying') return 'Отправляется';
+    return 'Ожидает исправления';
+}
+
+function getDeliveryIncidentPayloadText(incident) {
+    var payload = incident && incident.payload || {};
+    var text = payload.answer || payload.text || payload.message || payload.messageText || '';
+    if (!text && payload.action) {
+        text = payload.action.text || payload.action.message || '';
+    }
+    return String(text || '').trim();
+}
+
+function getDeliveryIncidentAttachmentCount(incident) {
+    var payload = incident && incident.payload || {};
+    var attachments = payload.attachments || payload.messageAttachments || payload.action && payload.action.attachments || [];
+    return Array.isArray(attachments) ? attachments.length : (attachments ? 1 : 0);
+}
+
+function renderDeliveryIncidentCards(targetId, incidents) {
+    var target = document.getElementById(targetId);
+    if (!target) return;
+    var rows = Array.isArray(incidents) ? incidents : [];
+    if (!rows.length) {
+        target.innerHTML = '<div class="community-empty-note">Ошибок доставки для выбранного сообщества нет.</div>';
+        return;
+    }
+    target.innerHTML = rows.map(function(incident) {
+        var status = String(incident.status || 'pending');
+        var pending = status === 'pending' || status === 'retrying';
+        var text = getDeliveryIncidentPayloadText(incident);
+        var attachmentCount = getDeliveryIncidentAttachmentCount(incident);
+        var userId = String(incident.userId || '').replace(/[^0-9]/g, '');
+        var userMarkup = userId
+            ? '<a href="https://vk.ru/id' + escapeHtml(userId) + '" target="_blank" rel="noopener noreferrer">Пользователь VK ' + escapeHtml(userId) + '</a>'
+            : 'Пользователь не указан';
+        var detailParts = [
+            userMarkup,
+            incident.activityTitle ? ('Активность: ' + escapeHtml(incident.activityTitle)) : '',
+            incident.postId ? ('Пост: ' + escapeHtml(incident.postId)) : '',
+            incident.commentId ? ('Комментарий: ' + escapeHtml(incident.commentId)) : ''
+        ].filter(Boolean);
+        var payloadDetails = [];
+        if (text) payloadDetails.push('Текст: «' + escapeHtml(text) + '»');
+        if (attachmentCount) payloadDetails.push('Вложений: ' + String(attachmentCount));
+        var rowClass = status === 'resolved' ? ' is-resolved' : (status === 'cancelled' ? ' is-cancelled' : '');
+        return '<article class="delivery-incident-card' + rowClass + '">' +
+            '<div class="delivery-incident-card-header">' +
+                '<div><div class="delivery-incident-card-title">' + escapeHtml(incident.errorTitle || incident.summary || 'Ошибка доставки') + '</div>' +
+                '<div class="delivery-incident-card-meta">' + escapeHtml(formatDeliveryIncidentDate(incident.createdAt)) + ' · попыток: ' + String(Number(incident.retryCount || 0)) + '</div></div>' +
+                '<span class="delivery-incident-status">' + escapeHtml(getDeliveryIncidentStatusLabel(status)) + '</span>' +
+            '</div>' +
+            '<div class="delivery-incident-card-detail">' + detailParts.join(' · ') + '</div>' +
+            (payloadDetails.length ? '<div class="delivery-incident-card-detail">' + payloadDetails.join(' · ') + '</div>' : '') +
+            '<div class="delivery-incident-card-error"><strong>Что произошло:</strong> ' + escapeHtml(incident.explanation || incident.error || 'Доставка не подтверждена.') +
+                (incident.error ? '<div style="margin-top:6px;"><strong>Ответ системы:</strong> ' + escapeHtml(incident.error) + '</div>' : '') +
+                '<div style="margin-top:6px;"><strong>Как исправить:</strong> ' + escapeHtml(incident.remediation || 'Устраните причину и повторите отправку.') + '</div>' +
+            '</div>' +
+            (pending ? '<div class="delivery-incident-card-actions">' +
+                '<button class="btn btn-save" type="button" onclick="retryDeliveryIncidentFromAdmin(&quot;' + escapeHtml(incident.id) + '&quot;)">Повторить сейчас</button>' +
+                '<button class="btn btn-neutral" type="button" onclick="cancelDeliveryIncidentFromAdmin(&quot;' + escapeHtml(incident.id) + '&quot;)">Не повторять</button>' +
+            '</div>' : '') +
+        '</article>';
+    }).join('');
+}
+
+function renderDeliveryIncidentSurfaces() {
+    var incidents = Array.isArray(window.deliveryIncidents) ? window.deliveryIncidents : [];
+    var pending = incidents.filter(function(item) {
+        return item.status === 'pending' || item.status === 'retrying';
+    });
+    var subtitle = document.getElementById('deliveryIncidentsSubtitle');
+    var summary = document.getElementById('deliveryRecoverySummary');
+    if (subtitle) {
+        subtitle.textContent = pending.length
+            ? ('Требуют внимания: ' + String(pending.length) + '. История сохранена ниже.')
+            : 'Новых ошибок нет. Ниже сохранена история доставки.';
+    }
+    if (summary) {
+        summary.textContent = pending.length
+            ? ('Ожидают исправления или повтора: ' + String(pending.length) + '.')
+            : 'Все зафиксированные ошибки обработаны.';
+    }
+    renderDeliveryIncidentCards('deliveryIncidentsList', incidents);
+    renderDeliveryIncidentCards('deliveryRecoveryList', incidents);
+}
+
+function updateDeliveryIncidentAlert(unreadCount) {
+    var btn = document.getElementById('deliveryIncidentAlertBtn');
+    var count = document.getElementById('deliveryIncidentAlertCount');
+    if (!btn || !count) return;
+    var unread = Math.max(0, Number(unreadCount || 0));
+    var previous = window.deliveryIncidentLastUnreadCount;
+    var hasNew = previous !== null && unread > previous;
+    if (unread > 0 && (hasNew || previous === null)) {
+        try { localStorage.removeItem(PAPA_BOT_DELIVERY_INDICATOR_HIDDEN_KEY); } catch (_e) {}
+    }
+    var hidden = false;
+    try { hidden = localStorage.getItem(PAPA_BOT_DELIVERY_INDICATOR_HIDDEN_KEY) === '1'; } catch (_e) {}
+    btn.classList.toggle('has-unread', unread > 0);
+    btn.classList.toggle('is-collapsed', hidden && unread === 0);
+    count.textContent = unread > 0 ? String(unread) : '';
+    btn.setAttribute('aria-label', unread > 0
+        ? ('Новых ошибок доставки: ' + String(unread))
+        : 'Ошибок доставки, требующих прочтения, нет');
+    window.deliveryIncidentUnreadCount = unread;
+    window.deliveryIncidentLastUnreadCount = unread;
+}
+
+window.loadDeliveryIncidents = async function(options) {
+    options = options || {};
+    var statusEl = document.getElementById('deliveryIncidentsStatus');
+    try {
+        if (options.showStatus && statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Проверяю журнал недоставок...');
+        var selectedCommunityKey = String(window.currentCommunityId || '');
+        var communityId = window.deliveryIncidentCommunityKey === selectedCommunityKey
+            ? String(window.deliveryIncidentResolvedCommunityId || '')
+            : '';
+        if (!communityId) {
+            communityId = await resolveActiveVkGroupIdForAdmin();
+            window.deliveryIncidentCommunityKey = selectedCommunityKey;
+            window.deliveryIncidentResolvedCommunityId = String(communityId || '');
+        }
+        var profileId = getCurrentProfileId();
+        var principalProfileId = getPrincipalProfileId();
+        var baseUrl = window.location.href.split('?')[0];
+        var url = baseUrl + '?getDeliveryIncidents=1&communityId=' + encodeURIComponent(communityId) +
+            '&profileId=' + encodeURIComponent(profileId) +
+            '&principalProfileId=' + encodeURIComponent(principalProfileId) +
+            '&limit=200&_ts=' + String(Date.now());
+        var response = await fetch(url, { cache: 'no-store' });
+        var data = await response.json();
+        if (!response.ok || data.success === false) throw new Error(data.error || 'Не удалось загрузить ошибки доставки');
+        window.deliveryIncidents = Array.isArray(data.incidents) ? data.incidents : [];
+        updateDeliveryIncidentAlert(data.unreadCount);
+        renderDeliveryIncidentSurfaces();
+        if (statusEl) statusEl.innerHTML = '';
+        return data;
+    } catch (error) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Не удалось загрузить ошибки доставки: ' + error.message);
+        return null;
+    }
+};
+
+async function postDeliveryIncidentAction(action, payload) {
+    var communityId = await resolveActiveVkGroupIdForAdmin();
+    var profileId = getCurrentProfileId();
+    var principalProfileId = getPrincipalProfileId();
+    var baseUrl = window.location.href.split('?')[0];
+    var response = await fetch(baseUrl + '?' + action + '=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({
+            communityId: communityId,
+            profileId: profileId,
+            principalProfileId: principalProfileId
+        }, payload || {}))
+    });
+    var data = await response.json();
+    if (!response.ok || data.success === false) throw new Error(data.error || 'Операция не выполнена');
+    return data;
+}
+
+window.retryDeliveryIncidentFromAdmin = async function(incidentId) {
+    if (!confirm('Повторить сохранённую отправку сейчас? Будут использованы тот же текст, результат и вложения.')) return;
+    var statusEl = document.getElementById('deliveryIncidentsStatus');
+    try {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Повторяю отправку...');
+        await postDeliveryIncidentAction('retryDeliveryIncident', { incidentId: incidentId });
+        await loadDeliveryIncidents();
+        if (statusEl) {
+            statusEl.innerHTML = makeInlineNotice('success', 'Отправка подтверждена.');
+            clearAdminStatusAfterDelay('deliveryIncidentsStatus', statusEl.innerHTML, 5000);
+        }
+    } catch (error) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Повтор пока не выполнен: ' + error.message);
+        await loadDeliveryIncidents();
+    }
+};
+
+window.cancelDeliveryIncidentFromAdmin = async function(incidentId) {
+    if (!confirm('Отключить повтор этой отправки? Запись останется в истории со статусом «Не повторять».')) return;
+    var statusEl = document.getElementById('deliveryIncidentsStatus');
+    try {
+        await postDeliveryIncidentAction('cancelDeliveryIncident', { incidentId: incidentId });
+        await loadDeliveryIncidents();
+        if (statusEl) {
+            statusEl.innerHTML = makeInlineNotice('success', 'Повтор отключён. Запись сохранена в истории.');
+            clearAdminStatusAfterDelay('deliveryIncidentsStatus', statusEl.innerHTML, 5000);
+        }
+    } catch (error) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Не удалось отключить повтор: ' + error.message);
+    }
+};
+
+window.openDeliveryIncidentsModal = async function() {
+    var overlay = document.getElementById('deliveryIncidentsOverlay');
+    if (overlay) overlay.style.display = 'flex';
+    var data = await loadDeliveryIncidents();
+    var unreadIds = (data && Array.isArray(data.incidents) ? data.incidents : [])
+        .filter(function(item) { return item.unread; })
+        .map(function(item) { return item.id; });
+    if (unreadIds.length) {
+        try {
+            await postDeliveryIncidentAction('markDeliveryIncidentsRead', { incidentIds: unreadIds });
+            window.deliveryIncidents.forEach(function(item) {
+                if (unreadIds.indexOf(item.id) !== -1) item.unread = false;
+            });
+            updateDeliveryIncidentAlert(0);
+            renderDeliveryIncidentSurfaces();
+        } catch (_e) {}
+    }
+};
+
+window.closeDeliveryIncidentsModal = function(event) {
+    if (event && event.target && event.target.id !== 'deliveryIncidentsOverlay') return;
+    var overlay = document.getElementById('deliveryIncidentsOverlay');
+    if (overlay) overlay.style.display = 'none';
+};
+
+window.hideDeliveryIncidentIndicator = function() {
+    if (window.deliveryIncidentUnreadCount > 0) {
+        var statusEl = document.getElementById('deliveryIncidentsStatus');
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Сначала откройте и прочитайте новые ошибки.');
+        return;
+    }
+    try { localStorage.setItem(PAPA_BOT_DELIVERY_INDICATOR_HIDDEN_KEY, '1'); } catch (_e) {}
+    updateDeliveryIncidentAlert(0);
+    closeDeliveryIncidentsModal();
+};
+
+function scheduleDeliveryIncidentPoll(delayMs) {
+    if (window.deliveryIncidentPollTimer) clearTimeout(window.deliveryIncidentPollTimer);
+    window.deliveryIncidentPollTimer = setTimeout(runDeliveryIncidentPoll, Math.max(1000, Number(delayMs || 5000)));
+}
+
+async function runDeliveryIncidentPoll() {
+    if (window.deliveryIncidentPollInFlight) {
+        scheduleDeliveryIncidentPoll(2000);
+        return;
+    }
+    if (!checkAuthSession()) {
+        scheduleDeliveryIncidentPoll(5000);
+        return;
+    }
+    window.deliveryIncidentPollInFlight = true;
+    try {
+        await loadDeliveryIncidents();
+    } finally {
+        window.deliveryIncidentPollInFlight = false;
+        scheduleDeliveryIncidentPoll(document.hidden ? 15000 : 5000);
+    }
+}
+
+function refreshDeliveryIncidentsInBackground() {
+    window.deliveryIncidentCommunityKey = '';
+    window.deliveryIncidentResolvedCommunityId = '';
+    scheduleDeliveryIncidentPoll(100);
+}
+
+function startDeliveryIncidentPolling() {
+    if (!window.deliveryIncidentPollingEventsInstalled) {
+        window.deliveryIncidentPollingEventsInstalled = true;
+        window.addEventListener('focus', refreshDeliveryIncidentsInBackground);
+        window.addEventListener('papa-bot-session-validated', refreshDeliveryIncidentsInBackground);
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) refreshDeliveryIncidentsInBackground();
+        });
+    }
+    refreshDeliveryIncidentsInBackground();
+}
+
+function getVersionSegmentTooltip(index) {
+    var parts = Array.isArray(window.botVersionData && window.botVersionData.parts) ? window.botVersionData.parts : [];
+    var part = parts[index] || {};
+    var label = String(part.label || PAPA_BOT_VERSION_SEGMENT_LABELS[index] || ('Раздел версии ' + String(index + 1))).trim();
+    var description = String(part.description || '').trim();
+    return description ? (label + ' — ' + description) : label;
+}
 
 function renderVersionSegments(versionText, sizeClass) {
     var raw = String(versionText || '').trim();
@@ -9718,10 +20308,256 @@ function renderVersionSegments(versionText, sizeClass) {
         '<span class="version-prefix">' + escapeHtml(prefix) + '</span>' +
         segments.map(function(segment, idx) {
             var dot = idx < segments.length - 1 ? '<span class="version-dot">.</span>' : '';
-            return '<span class="version-segment seg-' + (idx % 12) + '">' + escapeHtml(segment) + '</span>' + dot;
+            var telegramClass = idx === 12 ? ' telegram-segment' : '';
+            var tooltip = getVersionSegmentTooltip(idx);
+            return '<span class="version-segment has-tooltip seg-' + idx + telegramClass + '" data-tooltip="' + escapeHtml(tooltip) + '">' + escapeHtml(segment) + '</span>' + dot;
         }).join('') +
     '</span>';
 }
+
+function getVersionSegmentValues(versionText) {
+    var raw = String(versionText || '').trim();
+    if (raw.toLowerCase().indexOf('version ') === 0) {
+        raw = raw.substring(8).trim();
+    }
+    return raw.split('.').map(function(item) { return String(item || '').trim(); }).filter(Boolean);
+}
+
+function getReadBotVersionValue() {
+    try {
+        return String(localStorage.getItem(PAPA_BOT_READ_VERSION_KEY) || '').trim();
+    } catch (_e) {
+        return '';
+    }
+}
+
+function setInitialBotVersionNotificationBaseline(data) {
+    var currentVersion = String(data && data.displayVersion || '').trim();
+    if (!currentVersion || getReadBotVersionValue()) return;
+    try {
+        localStorage.setItem(PAPA_BOT_READ_VERSION_KEY, currentVersion);
+    } catch (_e) {}
+}
+
+function parseBotVersionSegment(value) {
+    var parsed = Number.parseInt(String(value || '').trim(), 10);
+    return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatBotVersionUpdateCount(count) {
+    var value = Math.max(0, Number(count) || 0);
+    var mod100 = value % 100;
+    var mod10 = value % 10;
+    var suffix = mod100 >= 11 && mod100 <= 14
+        ? 'обновлений'
+        : (mod10 === 1 ? 'обновление' : (mod10 >= 2 && mod10 <= 4 ? 'обновления' : 'обновлений'));
+    return String(value) + ' ' + suffix;
+}
+
+function formatBotVersionNotificationDate(value) {
+    var raw = String(value || '').trim();
+    if (!raw) return 'Историческое обновление · точные дата и время не были зафиксированы';
+    var date = new Date(raw);
+    if (!Number.isFinite(date.getTime())) return 'Дата и время обновления не указаны';
+    return date.toLocaleString('ru-RU', {
+        timeZone: 'Europe/Moscow',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    }) + ' МСК';
+}
+
+function buildBotVersionNotificationGroups(data, boundaryVersion, status) {
+    data = data || window.botVersionData || {};
+    status = status === 'old' ? 'old' : 'new';
+    var parts = Array.isArray(data.parts) ? data.parts : [];
+    var currentSegments = getVersionSegmentValues(data.displayVersion || '');
+    var boundarySegments = getVersionSegmentValues(boundaryVersion || '');
+
+    return parts.map(function(part, index) {
+        var boundaryValue = parseBotVersionSegment(boundarySegments[index]);
+        var currentValue = parseBotVersionSegment(currentSegments[index] || part.value);
+        if (status === 'new' && currentValue <= boundaryValue) return null;
+
+        var history = (Array.isArray(part.history) ? part.history : []).filter(function(item) {
+            var itemValue = parseBotVersionSegment(item && item.version);
+            if (itemValue > currentValue) return false;
+            return status === 'old' ? itemValue <= boundaryValue : itemValue > boundaryValue;
+        }).sort(function(left, right) {
+            var delta = parseBotVersionSegment(left && left.version) - parseBotVersionSegment(right && right.version);
+            return status === 'old' ? -delta : delta;
+        }).map(function(item) {
+            return {
+                version: String(item && item.version || '').trim(),
+                text: String(item && item.summary || '').trim(),
+                updatedAt: String(item && item.updatedAt || '').trim()
+            };
+        });
+
+        if (status === 'new' && !history.length && currentValue > boundaryValue) {
+            history.push({
+                version: String(part.value || currentSegments[index] || '').trim(),
+                text: String(part.currentSummary || '').trim(),
+                updatedAt: String(data.updatedAt || '').trim()
+            });
+        }
+
+        return {
+            key: String(part.key || '').trim(),
+            title: String(part.label || part.key || 'Обновление').trim(),
+            colorIndex: index,
+            updates: history
+        };
+    }).filter(function(group) {
+        return group && group.updates.length;
+    });
+}
+
+function countBotVersionNotificationGroups(groups) {
+    return (Array.isArray(groups) ? groups : []).reduce(function(total, group) {
+        return total + group.updates.length;
+    }, 0);
+}
+
+function buildBotVersionNotificationSnapshot(data, readVersion) {
+    var currentVersion = String(data && data.displayVersion || '').trim();
+    return {
+        currentVersion: currentVersion,
+        readVersion: String(readVersion || '').trim(),
+        newGroups: buildBotVersionNotificationGroups(data, readVersion, 'new'),
+        oldGroups: buildBotVersionNotificationGroups(data, readVersion, 'old'),
+        allGroups: buildBotVersionNotificationGroups(data, currentVersion, 'old')
+    };
+}
+
+function getUnreadBotVersionNotificationCount(data) {
+    data = data || window.botVersionData || {};
+    var currentVersion = String(data.displayVersion || '').trim();
+    if (!currentVersion) return 0;
+    var readVersion = getReadBotVersionValue();
+    if (readVersion === currentVersion) return 0;
+    if (!readVersion) return 0;
+    return countBotVersionNotificationGroups(buildBotVersionNotificationGroups(data, readVersion, 'new'));
+}
+
+function renderBotVersionNotificationsButton() {
+    var btn = document.getElementById('botVersionNotificationsBtn');
+    var countEl = document.getElementById('botVersionNotificationsCount');
+    if (!btn || !countEl) return;
+    var count = getUnreadBotVersionNotificationCount(window.botVersionData);
+    btn.classList.toggle('has-unread', count > 0);
+    countEl.textContent = count > 0 ? ('+' + String(count)) : '';
+    btn.setAttribute('aria-label', count > 0
+        ? ('Непрочитанных уведомлений об обновлениях: ' + String(count))
+        : 'Все уведомления об обновлениях прочитаны');
+    btn.title = count > 0
+        ? ('Непрочитанных обновлений: ' + String(count))
+        : 'Все уведомления об обновлениях сервиса прочитаны';
+}
+
+function renderBotVersionNotifications() {
+    var subtitleEl = document.getElementById('botVersionNotificationsSubtitle');
+    var summaryEl = document.getElementById('botVersionNotificationsSummary');
+    var listEl = document.getElementById('botVersionNotificationsList');
+    var newTabEl = document.getElementById('botVersionNotificationsNewTab');
+    var oldTabEl = document.getElementById('botVersionNotificationsOldTab');
+    var newCountEl = document.getElementById('botVersionNotificationsNewCount');
+    var oldCountEl = document.getElementById('botVersionNotificationsOldCount');
+    var data = window.botVersionData;
+    if (!subtitleEl || !summaryEl || !listEl) return;
+
+    if (!data) {
+        subtitleEl.textContent = 'Уведомления загрузятся после получения версии.';
+        summaryEl.textContent = 'Данные о версии ещё не загружены.';
+        listEl.innerHTML = '';
+        return;
+    }
+
+    var snapshot = window.botVersionNotificationSnapshot || buildBotVersionNotificationSnapshot(data, getReadBotVersionValue());
+    var section = window.botVersionNotificationSection === 'old' ? 'old' : 'new';
+    var groups = section === 'old' ? snapshot.oldGroups : snapshot.newGroups;
+    var newCount = countBotVersionNotificationGroups(snapshot.newGroups);
+    var oldCount = countBotVersionNotificationGroups(snapshot.oldGroups);
+    var updateCount = countBotVersionNotificationGroups(groups);
+
+    if (newTabEl) {
+        newTabEl.classList.toggle('is-active', section === 'new');
+        newTabEl.setAttribute('aria-selected', section === 'new' ? 'true' : 'false');
+    }
+    if (oldTabEl) {
+        oldTabEl.classList.toggle('is-active', section === 'old');
+        oldTabEl.setAttribute('aria-selected', section === 'old' ? 'true' : 'false');
+    }
+    if (newCountEl) newCountEl.textContent = String(newCount);
+    if (oldCountEl) oldCountEl.textContent = String(oldCount);
+
+    subtitleEl.textContent = section === 'new'
+        ? (updateCount ? ('Новых обновлений: ' + String(updateCount) + ' в разделах: ' + String(groups.length) + '.') : 'Новых непрочитанных обновлений нет.')
+        : (updateCount ? ('Старых обновлений: ' + String(updateCount) + ' в разделах: ' + String(groups.length) + '.') : 'Старых прочитанных обновлений пока нет.');
+    summaryEl.innerHTML = '<div style="margin-bottom:6px;">' + renderVersionSegments(data.displayVersion || 'version unknown', 'version-segments--large') + '</div>' +
+        '<div>' + (section === 'new'
+            ? 'Здесь находятся только непрочитанные обновления. После открытия окна они будут перенесены в раздел «Старые уведомления».'
+            : 'Здесь хранится полная история прочитанных обновлений сервиса. Нажмите на версию, чтобы снова открыть её описание.') + '</div>';
+    listEl.innerHTML = groups.length
+        ? groups.map(function(group) {
+            var countLabel = formatBotVersionUpdateCount(group.updates.length);
+            return '<section class="version-notification-group">' +
+                '<div class="version-notification-group-header">' +
+                    '<div class="version-notification-group-title">' + escapeHtml(group.title) + '</div>' +
+                    '<div class="version-notification-group-count">' + escapeHtml(countLabel) + '</div>' +
+                '</div>' +
+                group.updates.map(function(item) {
+                    return '<details class="version-notification-card">' +
+                        '<summary class="version-notification-card-summary">' +
+                            '<span class="version-segment seg-' + group.colorIndex + '">' + escapeHtml(item.version || '') + '</span>' +
+                            '<span class="version-notification-card-heading">' +
+                                '<span class="version-notification-card-title">Версия ' + escapeHtml(item.version || '') + '</span>' +
+                                '<span class="version-notification-card-date">' + escapeHtml(formatBotVersionNotificationDate(item.updatedAt)) + '</span>' +
+                            '</span>' +
+                        '</summary>' +
+                        '<div class="version-notification-card-text">' + escapeHtml(item.text || 'Описание обновления пока не заполнено.') + '</div>' +
+                    '</details>';
+                }).join('') +
+            '</section>';
+        }).join('')
+        : '<div class="version-notification-empty">' + (section === 'new'
+            ? 'Все обновления прочитаны. Откройте «Старые уведомления», чтобы посмотреть полную историю.'
+            : 'Прочитанных обновлений пока нет.') + '</div>';
+}
+
+window.setBotVersionNotificationSection = function(section) {
+    window.botVersionNotificationSection = section === 'old' ? 'old' : 'new';
+    if (window.botVersionNotificationSection === 'old' && window.botVersionNotificationSnapshot) {
+        window.botVersionNotificationSnapshot.oldGroups = window.botVersionNotificationSnapshot.allGroups;
+        window.botVersionNotificationSnapshot.newGroups = [];
+    }
+    renderBotVersionNotifications();
+};
+
+window.openBotVersionNotifications = function() {
+    var currentVersion = String(window.botVersionData && window.botVersionData.displayVersion || '').trim();
+    var readVersion = getReadBotVersionValue();
+    window.botVersionNotificationSection = 'new';
+    window.botVersionNotificationSnapshot = buildBotVersionNotificationSnapshot(window.botVersionData || {}, readVersion);
+    renderBotVersionNotifications();
+    if (currentVersion) {
+        try {
+            localStorage.setItem(PAPA_BOT_READ_VERSION_KEY, currentVersion);
+        } catch (_e) {}
+    }
+    renderBotVersionNotificationsButton();
+    var overlay = document.getElementById('botVersionNotificationsOverlay');
+    if (overlay) overlay.style.display = 'flex';
+};
+
+window.closeBotVersionNotifications = function(evt) {
+    if (evt && evt.target && evt.target.id && evt.target.id !== 'botVersionNotificationsOverlay') return;
+    var overlay = document.getElementById('botVersionNotificationsOverlay');
+    if (overlay) overlay.style.display = 'none';
+    window.botVersionNotificationSnapshot = null;
+};
 
 window.renderBotVersion = function() {
     var chipEl = document.getElementById('botVersionChip');
@@ -9735,10 +20571,13 @@ window.renderBotVersion = function() {
         if (summaryEl) summaryEl.textContent = 'Данные о версии пока не загружены.';
         if (partsEl) partsEl.innerHTML = '';
         if (subtitleEl) subtitleEl.textContent = 'Расшифровка версии загрузится после запроса к серверу.';
+        renderBotVersionNotificationsButton();
+        renderBotVersionNotifications();
         return;
     }
 
     if (chipEl) chipEl.innerHTML = renderVersionSegments(data.displayVersion || 'version unknown', 'version-segments--chip');
+    renderBotVersionNotificationsButton();
     if (subtitleEl) {
         subtitleEl.textContent = 'Обновления PAPA BOT от ' + escapeHtml(data.updatedAt || 'неизвестной даты') + ' по 14:30 мск.';
     }
@@ -9751,12 +20590,13 @@ window.renderBotVersion = function() {
         partsEl.innerHTML = parts.map(function(part, partIdx) {
             var history = Array.isArray(part.history) ? part.history : [];
             return '<div class="version-part-card">' +
-                '<div class="version-part-value"><span class="version-segment seg-' + (partIdx % 12) + '">' + escapeHtml(part.value || '') + '</span></div>' +
+                '<div class="version-part-value"><span class="version-segment seg-' + partIdx + '">' + escapeHtml(part.value || '') + '</span></div>' +
                 '<div class="version-part-title">' + escapeHtml(part.label || part.key || '') + '</div>' +
                 '<div class="version-current-note">' + escapeHtml(part.currentSummary || '') + '</div>' +
                 '<div class="version-history-box">' + history.map(function(item) {
                     return '<div class="version-history-item">' +
-                        '<div class="version-history-version version-segment seg-' + ((String(item.version || '').replace(/\D/g, '').slice(-2) || '0') % 12) + '">' + escapeHtml(item.version || '') + '</div>' +
+                        '<div class="version-history-version version-segment seg-' + partIdx + '">' + escapeHtml(item.version || '') + '</div>' +
+                        '<div class="version-history-date">' + escapeHtml(formatBotVersionNotificationDate(item.updatedAt)) + '</div>' +
                         '<div class="version-history-text">' + escapeHtml(item.summary || '') + '</div>' +
                     '</div>';
                 }).join('') + '</div>' +
@@ -9766,14 +20606,16 @@ window.renderBotVersion = function() {
 
     renderVersionEditor();
     renderCapabilitiesModal();
+    renderBotVersionNotifications();
 };
 
 window.loadBotVersion = async function() {
     try {
         var baseUrl = window.location.href.split('?')[0];
-        var res = await fetch(baseUrl + '?getBotVersion');
+        var res = await fetch(baseUrl + '?getBotVersion&_ts=' + Date.now(), { cache: 'no-store' });
         var data = await res.json();
         window.botVersionData = data;
+        setInitialBotVersionNotificationBaseline(data);
         renderBotVersion();
     } catch (e) {
         console.error('[Admin] ❌ loadBotVersion error:', e.message);
@@ -9830,8 +20672,9 @@ window.appendVersionHistoryEntry = function() {
     var existing = part.history.find(function(item) { return item.version === versionValue; });
     if (existing) {
         existing.summary = summaryValue;
+        existing.updatedAt = new Date().toISOString();
     } else {
-        part.history.push({ version: versionValue, summary: summaryValue });
+        part.history.push({ version: versionValue, summary: summaryValue, updatedAt: new Date().toISOString() });
         part.history.sort(function(a, b) { return String(a.version).localeCompare(String(b.version)); });
     }
     part.value = String(document.getElementById('versionEditorValue').value || part.value || '').trim();
@@ -10028,6 +20871,15 @@ window.setAppLogFilter = function(filter) {
     renderAppLogs();
 };
 
+function clearAdminStatusAfterDelay(elementId, expectedHtml, delayMs) {
+    setTimeout(function() {
+        var el = document.getElementById(elementId);
+        if (el && (!expectedHtml || el.innerHTML === expectedHtml)) {
+            el.innerHTML = '';
+        }
+    }, delayMs || 5000);
+}
+
 window.loadAppLogs = async function(showToast) {
     const statusEl = document.getElementById('appLogsStatus');
     try {
@@ -10049,7 +20901,13 @@ window.loadAppLogs = async function(showToast) {
             statusEl.innerHTML = '';
         }
     } catch (e) {
-        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', '❌ Не удалось загрузить журнал: ' + e.message);
+        if (statusEl) {
+            var errorHtml = makeInlineNotice('error', '❌ Не удалось загрузить журнал: ' + e.message);
+            statusEl.innerHTML = errorHtml;
+            if (String(e.message || '').includes('Legacy sheet access is disabled')) {
+                clearAdminStatusAfterDelay('appLogsStatus', errorHtml, 5000);
+            }
+        }
     }
 };
 
@@ -10141,7 +20999,12 @@ window.loadAdminProfiles = async function() {
             promoCodes: Array.isArray(data.promoCodes) ? data.promoCodes : [],
             recoveryRequests: Array.isArray(data.recoveryRequests) ? data.recoveryRequests : [],
             loginLogs: Array.isArray(data.loginLogs) ? data.loginLogs : [],
-            limitRequests: Array.isArray(data.limitRequests) ? data.limitRequests : []
+            limitRequests: Array.isArray(data.limitRequests) ? data.limitRequests : [],
+            balanceTopUps: Array.isArray(data.balanceTopUps) ? data.balanceTopUps : [],
+            financialOperations: Array.isArray(data.financialOperations) ? data.financialOperations : [],
+            errorReports: Array.isArray(data.errorReports) ? data.errorReports : [],
+            suggestionReports: Array.isArray(data.suggestionReports) ? data.suggestionReports : [],
+            yookassaConfigured: !!data.yookassaConfigured
         };
         renderAdminProfiles();
         renderPromoCodes();
@@ -10169,6 +21032,8 @@ window.saveAdminProfile = async function() {
         recoveryEmail: (document.getElementById('profileFormEmail')?.value || '').trim(),
         durationMinutes: (document.getElementById('profileFormDuration')?.value || '').trim(),
         requestsLimit: (document.getElementById('profileFormRequestsLimit')?.value || '').trim(),
+        balance: (document.getElementById('profileFormBalance')?.value || '').trim(),
+        extraRequestLimit: (document.getElementById('profileFormExtraRequestLimit')?.value || '').trim(),
         principalProfileId: getPrincipalProfileId()
     };
 
@@ -10229,6 +21094,8 @@ window.savePromoCode = async function() {
         label: (document.getElementById('promoFormLabel')?.value || '').trim(),
         durationMinutes: (document.getElementById('promoFormDuration')?.value || '').trim(),
         dailyRequestsLimit: (document.getElementById('promoFormRequestsLimit')?.value || '').trim(),
+        balanceCredit: (document.getElementById('promoFormBalanceCredit')?.value || '').trim(),
+        extraRequestLimitCredit: (document.getElementById('promoFormExtraRequestLimitCredit')?.value || '').trim(),
         maxUses: (document.getElementById('promoFormMaxUses')?.value || '1').trim(),
         principalProfileId: getPrincipalProfileId()
     };
@@ -10300,11 +21167,13 @@ window.resolveRecoveryRequestById = async function(requestId, profileId) {
 window.renderCommunityButtons = async function() {
     const container = document.getElementById('communityButtons');
     if (!container) return;
+    if (window.currentAdminPlatform === 'telegram') return;
     
     try {
         const baseUrl = window.location.href.split('?')[0];
         const res = await fetch(baseUrl + '?getBotSettings');
         const data = await res.json();
+        rememberBotSettings(data);
 
         const communities = data.communities || {};
         const communityIds = Object.keys(communities);
@@ -10428,6 +21297,7 @@ window.switchCommunity = async function(communityId) {
 
         // Очищаем кэш
         for (const t of allTabs) { dataStore[t] = []; }
+        dataStore['CommentTextLists'] = [];
 
         // &#x1F916; Сбрасываем состояние ботов при переключении сообщества
         window.activeBot = {};
@@ -10513,6 +21383,11 @@ function saveAppState(communityId) {
 // Восстановление состояния
 function restoreAppState() {
     try {
+        if (window.currentAdminPlatform === 'telegram') {
+            var telegramCommunityId = getAdminDataContextId();
+            window.currentCommunityId = telegramCommunityId;
+            return { communityId: telegramCommunityId, tabName: 'TelegramChannels' };
+        }
         const communityId = localStorage.getItem('vkBotLastCommunity');
         const tabName = localStorage.getItem('vkBotLastTab') || 'Messages';
         if (communityId) {
@@ -10542,9 +21417,11 @@ function highlightQuickStartTarget(target) {
 window.runQuickStartStep = function(stepKey) {
     var targets = {
         community: document.getElementById('addCommunityBtn') || document.getElementById('communitySwitcher'),
+        communityName: document.getElementById('communityName'),
         vkGroupId: document.getElementById('vkGroupId'),
         vkTokens: document.getElementById('vkTokens'),
         userToken: document.getElementById('userToken') || document.getElementById('getUserTokenBtn'),
+        saveAll: document.getElementById('saveAllSettingsBtn'),
         callback: document.getElementById('autoSetupCallbackBtn')
     };
     highlightQuickStartTarget(targets[stepKey]);
@@ -11130,6 +22007,60 @@ window.executeUserAction = async function() {
 };
 
 
+window.renderStoredVkTokenStatus = function(config) {
+    config = config || {};
+    const userSet = !!config.user_token_set;
+    const userState = document.getElementById('userTokenSavedState');
+    const userInput = document.getElementById('userToken');
+    const deleteUser = document.getElementById('deleteUserTokenBtn');
+    if (userState) userState.innerHTML = userSet
+        ? '<span style="color:#22c55e;font-weight:800;">Токен указан и сохранен в базе</span>'
+        : '<span>Токен НЕ указан, укажите токен</span>';
+    if (userInput) { userInput.value = ''; userInput.placeholder = userSet ? 'Токен указан и сохранен в базе' : 'Токен НЕ указан, укажите токен'; }
+    if (deleteUser) deleteUser.style.display = userSet ? '' : 'none';
+
+    const count = Math.max(0, Number(config.community_tokens_count) || 0);
+    const list = document.getElementById('vkTokensSavedList');
+    if (list) list.innerHTML = count
+        ? Array.from({ length: count }, function(_, index) {
+            return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0;padding:8px;border:1px solid #22c55e;border-radius:8px;">' +
+                '<span style="color:#22c55e;font-weight:800;">Токен указан и сохранен в базе</span>' +
+                '<button type="button" class="btn btn-delete" onclick="deleteStoredVkToken(&quot;community&quot;,' + index + ')">Удалить</button></div>';
+        }).join('')
+        : '<span>Токен НЕ указан, укажите токен</span>';
+    const communityInput = document.getElementById('vkTokens');
+    if (communityInput) { communityInput.value = ''; communityInput.placeholder = count ? 'Добавить ещё один токен' : 'Токен НЕ указан, укажите токен'; }
+};
+
+window.saveStoredVkToken = async function(type) {
+    const input = document.getElementById(type === 'user' ? 'userToken' : 'vkTokens');
+    const value = input ? input.value.trim() : '';
+    if (!value) return alert('Укажите токен');
+    try {
+        const res = await fetch(window.location.href.split('?')[0] + '?saveBotSettings', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ community_id: window.currentCommunityId, token_action: type === 'user' ? 'save_user_token' : 'add_community_token', token_value: value })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Не удалось сохранить токен');
+        input.value = '';
+        renderStoredVkTokenStatus(data.tokenStatus);
+    } catch (error) { alert(error.message); }
+};
+
+window.deleteStoredVkToken = async function(type, index) {
+    if (!confirm('Удалить токен из базы?')) return;
+    try {
+        const res = await fetch(window.location.href.split('?')[0] + '?saveBotSettings', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ community_id: window.currentCommunityId, token_action: type === 'user' ? 'delete_user_token' : 'delete_community_token', token_index: index })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.error || 'Не удалось удалить токен');
+        renderStoredVkTokenStatus(data.tokenStatus);
+    } catch (error) { alert(error.message); }
+};
+
 window.loadCommunitySettings = async function(communityId) {
     const settingsDebug = document.getElementById('settings-debug');
     try {
@@ -11137,6 +22068,7 @@ window.loadCommunitySettings = async function(communityId) {
         debug('🔍 loadCommunitySettings: загружаю настройки для ' + communityId);
         const res = await fetch(baseUrl + '?getBotSettings');
         const data = await res.json();
+        rememberBotSettings(data);
         debug('📋 Получены настройки: ' + JSON.stringify({
             active_community: data.active_community,
             communities: Object.keys(data.communities || {})
@@ -11154,19 +22086,11 @@ window.loadCommunitySettings = async function(communityId) {
         document.getElementById('confirmationCode').value = config.confirmation_token || '';
         document.getElementById('secretKey').value = config.secret_key || '';
         document.getElementById('vkGroupId').value = config.vk_group_id || '';
-        document.getElementById('userToken').value = config.user_token || '';
-
-        const vkTokensTextarea = document.getElementById('vkTokens');
-        if (config.vk_tokens && Array.isArray(config.vk_tokens)) {
-            vkTokensTextarea.value = config.vk_tokens.join('\\n');
-        } else if (config.vk_token) {
-            vkTokensTextarea.value = config.vk_token;
-        } else {
-            vkTokensTextarea.value = '';
-        }
+        renderStoredVkTokenStatus(config);
 
         settingsDebug.innerHTML = '<pre>Активно: ' + communityId + '\\n' +
-            JSON.stringify(config, null, 2).replace(/vk1\.[^"]+/g, '***') + '</pre>';
+            'User Token: ' + (config.user_token_set ? 'сохранён в базе' : 'не указан') + '\\n' +
+            'Community Tokens: ' + (config.community_tokens_count || 0) + '</pre>';
 
         // ✅ Возвращаем объект с именем и VK_GROUP_ID
         debug('✅ loadCommunitySettings возвращает: ' + JSON.stringify({ communityName, vkGroupId }));
@@ -11186,8 +22110,24 @@ window.refreshTabContent = async function(tabName) {
             await loadAdminProfiles();
             return;
         }
+        if (tabName === 'Profile') {
+            await loadProfileDashboard();
+            return;
+        }
+        if (tabName === 'Groups') {
+            await loadGroupsTab();
+            return;
+        }
         if (tabName === 'Settings') {
             await loadCommunitySettings(window.currentCommunityId);
+            return;
+        }
+        if (tabName === 'TelegramBots') {
+            await loadTelegramBots();
+            return;
+        }
+        if (tabName === 'TelegramChannels' || tabName === 'TelegramGroups') {
+            await loadTelegramChats(tabName === 'TelegramChannels' ? 'channel' : 'group');
             return;
         }
         await loadData(tabName);
@@ -11199,7 +22139,7 @@ window.refreshTabContent = async function(tabName) {
 };
 
 window.injectTabRefreshButtons = function() {
-    var tabs = ['Messages', 'Comments', 'Users', 'Variables', 'Mailing', 'Delayed', 'Triggers', 'Settings', 'Admin'];
+    var tabs = ['Messages', 'Comments', 'Users', 'Groups', 'Variables', 'Mailing', 'Delayed', 'Triggers', 'Profile', 'TelegramBots', 'TelegramChannels', 'TelegramGroups', 'Settings', 'Admin'];
     tabs.forEach(function(tabName) {
         var tabEl = document.getElementById(tabName);
         if (!tabEl) return;
@@ -11277,12 +22217,9 @@ window.saveCommunitySettings = async function() {
     const settings = {
         community_id: window.currentCommunityId,
         group_name: getValue('communityName'),
-        vk_tokens: vkTokensArray,
-        vk_token: vkTokensArray[0] || '',
         confirmation_token: getValue('confirmationCode'),
         secret_key: getValue('secretKey'),
-        vk_group_id: getValue('vkGroupId') ? parseInt(getValue('vkGroupId'), 10) : null,
-        user_token: getValue('userToken')
+        vk_group_id: getValue('vkGroupId') ? parseInt(getValue('vkGroupId'), 10) : null
     };
     
     const statusDiv = document.getElementById('save-status');
@@ -11357,8 +22294,10 @@ window.deleteCurrentCommunity = async function() {
         const data = await res.json();
         
         if (data.success) {
-            alert('&#x1F4E6; Сообщество удалено');
-            await renderCommunityButtons();
+            showSuccessOverlay('<div style="font-size:28px;font-weight:bold;color:var(--status-success-text);margin-bottom:12px;">✅ Сообщество удалено</div><div style="font-size:16px;color:var(--text-primary);">Админ-панель перезагружается для актуализации данных.</div>', {
+                autoCloseMs: 0
+            });
+            setTimeout(function() { window.location.reload(); }, 300);
         } else {
             alert('❌ Ошибка: ' + (data.error || 'неизвестная'));
         }
@@ -11367,12 +22306,660 @@ window.deleteCurrentCommunity = async function() {
     }
 };
 
+window.currentAdminPlatform = 'vk';
+window.currentTelegramConnectorId = '';
+window.currentTelegramScopeId = '';
+window.currentTelegramSection = '';
+window.telegramChatsCache = { channel: [], group: [] };
+window.telegramBindingsCache = [];
+window.telegramFileCatalog = {};
+window.activeTelegramChatIds = { channel: '', group: '' };
+window.telegramBotsCache = {};
+window.adminPlatformSwitchGeneration = 0;
+
+function clearPlatformScopedAdminData() {
+    ['Messages', 'Comments', 'Users', 'Groups', 'Variables', 'Variables_User', 'VK_Variables', 'Mailing', 'Delayed', 'Triggers', 'CommentActivities', 'CommentTextLists'].forEach(function(tab) {
+        dataStore[tab] = [];
+    });
+    ['Messages', 'Comments', 'Users', 'Variables', 'Mailing', 'Delayed', 'Triggers'].forEach(function(tab) {
+        var labelEl = document.getElementById('activeCommunityLabel-' + tab);
+        if (!labelEl) return;
+        labelEl.innerHTML = '';
+        labelEl.style.display = 'none';
+    });
+    window.activeBot = {};
+    window.currentTelegramScopeId = '';
+}
+
+function updateTelegramContextLabels(connectorId) {
+    var bot = window.telegramBotsCache[connectorId] || {};
+    if (!isTelegramConnectorId(connectorId)) return;
+    updateCommunityLabels(
+        connectorId,
+        bot.display_name || bot.first_name || bot.username || connectorId,
+        bot.bot_id || connectorId
+    );
+}
+
+function getRequestedAdminPlatform() {
+    try {
+        var url = new URL(window.location.href);
+        var requested = String(url.searchParams.get('platform') || localStorage.getItem('papaBotAdminPlatform') || 'vk').toLowerCase();
+        return requested === 'telegram' ? 'telegram' : 'vk';
+    } catch (e) {
+        return 'vk';
+    }
+}
+
+function findPlatformTabButton(tabName) {
+    return Array.from(document.querySelectorAll('.tablinks')).find(function(button) {
+        return String(button.getAttribute('onclick') || '').indexOf("'" + tabName + "'") !== -1;
+    }) || null;
+}
+
+function updatePlatformUrl(platform) {
+    try {
+        var url = new URL(window.location.href);
+        url.searchParams.set('platform', platform);
+        window.history.replaceState({}, '', url.toString());
+    } catch (e) {}
+}
+
+function getTelegramChatKindLabel(kind) {
+    return kind === 'channel' ? 'канал' : 'группу';
+}
+
+function getTelegramChatById(kind, chatId) {
+    return (window.telegramChatsCache[kind] || []).find(function(chat) {
+        return String(chat.id || '') === String(chatId || '');
+    }) || null;
+}
+
+window.showTelegramChatEditor = function(kind) {
+    var editor = document.getElementById('telegramChatEditor-' + kind);
+    if (editor) editor.style.display = 'block';
+};
+
+window.hideTelegramChatEditor = function(kind) {
+    var editor = document.getElementById('telegramChatEditor-' + kind);
+    if (editor) editor.style.display = 'none';
+};
+
+function renderTelegramChatButtons(kind) {
+    var container = document.getElementById('telegramChatButtons-' + kind);
+    if (!container) return;
+    var chats = window.telegramChatsCache[kind] || [];
+    var activeId = String(window.activeTelegramChatIds[kind] || '');
+    container.innerHTML = chats.map(function(chat) {
+        var active = String(chat.id || '') === activeId;
+        return '<button class="btn btn-info telegram-chat-button' + (active ? ' is-active' : '') + '" type="button" onclick="selectTelegramChat(&quot;' + kind + '&quot;,&quot;' + escapeHtml(chat.id || '') + '&quot;)">' + escapeHtml(chat.title || chat.chat_id || '') + '</button>';
+    }).join('');
+}
+
+function renderTelegramChatWorkspace(kind) {
+    var workspace = document.getElementById('telegramChatWorkspace-' + kind);
+    if (!workspace) return;
+    var chat = getTelegramChatById(kind, window.activeTelegramChatIds[kind]);
+    if (!chat) {
+        workspace.innerHTML = '<div class="community-empty-note">Добавьте или выберите ' + getTelegramChatKindLabel(kind) + '.</div>';
+        return;
+    }
+    var bindings = (window.telegramBindingsCache || []).filter(function(binding) {
+        return String(binding.telegram_chat_id || '') === String(chat.id || '');
+    });
+    var connectedIds = bindings.map(function(binding) { return String(binding.connector_id || ''); });
+    var availableBots = Object.keys(window.telegramBotsCache || {}).filter(function(connectorId) {
+        return connectedIds.indexOf(connectorId) === -1;
+    });
+    var botOptions = availableBots.map(function(connectorId) {
+        var bot = window.telegramBotsCache[connectorId] || {};
+        return '<option value="' + escapeHtml(connectorId) + '">' + escapeHtml(bot.display_name || bot.first_name || bot.username || connectorId) + '</option>';
+    }).join('');
+    var bindingCards = bindings.map(function(binding) {
+        var bot = window.telegramBotsCache[binding.connector_id] || {};
+        var title = bot.display_name || bot.first_name || bot.username || binding.connector_id;
+        var privacyWarning = kind === 'group' &&
+            !['administrator', 'creator'].includes(String(binding.bot_status || '')) &&
+            bot.can_read_all_group_messages !== true
+            ? '<div class="inline-notice inline-notice--error" style="margin-top:8px;">Privacy Mode мешает получать обычный текст. Назначьте бота администратором или отключите /setprivacy в BotFather.</div>'
+            : '';
+        return '<div class="telegram-chat-bot-card' + (String(window.currentTelegramScopeId || '') === String(binding.binding_id || '') ? ' is-active' : '') + '">' +
+            '<strong>' + escapeHtml(title) + '</strong>' +
+            '<div class="telegram-bot-card-meta">' + (bot.username ? '@' + escapeHtml(bot.username) + '<br>' : '') + 'Статус в чате: ' + escapeHtml(binding.bot_status || 'проверен') + '</div>' + privacyWarning +
+            '<div class="telegram-bot-card-actions">' +
+            '<button class="btn btn-info telegram-action-btn" type="button" onclick="openTelegramBindingScenarios(&quot;' + escapeHtml(binding.binding_id || '') + '&quot;)">Сценарии</button>' +
+            '<button class="btn btn-neutral telegram-action-btn" type="button" onclick="recheckTelegramBinding(&quot;' + escapeHtml(binding.binding_id || '') + '&quot;,&quot;' + kind + '&quot;)">Проверить права</button>' +
+            '<button class="btn btn-delete telegram-action-btn" type="button" onclick="unbindTelegramBotFromChat(&quot;' + escapeHtml(binding.binding_id || '') + '&quot;,&quot;' + kind + '&quot;)">Отвязать</button>' +
+            '</div></div>';
+    }).join('');
+    workspace.innerHTML = '<div class="profile-manager-header"><div><h3 class="profile-manager-title">' + escapeHtml(chat.title || '') + '</h3><div class="profile-manager-subtitle">Chat ID: ' + escapeHtml(chat.chat_id || '') + (chat.username ? ' · @' + escapeHtml(chat.username) : '') + '<br>К этому чату можно привязать любое количество подключённых TG-ботов.</div></div></div>' +
+        '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;"><button class="btn btn-add telegram-action-btn" type="button" onclick="toggleTelegramBotPicker(&quot;' + kind + '&quot;)">+ Привязать TG bot</button><button class="btn btn-delete telegram-action-btn" type="button" onclick="deleteTelegramChatEntry(&quot;' + escapeHtml(chat.id || '') + '&quot;,&quot;' + kind + '&quot;)">Удалить ' + getTelegramChatKindLabel(kind) + '</button></div>' +
+        '<div id="telegramBotPicker-' + kind + '" class="telegram-chat-editor" style="display:none;"><label style="display:block;font-weight:800;margin-bottom:8px;">Подключённый TG-бот</label><select id="telegramBotSelect-' + kind + '" style="width:100%;margin-bottom:10px;"><option value="">-- Выберите TG-бота --</option>' + botOptions + '</select><button class="btn btn-save telegram-action-btn" type="button" onclick="bindSelectedTelegramBot(&quot;' + kind + '&quot;)">Привязать</button>' + (!availableBots.length ? '<div class="community-empty-note" style="margin-top:10px;">Все подключённые TG-боты уже привязаны или сначала добавьте бота в разделе TELEGRAM-БОТЫ.</div>' : '') + '</div>' +
+        '<div class="telegram-chat-bot-list">' + (bindingCards || '<div class="community-empty-note">К этому чату TG-боты пока не привязаны.</div>') + '</div>';
+}
+
+window.loadTelegramChats = async function(kind) {
+    var loadingEl = document.getElementById('loading-' + (kind === 'channel' ? 'TelegramChannels' : 'TelegramGroups'));
+    if (loadingEl) loadingEl.style.display = 'block';
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?getTelegramChats=1&kind=' + encodeURIComponent(kind));
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Не удалось загрузить Telegram-чаты');
+        window.telegramChatsCache[kind] = Array.isArray(data.chats) ? data.chats : [];
+        window.telegramBindingsCache = (window.telegramBindingsCache || []).filter(function(binding) { return binding.kind !== kind; }).concat(Array.isArray(data.bindings) ? data.bindings : []);
+        window.telegramFileCatalog = Object.assign({}, window.telegramFileCatalog || {}, data.file_catalog || {});
+        var activeId = String(window.activeTelegramChatIds[kind] || '');
+        if (!getTelegramChatById(kind, activeId)) {
+            window.activeTelegramChatIds[kind] = window.telegramChatsCache[kind][0]?.id || '';
+        }
+        renderTelegramChatButtons(kind);
+        renderTelegramChatWorkspace(kind);
+        return data;
+    } catch (e) {
+        var statusEl = document.getElementById('telegramChatStatus-' + kind);
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка: ' + escapeHtml(e.message));
+        throw e;
+    } finally {
+        if (loadingEl) loadingEl.style.display = 'none';
+    }
+};
+
+window.saveTelegramChatFromEditor = async function(kind) {
+    var statusEl = document.getElementById('telegramChatStatus-' + kind);
+    var title = String(document.getElementById('telegramChatTitle-' + kind)?.value || '').trim();
+    var chatId = String(document.getElementById('telegramChatId-' + kind)?.value || '').trim();
+    if (!title || !chatId) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Укажите название и числовой Chat ID.');
+        return;
+    }
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?saveTelegramChat=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                kind: kind,
+                title: title,
+                chat_id: chatId,
+                username: String(document.getElementById('telegramChatUsername-' + kind)?.value || '').trim(),
+                description: String(document.getElementById('telegramChatDescription-' + kind)?.value || '').trim()
+            })
+        });
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Не удалось добавить Telegram-чат');
+        window.activeTelegramChatIds[kind] = data.chat.id;
+        hideTelegramChatEditor(kind);
+        ['Title', 'Id', 'Username', 'Description'].forEach(function(field) {
+            var el = document.getElementById('telegramChat' + field + '-' + kind);
+            if (el) el.value = '';
+        });
+        setInlineNoticeWithTimeout(statusEl, 'success', (kind === 'channel' ? 'Канал' : 'Группа') + ' добавлен.', 5000);
+        await loadTelegramChats(kind);
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка: ' + escapeHtml(e.message));
+    }
+};
+
+window.selectTelegramChat = function(kind, chatId) {
+    window.activeTelegramChatIds[kind] = chatId;
+    window.currentTelegramSection = kind;
+    renderTelegramChatButtons(kind);
+    renderTelegramChatWorkspace(kind);
+};
+
+window.toggleTelegramBotPicker = function(kind) {
+    var picker = document.getElementById('telegramBotPicker-' + kind);
+    if (picker) picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+};
+
+window.bindSelectedTelegramBot = async function(kind) {
+    var chat = getTelegramChatById(kind, window.activeTelegramChatIds[kind]);
+    var select = document.getElementById('telegramBotSelect-' + kind);
+    var connectorId = String(select?.value || '');
+    var statusEl = document.getElementById('telegramChatStatus-' + kind);
+    if (!chat || !connectorId) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Выберите TG-бота.');
+        return;
+    }
+    if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Проверяем бота и его права в Telegram...');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?bindTelegramBotToChat=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ telegram_chat_id: chat.id, connector_id: connectorId })
+        });
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Не удалось привязать TG-бота');
+        setInlineNoticeWithTimeout(statusEl, 'success', 'TG-бот привязан. Теперь можно создавать сценарии.', 5000);
+        await loadTelegramChats(kind);
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка привязки: ' + escapeHtml(e.message));
+    }
+};
+
+window.recheckTelegramBinding = async function(bindingId, kind) {
+    var binding = (window.telegramBindingsCache || []).find(function(item) {
+        return String(item.binding_id || '') === String(bindingId || '');
+    });
+    var statusEl = document.getElementById('telegramChatStatus-' + kind);
+    if (!binding) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Привязка TG-бота не найдена.');
+        return;
+    }
+    if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Проверяем права бота и Privacy Mode...');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?bindTelegramBotToChat=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                telegram_chat_id: binding.telegram_chat_id,
+                connector_id: binding.connector_id
+            })
+        });
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Проверка не пройдена');
+        setInlineNoticeWithTimeout(statusEl, 'success', 'Права проверены: бот может получать события для сценариев.', 5000);
+        await loadTelegramChats(kind);
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', escapeHtml(e.message));
+    }
+};
+
+window.unbindTelegramBotFromChat = async function(bindingId, kind) {
+    if (!confirm('Отвязать TG-бота от этого чата? Сохранённые таблицы сценариев останутся в хранилище.')) return;
+    var baseUrl = window.location.href.split('?')[0];
+    var response = await fetch(baseUrl + '?unbindTelegramBotFromChat=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ binding_id: bindingId })
+    });
+    var data = await response.json();
+    if (!response.ok || !data.success) {
+        showPanelActionNotice('Ошибка отвязки: ' + escapeHtml(data.error || 'неизвестная ошибка'), 'error');
+        return;
+    }
+    if (window.currentTelegramScopeId === bindingId) window.currentTelegramScopeId = '';
+    await loadTelegramChats(kind);
+};
+
+window.deleteTelegramChatEntry = async function(chatId, kind) {
+    if (!confirm('Удалить ' + getTelegramChatKindLabel(kind) + ' и все привязки TG-ботов к нему?')) return;
+    var baseUrl = window.location.href.split('?')[0];
+    var response = await fetch(baseUrl + '?deleteTelegramChat=1', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegram_chat_id: chatId })
+    });
+    var data = await response.json();
+    if (!response.ok || !data.success) {
+        showPanelActionNotice('Ошибка удаления: ' + escapeHtml(data.error || 'неизвестная ошибка'), 'error');
+        return;
+    }
+    window.activeTelegramChatIds[kind] = '';
+    await loadTelegramChats(kind);
+};
+
+window.openTelegramBindingScenarios = function(bindingId) {
+    var binding = (window.telegramBindingsCache || []).find(function(item) { return String(item.binding_id || '') === String(bindingId || ''); });
+    if (!binding) return;
+    var kind = binding.kind === 'channel' ? 'channel' : 'group';
+    var bot = window.telegramBotsCache[binding.connector_id] || {};
+    clearPlatformScopedAdminData();
+    window.currentTelegramScopeId = binding.binding_id;
+    window.currentTelegramConnectorId = binding.connector_id;
+    window.currentTelegramSection = kind;
+    window.currentCommunityId = binding.binding_id;
+    var contextBar = document.getElementById('telegramScenarioContextBar');
+    if (contextBar) {
+        contextBar.style.display = 'block';
+        contextBar.innerHTML = '<div class="profile-manager-header"><div><h3 class="profile-manager-title">Сценарии: ' + escapeHtml(binding.title || binding.chat_id || '') + '</h3><div class="profile-manager-subtitle">TG-бот: ' + escapeHtml(bot.display_name || bot.first_name || bot.username || binding.connector_id) + ' · данные изолированы для этой пары «чат + бот».</div></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;"><button class="btn btn-neutral telegram-action-btn" type="button" onclick="backToTelegramChatSection()">← Назад</button><button class="btn btn-info telegram-action-btn" type="button" onclick="showTelegramAttachmentCatalog()">Вложения TG</button></div><div id="telegramScenarioAttachmentCatalog" class="telegram-attachment-catalog"></div>';
+    }
+    var titleEl = document.querySelector('#Messages .tab-panel-title');
+    if (titleEl) titleEl.textContent = 'Сценарии TG-бота';
+    var sectionTab = findPlatformTabButton(kind === 'channel' ? 'TelegramChannels' : 'TelegramGroups');
+    originalOpenTab(sectionTab ? { currentTarget: sectionTab } : null, 'Messages');
+};
+
+window.openTelegramBotScenarios = function(connectorId) {
+    var bot = window.telegramBotsCache[connectorId] || null;
+    if (!bot || !isTelegramConnectorId(connectorId)) return;
+    clearPlatformScopedAdminData();
+    window.currentTelegramScopeId = connectorId;
+    window.currentTelegramConnectorId = connectorId;
+    window.currentTelegramSection = 'bot';
+    window.currentCommunityId = connectorId;
+    localStorage.setItem('papaBotTelegramConnectorId', connectorId);
+    var contextBar = document.getElementById('telegramScenarioContextBar');
+    if (contextBar) {
+        contextBar.style.display = 'block';
+        contextBar.innerHTML = '<div class="profile-manager-header"><div><h3 class="profile-manager-title">Личные сценарии: ' + escapeHtml(bot.display_name || bot.first_name || bot.username || connectorId) + '</h3><div class="profile-manager-subtitle">Эти мини-боты отвечают пользователям, которые пишут напрямую @' + escapeHtml(bot.username || 'telegram_bot') + '. Данные изолированы от каналов и групп.</div></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;"><button class="btn btn-neutral telegram-action-btn" type="button" onclick="backToTelegramBotSection()">← Назад к TG-ботам</button><button class="btn btn-info telegram-action-btn" type="button" onclick="showTelegramAttachmentCatalog()">Вложения TG</button></div><div id="telegramScenarioAttachmentCatalog" class="telegram-attachment-catalog"></div>';
+    }
+    var titleEl = document.querySelector('#Messages .tab-panel-title');
+    if (titleEl) titleEl.textContent = 'Сценарии личного TG-бота';
+    var sectionTab = findPlatformTabButton('TelegramBots');
+    originalOpenTab(sectionTab ? { currentTarget: sectionTab } : null, 'Messages');
+};
+
+window.backToTelegramChatSection = function() {
+    var kind = window.currentTelegramSection === 'channel' ? 'channel' : 'group';
+    window.currentTelegramScopeId = '';
+    window.currentCommunityId = window.currentTelegramConnectorId || '';
+    var contextBar = document.getElementById('telegramScenarioContextBar');
+    if (contextBar) contextBar.style.display = 'none';
+    var tab = findPlatformTabButton(kind === 'channel' ? 'TelegramChannels' : 'TelegramGroups');
+    if (tab) tab.click();
+};
+
+window.backToTelegramBotSection = function() {
+    window.currentTelegramScopeId = '';
+    window.currentTelegramSection = 'bot';
+    window.currentCommunityId = window.currentTelegramConnectorId || '';
+    var contextBar = document.getElementById('telegramScenarioContextBar');
+    if (contextBar) contextBar.style.display = 'none';
+    var tab = findPlatformTabButton('TelegramBots');
+    if (tab) tab.click();
+};
+
+window.showTelegramAttachmentCatalog = function() {
+    var container = document.getElementById('telegramScenarioAttachmentCatalog');
+    if (!container) return;
+    var items = window.telegramFileCatalog[window.currentTelegramConnectorId] || [];
+    container.innerHTML = items.length
+        ? items.map(function(item) {
+            var value = item.kind === 'photo' ? 'tg:photo:' + item.file_id : (item.kind === 'video' ? 'tg:video:' + item.file_id : 'tg:file:' + item.file_id);
+            return '<button class="btn btn-neutral" type="button" onclick="copyTelegramAttachmentValue(&quot;' + escapeHtml(value) + '&quot;)">' + escapeHtml(item.name || item.kind || 'Вложение') + '</button>';
+        }).join('')
+        : '<div class="community-empty-note">Вложений ещё нет. Нажмите «+» в поле «Вложения к ответу», чтобы загрузить первое.</div>';
+};
+
+window.copyTelegramAttachmentValue = function(value) {
+    if (navigator.clipboard) navigator.clipboard.writeText(value).catch(function() {});
+    showPanelActionNotice('ID вложения скопирован: <code>' + escapeHtml(value) + '</code>', 'success');
+};
+
+window.showTelegramBotEditor = function() {
+    var editor = document.getElementById('telegramBotEditor');
+    if (editor) editor.style.display = 'block';
+};
+
+window.hideTelegramBotEditor = function() {
+    var editor = document.getElementById('telegramBotEditor');
+    if (editor) editor.style.display = 'none';
+};
+
+function renderTelegramBotButtons(data) {
+    var container = document.getElementById('telegramBotButtons');
+    if (!container) return;
+    var bots = data && data.telegram_bots ? data.telegram_bots : {};
+    var ids = Object.keys(bots);
+    var activeId = String(window.currentTelegramConnectorId || data.active_telegram_bot || '');
+    container.innerHTML = ids.map(function(connectorId) {
+        var bot = bots[connectorId] || {};
+        var title = bot.display_name || bot.first_name || bot.username || connectorId;
+        return '<button class="btn btn-info telegram-chat-button' + (connectorId === activeId ? ' is-active' : '') + '" type="button" onclick="selectTelegramBot(&quot;' + escapeHtml(connectorId) + '&quot;)">' + escapeHtml(title) + '</button>';
+    }).join('');
+}
+
+function renderTelegramBotCards(data) {
+    var container = document.getElementById('telegramBotsList');
+    if (!container) return;
+    var bots = data && data.telegram_bots ? data.telegram_bots : {};
+    var ids = Object.keys(bots);
+    var activeId = String(window.currentTelegramConnectorId || data.active_telegram_bot || '');
+    renderTelegramBotButtons(data);
+    if (!ids.length) {
+        container.innerHTML = '<div class="community-empty-note">Telegram-боты ещё не подключены. Добавьте первого бота по токену из BotFather.</div>';
+        return;
+    }
+    if (!bots[activeId]) activeId = ids[0];
+    var bot = bots[activeId] || {};
+    var title = bot.display_name || bot.first_name || bot.username || activeId;
+    var username = bot.username ? '@' + bot.username : 'username не задан';
+    var webhookLabel = bot.webhook_status === 'active'
+        ? 'Webhook активен'
+        : (bot.webhook_status === 'unknown' ? 'Webhook: статус не подтверждён' : 'Webhook требует проверки');
+    var webhookError = bot.webhook_error ? '<div style="color:var(--status-error-text);margin-top:5px;">' + escapeHtml(bot.webhook_error) + '</div>' : '';
+    var privacyLabel = bot.can_read_all_group_messages === true
+        ? 'Privacy Mode выключен: бот получает обычные сообщения групп.'
+        : 'Privacy Mode включён: для обычных сообщений группы сделайте бота администратором или используйте /setprivacy в BotFather.';
+    container.innerHTML = '<div class="telegram-bot-card is-active">' +
+        '<div class="telegram-bot-card-title">' + escapeHtml(title) + '</div>' +
+        '<div class="telegram-bot-card-meta">' + escapeHtml(username) + '<br>Bot ID: ' + escapeHtml(bot.bot_id || '') + '<br>Token: ' + escapeHtml(bot.token_hint || 'не сохранён') + '<br>' + escapeHtml(webhookLabel) + '<br>' + escapeHtml(privacyLabel) + webhookError + '</div>' +
+        '<div class="telegram-bot-card-actions">' +
+        '<button class="btn btn-info telegram-action-btn" type="button" onclick="openTelegramBotScenarios(&quot;' + escapeHtml(activeId) + '&quot;)">Сценарии личного бота</button>' +
+        '<button class="btn btn-neutral telegram-action-btn" type="button" onclick="refreshTelegramWebhook(&quot;' + escapeHtml(activeId) + '&quot;)">Обновить webhook и статус</button>' +
+        '<button class="btn btn-delete telegram-action-btn" type="button" onclick="deleteTelegramBotConnection(&quot;' + escapeHtml(activeId) + '&quot;)">Удалить</button>' +
+        '</div></div>';
+}
+
+window.loadTelegramBots = async function() {
+    var loadingEl = document.getElementById('loading-TelegramBots');
+    var statusEl = document.getElementById('telegramConnectStatus');
+    if (loadingEl) loadingEl.style.display = 'block';
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?getTelegramBots=1');
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Не удалось загрузить Telegram-ботов');
+        window.telegramBotsCache = data.telegram_bots || {};
+        window.telegramFileCatalog = Object.assign({}, window.telegramFileCatalog || {}, data.file_catalog || {});
+        var savedId = localStorage.getItem('papaBotTelegramConnectorId') || '';
+        var activeId = window.telegramBotsCache[savedId] ? savedId : String(data.active_telegram_bot || Object.keys(window.telegramBotsCache)[0] || '');
+        window.currentTelegramConnectorId = activeId;
+        if (activeId) {
+            localStorage.setItem('papaBotTelegramConnectorId', activeId);
+            if (window.currentAdminPlatform === 'telegram') {
+                window.currentCommunityId = activeId;
+                updateTelegramContextLabels(activeId);
+            }
+        } else if (window.currentAdminPlatform === 'telegram') {
+            window.currentCommunityId = '';
+        }
+        renderTelegramBotCards(data);
+        return data;
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка загрузки Telegram: ' + escapeHtml(e.message));
+        throw e;
+    } finally {
+        if (loadingEl) loadingEl.style.display = 'none';
+    }
+};
+
+window.selectTelegramBot = function(connectorId) {
+    if (!window.telegramBotsCache[connectorId]) return;
+    clearPlatformScopedAdminData();
+    window.currentTelegramConnectorId = connectorId;
+    window.currentCommunityId = connectorId;
+    localStorage.setItem('papaBotTelegramConnectorId', connectorId);
+    renderTelegramBotCards({
+        telegram_bots: window.telegramBotsCache,
+        active_telegram_bot: connectorId
+    });
+    var bot = window.telegramBotsCache[connectorId] || {};
+    updateCommunityLabels(
+        connectorId,
+        bot.display_name || bot.first_name || bot.username || connectorId,
+        bot.bot_id || connectorId
+    );
+};
+
+window.connectTelegramBot = async function() {
+    var tokenEl = document.getElementById('telegramBotToken');
+    var nameEl = document.getElementById('telegramBotDisplayName');
+    var statusEl = document.getElementById('telegramConnectStatus');
+    var token = tokenEl ? tokenEl.value.trim() : '';
+    if (!token) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Укажите токен Telegram-бота из BotFather.');
+        return;
+    }
+    if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Проверяем токен и устанавливаем защищённый webhook...');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?connectTelegramBot=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                bot_token: token,
+                display_name: nameEl ? nameEl.value.trim() : ''
+            })
+        });
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Не удалось подключить Telegram-бота');
+        if (tokenEl) tokenEl.value = '';
+        if (nameEl) nameEl.value = '';
+        hideTelegramBotEditor();
+        window.currentTelegramConnectorId = data.active_telegram_bot || data.bot?.connector_id || '';
+        if (window.currentTelegramConnectorId) localStorage.setItem('papaBotTelegramConnectorId', window.currentTelegramConnectorId);
+        setInlineNoticeWithTimeout(statusEl, 'success', 'Telegram-бот подключён, webhook активирован.', 5000);
+        await loadTelegramBots();
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка подключения: ' + escapeHtml(e.message));
+    }
+};
+
+window.refreshTelegramWebhook = async function(connectorId) {
+    var statusEl = document.getElementById('telegramConnectStatus');
+    if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Обновляем Telegram webhook...');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?refreshTelegramWebhook=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ connector_id: connectorId })
+        });
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Не удалось обновить webhook');
+        setInlineNoticeWithTimeout(statusEl, 'success', 'Telegram webhook обновлён.', 5000);
+        await loadTelegramBots();
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка webhook: ' + escapeHtml(e.message));
+    }
+};
+
+window.testTelegramBot = async function() {
+    var statusEl = document.getElementById('telegramTestStatus');
+    var chatId = String(document.getElementById('telegramTestChatId')?.value || '').trim();
+    var text = String(document.getElementById('telegramTestText')?.value || '').trim();
+    if (!window.currentTelegramConnectorId || !chatId) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Выберите Telegram-бота и укажите Chat ID.');
+        return;
+    }
+    if (statusEl) statusEl.innerHTML = makeInlineNotice('warn', 'Отправляем тестовое сообщение...');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?testTelegramBot=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                connector_id: window.currentTelegramConnectorId,
+                chat_id: chatId,
+                text: text
+            })
+        });
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Не удалось отправить тест');
+        setInlineNoticeWithTimeout(statusEl, 'success', 'Тестовое сообщение отправлено.', 5000);
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка отправки: ' + escapeHtml(e.message));
+    }
+};
+
+window.deleteTelegramBotConnection = async function(connectorId) {
+    if (!confirm('Удалить подключение Telegram-бота? Сценарии и пользователи останутся в хранилище, но webhook будет отключён.')) return;
+    var statusEl = document.getElementById('telegramConnectStatus');
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?deleteTelegramBot=1', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ connector_id: connectorId })
+        });
+        var data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.error || 'Не удалось удалить Telegram-бота');
+        if (window.currentTelegramConnectorId === connectorId) window.currentTelegramConnectorId = '';
+        setInlineNoticeWithTimeout(statusEl, 'success', 'Подключение Telegram-бота удалено.', 5000);
+        await loadTelegramBots();
+    } catch (e) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка удаления: ' + escapeHtml(e.message));
+    }
+};
+
+window.switchAdminPlatform = async function(platform) {
+    platform = platform === 'telegram' ? 'telegram' : 'vk';
+    window.adminPlatformSwitchGeneration += 1;
+    var switchGeneration = window.adminPlatformSwitchGeneration;
+    window.currentAdminPlatform = platform;
+    clearPlatformScopedAdminData();
+    document.body.setAttribute('data-platform', platform);
+    localStorage.setItem('papaBotAdminPlatform', platform);
+    updatePlatformUrl(platform);
+
+    var title = document.getElementById('platformControlCenterTitle');
+    if (title) title.textContent = platform === 'telegram' ? 'Telegram Bot Control Center' : 'VK Bot Control Center';
+    var vkButton = document.getElementById('platformVkBtn');
+    var telegramButton = document.getElementById('platformTelegramBtn');
+    if (vkButton) {
+        vkButton.classList.toggle('active', platform === 'vk');
+        vkButton.setAttribute('aria-pressed', platform === 'vk' ? 'true' : 'false');
+    }
+    if (telegramButton) {
+        telegramButton.classList.toggle('active', platform === 'telegram');
+        telegramButton.setAttribute('aria-pressed', platform === 'telegram' ? 'true' : 'false');
+    }
+
+    document.querySelectorAll('.tablinks[data-platforms]').forEach(function(button) {
+        var allowed = String(button.dataset.platforms || '').split(',').indexOf(platform) !== -1;
+        button.style.display = allowed ? '' : 'none';
+    });
+    var vkVariablesReference = document.getElementById('vkVariablesReference');
+    var telegramVariablesReference = document.getElementById('telegramVariablesReference');
+    if (vkVariablesReference) vkVariablesReference.style.display = platform === 'vk' ? '' : 'none';
+    if (telegramVariablesReference) telegramVariablesReference.style.display = platform === 'telegram' ? '' : 'none';
+
+    if (platform === 'telegram') {
+        window.currentCommunityId = '';
+        try {
+            await loadTelegramBots();
+        } catch (e) {}
+        if (switchGeneration !== window.adminPlatformSwitchGeneration || window.currentAdminPlatform !== 'telegram') return;
+        window.currentCommunityId = isTelegramConnectorId(window.currentTelegramConnectorId)
+            ? window.currentTelegramConnectorId
+            : '';
+        if (window.currentCommunityId) updateTelegramContextLabels(window.currentCommunityId);
+        var telegramTab = findPlatformTabButton('TelegramBots');
+        if (telegramTab) telegramTab.click();
+    } else {
+        window.currentCommunityId = '';
+        restoreCurrentCommunityIdFromStorage();
+        try {
+            await renderCommunityButtons();
+        } catch (e) {}
+        if (switchGeneration !== window.adminPlatformSwitchGeneration || window.currentAdminPlatform !== 'vk') return;
+        var messagesTab = findPlatformTabButton('Messages');
+        if (messagesTab) messagesTab.click();
+    }
+};
+
 // ?? Вызов рендера кнопок при загрузке вкладки
 const originalOpenTab = window.openTab;
 window.openTab = function(evt, name) {
+    clearProfileAiIntegrationTestNoticeOnTabChange();
     originalOpenTab(evt, name);
     if (name === 'Settings') {
         renderCommunityButtons();
+    }
+    if (name === 'TelegramBots') {
+        window.currentTelegramScopeId = '';
+        window.currentTelegramSection = 'bot';
+        loadTelegramBots().catch(function() {});
+    }
+    if (name === 'TelegramChannels' || name === 'TelegramGroups') {
+        window.currentTelegramScopeId = '';
+        window.currentTelegramSection = name === 'TelegramChannels' ? 'channel' : 'group';
+        loadTelegramChats(window.currentTelegramSection).catch(function() {});
     }
 };
 
@@ -11405,6 +22992,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Инициализация темы при загрузке
     initTheme();
     window.updateThemeDocking && window.updateThemeDocking();
+    window.adminPlatformReadyPromise = switchAdminPlatform(getRequestedAdminPlatform());
+    Promise.resolve(window.adminPlatformReadyPromise).finally(startDeliveryIncidentPolling);
 });
 
 // ===== УПРАВЛЕНИЕ ТЕМАМИ =====

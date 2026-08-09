@@ -3,6 +3,7 @@ const os = require('os');
 const path = require('path');
 const express = require('express');
 const multer = require('multer');
+const axios = require('axios');
 
 const { handleUploadRequestWithDependencies } = require('./src/modules/render-uploader-service');
 
@@ -57,6 +58,55 @@ const upload = multer({
     }
   })
 });
+
+const RELAY_CHUNK_SIZE = 1.5 * 1024 * 1024;
+const PAPA_BOT_UPLOAD_URL = String(process.env.PAPA_BOT_UPLOAD_URL || 'https://functions.yandexcloud.net/d4eg37ikm3vl5tm1mjld').replace(/\/+$/, '');
+
+async function uploadLargeFileThroughPapa(req) {
+  const file = req.file;
+  const body = req.body || {};
+  const renderGrant = String(body.render_grant || '').trim();
+  if (!renderGrant) throw new Error('Render relay grant is missing');
+  if (!file?.path) throw new Error('Файл не получен Render');
+  const totalChunks = Math.max(1, Math.ceil(Number(file.size || 0) / RELAY_CHUNK_SIZE));
+  const handle = await fs.promises.open(file.path, 'r');
+  try {
+    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex += 1) {
+      const start = chunkIndex * RELAY_CHUNK_SIZE;
+      const length = Math.min(RELAY_CHUNK_SIZE, Number(file.size || 0) - start);
+      const chunk = Buffer.alloc(length);
+      await handle.read(chunk, 0, length, start);
+      const response = await axios.post(PAPA_BOT_UPLOAD_URL, {
+        action: 'upload_attachment_chunk',
+        upload_id: body.upload_id,
+        chunk_index: chunkIndex,
+        total_chunks: totalChunks,
+        render_grant: renderGrant,
+        chunk_base64: chunk.toString('base64'),
+        fileName: file.originalname,
+        fileType: file.mimetype || 'application/octet-stream',
+        fileSize: Number(file.size || 0),
+        target: body.target,
+        groupId: body.group_id,
+        communityId: body.community_id,
+        profileId: body.profile_id
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        timeout: 120000,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+      });
+      if (!response.data?.success) throw new Error(response.data?.error || 'PAPA BOT relay upload failed');
+      if (chunkIndex === totalChunks - 1) return response.data;
+    }
+  } finally {
+    await handle.close();
+    await fs.promises.unlink(file.path).catch(() => {});
+  }
+  throw new Error('PAPA BOT relay upload did not return a result');
+}
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -136,7 +186,9 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       mimetype: req.file?.mimetype
     });
 
-    const uploadPromise = handleUploadRequestWithDependencies(req);
+    const uploadPromise = req.body?.user_token
+      ? handleUploadRequestWithDependencies(req)
+      : uploadLargeFileThroughPapa(req);
     if (uploadId) {
       uploadInFlight.set(uploadId, uploadPromise);
     }
