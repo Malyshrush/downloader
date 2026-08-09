@@ -11341,7 +11341,7 @@ saveBtn.onclick = function() {
           formData.append('render_grant', renderGrant);
 
           var RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
-          var RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
+          var RENDER_RETRY_UPLOAD_TIMEOUT_MS = 300000;
           var RENDER_FINAL_RETRY_DELAY_MS = 10000;
 
           var uploadViaRender = function(timeoutMs) {
@@ -17741,7 +17741,7 @@ window.uploadConsentDocumentFileToVk = async function(file, documentType, status
             renderResponse = await recoverProfileConsentRenderUploadResult(baseUrl, uploadId, 15000);
         } catch (_recoveryError) {
             try {
-                renderResponse = await uploadViaRender(120000);
+                renderResponse = await uploadViaRender(300000);
             } catch (retryError) {
                 if (!isProfileConsentRenderWakeCandidate(retryError)) throw new Error('Render недоступен: ' + retryError.message);
                 if (statusEl) statusEl.innerText = 'Render всё ещё обрабатывает файл, восстанавливаем результат...';

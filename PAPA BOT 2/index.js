@@ -94,7 +94,7 @@ async function uploadLargeFileThroughPapa(req) {
         headers: {
           'Content-Type': 'application/json',
         },
-        timeout: 120000,
+        timeout: 300000,
         maxContentLength: Infinity,
         maxBodyLength: Infinity
       });

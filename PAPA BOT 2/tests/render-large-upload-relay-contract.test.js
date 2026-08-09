@@ -4,6 +4,7 @@ const assert = require('node:assert/strict');
 process.env.CALLBACK_SECRET = 'render-relay-test-secret';
 
 const { __testOnly } = require('../src/handler');
+const attachmentsSource = require('fs').readFileSync(require('path').join(__dirname, '..', 'src', 'modules', 'attachments.js'), 'utf8');
 
 function makeEvent(body, secret = process.env.CALLBACK_SECRET) {
   return {
@@ -88,4 +89,8 @@ test('Render relay rejects requests without its server-to-server secret', async 
     { s3Client: { send: async () => { throw new Error('must not access storage'); } } }
   );
   assert.equal(response.statusCode, 400);
+});
+
+test('final relay upload bypasses Render recursion for videos', () => {
+  assert.match(attachmentsSource, /async function uploadToVKFromRenderRelay\([\s\S]*?startsWith\('video\/'\)/);
 });

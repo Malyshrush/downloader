@@ -7,7 +7,7 @@ test('admin panel uses multi-step Render retry timings for large attachment uplo
     assert.match(adminPanelHTML, /var useRenderService = fileSizeMB > 3\.5;/g);
     assert.equal((adminPanelHTML.match(/var useRenderService = fileSizeMB > 3\.5;/g) || []).length, 2);
     assert.match(adminPanelHTML, /var RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;/);
-    assert.match(adminPanelHTML, /var RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;/);
+    assert.match(adminPanelHTML, /var RENDER_RETRY_UPLOAD_TIMEOUT_MS = 300000;/);
     assert.match(adminPanelHTML, /var RENDER_FINAL_RETRY_DELAY_MS = 10000;/);
     assert.match(adminPanelHTML, /message\.includes\('timed out'\)/);
 });

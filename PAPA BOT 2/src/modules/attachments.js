@@ -11,6 +11,100 @@ const RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
 const RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
 const RENDER_FINAL_RETRY_DELAY_MS = 10000;
 
+function getVkDocumentCdnFallbackUrl(rawUrl) {
+    try {
+        const parsed = new URL(rawUrl);
+        const match = parsed.hostname.match(/^(psv\d+)\.userapi\.com$/i);
+        if (!match) return '';
+        parsed.hostname = `${match[1]}.vkuseraudio.net`;
+        return parsed.toString();
+    } catch (_) {
+        return '';
+    }
+}
+
+function getAxiosTlsFailureUrl(error, originalUrl) {
+    const candidates = [
+        error?.request?._currentUrl,
+        error?.request?._redirectable?._currentUrl,
+        error?.request?._options?.href,
+        error?.request?._redirectable?._options?.href,
+        originalUrl
+    ];
+    return candidates.find(candidate => getVkDocumentCdnFallbackUrl(candidate)) || originalUrl;
+}
+
+function buildVkDocumentDownloadOptions(axiosOptions = {}) {
+    const callerBeforeRedirect = axiosOptions.beforeRedirect;
+    return Object.assign({}, axiosOptions, {
+        beforeRedirect(options, responseDetails, requestDetails) {
+            const currentHostname = String(options.hostname || options.host || '').split(':')[0];
+            const match = currentHostname.match(/^(psv\d+)\.userapi\.com$/i);
+            if (match) {
+                const safeHostname = `${match[1]}.vkuseraudio.net`;
+                options.hostname = safeHostname;
+                options.host = safeHostname;
+                options.servername = safeHostname;
+                if (options.headers) {
+                    options.headers.host = safeHostname;
+                }
+            }
+            if (typeof callerBeforeRedirect === 'function') {
+                callerBeforeRedirect(options, responseDetails, requestDetails);
+            }
+        }
+    });
+}
+
+async function downloadVkDocument(rawUrl, axiosOptions = {}) {
+    const safeAxiosOptions = buildVkDocumentDownloadOptions(axiosOptions);
+    try {
+        return await axios.get(rawUrl, safeAxiosOptions);
+    } catch (error) {
+        const isTlsHostnameMismatch = error?.code === 'ERR_TLS_CERT_ALTNAME_INVALID'
+            || /Hostname\/IP does not match certificate/i.test(String(error?.message || ''));
+        const failedUrl = isTlsHostnameMismatch ? getAxiosTlsFailureUrl(error, rawUrl) : rawUrl;
+        const fallbackUrl = isTlsHostnameMismatch ? getVkDocumentCdnFallbackUrl(failedUrl) : '';
+        if (!fallbackUrl) throw error;
+
+        log('warn', `VK document CDN certificate mismatch for ${new URL(rawUrl).hostname}; retrying through ${new URL(fallbackUrl).hostname}`);
+        return axios.get(fallbackUrl, safeAxiosOptions);
+    }
+}
+
+function isRetryableDocumentTransferError(error) {
+    const status = Number(error?.response?.status);
+    if ([405, 408, 425, 429, 500, 502, 503, 504].includes(status)) return true;
+
+    const code = String(error?.code || '').toUpperCase();
+    if ([
+        'ECONNABORTED',
+        'ETIMEDOUT',
+        'ECONNRESET',
+        'ECONNREFUSED',
+        'ENOTFOUND',
+        'EHOSTUNREACH',
+        'ERR_TLS_CERT_ALTNAME_INVALID',
+        'SELF_SIGNED_CERT_IN_CHAIN',
+        'DEPTH_ZERO_SELF_SIGNED_CERT'
+    ].includes(code)) return true;
+
+    const message = String(error?.message || '').toLowerCase();
+    return (
+        message.includes('hostname/ip does not match certificate') ||
+        message.includes('self-signed certificate') ||
+        message.includes('timeout') ||
+        message.includes('timed out') ||
+        message.includes('socket hang up') ||
+        message.includes('network error') ||
+        message.includes('status code 405') ||
+        message.includes('status code 429') ||
+        message.includes('status code 502') ||
+        message.includes('status code 503') ||
+        message.includes('status code 504')
+    );
+}
+
 // Поля вложений для разных типов
 const ATTACHMENT_FIELDS = {
     MESSAGES: ['Вложения', 'Вложения к ответу'],
@@ -42,22 +136,32 @@ function getAttachmentsFromRow(row, type) {
 /**
  * Обработать вложение через User Token
  */
-async function processAttachmentWithUserToken(attachment, groupId) {
+async function processAttachmentWithUserToken(attachment, groupId, options = {}) {
     try {
         log('debug', `🔗 Processing attachment: ${attachment}`);
         
-        const match = attachment.match(/^(doc|photo|video)(-?\d+)_(\d+)$/);
+        const match = attachment.match(/^(doc|photo|video)(-?\d+)_(\d+)(?:_([A-Za-z0-9_-]+))?$/);
         if (!match) {
             log('debug', `⚠️ Invalid attachment format: ${attachment}`);
             return attachment;
         }
         
-        const [, type, ownerIdStr, id] = match;
+        const [, type, ownerIdStr, id, accessKey = ''] = match;
         const ownerId = parseInt(ownerIdStr);
         const absGroupId = Math.abs(parseInt(groupId));
+        const target = String(options.target || '').toLowerCase();
+        const needsWallPhoto = target === 'comment' && type === 'photo';
+        const targetPeerId = Number.parseInt(options.peerId, 10);
+
+        // VK can save an unpublished wall photo under the User Token owner.
+        // Such photos are attachable only while their access_key is preserved.
+        if (needsWallPhoto && accessKey) {
+            log('debug', `✅ Comment wall photo already has access_key: ${attachment}`);
+            return attachment;
+        }
 
         // Если вложение уже принадлежит группе
-        if (ownerId === -absGroupId && type !== 'doc') {
+        if (ownerId === -absGroupId && type !== 'doc' && !needsWallPhoto) {
             log('debug', `✅ Attachment already owned by group: ${attachment}`);
             return attachment;
         }
@@ -71,14 +175,15 @@ async function processAttachmentWithUserToken(attachment, groupId) {
         // Нужно скачать и загрузить в сообщество
         if (type === 'doc') {
             log('debug', `📄 Doc belongs to user, downloading and re-uploading to community...`);
-            const MAX_RETRIES = 3;
+            const MAX_RETRIES = 5;
             let lastError = null;
 
             for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
                 if (attempt > 1) {
                     const delayMs = attempt * 1000;
                     log('debug', `🔄 Retry ${attempt}/${MAX_RETRIES} for doc upload, waiting ${delayMs}ms...`);
-                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                    const sleepImpl = options.sleep || (ms => new Promise(resolve => setTimeout(resolve, ms)));
+                    await sleepImpl(delayMs);
                 }
 
                 try {
@@ -91,14 +196,22 @@ async function processAttachmentWithUserToken(attachment, groupId) {
                         access_token: docUserToken
                     });
 
+                    if (docRes.error) {
+                        const sourceError = new Error(`VK cannot read source document ${ownerId}_${id}: ${docRes.error.error_msg || 'unknown API error'}`);
+                        sourceError.code = 'VK_DOCUMENT_SOURCE_UNAVAILABLE';
+                        sourceError.vkErrorCode = docRes.error.error_code;
+                        throw sourceError;
+                    }
+
                     const doc = (docRes.response?.items?.[0]) || (Array.isArray(docRes.response) ? docRes.response[0] : null);
                     if (!doc || !doc.url) {
-                        log('warn', `⚠️ Cannot get doc ${ownerId}_${id}, sending as-is`);
-                        return `doc${ownerId}_${id}`;
+                        const sourceError = new Error(`VK source document ${ownerId}_${id} is unavailable`);
+                        sourceError.code = 'VK_DOCUMENT_SOURCE_UNAVAILABLE';
+                        throw sourceError;
                     }
 
                     // 2. Скачиваем файл
-                    const downloadRes = await axios.get(doc.url, {
+                    const downloadRes = await downloadVkDocument(doc.url, {
                         responseType: 'arraybuffer',
                         timeout: 60000,
                         maxRedirects: 20
@@ -109,10 +222,11 @@ async function processAttachmentWithUserToken(attachment, groupId) {
                     log('debug', `📄 Doc downloaded: ${fileName}, size=${fileBuffer.length} bytes`);
 
                     // 3. Получаем URL загрузки для сообщества
-                    log('debug', `📤 Step 3/5: Getting upload URL with peer_id=${Math.abs(parseInt(ownerId))}...`);
+                    const uploadPeerId = Number.isFinite(targetPeerId) ? targetPeerId : Math.abs(parseInt(ownerId));
+                    log('debug', `Document upload: requesting message upload server for peer_id=${uploadPeerId}`);
                     const uploadServerRes = await vkGet('docs.getMessagesUploadServer', {
                         group_id: Math.abs(parseInt(groupId)),
-                        peer_id: Math.abs(parseInt(ownerId)),
+                        peer_id: uploadPeerId,
                         type: 'doc',
                         access_token: groupToken
                     });
@@ -154,12 +268,22 @@ async function processAttachmentWithUserToken(attachment, groupId) {
                     return newAttachment;
                 } catch (err) {
                     lastError = err;
-                    const isRetryable = err.message.includes('502') || err.message.includes('504') || err.message.includes('ETIMEDOUT') || err.message.includes('ECONNRESET') || err.message.includes('ECONNREFUSED') || err.code === 'ETIMEDOUT' || err.code === 'ECONNRESET' || err.code === 'ECONNABORTED';
+                    if (err?.code === 'VK_DOCUMENT_SOURCE_UNAVAILABLE') {
+                        throw err;
+                    }
+                    const isRetryable = isRetryableDocumentTransferError(err);
                     log('warn', `⚠️ Doc upload attempt ${attempt}/${MAX_RETRIES} failed: ${err.message} (retryable: ${isRetryable})`);
 
-                    if (!isRetryable || attempt === MAX_RETRIES) {
+                    if (!isRetryable) {
                         log('error', `❌ Doc re-upload failed after ${attempt} attempts: ${err.message}, sending as-is`);
                         return `doc${ownerId}_${id}`;
+                    }
+
+                    if (attempt === MAX_RETRIES) {
+                        const exhaustedError = new Error(`VK document re-upload failed after ${MAX_RETRIES} transient attempts: ${err.message}`);
+                        exhaustedError.code = 'VK_DOCUMENT_REUPLOAD_EXHAUSTED';
+                        exhaustedError.cause = err;
+                        throw exhaustedError;
                     }
                 }
             }
@@ -175,21 +299,63 @@ async function processAttachmentWithUserToken(attachment, groupId) {
             return attachment;
         }
 
+        if (type === 'video') {
+            let resolvedAccessKey = accessKey;
+            if (!resolvedAccessKey) {
+                const videoRes = await vkGet('video.get', {
+                    videos: `${ownerId}_${id}`,
+                    access_token: userToken
+                });
+                resolvedAccessKey = videoRes.response?.items?.[0]?.access_key || '';
+                if (resolvedAccessKey) {
+                    log('info', `Recovered private video access_key for video${ownerId}_${id}`);
+                }
+            }
+
+            const editRes = await vkGet('video.edit', {
+                owner_id: ownerId,
+                video_id: id,
+                privacy_view: 'all',
+                access_token: userToken
+            });
+            if (editRes.error) {
+                log('warn', `Cannot make video${ownerId}_${id} viewable: ${editRes.error.error_msg}`);
+            } else {
+                log('info', `Video is viewable by message recipients: video${ownerId}_${id}`);
+            }
+
+            return `video${ownerId}_${id}${resolvedAccessKey ? `_${resolvedAccessKey}` : ''}`;
+        }
+
         log('debug', `📎 Attachment type: ${type}, ownerId: ${ownerId}, id: ${id}, groupId: ${absGroupId}`);
 
         // Скачиваем и перезагружаем
-        const newAttachment = await reuploadAttachment(type, ownerId, id, userToken, groupId);
+        const newAttachment = await reuploadAttachment(type, ownerId, id, userToken, groupId, options, accessKey);
         
         if (newAttachment) {
             log('info', `✅ Re-uploaded: ${attachment} → ${newAttachment}`);
             return newAttachment;
         }
         
+        if (needsWallPhoto) {
+            log('warn', `⚠️ Comment photo is inaccessible and has no access_key: ${attachment}`);
+            return null;
+        }
+
         log('warn', `⚠️ Re-upload returned null, using original: ${attachment}`);
         return attachment;
     } catch (error) {
         log('error', `❌ Error processing attachment ${attachment}:`, error.message);
         log('error', error.stack);
+        if (error?.code === 'VK_DOCUMENT_REUPLOAD_EXHAUSTED') {
+            throw error;
+        }
+        if (error?.code === 'VK_DOCUMENT_SOURCE_UNAVAILABLE') {
+            throw error;
+        }
+        if (String(options.target || '').toLowerCase() === 'comment' && String(attachment || '').startsWith('photo')) {
+            return null;
+        }
         return attachment;
     }
 }
@@ -197,7 +363,7 @@ async function processAttachmentWithUserToken(attachment, groupId) {
 /**
  * Перезагрузить вложение
  */
-async function reuploadAttachment(type, ownerId, id, userToken, groupId) {
+async function reuploadAttachment(type, ownerId, id, userToken, groupId, options = {}, accessKey = '') {
     let fileBuffer = null;
     let fileName = `attachment_${id}`;
     let mimeType = 'application/octet-stream';
@@ -217,7 +383,7 @@ async function reuploadAttachment(type, ownerId, id, userToken, groupId) {
         // Скачиваем файл
         if (type === 'photo') {
             const photoRes = await vkGet('photos.getById', {
-                photos: `${ownerId}_${id}`,
+                photos: `${ownerId}_${id}${accessKey ? `_${accessKey}` : ''}`,
                 access_token: downloadToken
             });
             
@@ -257,7 +423,7 @@ async function reuploadAttachment(type, ownerId, id, userToken, groupId) {
                 log('debug', `📄 Doc found: title="${doc.title}", ext="${doc.ext}"`);
                 log('debug', `📥 Downloading doc from URL...`);
                 try {
-                    const downloadRes = await axios.get(doc.url, { 
+                    const downloadRes = await downloadVkDocument(doc.url, { 
                         responseType: 'arraybuffer', 
                         timeout: 60000,
                         maxRedirects: 5,
@@ -290,6 +456,9 @@ async function reuploadAttachment(type, ownerId, id, userToken, groupId) {
 
         // Загружаем через User Token
         if (type === 'photo') {
+            if (String(options.target || '').toLowerCase() === 'comment') {
+                return await uploadPhotoToWall(fileBuffer, fileName, mimeType, groupId);
+            }
             return await uploadPhotoToMessages(fileBuffer, fileName, mimeType, groupId);
         } else if (type === 'doc') {
             return await uploadDocToMessages(fileBuffer, fileName, mimeType, groupId);
@@ -405,6 +574,57 @@ async function uploadPhotoToMessages(buffer, filename, mimeType, groupId) {
 /**
  * Загрузить документ в сообщения
  */
+async function uploadPhotoToWall(buffer, filename, mimeType, groupId) {
+    const absGroupId = groupId ? Math.abs(parseInt(groupId)) : getVkGroupId();
+    if (!absGroupId) throw new Error('VK Group ID is not set');
+
+    log('info', `[WALL PHOTO UPLOAD] Starting: ${filename}, group_id: ${absGroupId}`);
+
+    const userToken = await getUserToken(groupId?.toString());
+    if (!userToken) {
+        throw new Error('VK User Token is required to upload photo attachments for wall comments');
+    }
+
+    const uploadServerRes = await vkGet('photos.getWallUploadServer', {
+        group_id: absGroupId,
+        access_token: userToken
+    });
+
+    if (uploadServerRes.error) {
+        throw new Error(`VK User Token failed for wall photo upload: ${uploadServerRes.error.error_msg}`);
+    }
+    const uploadUrl = uploadServerRes.response.upload_url;
+
+    const formData = new FormData();
+    formData.append('photo', buffer, { filename, contentType: mimeType });
+
+    const uploadRes = await axios.post(uploadUrl, formData, {
+        headers: formData.getHeaders(),
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+    });
+
+    const { server, photo, hash } = uploadRes.data;
+    if (!server || !photo || !hash) throw new Error('VK wall photo upload failed');
+
+    const saveRes = await vkGet('photos.saveWallPhoto', {
+        server,
+        photo,
+        hash,
+        group_id: absGroupId,
+        access_token: userToken
+    });
+
+    if (saveRes.error) {
+        throw new Error(`VK User Token failed for wall photo save: ${saveRes.error.error_msg}`);
+    }
+    const savedPhoto = Array.isArray(saveRes.response) ? saveRes.response[0] : saveRes.response;
+    const accessKey = String(savedPhoto.access_key || '').trim();
+    const attachment = `photo${savedPhoto.owner_id}_${savedPhoto.id}${accessKey ? `_${accessKey}` : ''}`;
+    log('info', `[WALL PHOTO UPLOAD] Success: ${attachment}`);
+    return attachment;
+}
+
 async function uploadDocToMessages(buffer, filename, mimeType, groupId) {
     const absGroupId = groupId ? Math.abs(parseInt(groupId)) : getVkGroupId();
     if (!absGroupId) throw new Error('VK Group ID не настроен!');
@@ -517,6 +737,53 @@ async function uploadDocToMessages(buffer, filename, mimeType, groupId) {
     }
 }
 
+async function uploadDocToWall(buffer, filename, mimeType, groupId) {
+    const absGroupId = groupId ? Math.abs(parseInt(groupId, 10)) : getVkGroupId();
+    if (!absGroupId) throw new Error('VK Group ID is not set');
+
+    const userToken = await getUserToken(groupId?.toString());
+    if (!userToken) {
+        throw new Error('VK User Token is required to upload a reusable community document');
+    }
+
+    const uploadServerRes = await vkGet('docs.getWallUploadServer', {
+        group_id: absGroupId,
+        access_token: userToken
+    });
+    if (uploadServerRes.error) {
+        throw new Error(`VK User Token failed for community document upload: ${uploadServerRes.error.error_msg}`);
+    }
+
+    const formData = new FormData();
+    formData.append('file', buffer, { filename, contentType: mimeType });
+    const uploadRes = await axios.post(uploadServerRes.response.upload_url, formData, {
+        headers: formData.getHeaders(),
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 300000
+    });
+    if (!uploadRes.data?.file) {
+        throw new Error('VK community document upload returned no file token');
+    }
+
+    const saveRes = await vkGet('docs.save', {
+        file: uploadRes.data.file,
+        group_id: absGroupId,
+        access_token: userToken
+    });
+    if (saveRes.error) {
+        throw new Error(`VK User Token failed to save community document: ${saveRes.error.error_msg}`);
+    }
+
+    const savedDoc = saveRes.response?.doc || saveRes.response;
+    if (!savedDoc?.owner_id || !savedDoc?.id) {
+        throw new Error('VK community document save returned no document');
+    }
+    const attachment = `doc${savedDoc.owner_id}_${savedDoc.id}`;
+    log('info', `[DOC WALL UPLOAD] Success: ${attachment}`);
+    return attachment;
+}
+
 /**
  * Загрузить видео в сообщения
  */
@@ -559,12 +826,12 @@ async function uploadVideoStandard(buffer, filename, mimeType, token, groupId) {
     const saveRes = await vkGet('video.save', {
         name: filename || 'video.mp4',
         description: 'Загружено ботом',
-        privacy_view: 'only_me',
+        privacy_view: 'all',
         access_token: token
     });
     
     if (saveRes.error) throw new Error(saveRes.error.error_msg);
-    const { upload_url, video_id, owner_id } = saveRes.response;
+    const { upload_url, video_id, owner_id, access_key: accessKey = '' } = saveRes.response;
 
     const formData = new FormData();
     formData.append('video_file', buffer, { filename, contentType: mimeType });
@@ -576,7 +843,7 @@ async function uploadVideoStandard(buffer, filename, mimeType, token, groupId) {
         timeout: 600000
     });
 
-    return `video${owner_id}_${video_id}`;
+    return `video${owner_id}_${video_id}${accessKey ? `_${accessKey}` : ''}`;
 }
 
 /**
@@ -622,7 +889,7 @@ async function uploadVideoViaServer(buffer, filename, mimeType, token, groupId) 
  * Подготовить вложение для комментария на стене
  */
 async function processAttachmentForComment(attachment, groupId) {
-    return processAttachmentWithUserToken(attachment, groupId);
+    return processAttachmentWithUserToken(attachment, groupId, { target: 'comment' });
 }
 
 function sleep(ms) {
@@ -759,22 +1026,47 @@ async function uploadToVK(buffer, filename, mimeType, target, groupId) {
     log('info', `📎 [UPLOAD] type=${mimeType}, target=${target}, size=${(buffer.length/1024/1024).toFixed(2)}MB`);
 
     if (mimeType.startsWith('image/')) {
+        if (target === 'comment' || target === 'comments') {
+            return await uploadPhotoToWall(buffer, filename, mimeType, groupId);
+        }
         return await uploadPhotoToMessages(buffer, filename, mimeType, groupId);
     } else if (mimeType.startsWith('video/')) {
         return await uploadVideoToMessages(buffer, filename, mimeType, groupId);
+    } else if (target === 'wall' || target === 'comment' || target === 'comments') {
+        return await uploadDocToWall(buffer, filename, mimeType, groupId);
     } else {
         return await uploadDocToMessages(buffer, filename, mimeType, groupId);
     }
 }
 
+// Render-relay уже обошёл лимит Yandex Cloud, поэтому видео на финальном
+// серверном шаге нельзя повторно отправлять в Render — это создаёт рекурсивный
+// цикл и приводит к тайм-ауту. Здесь видео сразу загружается в VK User Token.
+async function uploadToVKFromRenderRelay(buffer, filename, mimeType, target, groupId) {
+    if (String(mimeType || '').toLowerCase().startsWith('video/')) {
+        const userToken = await getUserToken(groupId?.toString());
+        if (!userToken) throw new Error('User Token не настроен для загрузки видео.');
+        return uploadVideoStandard(buffer, filename, mimeType, userToken, groupId);
+    }
+    return uploadToVK(buffer, filename, mimeType, target, groupId);
+}
+
 module.exports = {
     getAttachmentsFromRow,
+    getVkDocumentCdnFallbackUrl,
+    getAxiosTlsFailureUrl,
+    buildVkDocumentDownloadOptions,
+    downloadVkDocument,
+    isRetryableDocumentTransferError,
     processAttachmentWithUserToken,
     processAttachmentForComment,
     uploadPhotoToMessages,
+    uploadPhotoToWall,
     uploadDocToMessages,
+    uploadDocToWall,
     uploadVideoToMessages,
     uploadToVK,
+    uploadToVKFromRenderRelay,
     __testOnly: {
         isRenderWakeCandidate,
         uploadViaRenderServiceWithDependencies
