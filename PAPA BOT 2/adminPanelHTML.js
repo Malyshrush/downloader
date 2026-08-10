@@ -3152,6 +3152,16 @@ color: #eff6ff;
   flex: 0 0 auto;
   color: var(--accent-strong);
 }
+.profile-section-focus {
+  outline: 3px solid rgba(245, 158, 11, 0.55);
+  outline-offset: 5px;
+  transition: outline-color 0.2s ease, box-shadow 0.2s ease;
+}
+.profile-section-title-focus {
+  text-align: center !important;
+  color: var(--accent-strong) !important;
+  text-shadow: 0 0 18px rgba(245, 158, 11, 0.3);
+}
 .profile-card.profile-card--active-community .profile-community-metric-btn {
   background: rgba(255,255,255,0.12);
   border-color: rgba(255,255,255,0.18);
@@ -15879,10 +15889,17 @@ window.scrollToAdminTabTop = function() {
 window.scrollToProfileSection = function(sectionId) {
     var target = document.getElementById(sectionId);
     if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    var heading = target.querySelector('.profile-manager-title, h3, h2') || target;
+    heading.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    target.classList.add('profile-section-focus');
+    if (heading !== target) heading.classList.add('profile-section-title-focus');
     document.querySelectorAll('.admin-back-to-top-btn').forEach(function(btn) {
         btn.classList.add('is-visible');
     });
+    setTimeout(function() {
+        target.classList.remove('profile-section-focus');
+        if (heading !== target) heading.classList.remove('profile-section-title-focus');
+    }, 3000);
 };
 
 window.addEventListener('scroll', updateAdminBackToTopButton, { passive: true });

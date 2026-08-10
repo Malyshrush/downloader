@@ -86,6 +86,13 @@ test('community card places payment operations directly after payment systems', 
   assert.ok(attachmentSettingsIndex > paymentOperationsIndex, 'attachment upload settings follow payment operations');
 });
 
+test('profile community card transitions center the selected block heading', () => {
+  assert.match(adminPanelHTML, /window\.scrollToProfileSection = function\(sectionId\)/);
+  assert.match(adminPanelHTML, /querySelector\('\.profile-manager-title, h3, h2'\)/);
+  assert.match(adminPanelHTML, /heading\.scrollIntoView\(\{ behavior: 'smooth', block: 'center' \}\)/);
+  assert.match(adminPanelHTML, /profile-section-title-focus/);
+});
+
 test('profile balance renders three vertical cards with approved controls and benefit badges', () => {
   assert.match(adminPanelHTML, /\.profile-balance-stack\s*\{/);
   assert.match(adminPanelHTML, /\.profile-balance-card\s*\{/);
