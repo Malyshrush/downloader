@@ -128,7 +128,8 @@ const { handleComment } = require('./modules/comments');
 const { processDelayed, processMailing } = require('./modules/scheduler');
 const { processStructuredTriggers } = require('./modules/structured-triggers');
 const { setupVkCallbackServer } = require('./modules/callback-setup');
-const { uploadToVK } = require('./modules/attachments');
+const { uploadToVK, uploadToVKFromRenderRelay } = require('./modules/attachments');
+const { getAttachmentUploadSettings, saveProfileAttachmentUploadOverrides } = require('./modules/attachment-upload-settings');
 const { getTokenPermissions, getMarketProducts } = require('./modules/vk-api');
 const {
     addAppLog,
@@ -1597,6 +1598,10 @@ async function handlePostRequest(event) {
         return handleSaveProfilePaymentIntegrations(event);
     }
 
+    if (q.saveProfileAttachmentUploadSettings !== undefined) {
+        return handleSaveProfileAttachmentUploadSettings(event);
+    }
+
     if (q.testProfilePaymentIntegration !== undefined) {
         return handleTestProfilePaymentIntegration(event);
     }
@@ -2529,7 +2534,7 @@ function buildExampleBotTemplates() {
 
 async function ensureDefaultConsentDocumentsForCommunity(communityId, profileId, overrides = {}) {
     const getLatestConsentDocumentVersionImpl = overrides.getLatestConsentDocumentVersion || getLatestConsentDocumentVersion;
-    const uploadToVKImpl = overrides.uploadToVK || uploadToVK;
+    const uploadToVKImpl = overrides.uploadToVK || uploadToVKFromRenderRelay;
     const recordConsentDocumentVersionImpl = overrides.recordConsentDocumentVersion || recordConsentDocumentVersion;
     const result = { createdCount: 0, created: [], skipped: [], failed: [] };
 
@@ -3685,6 +3690,19 @@ async function handleSaveProfilePaymentIntegrations(event) {
     }
 }
 
+async function handleSaveProfileAttachmentUploadSettings(event) {
+    try {
+        const q = getQueryParamsFromEvent(event);
+        const body = JSON.parse(event.body || '{}');
+        const profileId = getRequestProfileId(q, body);
+        assertProfileReadAccess(event, profileId);
+        const settings = await saveProfileAttachmentUploadOverrides(profileId, body.overrides || {}, { updatedBy: profileId });
+        return { statusCode: 200, headers: buildJsonHeaders(), body: JSON.stringify({ success: true, settings }) };
+    } catch (error) {
+        return { statusCode: error.statusCode || 500, headers: buildJsonHeaders(), body: JSON.stringify({ success: false, error: error.message }) };
+    }
+}
+
 async function handleTestProfilePaymentIntegration(event) {
     try {
         const body = JSON.parse(event.body || '{}');
@@ -3904,7 +3922,7 @@ async function readRenderRelayObject(body) {
 
 async function handleUploadAttachmentChunk(event, overrides = {}) {
     const s3 = overrides.s3Client || getS3Client();
-    const uploadToVKImpl = overrides.uploadToVK || uploadToVK;
+    const uploadToVKImpl = overrides.uploadToVK || uploadToVKFromRenderRelay;
     const persistUploadedCommunityFileRecordImpl = overrides.persistUploadedCommunityFileRecord || persistUploadedCommunityFileRecord;
     const loadBotConfigImpl = overrides.loadBotConfig || loadBotConfig;
     const getUserTokenImpl = overrides.getUserToken || getUserToken;
@@ -3943,7 +3961,7 @@ async function handleUploadAttachmentChunk(event, overrides = {}) {
             await loadBotConfigImpl(profileId);
             const userToken = await getUserTokenImpl(grant.communityId, profileId);
             if (!userToken) throw new Error('User Token не настроен для загрузки вложений.');
-            const attachment = await uploadToVKImpl(buffer, body.fileName, body.fileType, grant.target, grant.groupId);
+            const attachment = await uploadToVKImpl(buffer, body.fileName, body.fileType, grant.target, grant.groupId, profileId);
             await persistUploadedCommunityFileRecordImpl({ ...body, profileId, attachment, fileSize: Number(body.fileSize || buffer.length) });
             return { statusCode: 200, headers: buildJsonHeaders(), body: JSON.stringify({ success: true, attachment, fileName: body.fileName, fileType: body.fileType, fileSize: Number(body.fileSize || buffer.length) }) };
         } finally {
@@ -3960,11 +3978,11 @@ async function handleUploadAttachmentWithDependencies(event, overrides = {}) {
         const getUserTokenImpl = overrides.getUserToken || getUserToken;
         const uploadToVKImpl = overrides.uploadToVK || uploadToVK;
         const persistUploadedCommunityFileRecordImpl = overrides.persistUploadedCommunityFileRecord || persistUploadedCommunityFileRecord;
-        await loadBotConfigImpl();
         const body = JSON.parse(event.body);
         const { fileBase64, fileType, fileName, target, groupId, communityId } = body;
         const q = event.queryStringParameters || event.query || event.params || {};
         const profileId = getRequestProfileId(q, body);
+        await loadBotConfigImpl(profileId);
 
         if (!fileBase64 || !target) {
             return {
@@ -3991,7 +4009,7 @@ async function handleUploadAttachmentWithDependencies(event, overrides = {}) {
         }
 
         const buffer = Buffer.from(fileBase64, 'base64');
-        const attachment = await uploadToVKImpl(buffer, fileName, fileType, target, groupId || communityId || null);
+        const attachment = await uploadToVKImpl(buffer, fileName, fileType, target, groupId || communityId || null, profileId);
         await persistUploadedCommunityFileRecordImpl({
             ...body,
             attachment,

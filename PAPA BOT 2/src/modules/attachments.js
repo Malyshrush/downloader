@@ -7,6 +7,7 @@ const FormData = require('form-data');
 const { log } = require('../utils/logger');
 const { getUserToken, getVkToken, getVkGroupId } = require('./config');
 const { vkGet } = require('./vk-api');
+const { resolveAttachmentUploadSource } = require('./attachment-upload-settings');
 const RENDER_INITIAL_UPLOAD_TIMEOUT_MS = 20000;
 const RENDER_RETRY_UPLOAD_TIMEOUT_MS = 120000;
 const RENDER_FINAL_RETRY_DELAY_MS = 10000;
@@ -312,18 +313,7 @@ async function processAttachmentWithUserToken(attachment, groupId, options = {})
                 }
             }
 
-            const editRes = await vkGet('video.edit', {
-                owner_id: ownerId,
-                video_id: id,
-                privacy_view: 'all',
-                access_token: userToken
-            });
-            if (editRes.error) {
-                log('warn', `Cannot make video${ownerId}_${id} viewable: ${editRes.error.error_msg}`);
-            } else {
-                log('info', `Video is viewable by message recipients: video${ownerId}_${id}`);
-            }
-
+            log('info', `Keeping video private for message delivery: video${ownerId}_${id}`);
             return `video${ownerId}_${id}${resolvedAccessKey ? `_${resolvedAccessKey}` : ''}`;
         }
 
@@ -571,6 +561,22 @@ async function uploadPhotoToMessages(buffer, filename, mimeType, groupId) {
     throw new Error(`Не удалось загрузить фото. User Token: ${userTokenError}. Group Token: ${groupTokenError}`);
 }
 
+async function uploadPhotoToCommunityMessages(buffer, filename, mimeType, groupId, profileId = null) {
+    const absGroupId = groupId ? Math.abs(parseInt(groupId, 10)) : getVkGroupId();
+    if (!absGroupId) throw new Error('VK Group ID is not set');
+    const groupToken = await getVkToken(0, groupId, profileId);
+    if (!groupToken) throw new Error('Community Token is not configured');
+    const server = await vkGet('photos.getMessagesUploadServer', { group_id: absGroupId, access_token: groupToken });
+    if (server.error) throw new Error(server.error.error_msg);
+    const formData = new FormData();
+    formData.append('photo', buffer, { filename, contentType: mimeType });
+    const uploaded = await axios.post(server.response.upload_url, formData, { headers: formData.getHeaders(), maxContentLength: Infinity, maxBodyLength: Infinity });
+    const saved = await vkGet('photos.saveMessagesPhoto', { server: uploaded.data.server, photo: uploaded.data.photo, hash: uploaded.data.hash, group_id: absGroupId, access_token: groupToken });
+    if (saved.error) throw new Error(saved.error.error_msg);
+    const item = saved.response[0];
+    return `photo${item.owner_id}_${item.id}`;
+}
+
 /**
  * Загрузить документ в сообщения
  */
@@ -737,6 +743,24 @@ async function uploadDocToMessages(buffer, filename, mimeType, groupId) {
     }
 }
 
+async function uploadDocToCommunityMessages(buffer, filename, mimeType, groupId, profileId = null) {
+    const absGroupId = groupId ? Math.abs(parseInt(groupId, 10)) : getVkGroupId();
+    if (!absGroupId) throw new Error('VK Group ID is not set');
+    const groupToken = await getVkToken(0, groupId, profileId);
+    if (!groupToken) throw new Error('Community Token is not configured');
+    const peerId = -absGroupId;
+    const server = await vkGet('docs.getMessagesUploadServer', { peer_id: peerId, access_token: groupToken });
+    if (server.error) throw new Error(server.error.error_msg);
+    const formData = new FormData();
+    formData.append('file', buffer, { filename, contentType: mimeType });
+    const uploaded = await axios.post(server.response.upload_url, formData, { headers: formData.getHeaders(), maxContentLength: Infinity, maxBodyLength: Infinity, timeout: 300000 });
+    if (!uploaded.data?.file) throw new Error('VK document upload returned no file token');
+    const saved = await vkGet('docs.save', { file: uploaded.data.file, peer_id: peerId, access_token: groupToken });
+    if (saved.error) throw new Error(saved.error.error_msg);
+    const item = saved.response.doc || saved.response;
+    return `doc${item.owner_id}_${item.id}`;
+}
+
 async function uploadDocToWall(buffer, filename, mimeType, groupId) {
     const absGroupId = groupId ? Math.abs(parseInt(groupId, 10)) : getVkGroupId();
     if (!absGroupId) throw new Error('VK Group ID is not set');
@@ -787,8 +811,8 @@ async function uploadDocToWall(buffer, filename, mimeType, groupId) {
 /**
  * Загрузить видео в сообщения
  */
-async function uploadVideoToMessages(buffer, filename, mimeType, groupId) {
-    const userToken = await getUserToken(groupId?.toString());
+async function uploadVideoToMessages(buffer, filename, mimeType, groupId, profileId = null) {
+    const userToken = await getUserToken(groupId?.toString(), profileId);
     if (!userToken) throw new Error('User Token не настроен!');
     
     const absGroupId = groupId ? Math.abs(parseInt(groupId)) : getVkGroupId();
@@ -805,7 +829,8 @@ async function uploadVideoToMessages(buffer, filename, mimeType, groupId) {
     if (fileSizeMB > 3.5) {
         log('info', `🎬 [VIDEO UPLOAD] File >3.5MB, using Render service...`);
         try {
-            const result = await uploadViaRenderServiceWithDependencies(buffer, filename, mimeType, 'messages', absGroupId);
+            const uploadSource = await resolveAttachmentUploadSource(profileId, 'video');
+            const result = await uploadViaRenderServiceWithDependencies(buffer, filename, mimeType, 'messages', absGroupId, { profileId, userVideoPrivacy: uploadSource.settings.userVideoPrivacy.effective });
             log('info', `✅ [VIDEO UPLOAD] Success via Render: ${result}`);
             return result;
         } catch (renderError) {
@@ -815,18 +840,22 @@ async function uploadVideoToMessages(buffer, filename, mimeType, groupId) {
     }
 
     // Для видео ≤3.5MB - стандартный метод через User Token
-    return await uploadVideoStandard(buffer, filename, mimeType, userToken, absGroupId);
+    const uploadSource = await resolveAttachmentUploadSource(profileId, 'video');
+    return await uploadVideoStandard(buffer, filename, mimeType, userToken, absGroupId, uploadSource.source, uploadSource.settings.userVideoPrivacy.effective);
 }
 
 /**
  * Стандартная загрузка видео (до 100MB)
  */
-async function uploadVideoStandard(buffer, filename, mimeType, token, groupId) {
-    // ✅ ИСПРАВЛЕНИЕ: Убираем group_id, загружаем на личную страницу пользователя
+async function uploadVideoStandard(buffer, filename, mimeType, token, groupId, source = 'user', userVideoPrivacy = 'all') {
+    // Сохраняем видео в видеокаталоге сообщества, чтобы User Token не становился
+    // владельцем медиа в личном профиле.
     const saveRes = await vkGet('video.save', {
         name: filename || 'video.mp4',
         description: 'Загружено ботом',
-        privacy_view: 'all',
+        ...(source === 'community'
+            ? { group_id: Math.abs(groupId), privacy_view: 'all' }
+            : { privacy_view: userVideoPrivacy }),
         access_token: token
     });
     
@@ -875,7 +904,7 @@ async function uploadVideoViaServer(buffer, filename, mimeType, token, groupId) 
         owner_id,
         name: filename || 'video.mp4',
         description: 'Загружено ботом',
-        group_id: Math.abs(groupId),
+        privacy_view: 'nobody',
         access_token: token
     });
     
@@ -896,12 +925,13 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function createRenderUploadFormData(buffer, filename, mimeType, userToken, groupId, target) {
+function createRenderUploadFormData(buffer, filename, mimeType, userToken, groupId, target, userVideoPrivacy = '') {
     const formData = new FormData();
     formData.append('file', buffer, { filename, contentType: mimeType });
     formData.append('user_token', userToken);
     formData.append('group_id', Math.abs(parseInt(groupId)));
     formData.append('target', target);
+    if (userVideoPrivacy) formData.append('user_video_privacy', userVideoPrivacy);
     return formData;
 }
 
@@ -940,7 +970,7 @@ async function uploadViaRenderServiceWithDependencies(buffer, filename, mimeType
         return response.data;
     });
 
-    const userToken = await getUserTokenImpl(groupId?.toString());
+    const userToken = await getUserTokenImpl(groupId?.toString(), overrides.profileId);
     if (!userToken) {
         throw new Error('User Token не настроен для загрузки через Render');
     }
@@ -949,7 +979,7 @@ async function uploadViaRenderServiceWithDependencies(buffer, filename, mimeType
     log('info', `[RENDER UPLOAD] Uploading to ${uploadUrl}`);
 
     const executeUpload = async timeoutMs => {
-        const formData = createFormDataImpl(buffer, filename, mimeType, userToken, groupId, target);
+        const formData = createFormDataImpl(buffer, filename, mimeType, userToken, groupId, target, overrides.userVideoPrivacy);
         const payload = await uploadRequest(uploadUrl, formData, timeoutMs);
         if (!payload?.success) {
             throw new Error(payload?.error || 'Render upload failed');
@@ -1022,33 +1052,40 @@ async function uploadViaRenderService(buffer, filename, mimeType, target, groupI
 /**
  * Универсальная функция загрузки в VK
  */
-async function uploadToVK(buffer, filename, mimeType, target, groupId) {
+async function uploadToVK(buffer, filename, mimeType, target, groupId, profileId = null) {
     log('info', `📎 [UPLOAD] type=${mimeType}, target=${target}, size=${(buffer.length/1024/1024).toFixed(2)}MB`);
 
+    const type = mimeType.startsWith('image/') ? 'image' : (mimeType.startsWith('video/') ? 'video' : 'document');
+    const uploadSource = await resolveAttachmentUploadSource(profileId, type);
     if (mimeType.startsWith('image/')) {
         if (target === 'comment' || target === 'comments') {
             return await uploadPhotoToWall(buffer, filename, mimeType, groupId);
         }
-        return await uploadPhotoToMessages(buffer, filename, mimeType, groupId);
+        return uploadSource.source === 'community'
+            ? uploadPhotoToCommunityMessages(buffer, filename, mimeType, groupId, profileId)
+            : uploadPhotoToMessages(buffer, filename, mimeType, groupId);
     } else if (mimeType.startsWith('video/')) {
-        return await uploadVideoToMessages(buffer, filename, mimeType, groupId);
+        return await uploadVideoToMessages(buffer, filename, mimeType, groupId, profileId);
     } else if (target === 'wall' || target === 'comment' || target === 'comments') {
         return await uploadDocToWall(buffer, filename, mimeType, groupId);
     } else {
-        return await uploadDocToMessages(buffer, filename, mimeType, groupId);
+        return uploadSource.source === 'community'
+            ? uploadDocToCommunityMessages(buffer, filename, mimeType, groupId, profileId)
+            : uploadDocToMessages(buffer, filename, mimeType, groupId);
     }
 }
 
 // Render-relay уже обошёл лимит Yandex Cloud, поэтому видео на финальном
 // серверном шаге нельзя повторно отправлять в Render — это создаёт рекурсивный
 // цикл и приводит к тайм-ауту. Здесь видео сразу загружается в VK User Token.
-async function uploadToVKFromRenderRelay(buffer, filename, mimeType, target, groupId) {
+async function uploadToVKFromRenderRelay(buffer, filename, mimeType, target, groupId, profileId = null) {
     if (String(mimeType || '').toLowerCase().startsWith('video/')) {
-        const userToken = await getUserToken(groupId?.toString());
+        const userToken = await getUserToken(groupId?.toString(), profileId);
         if (!userToken) throw new Error('User Token не настроен для загрузки видео.');
-        return uploadVideoStandard(buffer, filename, mimeType, userToken, groupId);
+        const uploadSource = await resolveAttachmentUploadSource(profileId, 'video');
+        return uploadVideoStandard(buffer, filename, mimeType, userToken, groupId, uploadSource.source, uploadSource.settings.userVideoPrivacy.effective);
     }
-    return uploadToVK(buffer, filename, mimeType, target, groupId);
+    return uploadToVK(buffer, filename, mimeType, target, groupId, profileId);
 }
 
 module.exports = {
@@ -1061,8 +1098,10 @@ module.exports = {
     processAttachmentWithUserToken,
     processAttachmentForComment,
     uploadPhotoToMessages,
+    uploadPhotoToCommunityMessages,
     uploadPhotoToWall,
     uploadDocToMessages,
+    uploadDocToCommunityMessages,
     uploadDocToWall,
     uploadVideoToMessages,
     uploadToVK,

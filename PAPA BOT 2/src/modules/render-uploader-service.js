@@ -54,6 +54,11 @@ function normalizeGroupId(groupId) {
     return Math.abs(Number(groupId));
 }
 
+function normalizeUserVideoPrivacy(value) {
+    const privacy = String(value || '').trim().toLowerCase();
+    return ['all', 'friends', 'friends_of_friends', 'nobody'].includes(privacy) ? privacy : 'all';
+}
+
 function buildVkError(prefix, error) {
     if (!error) return new Error(prefix);
     if (error.data?.error?.error_msg) return new Error(`${prefix}: ${error.data.error.error_msg}`);
@@ -130,18 +135,12 @@ async function uploadPhotoToMessagesWithToken(token, absGroupId, file, overrides
 }
 
 async function uploadPhotoToWall(userToken, groupId, file, overrides = {}) {
-    const communityToken = overrides.communityToken || '';
     const absGroupId = normalizeGroupId(groupId);
     return tryUploadStrategies([
         {
             name: 'photo wall user token',
             enabled: !!userToken,
             run: () => uploadPhotoToWallWithToken(userToken, absGroupId, file, overrides)
-        },
-        {
-            name: 'photo wall community token',
-            enabled: !!communityToken,
-            run: () => uploadPhotoToWallWithToken(communityToken, absGroupId, file, overrides)
         }
     ]);
 }
@@ -168,7 +167,8 @@ async function uploadPhotoToWallWithToken(token, absGroupId, file, overrides = {
     if (saveRes.data.error) throw new Error(saveRes.data.error.error_msg);
 
     const savedPhoto = saveRes.data.response[0];
-    return `photo${savedPhoto.owner_id}_${savedPhoto.id}`;
+    const accessKey = String(savedPhoto.access_key || '').trim();
+    return `photo${savedPhoto.owner_id}_${savedPhoto.id}${accessKey ? `_${accessKey}` : ''}`;
 }
 
 async function uploadDocToMessages(userToken, groupId, file, overrides = {}) {
@@ -291,21 +291,22 @@ async function uploadDocToWallWithToken(token, absGroupId, file, overrides = {})
 }
 
 async function uploadVideoToMessages(userToken, groupId, file, overrides = {}) {
+    const absGroupId = normalizeGroupId(groupId);
     const saveRes = await vkGet('https://api.vk.com/method/video.save', {
         access_token: userToken,
         name: file.originalname || 'video.mp4',
-        privacy_view: 'only_me',
+        privacy_view: normalizeUserVideoPrivacy(overrides.userVideoPrivacy),
         v: '5.199'
     }, overrides);
     if (saveRes.data.error) throw new Error('VK API Error: ' + saveRes.data.error.error_msg);
 
-    const { upload_url, video_id, owner_id } = saveRes.data.response;
+    const { upload_url, video_id, owner_id, access_key: accessKey = '' } = saveRes.data.response;
     const form = createUploadForm(file, 'video_file', overrides);
     await vkPost(upload_url, form, {
         headers: form.getHeaders()
     }, overrides);
 
-    return `video${owner_id}_${video_id}`;
+    return `video${owner_id}_${video_id}${accessKey ? `_${accessKey}` : ''}`;
 }
 
 async function uploadVideoToWall(userToken, groupId, file, overrides = {}) {
@@ -325,7 +326,8 @@ async function handleUploadRequestWithDependencies(req, overrides = {}) {
     const userToken = body.user_token;
     const communityToken = body.community_token;
     const groupId = body.group_id;
-    const target = body.target;
+    const target = String(body.target || '').trim().toLowerCase();
+    const isCommentTarget = target === 'comment' || target === 'comments';
 
     if (!groupId || !file || !target) {
         throw new Error('Missing required fields (group_id, file, target)');
@@ -339,13 +341,13 @@ async function handleUploadRequestWithDependencies(req, overrides = {}) {
         let attachment = null;
 
         if (mime.startsWith('image/')) {
-            attachment = target === 'comments'
+            attachment = isCommentTarget
                 ? await uploadPhotoToWallImpl(userToken, groupId, file, { ...overrides, communityToken })
                 : await uploadPhotoToMessagesImpl(userToken, groupId, file, { ...overrides, communityToken });
         } else if (mime.startsWith('video/')) {
-            attachment = await uploadVideoToMessagesImpl(userToken, groupId, file, { ...overrides, communityToken });
+            attachment = await uploadVideoToMessagesImpl(userToken, groupId, file, { ...overrides, communityToken, userVideoPrivacy: body.user_video_privacy });
         } else {
-            attachment = target === 'comments'
+            attachment = isCommentTarget
                 ? await uploadDocToWallImpl(userToken, groupId, file, { ...overrides, communityToken })
                 : await uploadDocToMessagesImpl(userToken, groupId, file, { ...overrides, communityToken });
         }

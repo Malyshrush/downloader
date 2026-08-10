@@ -218,6 +218,138 @@ async function run(name, fn) {
     assert.equal(attachment, 'photo-229445618_42');
     assert.deepEqual(calls.map(call => call[0]), ['GET', 'POST', 'POST']);
   });
+
+  await run('uploadVideoToMessages defaults to recipient-viewable privacy and preserves access_key', async () => {
+    const calls = [];
+    const attachment = await uploader.uploadVideoToMessages(
+      'user-token',
+      '229445618',
+      {
+        path: 'C:\\tmp\\clip.mp4',
+        originalname: 'clip.mp4',
+        mimetype: 'video/mp4',
+        size: 4096
+      },
+      {
+        FormDataCtor: function FakeFormData() {
+          return {
+            append() {},
+            getHeaders() {
+              return { 'content-type': 'multipart/form-data' };
+            }
+          };
+        },
+        createReadStream: filePath => ({ kind: 'stream', filePath }),
+        httpGet: async (url, options) => {
+          calls.push(['GET', url, options.params]);
+          assert.equal(url, 'https://api.vk.com/method/video.save');
+          assert.equal(options.params.privacy_view, 'all');
+          assert.equal(options.params.group_id, undefined);
+          return {
+            data: {
+              response: {
+                upload_url: 'https://upload.vk.test/video',
+                owner_id: 27894453,
+                video_id: 456,
+                access_key: 'render-video-key'
+              }
+            }
+          };
+        },
+        httpPost: async url => {
+          calls.push(['POST', url]);
+          assert.equal(url, 'https://upload.vk.test/video');
+          return { data: { ok: 1 } };
+        }
+      }
+    );
+
+    assert.equal(attachment, 'video27894453_456_render-video-key');
+    assert.deepEqual(calls.map(call => call[0]), ['GET', 'POST']);
+  });
+
+  await run('uploadPhotoToWall preserves access_key returned by VK', async () => {
+    const attachment = await uploader.uploadPhotoToWall(
+      'user-token',
+      '229445618',
+      {
+        path: 'C:\\tmp\\wall-photo.jpg',
+        originalname: 'wall-photo.jpg',
+        mimetype: 'image/jpeg',
+        size: 4096
+      },
+      {
+        communityToken: 'community-token-must-not-be-used',
+        FormDataCtor: function FakeFormData() {
+          return {
+            append() {},
+            getHeaders() {
+              return { 'content-type': 'multipart/form-data' };
+            }
+          };
+        },
+        createReadStream: filePath => ({ kind: 'stream', filePath }),
+        httpGet: async (url, options) => {
+          assert.equal(url, 'https://api.vk.com/method/photos.getWallUploadServer');
+          assert.equal(options.params.access_token, 'user-token');
+          assert.equal(options.params.group_id, 229445618);
+          return { data: { response: { upload_url: 'https://upload.vk.test/wall-photo' } } };
+        },
+        httpPost: async (url, data, options) => {
+          if (url === 'https://upload.vk.test/wall-photo') {
+            return { data: { server: 1, photo: '[]', hash: 'hash' } };
+          }
+          assert.equal(url, 'https://api.vk.com/method/photos.saveWallPhoto');
+          assert.equal(options.params.access_token, 'user-token');
+          return {
+            data: {
+              response: [{
+                owner_id: 27894453,
+                id: 457239999,
+                access_key: 'private-wall-key'
+              }]
+            }
+          };
+        }
+      }
+    );
+
+    assert.equal(attachment, 'photo27894453_457239999_private-wall-key');
+  });
+
+  await run('Render upload treats singular comment target as a wall attachment', async () => {
+    const routes = [];
+    const result = await uploader.handleUploadRequestWithDependencies(
+      {
+        body: {
+          user_token: 'user-token',
+          community_token: 'community-token',
+          group_id: '229445618',
+          target: 'comment'
+        },
+        file: {
+          path: 'C:\\tmp\\wall-photo.jpg',
+          originalname: 'wall-photo.jpg',
+          mimetype: 'image/jpeg',
+          size: 4096
+        }
+      },
+      {
+        uploadPhotoToWall: async () => {
+          routes.push('wall');
+          return 'photo27894453_457239999_private-wall-key';
+        },
+        uploadPhotoToMessages: async () => {
+          routes.push('messages');
+          return 'unexpected';
+        },
+        cleanupFile: async () => {}
+      }
+    );
+
+    assert.deepEqual(routes, ['wall']);
+    assert.equal(result.attachment, 'photo27894453_457239999_private-wall-key');
+  });
 })().then(() => {
   process.exit(0);
 }).catch(error => {

@@ -18435,6 +18435,7 @@ window.renderProfileDashboard = function() {
     var dailyLimitPackages = Array.isArray(data.dailyLimitPackages) ? data.dailyLimitPackages : [];
     var extraLimitPackages = Array.isArray(data.extraLimitPackages) ? data.extraLimitPackages : [];
     var promoStatus = data.promoActivationStatus || { attempts: 0, remainingAttempts: 3, blocked: false, nextResetAt: 0 };
+    var attachmentUploadSettings = data.attachmentUploadSettings || { global: { image: 'community', document: 'user', video: 'community' }, overrides: {}, effective: { image: 'community', document: 'user', video: 'community' }, userVideoPrivacy: { global: 'all', override: '', effective: 'all' } };
     var activeCommunityId = String(window.currentCommunityId || '').trim();
     if (!window.selectedProfileDailyLimitPackageCost && dailyLimitPackages.length) {
         window.selectedProfileDailyLimitPackageCost = Number(dailyLimitPackages[0].cost || 0);
@@ -18494,6 +18495,32 @@ window.renderProfileDashboard = function() {
         (selectedCommunity ? '<div class="profile-manager-subtitle" style="margin-bottom:12px;">Сейчас показано сообщество: <strong>' + escapeHtml(selectedCommunity.groupName || ('Сообщество ' + selectedCommunityVkGroupId)) + '</strong> (' + escapeHtml(selectedCommunityVkGroupId) + ')</div>' : '') +
         '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px;"><input type="text" id="profileFilesFilter" placeholder="Поиск по названию, типу, размеру или аттачменту" oninput="filterProfileFiles()" style="flex:1;min-width:280px;"></div>' +
         '<div style="overflow:auto;"><table style="width:100%;border-collapse:collapse;"><thead><tr><th>Название</th><th>Тип</th><th>Размер</th><th>Аттачмент</th><th>Действие</th></tr></thead><tbody id="profileFilesTableBody">' + filesRowsHtml + '</tbody></table></div><div id="profileFilesStatus" style="margin-top:10px;"></div></div>';
+    var uploadSourceOptions = function(type) {
+        var effective = attachmentUploadSettings.effective[type] || attachmentUploadSettings.global[type] || 'user';
+        var override = attachmentUploadSettings.overrides[type] || '';
+        var label = effective === 'community' ? 'сообщество' : 'пользователь';
+        return '<select id="profileAttachmentSource_' + type + '">' +
+            '<option value="">Глобально: ' + label + '</option>' +
+            '<option value="user"' + (override === 'user' ? ' selected' : '') + '>Пользователь</option>' +
+            '<option value="community"' + (override === 'community' ? ' selected' : '') + '>Сообщество</option>' +
+        '</select>';
+    };
+    var videoPrivacy = attachmentUploadSettings.userVideoPrivacy || { global: 'all', override: '', effective: 'all' };
+    var videoPrivacyOptions = function() {
+        var effective = videoPrivacy.effective || videoPrivacy.global || 'all';
+        var override = videoPrivacy.override || '';
+        var labels = { all: 'Все пользователи', friends: 'Только друзья', friends_of_friends: 'Друзья и друзья друзей', nobody: 'Только я' };
+        return '<select id="profileAttachmentUserVideoPrivacy">' +
+            '<option value="">Глобально: ' + escapeHtml(labels[effective] || 'Все пользователи') + '</option>' +
+            Object.keys(labels).map(function(value) { return '<option value="' + value + '"' + (override === value ? ' selected' : '') + '>' + labels[value] + '</option>'; }).join('') +
+        '</select>';
+    };
+    var attachmentUploadSectionHtml = '<div id="profileAttachmentUploadSettings" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Источник загрузки вложений</h3><div class="profile-manager-subtitle">Настройка действует для вложений из Сообщений, Рассылки и Отложенных. Для фото в комментариях VK всегда требует безопасную загрузку от сообщества.</div></div></div>' +
+        '<div class="structured-trigger-grid"><div class="structured-trigger-field"><label>Изображения</label>' + uploadSourceOptions('image') + '<small>Пользователь — личное вложение владельца User Token. Сообщество — вложение принадлежит сообществу.</small></div>' +
+        '<div class="structured-trigger-field"><label>Документы</label>' + uploadSourceOptions('document') + '<small>Пользователь — документ сохраняется у владельца User Token. Сообщество — документ создаётся токеном сообщества.</small></div>' +
+        '<div class="structured-trigger-field"><label>Видео и клипы</label>' + uploadSourceOptions('video') + '<small>Сообщество — видео принадлежит сообществу и может быть видно в его видеокаталоге.</small></div>' +
+        '<div class="structured-trigger-field"><label>Приватность пользовательского видео</label>' + videoPrivacyOptions() + '<small>Используется только при выборе «Пользователь» для видео/клипов. По умолчанию «Все пользователи», чтобы получатель мог открыть видео из сообщения. VK не поддерживает режим «видно только получателю сообщения».</small></div></div>' +
+        '<div class="profile-card-actions" style="margin-top:12px;"><button class="btn btn-save" type="button" onclick="saveProfileAttachmentUploadSettings()">Сохранить источник загрузки</button></div><div id="profileAttachmentUploadSettingsStatus" style="margin-top:10px;"></div></div>';
 
     var resetLabel = promoStatus.nextResetAt ? formatRuDateTime(promoStatus.nextResetAt) : '00:00 МСК';
     var promoHint = promoStatus.blocked
@@ -18814,8 +18841,32 @@ window.renderProfileDashboard = function() {
         aiSectionHtml +
         paymentSectionHtml +
         paymentOperationsSectionHtml +
+        attachmentUploadSectionHtml +
         documentsSectionHtml +
         filesSectionHtml;
+};
+
+window.saveProfileAttachmentUploadSettings = async function() {
+    var statusEl = document.getElementById('profileAttachmentUploadSettingsStatus');
+    var overrides = {};
+    ['image', 'document', 'video'].forEach(function(type) {
+        var value = String((document.getElementById('profileAttachmentSource_' + type) || {}).value || '').trim();
+        if (value === 'user' || value === 'community') overrides[type] = value;
+    });
+    var userVideoPrivacy = String((document.getElementById('profileAttachmentUserVideoPrivacy') || {}).value || '').trim();
+    if (userVideoPrivacy) overrides.userVideoPrivacy = userVideoPrivacy;
+    try {
+        var baseUrl = window.location.href.split('?')[0];
+        var response = await fetch(baseUrl + '?saveProfileAttachmentUploadSettings=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId: getCurrentProfileId(), principalProfileId: getPrincipalProfileId(), overrides: overrides }) });
+        var result = await response.json();
+        if (!result.success) throw new Error(result.error || 'Не удалось сохранить настройку');
+        if (!window.profileDashboardData) window.profileDashboardData = {};
+        window.profileDashboardData.attachmentUploadSettings = result.settings;
+        renderProfileDashboard();
+        setInlineNoticeWithTimeout(document.getElementById('profileAttachmentUploadSettingsStatus'), 'success', 'Источник загрузки сохранён.', 5000);
+    } catch (error) {
+        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка: ' + error.message);
+    }
 };
 
 window.selectProfileDailyLimitPackage = function(cost) {

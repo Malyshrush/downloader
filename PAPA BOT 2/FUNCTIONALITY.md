@@ -969,3 +969,17 @@
 - Temporary strict-TLS chain failures during VK document download are retried up to five times. If all attempts fail, the consent message is not sent with zero or one document: the incoming event fails before `messages.send` and returns to the queue for an atomic retry of the complete two-document message.
 - VK API errors while reading an existing source document, including an expired or revoked User Token, now stop delivery before `messages.send` instead of sending foreign document IDs that VK silently removes.
 - Newly uploaded OPD, OPD policy, and public-offer documents are saved through the VK wall-document flow with community ownership (`doc-<group_id>_<id>`), so later consent messages can reuse them without reading the uploader's personal documents at runtime.
+
+## 2026-08-09 — Приватные видео в сообщениях VK
+
+- Видео, предназначенные для отправки в сообщениях, сохраняются через User Token как личные VK-видео с `privacy_view=nobody` и без `group_id`, поэтому они не добавляются в видеокаталог сообщества.
+- Идентификатор `access_key` сохраняется во вложении `video<owner_id>_<video_id>_<access_key>`. При подготовке существующего видео ключ восстанавливается через `video.get`, но приватность больше не переключается в публичную через `video.edit`.
+- VK может ограничить воспроизведение приватного видео у получателя. Если API не разрешит просмотр, сервис должен показать ошибку доставки, а не делать видео публичным автоматически.
+
+## 2026-08-10 — Источник загрузки вложений
+
+- В разделе «ПРОФИЛЬ» каждый профиль выбирает источник для изображений, документов и видео/клипов: «Пользователь», «Сообщество» или использование глобального правила.
+- Центр управления PAPA BOT задаёт глобальные значения и отдельные значения выбранного профиля. Глобальное сохранение очищает индивидуальные переопределения, поэтому правило сразу действует для текущих и будущих профилей.
+- Начальная глобальная политика: изображения — сообщество, документы — пользователь, видео/клипы — сообщество. Она применяется к загрузкам из Сообщений, Комментариев, Рассылки и Отложенных; фото для комментариев VK остаётся в обязательном wall-photo формате сообщества.
+- Если служебное хранилище этих настроек временно недоступно, раздел «ПРОФИЛЬ» и отправка вложений продолжают работу с безопасной глобальной политикой по умолчанию.
+- Для видео и клипов при источнике «Пользователь» отдельно задаётся приватность VK: «Все пользователи», «Только друзья», «Друзья и друзья друзей» или «Только я». По умолчанию выбрано «Все пользователи» (`privacy_view=all`), чтобы адресат сообщения мог воспроизвести вложение. Глобальная настройка и индивидуальное переопределение доступны в разделе «ПРОФИЛЬ» и Центре управления PAPA BOT.

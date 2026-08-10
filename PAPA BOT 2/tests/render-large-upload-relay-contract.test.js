@@ -94,3 +94,9 @@ test('Render relay rejects requests without its server-to-server secret', async 
 test('final relay upload bypasses Render recursion for videos', () => {
   assert.match(attachmentsSource, /async function uploadToVKFromRenderRelay\([\s\S]*?startsWith\('video\/'\)/);
 });
+
+test('user-owned video uploads use the configured recipient-viewable privacy', () => {
+  assert.match(attachmentsSource, /async function uploadVideoStandard\([^)]*userVideoPrivacy = 'all'[\s\S]*?privacy_view:\s*userVideoPrivacy[\s\S]*?access_token/);
+  assert.match(attachmentsSource, /user_video_privacy/);
+  assert.match(attachmentsSource, /Keeping video private for message delivery/);
+});

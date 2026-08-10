@@ -1,6 +1,6 @@
 {
-  "displayVersion": "version 006.0066.0025.0011.0021.0006.0004.0001.0003.0013.0013.0096.0001",
-  "updatedAt": "2026-08-09T23:06:54.855+03:00",
+  "displayVersion": "version 006.0070.0025.0011.0021.0006.0004.0001.0003.0013.0013.0096.0001",
+  "updatedAt": "2026-08-10T11:20:02.204+03:00",
   "baseline": true,
   "note": "Видео через Render-relay больше не зацикливается на повторной отправке в Render: PAPA BOT загружает его в VK напрямую с увеличенным тайм-аутом relay.",
   "capabilities": [
@@ -209,10 +209,10 @@
     },
     {
       "key": "admin_ui",
-      "value": "0066",
+      "value": "0070",
       "label": "Админ-панель: интерфейс",
       "description": "Разметка, логика вкладок, формы, карточки, переключатели и поведение элементов панели.",
-      "currentSummary": "VK-токены больше не показываются в панели: интерфейс отображает только факт сохранения, позволяет добавить новый или удалить выбранный токен из базы; вложения и документы больше 3,5 МБ направляются через Render-relay без передачи User Token в браузер, а видео не зацикливается на Render.",
+      "currentSummary": "VK-токены больше не показываются в панели: интерфейс отображает только факт сохранения, позволяет добавить новый или удалить выбранный токен из базы; вложения и документы больше 3,5 МБ направляются через Render-relay без передачи User Token в браузер, а видео не зацикливается на Render. Для пользовательских видео/клипов выбирается приватность; по умолчанию она «Все пользователи», чтобы получатель мог воспроизвести вложение.",
       "history": [
         {
           "version": "0001",
@@ -496,6 +496,26 @@
           "version": "0066",
           "summary": "Исправлен видеопуть Render-relay: после сборки чанков видео загружается в VK напрямую, без рекурсивного повторного вызова Render; тайм-аут relay увеличен до 300 секунд.",
           "updatedAt": "2026-08-09T23:06:54.855+03:00"
+        },
+        {
+          "version": "0067",
+          "summary": "Video message uploads now use a private user-owned VK video (privacy_view=nobody) while preserving access_key for the message attachment.",
+          "updatedAt": "2026-08-09T23:25:00.000+03:00"
+        },
+        {
+          "version": "0068",
+          "summary": "Added global and per-profile attachment upload source settings for images, documents, videos and clips. Global reset clears profile overrides; the initial service policy is image/community, document/user, video/community.",
+          "updatedAt": "2026-08-10T00:05:00.000+03:00"
+        },
+        {
+          "version": "0069",
+          "summary": "Profile loading now safely falls back to the global attachment upload policy when optional attachment settings storage is temporarily unavailable.",
+          "updatedAt": "2026-08-10T10:04:19.253+03:00"
+        },
+        {
+          "version": "0070",
+          "summary": "Added global and per-profile privacy controls for user-owned VK videos and clips. The default is privacy_view=all so message recipients can view the attachment; more restrictive VK modes remain selectable.",
+          "updatedAt": "2026-08-10T11:20:02.204+03:00"
         }
       ]
     },
