@@ -352,7 +352,9 @@ async function handleUploadRequestWithDependencies(req, overrides = {}) {
         } else if (mime.startsWith('video/')) {
             attachment = await uploadVideoToMessagesImpl(userToken, groupId, file, { ...overrides, communityToken, userVideoPrivacy: body.user_video_privacy });
         } else {
-            attachment = isCommentTarget
+            attachment = target === 'profile_document'
+                ? await uploadDocToMessagesWithUserToken(userToken, file, overrides)
+                : isCommentTarget
                 ? await uploadDocToWallImpl(userToken, groupId, file, { ...overrides, communityToken })
                 : await uploadDocToMessagesImpl(userToken, groupId, file, { ...overrides, communityToken });
         }

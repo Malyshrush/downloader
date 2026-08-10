@@ -17703,7 +17703,7 @@ window.uploadConsentDocumentFileToVk = async function(file, documentType, status
     // Документы больше 3,5 МБ также должны обходить лимит Yandex Cloud.
     var useRenderService = fileSizeMB > 3.5;
     var base64 = await readProfileConsentDocumentFileAsBase64(file);
-    var target = ['personal_data_consent', 'personal_data_policy', 'public_offer'].includes(documentType) ? 'wall' : 'message';
+    var target = ['personal_data_consent', 'personal_data_policy', 'public_offer'].includes(documentType) ? 'profile_document' : 'message';
 
     if (statusEl) statusEl.innerText = 'Загрузка в VK через сервис ' + (useRenderService ? 'Render' : 'PAPA BOT');
 

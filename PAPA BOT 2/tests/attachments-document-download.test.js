@@ -339,6 +339,49 @@ test('consent documents upload to the community wall for reusable group ownershi
     assert.deepEqual(tokenCalls, [{ communityId: '240175263', profileId: 'profile-42' }]);
 });
 
+test('profile documents upload with the selected profile user token without a community upload route', async () => {
+    const vkCalls = [];
+    const tokenCalls = [];
+    const attachments = loadAttachmentsWithMocks({
+        axiosGet: async () => {
+            throw new Error('download must not start');
+        },
+        axiosPost: async url => {
+            assert.equal(url, 'https://upload.vk.test/user-doc');
+            return { data: { file: 'user-doc-token' } };
+        },
+        vkGet: async (method, params) => {
+            vkCalls.push({ method, params });
+            if (method === 'docs.getMessagesUploadServer') {
+                assert.equal(params.access_token, 'selected-user-token');
+                assert.equal(Object.hasOwn(params, 'peer_id'), false);
+                return { response: { upload_url: 'https://upload.vk.test/user-doc' } };
+            }
+            assert.equal(method, 'docs.save');
+            assert.equal(params.access_token, 'selected-user-token');
+            assert.equal(Object.hasOwn(params, 'group_id'), false);
+            return { response: { doc: { owner_id: 787794248, id: 704 } } };
+        },
+        getUserToken: async (communityId, profileId) => {
+            tokenCalls.push({ communityId, profileId });
+            return 'selected-user-token';
+        }
+    });
+
+    const result = await attachments.uploadToVK(
+        Buffer.from('document'),
+        'consent.pdf',
+        'application/pdf',
+        'profile_document',
+        '240175263',
+        'profile-42'
+    );
+
+    assert.equal(result, 'doc787794248_704');
+    assert.deepEqual(vkCalls.map(call => call.method), ['docs.getMessagesUploadServer', 'docs.save']);
+    assert.deepEqual(tokenCalls, [{ communityId: '240175263', profileId: 'profile-42' }]);
+});
+
 test('consent document falls back to a community-owned messages upload when VK denies wall documents', async () => {
     const vkCalls = [];
     const attachments = loadAttachmentsWithMocks({

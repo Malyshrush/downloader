@@ -743,6 +743,33 @@ async function uploadDocToMessages(buffer, filename, mimeType, groupId) {
     }
 }
 
+async function uploadDocToProfileUserMessages(buffer, filename, mimeType, groupId, profileId = null) {
+    const userToken = await getUserToken(groupId?.toString(), profileId);
+    if (!userToken) throw new Error('VK User Token is required to upload a profile document');
+
+    const uploadServerRes = await vkGet('docs.getMessagesUploadServer', {
+        type: 'doc',
+        access_token: userToken
+    });
+    if (uploadServerRes.error) throw new Error(`VK User Token failed for profile document upload: ${uploadServerRes.error.error_msg}`);
+
+    const formData = new FormData();
+    formData.append('file', buffer, { filename, contentType: mimeType });
+    const uploadRes = await axios.post(uploadServerRes.response.upload_url, formData, {
+        headers: formData.getHeaders(),
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        timeout: 300000
+    });
+    if (!uploadRes.data?.file) throw new Error('VK profile document upload returned no file token');
+
+    const saveRes = await vkGet('docs.save', { file: uploadRes.data.file, access_token: userToken });
+    if (saveRes.error) throw new Error(`VK User Token failed to save profile document: ${saveRes.error.error_msg}`);
+    const savedDoc = saveRes.response?.doc || saveRes.response;
+    if (!savedDoc?.owner_id || !savedDoc?.id) throw new Error('VK profile document save returned no document');
+    return `doc${savedDoc.owner_id}_${savedDoc.id}`;
+}
+
 async function uploadDocToCommunityMessages(buffer, filename, mimeType, groupId, profileId = null) {
     const absGroupId = groupId ? Math.abs(parseInt(groupId, 10)) : getVkGroupId();
     if (!absGroupId) throw new Error('VK Group ID is not set');
@@ -1067,6 +1094,9 @@ async function uploadToVK(buffer, filename, mimeType, target, groupId, profileId
     log('info', `📎 [UPLOAD] type=${mimeType}, target=${target}, size=${(buffer.length/1024/1024).toFixed(2)}MB`);
 
     const type = mimeType.startsWith('image/') ? 'image' : (mimeType.startsWith('video/') ? 'video' : 'document');
+    if (type === 'document' && target === 'profile_document') {
+        return uploadDocToProfileUserMessages(buffer, filename, mimeType, groupId, profileId);
+    }
     const uploadSource = await resolveAttachmentUploadSource(profileId, type);
     if (mimeType.startsWith('image/')) {
         if (target === 'comment' || target === 'comments') {
@@ -1112,6 +1142,7 @@ module.exports = {
     uploadPhotoToCommunityMessages,
     uploadPhotoToWall,
     uploadDocToMessages,
+    uploadDocToProfileUserMessages,
     uploadDocToCommunityMessages,
     uploadDocToWall,
     uploadVideoToMessages,

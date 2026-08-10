@@ -210,6 +210,40 @@ async function run(name, fn) {
     ]);
   });
 
+  await run('profile document upload uses the selected user token without a community route', async () => {
+    const calls = [];
+    const result = await uploader.__testOnly.handleUploadRequestWithDependencies(
+      {
+        body: { user_token: 'selected-user-token', group_id: '229445618', target: 'profile_document' },
+        file: { path: 'C:\\tmp\\profile.pdf', originalname: 'profile.pdf', mimetype: 'application/pdf', size: 4096 }
+      },
+      {
+        uploadDocToMessages: async () => { throw new Error('generic route must not run'); },
+        uploadDocToWall: async () => { throw new Error('community route must not run'); },
+        uploadVideoToMessages: async () => { throw new Error('video route must not run'); },
+        httpGet: async (url, options) => {
+          calls.push(['GET', url, options.params]);
+          return { data: { response: { upload_url: 'https://upload.vk.test/profile-doc' } } };
+        },
+        httpPost: async (url, _data, options) => {
+          calls.push(['POST', url, options.params || null]);
+          if (url === 'https://upload.vk.test/profile-doc') return { data: { file: 'profile-doc-token' } };
+          return { data: { response: { doc: { owner_id: 787794248, id: 705 } } } };
+        },
+        FormDataCtor: function FakeFormData() { return { append() {}, getHeaders() { return {}; } }; },
+        createReadStream: () => ({ kind: 'stream' }),
+        unlink: async () => {}
+      }
+    );
+
+    assert.equal(result.attachment, 'doc787794248_705');
+    assert.deepEqual(calls.map(call => call[1]), [
+      'https://api.vk.com/method/docs.getMessagesUploadServer',
+      'https://upload.vk.test/profile-doc',
+      'https://api.vk.com/method/docs.save'
+    ]);
+  });
+
   await run('uploadPhotoToMessages passes group_id with user token like Yandex uploader', async () => {
     const calls = [];
 
