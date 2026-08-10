@@ -7,6 +7,54 @@ const { log } = require('../utils/logger');
 
 const AUTH_FILE_KEY = 'admin_auth.json';
 const MAIN_ADMIN_PROFILE_ID = '1';
+const REGISTRATION_CONSENT_DOCUMENTS = Object.freeze([
+    {
+        key: 'personalDataConsent',
+        title: 'Согласие на обработку персональных данных',
+        version: '2.0 (редакция от 09.08.2026)',
+        url: 'https://malyshrush.github.io/papa-bot-vk-miniapp/legal/consent.html'
+    },
+    {
+        key: 'privacyPolicy',
+        title: 'Политика обработки персональных данных',
+        version: '2.0 (редакция от 09.08.2026)',
+        url: 'https://malyshrush.github.io/papa-bot-vk-miniapp/legal/privacy.html'
+    },
+    {
+        key: 'publicOffer',
+        title: 'Публичная оферта',
+        version: '2.0 (редакция от 09.08.2026)',
+        url: 'https://malyshrush.github.io/papa-bot-vk-miniapp/legal/terms.html'
+    }
+]);
+
+function hasRequiredRegistrationConsents(value) {
+    const consents = value && typeof value === 'object' ? value : {};
+    return REGISTRATION_CONSENT_DOCUMENTS.every(document => consents[document.key] === true);
+}
+
+function createRegistrationConsentsRecord(acceptedAt = new Date().toISOString()) {
+    return {
+        acceptedAt,
+        documents: REGISTRATION_CONSENT_DOCUMENTS.map(document => ({ ...document }))
+    };
+}
+
+function normalizeRegistrationConsents(value) {
+    if (!value || typeof value !== 'object' || !Array.isArray(value.documents)) return null;
+    return {
+        acceptedAt: String(value.acceptedAt || '').trim() || null,
+        documents: value.documents
+            .filter(document => document && typeof document === 'object')
+            .map(document => ({
+                key: String(document.key || '').trim(),
+                title: String(document.title || '').trim(),
+                version: String(document.version || '').trim(),
+                url: String(document.url || '').trim()
+            }))
+            .filter(document => document.key && document.title)
+    };
+}
 
 function normalizeProfileId(profileId) {
     const normalized = String(profileId || MAIN_ADMIN_PROFILE_ID).trim();
@@ -54,7 +102,8 @@ function normalizeProfile(profileId, profile, fallbackProfile = null) {
         createdByProfileId: profile?.createdByProfileId || fallback.createdByProfileId || MAIN_ADMIN_PROFILE_ID,
         promoCodeUsed: profile?.promoCodeUsed || '',
         lastLoginAt: profile?.lastLoginAt || null,
-        requestsLimit: Number.isFinite(resolvedRequestsLimit) && resolvedRequestsLimit > 0 ? resolvedRequestsLimit : null
+        requestsLimit: Number.isFinite(resolvedRequestsLimit) && resolvedRequestsLimit > 0 ? resolvedRequestsLimit : null,
+        registrationConsents: normalizeRegistrationConsents(profile?.registrationConsents || fallback.registrationConsents)
     };
 }
 
@@ -163,7 +212,8 @@ function toPublicProfile(profile, currentProfileId = null) {
         createdByProfileId: profile?.createdByProfileId || MAIN_ADMIN_PROFILE_ID,
         promoCodeUsed: profile?.promoCodeUsed || '',
         lastLoginAt: profile?.lastLoginAt || null,
-        requestsLimit: profile?.requestsLimit || null
+        requestsLimit: profile?.requestsLimit || null,
+        registrationConsents: normalizeRegistrationConsents(profile?.registrationConsents)
     };
 }
 
@@ -268,6 +318,12 @@ async function upsertAdminProfile(profileData, actorProfileId = MAIN_ADMIN_PROFI
         throw new Error('Такой логин уже используется в другом профиле');
     }
 
+    if (!recoveryEmail) throw new Error('Email is required');
+    const duplicateEmail = Object.values(auth.profiles || {}).find(profile => (
+        String(profile.recoveryEmail || '').trim().toLowerCase() === recoveryEmail.toLowerCase() && normalizeProfileId(profile.id) !== profileId
+    ));
+    if (duplicateEmail) throw new Error('Email is already used by another profile');
+
     const isMain = profileId === MAIN_ADMIN_PROFILE_ID;
     const role = isMain ? 'main_admin' : (profileData?.role || existingProfile?.role || 'admin');
 
@@ -296,11 +352,51 @@ async function upsertAdminProfile(profileData, actorProfileId = MAIN_ADMIN_PROFI
     return toPublicProfile(saved.profiles[profileId], profileId);
 }
 
+async function updateAdminProfileCredentials(profileId, changes = {}, overrides = {}) {
+    const loadAuth = overrides.loadAdminAuth || loadAdminAuth;
+    const saveAuth = overrides.saveAdminAuth || saveAdminAuth;
+    const auth = await loadAuth();
+    const normalizedId = normalizeProfileId(profileId);
+    const existingProfile = auth.profiles?.[normalizedId];
+
+    if (!existingProfile) {
+        throw new Error('Профиль не найден');
+    }
+
+    const nextUsername = String(changes.username || '').trim() || existingProfile.username;
+    const nextPassword = String(changes.password || '').trim() || existingProfile.password;
+    const nextRecoveryEmail = String(changes.recoveryEmail || '').trim() || existingProfile.recoveryEmail;
+    const hasChange = nextUsername !== existingProfile.username ||
+        nextPassword !== existingProfile.password ||
+        nextRecoveryEmail !== existingProfile.recoveryEmail;
+
+    if (!hasChange) {
+        throw new Error('Укажите хотя бы одно новое значение');
+    }
+
+    const duplicate = Object.values(auth.profiles || {}).find(profile => {
+        return String(profile.username || '').trim() === nextUsername && normalizeProfileId(profile.id) !== normalizedId;
+    });
+    if (duplicate) {
+        throw new Error('Такой логин уже используется в другом профиле');
+    }
+
+    auth.profiles[normalizedId] = normalizeProfile(normalizedId, {
+        ...existingProfile,
+        username: nextUsername,
+        password: nextPassword,
+        recoveryEmail: nextRecoveryEmail
+    }, existingProfile);
+    const saved = await saveAuth(auth);
+    return toPublicProfile(saved.profiles[normalizedId], normalizedId);
+}
+
 async function registerProfileFromPromo(profileData, promoCode) {
     const publicProfile = await upsertAdminProfile({
         ...profileData,
         role: 'admin',
-        promoCodeUsed: String(promoCode || '').trim().toUpperCase()
+        promoCodeUsed: String(promoCode || '').trim().toUpperCase(),
+        registrationConsents: createRegistrationConsentsRecord()
     }, MAIN_ADMIN_PROFILE_ID);
     return publicProfile;
 }
@@ -313,7 +409,7 @@ async function reactivateExpiredProfile(profileId, promoCode, durationMinutes, r
     if (!existingProfile) {
         throw new Error('Профиль не найден');
     }
-    if (isMainAdminProfile(existingProfile)) {
+    if (false && isMainAdminProfile(existingProfile)) {
         throw new Error('Главный админ не требует повторной активации');
     }
 
@@ -341,7 +437,7 @@ async function activateProfileWithPromoCode(profileId, promo) {
     if (!existingProfile) {
         throw new Error('РџСЂРѕС„РёР»СЊ РЅРµ РЅР°Р№РґРµРЅ');
     }
-    if (isMainAdminProfile(existingProfile)) {
+    if (false && isMainAdminProfile(existingProfile)) {
         throw new Error('Р“Р»Р°РІРЅС‹Р№ Р°РґРјРёРЅ РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚ РїСЂРѕРјРѕРєРѕРґС‹');
     }
 
@@ -445,8 +541,11 @@ async function saveAdminAuth(config) {
 module.exports = {
     AUTH_FILE_KEY,
     MAIN_ADMIN_PROFILE_ID,
+    REGISTRATION_CONSENT_DOCUMENTS,
     normalizeProfileId,
     normalizeAdminAuth,
+    hasRequiredRegistrationConsents,
+    createRegistrationConsentsRecord,
     buildDefaultAuthConfig,
     loadAdminAuth,
     saveAdminAuth,
@@ -456,6 +555,7 @@ module.exports = {
     findProfileByUsername,
     findProfileByRecoveryEmail,
     upsertAdminProfile,
+    updateAdminProfileCredentials,
     registerProfileFromPromo,
     reactivateExpiredProfile,
     activateProfileWithPromoCode,

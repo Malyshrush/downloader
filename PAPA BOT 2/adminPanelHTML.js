@@ -6040,6 +6040,11 @@ return '<div id="registerModal" style="position:fixed;top:0;left:0;width:100%;he
 '<input type="email" id="registerEmail" placeholder="Email для восстановления" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
 '<button onclick="sendRegistrationCode()" style="width:100%;padding:10px;background:#0ea5e9;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:bold;">📧 Отправить код на email</button>' +
 '<input type="text" id="registerEmailCode" placeholder="Код из письма" inputmode="numeric" maxlength="6" style="width:100%;padding:12px;margin:10px 0;border:1px solid var(--border-color);border-radius:10px;font-size:14px;background:var(--bg-input);color:var(--text-input);">' +
+'<div id="registerConsents" style="margin:12px 0;padding:12px;border:1px solid var(--border-color);border-radius:10px;background:var(--surface-soft);font-size:13px;line-height:1.45;color:var(--text-primary);">' +
+'<label style="display:flex;gap:9px;align-items:flex-start;margin:8px 0;cursor:pointer;"><input id="registerConsentPersonalData" type="checkbox" style="margin-top:3px;flex:0 0 auto;"> <span>Даю <a href="https://malyshrush.github.io/papa-bot-vk-miniapp/legal/consent.html" target="_blank" rel="noopener noreferrer">согласие на обработку персональных данных</a>.</span></label>' +
+'<label style="display:flex;gap:9px;align-items:flex-start;margin:8px 0;cursor:pointer;"><input id="registerConsentPrivacyPolicy" type="checkbox" style="margin-top:3px;flex:0 0 auto;"> <span>Ознакомился(ась) с <a href="https://malyshrush.github.io/papa-bot-vk-miniapp/legal/privacy.html" target="_blank" rel="noopener noreferrer">Политикой обработки персональных данных</a>.</span></label>' +
+'<label style="display:flex;gap:9px;align-items:flex-start;margin:8px 0;cursor:pointer;"><input id="registerConsentPublicOffer" type="checkbox" style="margin-top:3px;flex:0 0 auto;"> <span>Принимаю условия <a href="https://malyshrush.github.io/papa-bot-vk-miniapp/legal/terms.html" target="_blank" rel="noopener noreferrer">Публичной оферты</a>.</span></label>' +
+'</div>' +
 '<div id="registerPromoInfo" class="hint" style="margin-bottom:10px;"></div>' +
 '<button onclick="submitRegisterAccount()" style="width:100%;padding:12px;background:#16a34a;color:white;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:bold;">&#x1F680; Создать аккаунт</button>' +
 '</div>' +
@@ -6404,10 +6409,19 @@ username: document.getElementById('registerUsername').value.trim(),
 password: document.getElementById('registerPassword').value.trim(),
 recoveryEmail: document.getElementById('registerEmail').value.trim(),
 emailCode: document.getElementById('registerEmailCode').value.trim(),
+registrationConsents: {
+personalDataConsent: !!(document.getElementById('registerConsentPersonalData') || {}).checked,
+privacyPolicy: !!(document.getElementById('registerConsentPrivacyPolicy') || {}).checked,
+publicOffer: !!(document.getElementById('registerConsentPublicOffer') || {}).checked
+},
 clientId: getPromoClientId()
 };
 if (!payload.name || !payload.username || !payload.password || !payload.recoveryEmail || !payload.emailCode) {
 statusEl.innerHTML = makeInlineNotice('error', 'Заполните данные профиля, email и код подтверждения.');
+return;
+}
+if (!payload.registrationConsents.personalDataConsent || !payload.registrationConsents.privacyPolicy || !payload.registrationConsents.publicOffer) {
+statusEl.innerHTML = makeInlineNotice('error', 'Для регистрации подтвердите согласие на обработку персональных данных, ознакомление с Политикой и принятие Публичной оферты.');
 return;
 }
 try {
@@ -16801,6 +16815,8 @@ window.renderAdminProfiles = function() {
             profile.promoCodeUsed,
             profile.lastLoginAt,
             profile.createdAt,
+            profile.registrationConsents && profile.registrationConsents.acceptedAt,
+            profile.registrationConsents && (profile.registrationConsents.documents || []).map(function(document) { return document.title; }).join(' '),
             profile.expiresAt,
             profile.requestsLimit
         ].join(' ').toLowerCase();
@@ -16841,6 +16857,11 @@ window.renderAdminProfiles = function() {
         var requestsLimitLabel = profile.requestsLimit ? String(profile.requestsLimit) : 'Не задан';
         var balanceLabel = Number.isFinite(Number(profile.balance)) ? (String(Math.max(0, Math.floor(Number(profile.balance)))) + ' ₽') : '0 ₽';
         var extraRequestLimitLabel = Number.isFinite(Number(profile.extraRequestLimit)) ? String(Math.max(0, Math.floor(Number(profile.extraRequestLimit)))) : '0';
+        var registrationConsents = profile.registrationConsents && typeof profile.registrationConsents === 'object' ? profile.registrationConsents : null;
+        var registrationAcceptedAt = registrationConsents && registrationConsents.acceptedAt ? formatRuDateTime(registrationConsents.acceptedAt) : '';
+        var registrationDocumentsLabel = registrationConsents && Array.isArray(registrationConsents.documents) && registrationConsents.documents.length
+            ? registrationConsents.documents.map(function(document) { return String(document.title || '').trim(); }).filter(Boolean).join('; ')
+            : 'Не зафиксированы (профиль создан до введения обязательных согласий)';
         var deleteButton = profile.role === 'main_admin'
             ? '<button class="btn btn-neutral" type="button" disabled style="opacity:0.6;cursor:not-allowed;">Главный профиль</button>'
             : '<button class="btn btn-delete" type="button" onclick="deleteAdminProfileById(&quot;' + escapeHtml(profile.id) + '&quot;)" style="min-width:auto;">Удалить</button>';
@@ -16855,6 +16876,8 @@ window.renderAdminProfiles = function() {
             '<div class="profile-card-details">' +
                 '<div class="profile-card-row"><span class="profile-card-label">Логин:</span> ' + escapeHtml(profile.username || 'не задан') + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Email:</span> ' + escapeHtml(profile.recoveryEmail || 'не задан') + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Зарегистрирован:</span> ' + escapeHtml(profile.createdAt ? formatRuDateTime(profile.createdAt) : 'дата не зафиксирована') + '</div>' +
+                '<div class="profile-card-row"><span class="profile-card-label">Согласия при регистрации' + (registrationAcceptedAt ? (' (' + escapeHtml(registrationAcceptedAt) + ')') : '') + ':</span> ' + escapeHtml(registrationDocumentsLabel) + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Промокод:</span> ' + escapeHtml(profile.promoCodeUsed || 'не использовался') + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Осталось минут:</span> ' + escapeHtml(remainingMinutesLabel) + '</div>' +
                 '<div class="profile-card-row"><span class="profile-card-label">Лимит запросов:</span> ' + escapeHtml(requestsLimitLabel) + '</div>' +
@@ -18453,6 +18476,21 @@ window.renderProfileDashboard = function() {
     var extraLimitPackages = Array.isArray(data.extraLimitPackages) ? data.extraLimitPackages : [];
     var promoStatus = data.promoActivationStatus || { attempts: 0, remainingAttempts: 3, blocked: false, nextResetAt: 0 };
     var attachmentUploadSettings = data.attachmentUploadSettings || { global: { image: 'community', document: 'user', video: 'community' }, overrides: {}, effective: { image: 'community', document: 'user', video: 'community' }, userVideoPrivacy: { global: 'all', override: '', effective: 'all' } };
+    var registration = data.registration && typeof data.registration === 'object' ? data.registration : {};
+    var registrationConsents = registration.consents && typeof registration.consents === 'object' ? registration.consents : null;
+    var registrationDocuments = registrationConsents && Array.isArray(registrationConsents.documents) ? registrationConsents.documents : [];
+    var registrationInfoHtml = '<div id="profileRegistrationInfo" class="settings-surface profile-manager"><div class="profile-manager-header"><div><h3 class="profile-manager-title">Регистрация и согласия</h3><div class="profile-manager-subtitle">Сведения о создании учётной записи и подтверждённых при регистрации документах.</div></div></div>' +
+        '<div class="profile-card-details">' +
+            '<div class="profile-card-row"><span class="profile-card-label">Дата регистрации:</span> ' + escapeHtml(registration.createdAt ? formatRuDateTime(registration.createdAt) : 'Не зафиксирована') + '</div>' +
+            (registrationConsents && registrationConsents.acceptedAt ? '<div class="profile-card-row"><span class="profile-card-label">Согласия подтверждены:</span> ' + escapeHtml(formatRuDateTime(registrationConsents.acceptedAt)) + '</div>' : '') +
+            '<div class="profile-card-row"><span class="profile-card-label">Документы:</span> ' + (registrationDocuments.length ? registrationDocuments.map(function(document) {
+                var label = String(document.title || 'Документ').trim();
+                var version = String(document.version || '').trim();
+                var url = String(document.url || '').trim();
+                var text = escapeHtml(label + (version ? ' — ' + version : ''));
+                return url ? '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' + text + '</a>' : text;
+            }).join('<br>') : 'Состав согласий при регистрации не зафиксирован: профиль создан до введения обязательных согласий.') + '</div>' +
+        '</div></div>';
     var activeCommunityId = String(window.currentCommunityId || '').trim();
     if (!window.selectedProfileDailyLimitPackageCost && dailyLimitPackages.length) {
         window.selectedProfileDailyLimitPackageCost = Number(dailyLimitPackages[0].cost || 0);
@@ -18845,6 +18883,7 @@ window.renderProfileDashboard = function() {
 
     container.innerHTML = foreignProfileBanner +
         '<div class="profile-manager-header"><div><h3 class="profile-manager-title">' + escapeHtml(data.profileName || getCurrentProfileName()) + '</h3><div class="profile-manager-subtitle">Текущий профиль: ' + escapeHtml(getCurrentProfileId()) + '. Здесь можно выйти из профиля, посмотреть статистику и запросить увеличение лимита.</div></div><div class="profile-card-actions"><button class="btn btn-delete" type="button" onclick="exitProfileSession()">Выйти с профиля</button></div></div>' +
+        registrationInfoHtml +
         '<div class="profile-grid">' +
             '<div class="profile-card current"><div class="profile-card-name">Лимит запросов в сутки</div><div class="profile-card-details"><div class="profile-card-row"><span class="profile-card-label">Лимит:</span> ' + escapeHtml(effectiveDailyLimit ? String(effectiveDailyLimit) : 'Без ограничений') + '</div><div class="profile-card-row"><span class="profile-card-label">Источник:</span> ' + escapeHtml(effectiveDailyLimitSource) + '</div><div class="profile-card-row"><span class="profile-card-label">Использовано сегодня:</span> ' + escapeHtml(String(effectiveDailyUsed || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Осталось:</span> ' + escapeHtml(effectiveDailyRemaining === null ? 'Без ограничений' : String(effectiveDailyRemaining)) + '</div></div></div>' +
             '<div class="profile-card"><div class="profile-card-name">Суммарная активность</div><div class="profile-card-details"><div class="profile-card-row"><span class="profile-card-label">Запросов к PAPA BOT:</span> ' + escapeHtml(String(data.totalPapaRequests || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Сообщения:</span> ' + escapeHtml(String(data.totalMessages || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Комментарии:</span> ' + escapeHtml(String(data.totalComments || 0)) + '</div><div class="profile-card-row"><span class="profile-card-label">Триггеры:</span> ' + escapeHtml(String(data.totalTriggers || 0)) + '</div></div></div>' +
@@ -18875,15 +18914,14 @@ window.saveProfileAttachmentUploadSettings = async function() {
     if (userVideoPrivacy) overrides.userVideoPrivacy = userVideoPrivacy;
     try {
         var baseUrl = window.location.href.split('?')[0];
-        var response = await fetch(baseUrl + '?saveProfileAttachmentUploadSettings=1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileId: getCurrentProfileId(), principalProfileId: getPrincipalProfileId(), overrides: overrides }) });
-        var result = await response.json();
+        var result = await fetchAdminJson(baseUrl + '?saveProfileAttachmentUploadSettings=1', { method: 'POST', body: JSON.stringify({ profileId: getCurrentProfileId(), principalProfileId: getPrincipalProfileId(), overrides: overrides }) });
         if (!result.success) throw new Error(result.error || 'Не удалось сохранить настройку');
         if (!window.profileDashboardData) window.profileDashboardData = {};
         window.profileDashboardData.attachmentUploadSettings = result.settings;
         renderProfileDashboard();
         setInlineNoticeWithTimeout(document.getElementById('profileAttachmentUploadSettingsStatus'), 'success', 'Источник загрузки сохранён.', 5000);
     } catch (error) {
-        if (statusEl) statusEl.innerHTML = makeInlineNotice('error', 'Ошибка: ' + error.message);
+        if (statusEl) setInlineNoticeWithTimeout(statusEl, 'error', 'Ошибка: ' + error.message, 5000);
     }
 };
 

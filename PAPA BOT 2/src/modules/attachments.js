@@ -761,11 +761,11 @@ async function uploadDocToCommunityMessages(buffer, filename, mimeType, groupId,
     return `doc${item.owner_id}_${item.id}`;
 }
 
-async function uploadDocToWall(buffer, filename, mimeType, groupId) {
+async function uploadDocToWall(buffer, filename, mimeType, groupId, profileId = null) {
     const absGroupId = groupId ? Math.abs(parseInt(groupId, 10)) : getVkGroupId();
     if (!absGroupId) throw new Error('VK Group ID is not set');
 
-    const userToken = await getUserToken(groupId?.toString());
+    const userToken = await getUserToken(groupId?.toString(), profileId);
     if (!userToken) {
         throw new Error('VK User Token is required to upload a reusable community document');
     }
@@ -1067,7 +1067,7 @@ async function uploadToVK(buffer, filename, mimeType, target, groupId, profileId
     } else if (mimeType.startsWith('video/')) {
         return await uploadVideoToMessages(buffer, filename, mimeType, groupId, profileId);
     } else if (target === 'wall' || target === 'comment' || target === 'comments') {
-        return await uploadDocToWall(buffer, filename, mimeType, groupId);
+        return await uploadDocToWall(buffer, filename, mimeType, groupId, profileId);
     } else {
         return uploadSource.source === 'community'
             ? uploadDocToCommunityMessages(buffer, filename, mimeType, groupId, profileId)

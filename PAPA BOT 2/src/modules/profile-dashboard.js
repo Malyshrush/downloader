@@ -1605,6 +1605,10 @@ async function getProfileDashboardOverviewWithDependencies(profileId, overrides 
     return {
         profileId: String(profileId),
         profileName: container.profileName,
+        registration: {
+            createdAt: profile?.createdAt || null,
+            consents: profile?.registrationConsents || null
+        },
         attachmentUploadSettings,
         isMainAdmin: !!(profile && isMainAdminProfile(profile)),
         dailyLimit: hasLimit ? profileRequestsLimit : null,

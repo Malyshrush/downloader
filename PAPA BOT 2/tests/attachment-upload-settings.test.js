@@ -1,5 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const settings = require('../src/modules/attachment-upload-settings');
 
 function memoryStore(initial) {
@@ -40,4 +42,17 @@ test('individual profile override wins until a later global reset', async () => 
   assert.equal(result.effective.image, 'user');
   assert.equal(result.effective.document, 'user');
   assert.equal(result.userVideoPrivacy.effective, 'friends');
+});
+
+test('attachment upload settings save uses an authenticated session and temporary notices', () => {
+  const handler = fs.readFileSync(path.join(__dirname, '..', 'src', 'handler.js'), 'utf8');
+  const panel = fs.readFileSync(path.join(__dirname, '..', 'adminPanelHTML.js'), 'utf8');
+  const routeIndex = handler.indexOf('q.saveProfileAttachmentUploadSettings !== undefined');
+  const sessionIndex = handler.indexOf('const needsAdminSession');
+  const saveIndex = panel.indexOf('window.saveProfileAttachmentUploadSettings = async function()');
+  const saveBlock = panel.slice(saveIndex, panel.indexOf('window.selectProfileDailyLimitPackage', saveIndex));
+
+  assert.ok(routeIndex > sessionIndex, 'save route must be covered by the session guard');
+  assert.match(saveBlock, /fetchAdminJson\(baseUrl \+ '\?saveProfileAttachmentUploadSettings=1'/);
+  assert.match(saveBlock, /setInlineNoticeWithTimeout\(statusEl, 'error',[\s\S]*5000\)/);
 });

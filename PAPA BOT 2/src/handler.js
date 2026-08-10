@@ -90,6 +90,7 @@ const {
     findProfileByUsername,
     findProfileByRecoveryEmail,
     registerProfileFromPromo,
+    hasRequiredRegistrationConsents,
     reactivateExpiredProfile,
     activateProfileWithPromoCode,
     isMainAdminProfile,
@@ -1418,6 +1419,7 @@ async function handlePostRequest(event) {
         q.saveAdminProfile !== undefined ||
         q.saveProfileAiIntegrations !== undefined ||
         q.saveProfilePaymentIntegrations !== undefined ||
+        q.saveProfileAttachmentUploadSettings !== undefined ||
         q.testProfilePaymentIntegration !== undefined ||
         q.testProfileAiIntegration !== undefined ||
         q.deleteAdminProfile !== undefined ||
@@ -2003,6 +2005,14 @@ async function handleRegisterAccount(event) {
         const name = String(body.name || '').trim();
         const recoveryEmail = String(body.recoveryEmail || '').trim();
         const emailCode = String(body.emailCode || '').trim();
+
+        if (!hasRequiredRegistrationConsents(body.registrationConsents)) {
+            return {
+                statusCode: 400,
+                headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+                body: JSON.stringify({ success: false, error: '\u0414\u043b\u044f \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u0438 \u043d\u0435\u043e\u0431\u0445\u043e\u0434\u0438\u043c\u043e \u043f\u0440\u0438\u043d\u044f\u0442\u044c \u043e\u0444\u0435\u0440\u0442\u0443, \u043e\u0437\u043d\u0430\u043a\u043e\u043c\u0438\u0442\u044c\u0441\u044f \u0441 \u043f\u043e\u043b\u0438\u0442\u0438\u043a\u043e\u0439 \u0438 \u0434\u0430\u0442\u044c \u0441\u043e\u0433\u043b\u0430\u0441\u0438\u0435 \u043d\u0430 \u043e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0443 \u043f\u0435\u0440\u0441\u043e\u043d\u0430\u043b\u044c\u043d\u044b\u0445 \u0434\u0430\u043d\u043d\u044b\u0445.' })
+            };
+        }
 
         if (!recoveryEmail || !emailCode) {
             return { statusCode: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ success: false, error: 'Укажите email и код подтверждения' }) };
