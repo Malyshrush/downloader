@@ -18802,6 +18802,7 @@ window.renderProfileDashboard = function() {
                 renderProfileCommunityMetricLink('Интеграции с ИИ', aiIntegrations.length, 'profileAiIntegrations', 'Перейти к AI-интеграциям профиля') +
                 renderProfileCommunityMetricLink('Платежные системы', paymentIntegrations.length, 'profilePaymentIntegrations', 'Перейти к платежным интеграциям профиля') +
                 renderProfileCommunityMetricLink('Платежные операции', communityPaymentOperationsCount, 'profilePaymentOperations', 'Перейти к платежным операциям профиля') +
+                renderProfileCommunityMetricLink('Источник загрузки вложений', '⚙️', 'profileAttachmentUploadSettings', 'Перейти к настройкам источника загрузки вложений') +
                 renderProfileCommunityMetricLink('Отправленные Ошибка', errorReports.length, 'profileErrorReports', 'Перейти к отправленным ошибкам') +
                 renderProfileCommunityMetricLink('Отправленные Предложения', suggestionReports.length, 'profileSuggestionReports', 'Перейти к отправленным предложениям') +
                 renderProfileCommunityMetricLink('Документы', communityDocumentCount, 'profileConsentDocuments', 'Перейти к документам выбранного сообщества') +
