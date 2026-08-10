@@ -173,6 +173,43 @@ async function run(name, fn) {
     assert.deepEqual(httpCalls.map(call => call[0]), ['GET', 'GET', 'POST', 'POST']);
   });
 
+  await run('uploadDocToWall falls back to the community messages route when both wall tokens are denied', async () => {
+    const calls = [];
+    const attachment = await uploader.uploadDocToWall(
+      'user-token',
+      '229445618',
+      { path: 'C:\\tmp\\payload.pdf', originalname: 'payload.pdf', mimetype: 'application/pdf', size: 4096 },
+      {
+        communityToken: 'community-token',
+        FormDataCtor: function FakeFormData() {
+          return { append() {}, getHeaders() { return {}; } };
+        },
+        createReadStream: () => ({ kind: 'stream' }),
+        httpGet: async (url, options) => {
+          calls.push(['GET', url, options.params]);
+          if (url.endsWith('docs.getWallUploadServer')) {
+            return { data: { error: { error_msg: "Access denied: User can't upload docs to this group" } } };
+          }
+          return { data: { response: { upload_url: 'https://upload.vk.test/messages-doc' } } };
+        },
+        httpPost: async (url, _data, options) => {
+          calls.push(['POST', url, options.params || null]);
+          if (url === 'https://upload.vk.test/messages-doc') return { data: { file: 'messages-doc-token' } };
+          return { data: { response: { doc: { owner_id: -229445618, id: 703 } } } };
+        }
+      }
+    );
+
+    assert.equal(attachment, 'doc-229445618_703');
+    assert.deepEqual(calls.map(call => call[1]), [
+      'https://api.vk.com/method/docs.getWallUploadServer',
+      'https://api.vk.com/method/docs.getWallUploadServer',
+      'https://api.vk.com/method/docs.getMessagesUploadServer',
+      'https://upload.vk.test/messages-doc',
+      'https://api.vk.com/method/docs.save'
+    ]);
+  });
+
   await run('uploadPhotoToMessages passes group_id with user token like Yandex uploader', async () => {
     const calls = [];
 

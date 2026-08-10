@@ -339,6 +339,50 @@ test('consent documents upload to the community wall for reusable group ownershi
     assert.deepEqual(tokenCalls, [{ communityId: '240175263', profileId: 'profile-42' }]);
 });
 
+test('consent document falls back to a community-owned messages upload when VK denies wall documents', async () => {
+    const vkCalls = [];
+    const attachments = loadAttachmentsWithMocks({
+        axiosGet: async () => {
+            throw new Error('download must not start');
+        },
+        axiosPost: async url => {
+            assert.equal(url, 'https://upload.vk.test/messages-doc');
+            return { data: { file: 'messages-doc-token' } };
+        },
+        vkGet: async (method, params) => {
+            vkCalls.push({ method, params });
+            if (method === 'docs.getWallUploadServer') {
+                return { error: { error_msg: "Access denied: User can't upload docs to this group" } };
+            }
+            if (method === 'docs.getMessagesUploadServer') {
+                assert.equal(params.peer_id, -240175263);
+                assert.equal(params.access_token, 'group-token');
+                return { response: { upload_url: 'https://upload.vk.test/messages-doc' } };
+            }
+            assert.equal(method, 'docs.save');
+            assert.equal(params.peer_id, -240175263);
+            assert.equal(params.access_token, 'group-token');
+            return { response: { doc: { owner_id: -240175263, id: 702 } } };
+        }
+    });
+
+    const result = await attachments.uploadToVK(
+        Buffer.from('document'),
+        'consent.pdf',
+        'application/pdf',
+        'wall',
+        '240175263',
+        'profile-42'
+    );
+
+    assert.equal(result, 'doc-240175263_702');
+    assert.deepEqual(vkCalls.map(call => call.method), [
+        'docs.getWallUploadServer',
+        'docs.getMessagesUploadServer',
+        'docs.save'
+    ]);
+});
+
 test('private video upload and later processing preserve its access_key', async () => {
     const attachments = loadAttachmentsWithMocks({
         axiosGet: async () => {

@@ -770,42 +770,53 @@ async function uploadDocToWall(buffer, filename, mimeType, groupId, profileId = 
         throw new Error('VK User Token is required to upload a reusable community document');
     }
 
-    const uploadServerRes = await vkGet('docs.getWallUploadServer', {
-        group_id: absGroupId,
-        access_token: userToken
-    });
-    if (uploadServerRes.error) {
-        throw new Error(`VK User Token failed for community document upload: ${uploadServerRes.error.error_msg}`);
-    }
+    try {
+        const uploadServerRes = await vkGet('docs.getWallUploadServer', {
+            group_id: absGroupId,
+            access_token: userToken
+        });
+        if (uploadServerRes.error) {
+            throw new Error(`VK User Token failed for community document upload: ${uploadServerRes.error.error_msg}`);
+        }
 
-    const formData = new FormData();
-    formData.append('file', buffer, { filename, contentType: mimeType });
-    const uploadRes = await axios.post(uploadServerRes.response.upload_url, formData, {
-        headers: formData.getHeaders(),
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-        timeout: 300000
-    });
-    if (!uploadRes.data?.file) {
-        throw new Error('VK community document upload returned no file token');
-    }
+        const formData = new FormData();
+        formData.append('file', buffer, { filename, contentType: mimeType });
+        const uploadRes = await axios.post(uploadServerRes.response.upload_url, formData, {
+            headers: formData.getHeaders(),
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity,
+            timeout: 300000
+        });
+        if (!uploadRes.data?.file) {
+            throw new Error('VK community document upload returned no file token');
+        }
 
-    const saveRes = await vkGet('docs.save', {
-        file: uploadRes.data.file,
-        group_id: absGroupId,
-        access_token: userToken
-    });
-    if (saveRes.error) {
-        throw new Error(`VK User Token failed to save community document: ${saveRes.error.error_msg}`);
-    }
+        const saveRes = await vkGet('docs.save', {
+            file: uploadRes.data.file,
+            group_id: absGroupId,
+            access_token: userToken
+        });
+        if (saveRes.error) {
+            throw new Error(`VK User Token failed to save community document: ${saveRes.error.error_msg}`);
+        }
 
-    const savedDoc = saveRes.response?.doc || saveRes.response;
-    if (!savedDoc?.owner_id || !savedDoc?.id) {
-        throw new Error('VK community document save returned no document');
+        const savedDoc = saveRes.response?.doc || saveRes.response;
+        if (!savedDoc?.owner_id || !savedDoc?.id) {
+            throw new Error('VK community document save returned no document');
+        }
+        const attachment = `doc${savedDoc.owner_id}_${savedDoc.id}`;
+        log('info', `[DOC WALL UPLOAD] Success: ${attachment}`);
+        return attachment;
+    } catch (wallError) {
+        const message = String(wallError?.message || '');
+        if (!/access denied|can't upload docs to this group/i.test(message)) throw wallError;
+
+        // Some VK communities reject docs.getWallUploadServer for an administrator's
+        // User Token. The messages upload flow still creates a community-owned doc.
+        const attachment = await uploadDocToCommunityMessages(buffer, filename, mimeType, groupId, profileId);
+        log('warn', `[DOC WALL UPLOAD] VK denied wall upload; used community message upload: ${attachment}`);
+        return attachment;
     }
-    const attachment = `doc${savedDoc.owner_id}_${savedDoc.id}`;
-    log('info', `[DOC WALL UPLOAD] Success: ${attachment}`);
-    return attachment;
 }
 
 /**

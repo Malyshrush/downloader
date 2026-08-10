@@ -260,6 +260,11 @@ async function uploadDocToWall(userToken, groupId, file, overrides = {}) {
             name: 'doc wall community token',
             enabled: !!communityToken,
             run: () => uploadDocToWallWithToken(communityToken, absGroupId, file, overrides)
+        },
+        {
+            name: 'doc messages community token',
+            enabled: !!communityToken,
+            run: () => uploadDocToMessagesWithCommunityToken(communityToken, absGroupId, file, overrides)
         }
     ]);
 }
